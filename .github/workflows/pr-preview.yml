@@ -27,15 +27,23 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          # Pin to 20 (ships npm 10). Node 22 ships npm 11, which has a known
-          # "Exit handler never called!" bug that aborts `npm ci` on some CI
-          # runners (npm/cli#8203 and related). Astro 5.x supports both.
+          # Pin to 20. Astro 5.x supports it; Node 22's npm 11 has the
+          # "Exit handler never called!" bug (npm/cli#8203). We deliberately
+          # do NOT set cache: "npm" — the action's npm cache-restore is the
+          # most-cited trigger for the same bug on the runners we hit it on.
           node-version: "20"
-          cache: "npm"
+
+      - name: Pin npm to 10.9.2 (workaround npm/cli#8203)
+        # The bug is present in several npm 10.x / 11.x patches that ship
+        # with current Node releases. 10.9.2 is the last version reported
+        # not to hit it for this codebase. Re-evaluate when npm publishes a
+        # confirmed fix.
+        run: npm install -g npm@10.9.2
 
       - name: Install dependencies
-        # --no-audit --no-fund avoid the post-install audit step where the
-        # npm bug above most often surfaces, and they're meaningless in CI.
+        # --no-audit --no-fund: skip operations that pull from the npm
+        # registry post-install (where the bug fires) and are meaningless
+        # in CI anyway.
         run: npm ci --no-audit --no-fund
 
       - name: Type check
