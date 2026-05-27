@@ -27,14 +27,16 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
 
       - name: Install dependencies
         run: npm ci
 
       - name: Type check
-        run: npx astro check
+        # Use the local binary directly so a flaky `npm ci` can't silently
+        # fall back to npx-installing a newer astro than package.json pins.
+        run: ./node_modules/.bin/astro check
 
       - name: Authenticate to Wix
         env:
@@ -44,16 +46,16 @@ jobs:
             echo "::error::WIX_API_KEY secret is not set on this repository."
             exit 1
           fi
-          npx wix login --api-key "$WIX_API_KEY"
+          ./node_modules/.bin/wix login --api-key "$WIX_API_KEY"
 
       - name: Build project
-        run: npx wix build
+        run: ./node_modules/.bin/wix build
 
       - name: Create preview deployment
         id: preview
         run: |
           # `wix preview` prints a unique preview URL on success.
-          OUTPUT=$(npx wix preview 2>&1)
+          OUTPUT=$(./node_modules/.bin/wix preview 2>&1)
           echo "$OUTPUT"
 
           # Extract the first HTTPS URL from the output — Wix prints the
