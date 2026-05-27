@@ -52,7 +52,19 @@ These are code/design changes:
 - Changing how the slideshow behaves (auto-advance speed, transitions)
 - Anything involving CSS, HTML structure, or JavaScript
 
-For these, ask Danielle, or open a PR yourself (see the developer section below).
+For these, ask Danielle, or open a PR yourself (see the code-PR workflow below).
+
+### Code-PR workflow (for design / structural changes)
+
+You don't need a local dev environment. You can open code PRs entirely from your browser using Claude.ai + the GitHub MCP.
+
+1. **One-time:** connect the [GitHub MCP](https://github.com/github/github-mcp-server) to your Claude.ai account, and ask Danielle to add you as a collaborator on `daniellekorn/official-rck-headless` with **write** access (you need it to push branches, but you will not be able to merge to `main`).
+2. In Claude.ai, say what you want — "make the hero title purple", "round the corners on the Join Us cards more". Claude opens a PR on a new branch (it will never push directly to `main` — branch protection prevents that).
+3. **GitHub Actions builds a preview.** Within a few minutes of opening the PR, a bot comment appears with a **Preview URL**. Click it to see your change live on a temporary Wix preview deployment.
+4. The preview comment updates automatically every time you (or Claude) push new commits to the PR branch.
+5. Danielle reviews the diff + the preview URL, then merges. After merging, Danielle ships the change manually via `wix release`.
+
+**If the workflow fails:** the PR will show a red ✕ — open the failing job in GitHub Actions to see what broke. Most commonly it's a TypeScript error caught by the `astro check` step. Ask Claude to fix it in the same PR.
 
 ### Collection schemas (fields)
 
@@ -144,13 +156,18 @@ npm run dev        # opens http://localhost:4321
 
 ### PR workflow
 
-- Branch from `main`. Open PR against `main`.
-- Danielle reviews. Pulls the branch locally to verify the visual change in `wix dev`.
-- Merge to `main`. Ship with `wix release` (manual for now).
+- Branch from `main`. Open PR against `main`. Direct pushes to `main` are blocked by branch protection.
+- On PR open / commit push, `.github/workflows/pr-preview.yml` runs: `npm ci` → `astro check` (TypeScript) → `wix build` → `wix preview`. A bot comment with the unique preview URL lands on the PR; it updates in place on subsequent pushes (no comment spam).
+- Click the preview URL to verify visually instead of pulling locally for every PR. Local pull still works when you want to debug or step through code.
+- Merge to `main`. Ship with `wix release` (manual for now — see design log #002).
 
 ### Secrets
 
 `.env.local` is gitignored and must stay that way. The Wix CLI rewrites it via `wix env pull`. If you accidentally commit it, rotate `WIX_CLIENT_SECRET` in the Wix dashboard immediately.
+
+The PR-preview workflow uses a separate **Wix API key** stored as the `WIX_API_KEY` repo secret in GitHub. Rotate it from the [Wix account API keys page](https://manage.wix.com/account/api-keys) if it's ever exposed (e.g. pasted into a chat) and update the GitHub secret via `gh secret set WIX_API_KEY --repo daniellekorn/official-rck-headless` (paste at the prompt — never put it on the command line).
+
+> **Security caveat — `pull_request` event + secrets.** Workflows fire on PRs from same-repo branches with secrets in scope. A malicious `postinstall` in a PR's `package.json` could exfiltrate `WIX_API_KEY`. Trust model: contributors with branch-push access are trusted. If you add a new contributor, also enable GitHub's "Require approval for first-time contributors" setting (Settings → Actions → General).
 
 ### What lives in code vs. CMS
 
