@@ -4,14 +4,85 @@ import { media } from "@wix/sdk";
 
 const COLLECTION_ID = "TeamMembers";
 
-export type RoleGroup = "rabbeim" | "kollel" | "administration" | "board";
+// Canonical role group keys. Add a new key here + extend ROLE_GROUP_ALIASES
+// below to introduce a new group. Groups with zero members don't render.
+export type RoleGroup =
+	| "leadership"
+	| "rabbis"
+	| "kollel"
+	| "staff"
+	| "board"
+	| "other";
 
 export const ROLE_GROUPS: { key: RoleGroup; label: string }[] = [
-	{ key: "rabbeim", label: "Rabbeim" },
-	{ key: "kollel", label: "Kollel Members" },
-	{ key: "administration", label: "Administration" },
+	{ key: "leadership", label: "Leadership" },
+	{ key: "rabbis", label: "Rabbis" },
+	{ key: "kollel", label: "Kollel" },
+	{ key: "staff", label: "Staff" },
 	{ key: "board", label: "Board" },
+	// "other" is the catch-all for values that don't match any alias.
+	// It renders at the bottom of the page so unmatched members never
+	// silently disappear — surfaces typos / new categories quickly.
+	{ key: "other", label: "Team" },
 ];
+
+// Map raw (lowercased, trimmed) roleGroup values from the CMS to canonical
+// keys. Extend liberally — the friend can type "Rabbi" or "rabbeim" or
+// "Rabbis" and they all land in the same place. Anything that doesn't match
+// here goes to "other" rather than getting dropped.
+const ROLE_GROUP_ALIASES: Record<string, RoleGroup> = {
+	// Leadership
+	"leadership": "leadership",
+	"leader": "leadership",
+	"founder": "leadership",
+	"founders": "leadership",
+	"director": "leadership",
+	"directors": "leadership",
+	"executive": "leadership",
+	"president": "leadership",
+	"rosh kollel": "leadership",
+
+	// Rabbis
+	"rabbi": "rabbis",
+	"rabbis": "rabbis",
+	"rabbeim": "rabbis",
+	"rabbanim": "rabbis",
+	"rav": "rabbis",
+	"maggid shiur": "rabbis",
+
+	// Kollel members
+	"kollel": "kollel",
+	"kollel member": "kollel",
+	"kollel members": "kollel",
+	"avrech": "kollel",
+	"avreich": "kollel",
+	"avreichim": "kollel",
+	"yungerman": "kollel",
+	"yungerleit": "kollel",
+
+	// Staff / Administration
+	"staff": "staff",
+	"admin": "staff",
+	"administration": "staff",
+	"administrative": "staff",
+	"administrator": "staff",
+	"hanhala": "staff",
+	"office": "staff",
+
+	// Board
+	"board": "board",
+	"board member": "board",
+	"board members": "board",
+	"trustee": "board",
+	"trustees": "board",
+};
+
+function normalizeRoleGroup(raw: unknown): RoleGroup {
+	if (typeof raw !== "string") return "other";
+	const key = raw.trim().toLowerCase();
+	if (!key) return "other";
+	return ROLE_GROUP_ALIASES[key] ?? "other";
+}
 
 export interface TeamMember {
 	_id: string;
@@ -20,6 +91,7 @@ export interface TeamMember {
 	hebrewName?: string;
 	role: string;
 	roleGroup: RoleGroup;
+	roleGroupRaw?: string; // what the editor actually typed, for debugging
 	bio?: unknown;
 	photo?: string;
 	photoUrl?: string;
@@ -45,9 +117,11 @@ export async function getTeam(): Promise<TeamMember[]> {
 			.limit(200)
 			.find();
 
-		return (results as TeamMember[]).map((m) => ({
+		return (results as Array<TeamMember & { roleGroup: unknown }>).map((m) => ({
 			...m,
 			photoUrl: resolveImage(m.photo),
+			roleGroupRaw: typeof m.roleGroup === "string" ? m.roleGroup : undefined,
+			roleGroup: normalizeRoleGroup(m.roleGroup),
 		}));
 	} catch (err) {
 		console.error(`[team] query failed:`, err);
@@ -57,14 +131,15 @@ export async function getTeam(): Promise<TeamMember[]> {
 
 export function groupByRole(members: TeamMember[]): Record<RoleGroup, TeamMember[]> {
 	const groups: Record<RoleGroup, TeamMember[]> = {
-		rabbeim: [],
+		leadership: [],
+		rabbis: [],
 		kollel: [],
-		administration: [],
+		staff: [],
 		board: [],
+		other: [],
 	};
 	for (const m of members) {
-		const key = (m.roleGroup ?? "kollel") as RoleGroup;
-		if (key in groups) groups[key].push(m);
+		groups[m.roleGroup].push(m);
 	}
 	return groups;
 }

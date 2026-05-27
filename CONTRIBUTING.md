@@ -121,7 +121,20 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 
 #### `TeamMembers`
 
-See the existing data model — fields: `firstName`, `lastName`, `hebrewName` (opt), `role`, `roleGroup` (one of: `rabbeim`, `kollel`, `administration`, `board`), `bio` (Rich Text), `photo` (Image), `email` (opt), `sortOrder` (Number), `featured` (Boolean).
+Fields: `firstName`, `lastName`, `hebrewName` (opt), `role`, `roleGroup`, `bio` (Rich Text), `photo` (Image), `email` (opt), `sortOrder` (Number), `featured` (Boolean).
+
+**`roleGroup`** drives which section on /team a member appears in. Case-insensitive and forgiving about exact wording — type whatever feels natural and it usually lands in the right section. Recognized values (any spelling/case works):
+
+| You type… | Lands in section |
+|---|---|
+| `Leadership`, `Founder`, `Director`, `President`, `Rosh Kollel` | **Leadership** |
+| `Rabbi`, `Rabbis`, `Rabbeim`, `Rabbanim`, `Rav`, `Maggid Shiur` | **Rabbis** |
+| `Kollel`, `Avreich`, `Avreichim`, `Yungerman`, `Yungerleit` | **Kollel** |
+| `Staff`, `Admin`, `Administration`, `Hanhala`, `Office` | **Staff** |
+| `Board`, `Board Member`, `Trustee` | **Board** |
+| Anything else | **Team** (catch-all so nothing silently disappears) |
+
+If a value lands a member in the wrong section, either fix the spelling or ask the developer to extend the alias map in `src/lib/team.ts`.
 
 #### `DaveningTimes`
 

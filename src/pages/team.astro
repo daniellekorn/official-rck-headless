@@ -100,9 +100,23 @@ const hasAny = team.length > 0;
 														</p>
 													)}
 													{bioText && (
-														<p class="mt-4 text-sm sm:text-[0.9375rem] leading-relaxed text-navy-500 line-clamp-4">
-															{bioText}
-														</p>
+														<div class="mt-4" data-bio>
+															<p
+																class="text-sm sm:text-[0.9375rem] leading-relaxed text-navy-500 whitespace-pre-line line-clamp-4"
+																data-bio-text
+															>
+																{bioText}
+															</p>
+															<button
+																type="button"
+																data-bio-toggle
+																class="mt-2 inline-flex items-center gap-1 text-xs font-bold uppercase tracking-[0.18em] text-gold-500 hover:text-gold-600 transition-colors"
+																hidden
+															>
+																<span data-bio-toggle-label>Read more</span>
+																<span aria-hidden="true" data-bio-toggle-arrow>↓</span>
+															</button>
+														</div>
 													)}
 													{m.email && (
 														<a
@@ -135,3 +149,28 @@ const hasAny = team.length > 0;
 		overflow: hidden;
 	}
 </style>
+
+<script>
+	// Click-to-expand for each team-member bio. Only shows the toggle
+	// button when the text is actually overflowing the clamped height,
+	// so short bios don't get a useless "Read more" button.
+	document.querySelectorAll<HTMLElement>("[data-bio]").forEach((root) => {
+		const text = root.querySelector<HTMLElement>("[data-bio-text]");
+		const toggle = root.querySelector<HTMLButtonElement>("[data-bio-toggle]");
+		const label = root.querySelector<HTMLElement>("[data-bio-toggle-label]");
+		const arrow = root.querySelector<HTMLElement>("[data-bio-toggle-arrow]");
+		if (!text || !toggle || !label || !arrow) return;
+
+		// Reveal the toggle only if the clamped text is actually being cut off.
+		// scrollHeight > clientHeight means there's content hidden by line-clamp.
+		const overflows = () => text.scrollHeight - text.clientHeight > 1;
+		if (overflows()) toggle.hidden = false;
+
+		toggle.addEventListener("click", () => {
+			const expanding = text.classList.contains("line-clamp-4");
+			text.classList.toggle("line-clamp-4");
+			label.textContent = expanding ? "Show less" : "Read more";
+			arrow.textContent = expanding ? "↑" : "↓";
+		});
+	});
+</script>
