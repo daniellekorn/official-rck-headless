@@ -1,0 +1,81 @@
+---
+const cards = [
+	{
+		title: "Daven with Us",
+		subtitle: "Daily Tefillah & Minyanim",
+		href: "/daven",
+		icon: "book",
+	},
+	{
+		title: "Learn with Us",
+		subtitle: "Weekly Shiurim & Chavrutas",
+		href: "/learn",
+		icon: "reader",
+	},
+	{
+		title: "Our Programs",
+		subtitle: "Connection & Community",
+		href: "/programming",
+		icon: "people",
+	},
+];
+---
+
+<section class="relative isolate overflow-hidden py-16 sm:py-20 md:py-32">
+	<!-- Cityscape placeholder backdrop -->
+	<div
+		class="absolute inset-0 -z-10"
+		style="background:
+			linear-gradient(180deg, rgba(15,23,42,0.55) 0%, rgba(15,23,42,0.35) 60%, rgba(15,23,42,0.65) 100%),
+			linear-gradient(135deg, #1f2c4b 0%, #3d4d6f 40%, #b9902a 100%);"
+		aria-hidden="true"
+	>
+	</div>
+
+	<div class="container-page">
+		<h2 class="text-center font-sans text-3xl sm:text-4xl md:text-5xl font-black tracking-[-0.025em] text-white">
+			Join Us
+		</h2>
+		<span class="mx-auto mt-3 sm:mt-4 block h-[2px] w-16 bg-gold-400" aria-hidden="true"></span>
+
+		<div class="mt-10 sm:mt-14 grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 md:gap-8">
+			{
+				cards.map((card) => (
+					<a
+						href={card.href}
+						class="group relative flex flex-col items-center rounded-2xl bg-gold-500/85 px-8 py-10 text-center text-white shadow-[0_18px_40px_-20px_rgba(0,0,0,0.55)] ring-1 ring-gold-300/40 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:bg-gold-500"
+					>
+						<span class="flex h-16 w-16 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/30">
+							{card.icon === "book" && (
+								<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.5">
+									<path d="M3 5.5C3 4.67 3.67 4 4.5 4H10c1.1 0 2 .9 2 2v13c0-1.1-.9-2-2-2H4.5a1.5 1.5 0 0 1-1.5-1.5v-10ZM21 5.5c0-.83-.67-1.5-1.5-1.5H14c-1.1 0-2 .9-2 2v13c0-1.1.9-2 2-2h5.5a1.5 1.5 0 0 0 1.5-1.5v-10Z" stroke-linejoin="round"/>
+								</svg>
+							)}
+							{card.icon === "reader" && (
+								<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.5">
+									<circle cx="12" cy="6" r="2.5" />
+									<path d="M4 19v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2" stroke-linecap="round" />
+									<path d="M8 16h8" stroke-linecap="round" />
+								</svg>
+							)}
+							{card.icon === "people" && (
+								<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.5">
+									<circle cx="7" cy="8" r="2.5" />
+									<circle cx="17" cy="8" r="2.5" />
+									<circle cx="12" cy="6.5" r="2.5" />
+									<path d="M2 19c0-2.5 2.5-4 5-4M22 19c0-2.5-2.5-4-5-4M7 19c0-2.5 2.5-4 5-4s5 1.5 5 4" stroke-linecap="round" />
+								</svg>
+							)}
+						</span>
+						<p class="mt-5 text-xs uppercase tracking-[0.22em] text-white/85">
+							{card.subtitle}
+						</p>
+						<h3 class="mt-2 font-sans text-2xl font-extrabold tracking-[-0.015em]">
+							{card.title}
+						</h3>
+					</a>
+				))
+			}
+		</div>
+	</div>
+</section>

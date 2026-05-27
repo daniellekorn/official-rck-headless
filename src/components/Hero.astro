@@ -1,0 +1,54 @@
+---
+// Image placeholder: the user will swap in a real kollel photo later.
+// Uses a layered gradient + subtle pattern so the section reads as intentional.
+---
+
+<section class="relative isolate overflow-hidden min-h-[640px] md:min-h-[720px] flex items-end">
+	<!-- Backdrop placeholder -->
+	<div
+		class="absolute inset-0 -z-10 bg-navy-700"
+		style="background-image:
+			radial-gradient(1200px 600px at 20% 20%, rgba(185,144,42,0.18), transparent 60%),
+			radial-gradient(900px 500px at 85% 80%, rgba(31,44,75,0.6), transparent 60%),
+			linear-gradient(135deg, #0f172a 0%, #16213d 60%, #1f2c4b 100%);"
+		aria-hidden="true"
+	>
+	</div>
+	<div
+		class="absolute inset-0 -z-10 opacity-[0.07]"
+		style="background-image: repeating-linear-gradient(45deg, #fff 0 1px, transparent 1px 14px);"
+		aria-hidden="true"
+	>
+	</div>
+	<div class="absolute inset-0 -z-10 bg-gradient-to-b from-black/10 via-transparent to-black/40" aria-hidden="true"></div>
+
+	<div class="container-page pb-20 pt-40 md:pt-48 md:pb-24 w-full">
+		<div class="max-w-3xl">
+			<p class="eyebrow text-gold-300">Welcome to</p>
+			<h1
+				class="mt-4 font-sans text-[2.5rem] leading-[1.02] text-white sm:text-5xl md:text-6xl lg:text-[4.5rem] font-black tracking-[-0.025em]"
+			>
+				The Ra'anana<br class="hidden sm:block" /> Community Kollel
+			</h1>
+			<span class="mt-6 block h-[3px] w-24 bg-gold-400" aria-hidden="true"></span>
+			<p class="mt-6 max-w-xl text-base sm:text-lg text-white/80 leading-relaxed">
+				A home for Torah, community, and growth in Ra'anana, Israel.
+			</p>
+		</div>
+
+		<div class="mt-12 flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-4">
+			<a
+				href="/schedule"
+				class="inline-flex items-center justify-center rounded-sm border border-gold-400 px-7 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-colors hover:bg-gold-400 hover:text-navy-700"
+			>
+				Our Schedule
+			</a>
+			<a
+				href="/programming"
+				class="inline-flex items-center justify-center rounded-sm border border-gold-400 px-7 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-colors hover:bg-gold-400 hover:text-navy-700"
+			>
+				Our Programs
+			</a>
+		</div>
+	</div>
+</section>

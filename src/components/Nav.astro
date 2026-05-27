@@ -1,0 +1,143 @@
+---
+const links = [
+	{ label: "Home", href: "/", active: true },
+	{ label: "Meet the Team", href: "/team" },
+	{ label: "Daven with Us", href: "/daven" },
+	{ label: "Learn with Us", href: "/learn" },
+	{ label: "Programming", href: "/programming" },
+	{ label: "Donate", href: "/donate" },
+];
+---
+
+<header
+	class="fixed inset-x-0 top-0 z-50 pt-3 sm:pt-5 transition-all duration-300"
+	data-nav-header
+>
+	<div class="container-page">
+		<nav
+			class="mx-auto flex max-w-5xl items-center justify-between gap-3 sm:gap-6 rounded-full bg-white/95 px-4 sm:px-6 py-2.5 sm:py-3 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.25)] backdrop-blur ring-1 ring-black/5"
+		>
+			<a href="/" class="flex items-center gap-2 sm:gap-3" aria-label="Ra'anana Community Kollel — Home">
+				<span
+					class="font-sans text-lg sm:text-xl font-black tracking-tight text-navy-600 ring-1 ring-gold-500 rounded-sm px-2 py-0.5"
+				>
+					RCK
+				</span>
+				<span class="hidden text-[10px] uppercase tracking-[0.18em] text-navy-400 sm:block leading-tight">
+					Ra'anana<br />Community Kollel
+				</span>
+			</a>
+
+			<ul class="hidden items-center gap-5 lg:gap-7 md:flex">
+				{
+					links.map((link) => (
+						<li>
+							<a
+								href={link.href}
+								class:list={[
+									"text-sm font-medium transition-colors whitespace-nowrap",
+									link.active
+										? "text-navy-600 underline underline-offset-[6px] decoration-1"
+										: "text-navy-500 hover:text-navy-700",
+								]}
+							>
+								{link.label}
+							</a>
+						</li>
+					))
+				}
+			</ul>
+
+			<button
+				type="button"
+				data-mobile-toggle
+				aria-controls="mobile-menu"
+				aria-expanded="false"
+				aria-label="Toggle menu"
+				class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full text-navy-600 hover:bg-navy-50"
+			>
+				<svg data-icon="open" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+					<path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
+				</svg>
+				<svg data-icon="close" viewBox="0 0 24 24" class="hidden h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+					<path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
+				</svg>
+			</button>
+		</nav>
+
+		<div
+			id="mobile-menu"
+			data-mobile-menu
+			class="md:hidden mx-auto mt-2 max-w-5xl origin-top scale-y-95 opacity-0 pointer-events-none transition-all duration-200 rounded-2xl bg-white/98 shadow-[0_24px_48px_-20px_rgba(15,23,42,0.35)] ring-1 ring-black/5 backdrop-blur"
+		>
+			<ul class="flex flex-col p-2">
+				{
+					links.map((link) => (
+						<li>
+							<a
+								href={link.href}
+								class:list={[
+									"block rounded-xl px-4 py-3 text-base font-medium transition-colors",
+									link.active
+										? "bg-navy-50 text-navy-700"
+										: "text-navy-600 hover:bg-navy-50",
+								]}
+							>
+								{link.label}
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+	</div>
+</header>
+
+<script>
+	const header = document.querySelector<HTMLElement>("[data-nav-header]");
+	const toggle = document.querySelector<HTMLButtonElement>("[data-mobile-toggle]");
+	const menu = document.querySelector<HTMLElement>("[data-mobile-menu]");
+	const openIcon = toggle?.querySelector<SVGElement>('[data-icon="open"]');
+	const closeIcon = toggle?.querySelector<SVGElement>('[data-icon="close"]');
+
+	const setOpen = (open: boolean) => {
+		if (!menu || !toggle) return;
+		toggle.setAttribute("aria-expanded", String(open));
+		menu.classList.toggle("opacity-0", !open);
+		menu.classList.toggle("scale-y-95", !open);
+		menu.classList.toggle("pointer-events-none", !open);
+		menu.classList.toggle("opacity-100", open);
+		menu.classList.toggle("scale-y-100", open);
+		openIcon?.classList.toggle("hidden", open);
+		closeIcon?.classList.toggle("hidden", !open);
+	};
+
+	toggle?.addEventListener("click", () => {
+		const isOpen = toggle.getAttribute("aria-expanded") === "true";
+		setOpen(!isOpen);
+	});
+
+	// Close on link click (within mobile menu)
+	menu?.querySelectorAll("a").forEach((a) => {
+		a.addEventListener("click", () => setOpen(false));
+	});
+
+	// Close on escape
+	document.addEventListener("keydown", (e) => {
+		if (e.key === "Escape") setOpen(false);
+	});
+
+	// Add subtle shadow/background tint once user scrolls past hero
+	let scrolled = false;
+	const onScroll = () => {
+		const shouldScroll = window.scrollY > 16;
+		if (shouldScroll === scrolled) return;
+		scrolled = shouldScroll;
+		header?.classList.toggle("pt-1", scrolled);
+		header?.classList.toggle("pt-3", !scrolled);
+		header?.classList.toggle("sm:pt-2", scrolled);
+		header?.classList.toggle("sm:pt-5", !scrolled);
+	};
+	window.addEventListener("scroll", onScroll, { passive: true });
+	onScroll();
+</script>

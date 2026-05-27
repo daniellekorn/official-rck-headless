@@ -1,0 +1,41 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+import Hero from "../components/Hero.astro";
+import SplitFeature from "../components/SplitFeature.astro";
+import JoinUs from "../components/JoinUs.astro";
+import WhoWeAre from "../components/WhoWeAre.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<Layout>
+	<Nav />
+	<main>
+		<Hero />
+
+		<SplitFeature
+			eyebrowGold="UNIQUE"
+			eyebrowNavy="IMPACTFUL"
+			subheadLine1="A Community Kollel"
+			subheadLine2="in Israel"
+			subheadAccent="line2"
+			body="Where the depth of Torah meets the warmth of community, the Ra'anana Community Kollel is building something distinct in Israel — inspiring Jewish growth, meaningful connection, and a vibrant Torah-centered home for the Anglo community and beyond."
+			imageOn="left"
+		/>
+
+		<JoinUs />
+
+		<SplitFeature
+			eyebrowGold="TORAH"
+			eyebrowNavy="VISION"
+			subheadLine1="A Kollel Dedicated to"
+			subheadLine2="Torah and Growth"
+			subheadAccent="line2"
+			body="At RCK, we believe that everyone can grow — grow in their connection to Torah, Hashem, self, and community. Everyone can learn. Everyone can connect."
+			imageOn="left"
+		/>
+
+		<WhoWeAre />
+	</main>
+	<Footer />
+</Layout>

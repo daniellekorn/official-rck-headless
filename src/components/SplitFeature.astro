@@ -1,0 +1,71 @@
+---
+interface Props {
+	eyebrowGold: string;
+	eyebrowNavy: string;
+	subheadLine1: string;
+	subheadLine2?: string;
+	subheadAccent?: "line1" | "line2";
+	body: string;
+	imageOn?: "left" | "right";
+}
+
+const {
+	eyebrowGold,
+	eyebrowNavy,
+	subheadLine1,
+	subheadLine2,
+	subheadAccent = "line2",
+	body,
+	imageOn = "left",
+} = Astro.props;
+---
+
+<section class="py-20 md:py-28">
+	<div class="container-page">
+		<div
+			class:list={[
+				"grid items-center gap-12 md:gap-16 lg:gap-20",
+				"md:grid-cols-2",
+			]}
+		>
+			<div class:list={[imageOn === "right" ? "md:order-2" : "md:order-1"]}>
+				<!-- Image placeholder -->
+				<div
+					class="relative aspect-[4/3] w-full overflow-hidden rounded-2xl ring-1 ring-navy-100"
+					style="background:
+						linear-gradient(135deg, #eef1f7 0%, #cfd5e3 50%, #f3e6b3 100%);"
+					aria-label="Photo placeholder"
+				>
+					<div class="absolute inset-0 flex items-center justify-center">
+						<span class="font-sans text-xs uppercase tracking-[0.22em] text-navy-300">
+							Photo
+						</span>
+					</div>
+				</div>
+			</div>
+
+			<div class:list={[imageOn === "right" ? "md:order-1" : "md:order-2"]}>
+				<p class="font-sans text-sm md:text-base font-bold uppercase tracking-[0.18em] leading-none">
+					<span class="text-gold-500">{eyebrowGold}</span>
+					<span class="text-navy-600 ml-1.5">{eyebrowNavy}</span>
+				</p>
+
+				<h2 class="mt-4 font-sans text-[2rem] sm:text-[2.5rem] md:text-[3rem] leading-[1.05] font-black uppercase tracking-[-0.02em]">
+					<span class={subheadAccent === "line1" ? "text-gold-500" : "text-navy-600"}>{subheadLine1}</span>
+					{
+						subheadLine2 && (
+							<>
+								{" "}
+								<span class={subheadAccent === "line2" ? "text-gold-500" : "text-navy-600"}>{subheadLine2}</span>
+							</>
+						)
+					}
+				</h2>
+
+				<p class="mt-6 max-w-prose text-base md:text-[1.0625rem] leading-relaxed text-navy-500">
+					{body}
+				</p>
+			</div>
+		</div>
+	</div>
+</section>
