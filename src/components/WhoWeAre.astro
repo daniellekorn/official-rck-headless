@@ -1,31 +1,53 @@
 ---
 import Slideshow from "./Slideshow.astro";
-// "Know from where you came and to where you are going." — Pirkei Avot 3:1
+
+interface SlideInput {
+	title?: string;
+	caption?: string;
+	imageUrl?: string;
+}
+
+interface Props {
+	title?: string;
+	hebrew?: string;
+	body?: string;
+	slides?: SlideInput[];
+}
+
+const {
+	title = "Who We Are",
+	hebrew = "דע מאין באת ולאן אתה הולך",
+	body = "Rooted in the timeless wisdom of our tradition, we are a community building a future of Torah learning, meaningful prayer, and deep connection — in the heart of Ra'anana.",
+	slides,
+} = Astro.props;
 ---
 
 <section class="bg-navy-700 py-20 md:py-24">
 	<div class="container-page">
 		<div class="text-center">
 			<h2 class="font-sans text-4xl md:text-5xl font-black tracking-[-0.025em] text-white">
-				Who We Are
+				{title}
 			</h2>
 			<span class="mx-auto mt-4 block h-[2px] w-16 bg-gold-400" aria-hidden="true"></span>
-			<p
-				lang="he"
-				dir="rtl"
-				class="mx-auto mt-6 max-w-2xl text-xl md:text-2xl font-medium text-gold-300"
-				style="font-family: var(--font-hebrew);"
-			>
-				דע מאין באת ולאן אתה הולך
-			</p>
-			<p class="mx-auto mt-8 max-w-2xl text-base md:text-lg leading-relaxed text-white/75">
-				Rooted in the timeless wisdom of our tradition, we are a community building a future
-				of Torah learning, meaningful prayer, and deep connection — in the heart of Ra'anana.
-			</p>
+			{hebrew && (
+				<p
+					lang="he"
+					dir="rtl"
+					class="mx-auto mt-6 max-w-2xl text-xl md:text-2xl font-medium text-gold-300"
+					style="font-family: var(--font-hebrew);"
+				>
+					{hebrew}
+				</p>
+			)}
+			{body && (
+				<p class="mx-auto mt-8 max-w-2xl text-base md:text-lg leading-relaxed text-white/75">
+					{body}
+				</p>
+			)}
 		</div>
 
 		<div class="mt-14 md:mt-16">
-			<Slideshow />
+			<Slideshow slides={slides} />
 		</div>
 	</div>
 </section>

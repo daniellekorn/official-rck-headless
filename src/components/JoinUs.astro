@@ -1,24 +1,22 @@
 ---
-const cards = [
-	{
-		title: "Daven with Us",
-		subtitle: "Daily Tefillah & Minyanim",
-		href: "/daven",
-		icon: "book",
-	},
-	{
-		title: "Learn with Us",
-		subtitle: "Weekly Shiurim & Chavrutas",
-		href: "/learn",
-		icon: "reader",
-	},
-	{
-		title: "Our Programs",
-		subtitle: "Connection & Community",
-		href: "/programming",
-		icon: "people",
-	},
+interface CardInput {
+	title?: string;
+	subtitle?: string;
+	href?: string;
+	icon?: "book" | "reader" | "people";
+}
+
+interface Props {
+	cards?: CardInput[];
+}
+
+const fallback: CardInput[] = [
+	{ title: "Daven with Us", subtitle: "Daily Tefillah & Minyanim", href: "/daven", icon: "book" },
+	{ title: "Learn with Us", subtitle: "Weekly Shiurim & Chavrutas", href: "/learn", icon: "reader" },
+	{ title: "Our Programs", subtitle: "Connection & Community", href: "/programming", icon: "people" },
 ];
+
+const cards: CardInput[] = Astro.props.cards && Astro.props.cards.length > 0 ? Astro.props.cards : fallback;
 ---
 
 <section class="relative isolate overflow-hidden py-16 sm:py-20 md:py-32">

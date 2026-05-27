@@ -1,19 +1,30 @@
 ---
-interface Slide {
+interface SlideInput {
 	title?: string;
 	caption?: string;
-	// gradient placeholder colors — the user will swap in real images later
-	from: string;
-	to: string;
+	imageUrl?: string;
 }
 
-const slides: Slide[] = [
+interface InternalSlide extends SlideInput {
+	from?: string;
+	to?: string;
+}
+
+interface Props {
+	slides?: SlideInput[];
+}
+
+const placeholder: InternalSlide[] = [
 	{ title: "Beis Medrash", caption: "Daily Torah learning in our home", from: "#1f2c4b", to: "#b9902a" },
 	{ title: "Shiurim", caption: "Weekly classes for every level", from: "#3d4d6f", to: "#dcbb4d" },
 	{ title: "Community Tefillah", caption: "Vibrant minyanim throughout the day", from: "#16213d", to: "#957021" },
 	{ title: "Chavrutas", caption: "One-on-one learning partnerships", from: "#677697", to: "#cea531" },
 	{ title: "Special Events", caption: "Holidays, melaveh malka, and more", from: "#0f172a", to: "#e8d27f" },
 ];
+
+const slides: InternalSlide[] = Astro.props.slides && Astro.props.slides.length > 0
+	? Astro.props.slides
+	: placeholder;
 ---
 
 <div
@@ -30,8 +41,18 @@ const slides: Slide[] = [
 						"absolute inset-0 transition-opacity duration-700 ease-out",
 						i === 0 ? "opacity-100" : "opacity-0",
 					]}
-					style={`background: linear-gradient(135deg, ${slide.from} 0%, ${slide.to} 100%);`}
+					style={slide.imageUrl
+						? undefined
+						: `background: linear-gradient(135deg, ${slide.from ?? "#1f2c4b"} 0%, ${slide.to ?? "#b9902a"} 100%);`}
 				>
+					{slide.imageUrl && (
+						<img
+							src={slide.imageUrl}
+							alt={slide.title ?? ""}
+							loading={i === 0 ? "eager" : "lazy"}
+							class="absolute inset-0 h-full w-full object-cover"
+						/>
+					)}
 					<div class="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
 					<figcaption class="absolute inset-x-0 bottom-0 p-4 sm:p-6 md:p-10 pr-14 sm:pr-16 md:pr-20 text-left text-white">
 						<p class="font-sans text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.22em] text-gold-300">

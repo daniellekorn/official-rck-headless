@@ -7,6 +7,8 @@ interface Props {
 	subheadAccent?: "line1" | "line2";
 	body: string;
 	imageOn?: "left" | "right";
+	imageUrl?: string;
+	imageAlt?: string;
 }
 
 const {
@@ -17,6 +19,8 @@ const {
 	subheadAccent = "line2",
 	body,
 	imageOn = "left",
+	imageUrl,
+	imageAlt = "",
 } = Astro.props;
 ---
 
@@ -29,19 +33,27 @@ const {
 			]}
 		>
 			<div class:list={[imageOn === "right" ? "md:order-2" : "md:order-1"]}>
-				<!-- Image placeholder -->
-				<div
-					class="relative aspect-[4/3] w-full overflow-hidden rounded-2xl ring-1 ring-navy-100"
-					style="background:
-						linear-gradient(135deg, #eef1f7 0%, #cfd5e3 50%, #f3e6b3 100%);"
-					aria-label="Photo placeholder"
-				>
-					<div class="absolute inset-0 flex items-center justify-center">
-						<span class="font-sans text-xs uppercase tracking-[0.22em] text-navy-300">
-							Photo
-						</span>
+				{imageUrl ? (
+					<img
+						src={imageUrl}
+						alt={imageAlt}
+						loading="lazy"
+						class="aspect-[4/3] w-full overflow-hidden rounded-2xl object-cover ring-1 ring-navy-100"
+					/>
+				) : (
+					<div
+						class="relative aspect-[4/3] w-full overflow-hidden rounded-2xl ring-1 ring-navy-100"
+						style="background:
+							linear-gradient(135deg, #eef1f7 0%, #cfd5e3 50%, #f3e6b3 100%);"
+						aria-label="Photo placeholder"
+					>
+						<div class="absolute inset-0 flex items-center justify-center">
+							<span class="font-sans text-xs uppercase tracking-[0.22em] text-navy-300">
+								Photo
+							</span>
+						</div>
 					</div>
-				</div>
+				)}
 			</div>
 
 			<div class:list={[imageOn === "right" ? "md:order-1" : "md:order-2"]}>
