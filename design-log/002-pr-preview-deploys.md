@@ -128,4 +128,4 @@ Shipped in commit `<sha>` (pending push). Workflow file at `.github/workflows/pr
 
 **Pending verification:** all four checks above. The user will exercise the workflow with a real test PR.
 
-**Follow-up:** branch protection on `main`. Decision pending — `gh api .../branches/main/protection` returns 403 (GitHub Pro required for private repos). User will pick from: upgrade to Pro, make repo public, or accept trust model. Will be logged as its own design log entry once decided.
+**Follow-up:** branch protection on `main`. Decision: **accept trust model** — branch protection on private repos is gated behind GitHub Pro; the user opted not to upgrade and not to make the repo public for now. CONTRIBUTING.md was updated to remove the (incorrect) "branch protection blocks direct pushes" claim and explicitly call out the convention. Revisit if/when the contributor set expands beyond the current trusted two.

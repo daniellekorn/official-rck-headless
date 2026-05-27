@@ -58,8 +58,8 @@ For these, ask Danielle, or open a PR yourself (see the code-PR workflow below).
 
 You don't need a local dev environment. You can open code PRs entirely from your browser using Claude.ai + the GitHub MCP.
 
-1. **One-time:** connect the [GitHub MCP](https://github.com/github/github-mcp-server) to your Claude.ai account, and ask Danielle to add you as a collaborator on `daniellekorn/official-rck-headless` with **write** access (you need it to push branches, but you will not be able to merge to `main`).
-2. In Claude.ai, say what you want — "make the hero title purple", "round the corners on the Join Us cards more". Claude opens a PR on a new branch (it will never push directly to `main` — branch protection prevents that).
+1. **One-time:** connect the [GitHub MCP](https://github.com/github/github-mcp-server) to your Claude.ai account, and ask Danielle to add you as a collaborator on `daniellekorn/official-rck-headless` with **write** access.
+2. In Claude.ai, say what you want — "make the hero title purple", "round the corners on the Join Us cards more". Claude opens a PR on a new branch. **Never push directly to `main`** — always open a PR so the preview workflow runs and Danielle reviews.
 3. **GitHub Actions builds a preview.** Within a few minutes of opening the PR, a bot comment appears with a **Preview URL**. Click it to see your change live on a temporary Wix preview deployment.
 4. The preview comment updates automatically every time you (or Claude) push new commits to the PR branch.
 5. Danielle reviews the diff + the preview URL, then merges. After merging, Danielle ships the change manually via `wix release`.
@@ -156,7 +156,7 @@ npm run dev        # opens http://localhost:4321
 
 ### PR workflow
 
-- Branch from `main`. Open PR against `main`. Direct pushes to `main` are blocked by branch protection.
+- Branch from `main`. Open PR against `main`. Direct pushes to `main` are not technically enforced (branch protection requires GitHub Pro on private repos — see design log #002), but **always** go through a PR by convention so the preview workflow runs and someone reviews.
 - On PR open / commit push, `.github/workflows/pr-preview.yml` runs: `npm ci` → `astro check` (TypeScript) → `wix build` → `wix preview`. A bot comment with the unique preview URL lands on the PR; it updates in place on subsequent pushes (no comment spam).
 - Click the preview URL to verify visually instead of pulling locally for every PR. Local pull still works when you want to debug or step through code.
 - Merge to `main`. Ship with `wix release` (manual for now — see design log #002).
