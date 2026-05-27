@@ -1,12 +1,19 @@
 ---
-const links = [
-	{ label: "Home", href: "/", active: true },
+const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
+
+const rawLinks = [
+	{ label: "Home", href: "/" },
 	{ label: "Meet the Team", href: "/team" },
 	{ label: "Daven with Us", href: "/daven" },
 	{ label: "Learn with Us", href: "/learn" },
 	{ label: "Programming", href: "/programming" },
 	{ label: "Donate", href: "/donate" },
 ];
+
+const links = rawLinks.map((l) => ({
+	...l,
+	active: l.href === "/" ? pathname === "/" : pathname.startsWith(l.href),
+}));
 ---
 
 <header

@@ -1,0 +1,97 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import PageHeader from "../components/PageHeader.astro";
+import { getDaveningByDayType, type DaveningTime, type DayType } from "../lib/davening";
+
+const grouped = await getDaveningByDayType();
+const hasAny = grouped.Weekday.length > 0 || grouped.Shabbat.length > 0;
+
+const cards: { key: DayType; label: string; times: DaveningTime[] }[] = [
+	{ key: "Weekday", label: "Weekday", times: grouped.Weekday },
+	{ key: "Shabbat", label: "Shabbat", times: grouped.Shabbat },
+];
+---
+
+<Layout title="Daven with Us — Ra'anana Community Kollel" description="Daily and Shabbat davening times at the Ra'anana Community Kollel.">
+	<Nav />
+	<main>
+		<PageHeader
+			eyebrow="Tefillah Schedule"
+			titleNavy="Daven with Us"
+			subtitle="Join us throughout the day — Shacharis, Mincha, Maariv, and Shabbat tefillos in the heart of Ra'anana."
+		/>
+
+		<section class="py-16 sm:py-20 md:py-24">
+			<div class="container-page">
+				{!hasAny && (
+					<div class="mx-auto max-w-xl text-center">
+						<p class="font-sans text-sm font-bold uppercase tracking-[0.18em] text-gold-500">
+							Coming soon
+						</p>
+						<h2 class="mt-3 font-sans text-3xl md:text-4xl font-black tracking-[-0.02em] text-navy-600">
+							Davening times on the way
+						</h2>
+						<p class="mt-4 text-base text-navy-500 leading-relaxed">
+							Once the office adds times in the Wix CMS dashboard
+							(<code class="rounded bg-navy-50 px-1.5 py-0.5 text-sm">DaveningTimes</code> collection),
+							they'll appear here automatically.
+						</p>
+					</div>
+				)}
+
+				{hasAny && (
+					<div class="grid gap-6 sm:gap-8 lg:gap-10 md:grid-cols-2">
+						{cards.map((card) => (
+							<article class="rounded-2xl bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_18px_40px_-24px_rgba(15,23,42,0.25)]">
+								<header class="bg-navy-700 px-6 sm:px-8 py-5">
+									<p class="font-sans text-[11px] font-bold uppercase tracking-[0.22em] text-gold-300">
+										Schedule
+									</p>
+									<h2 class="mt-1 font-sans text-2xl sm:text-3xl font-black tracking-[-0.02em] uppercase text-white">
+										{card.label}
+									</h2>
+								</header>
+
+								{card.times.length === 0 ? (
+									<div class="px-6 sm:px-8 py-10 text-center text-sm text-navy-400">
+										No {card.label.toLowerCase()} times listed yet.
+									</div>
+								) : (
+									<ul class="divide-y divide-navy-50">
+										{card.times.map((t) => (
+											<li class="flex items-baseline justify-between gap-4 px-6 sm:px-8 py-4 sm:py-5">
+												<div class="min-w-0">
+													<p class="font-sans text-base sm:text-lg font-bold text-navy-600 leading-tight">
+														{t.service}
+													</p>
+													{t.notes && (
+														<p class="mt-1 text-xs sm:text-sm text-navy-400 leading-snug">
+															{t.notes}
+														</p>
+													)}
+												</div>
+												<p class="font-sans text-xl sm:text-2xl font-black tracking-[-0.015em] text-gold-500 whitespace-nowrap">
+													{t.time}
+												</p>
+											</li>
+										))}
+									</ul>
+								)}
+							</article>
+						))}
+					</div>
+				)}
+
+				<p class="mx-auto mt-10 sm:mt-12 max-w-2xl text-center text-xs sm:text-sm text-navy-400">
+					Times may change seasonally and around chagim. For the most current schedule, contact the office at
+					<a href="mailto:office@rckollel.org" class="text-navy-600 hover:text-gold-500 transition-colors">
+						{" "}office@rckollel.org
+					</a>.
+				</p>
+			</div>
+		</section>
+	</main>
+	<Footer />
+</Layout>
