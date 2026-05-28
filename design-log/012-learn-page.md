@@ -1,4 +1,4 @@
-# 011 — Learn With Us page
+# 012 — Learn With Us page + CoverflowCarousel component
 
 **Status:** implemented
 **Date:** 2026-05-28
@@ -7,56 +7,79 @@
 
 ## Background
 
-The `Flyers` collection (#010) was built without a corresponding page. The first page to use it is `/learn`, surfacing the `learning` category of flyers with a showcase carousel and a filtered grid.
-
-## Problem
-
-No `/learn` route existed. Learning flyers added to the CMS had nowhere to display.
+The `Flyers` collection (#010) needed a page. `/learn` is the first, showing `category = learning` flyers in a 3D coverflow carousel with a sub-topic filtered grid below.
 
 ## Questions and Answers
 
-- **Q:** Should the carousel show only the filtered subset, or always all learning flyers?
-  **A:** Always all — the carousel is a showcase, not a browsing tool. Filtering only affects the grid below. Changing the carousel on filter would be jarring and defeats the "slow browse" intent.
+- **Q:** Should the carousel show only the filtered subset, or all learning flyers?
+  **A:** Always all — carousel is a showcase. Filter only affects the grid below.
 
 - **Q:** Sub-topic filtering: one tag per flyer (TEXT) or multiple (array)?
-  **A:** One tag per flyer (`subCategory` TEXT field). A flyer is generally about one topic. The Wix CMS API rejected `ARRAY_OF_STRINGS` as a field type, and a single TEXT field is editor-friendlier (editors just type one word). If multi-tagging is needed later it can be added as a second `subCategory2` field or revisited when the Wix API supports arrays.
+  **A:** One tag (`subCategory` TEXT field). Wix CMS API rejected `ARRAY_OF_STRINGS`. A single TEXT field is editor-friendlier. Multi-tagging can be revisited later.
 
-- **Q:** Canva API automation for populating flyers?
-  **A:** Rejected — see the reasoning in #010. The Canva Connect API can detect new designs in a folder but can't produce a public embed URL (only temporary user-scoped URLs). The office would still need CMS access for tags regardless, making the automation save only ~20 seconds per flyer at the cost of significant infrastructure. Full manual CMS entry wins.
+- **Q:** Canva API automation?
+  **A:** Rejected. The Connect API can detect new designs in a folder but can't produce a public embed URL, and the office still needs CMS access for tags. Full manual entry wins.
 
 - **Q:** Carousel library?
-  **A:** None — vanilla JS, following the same pattern as `Slideshow.astro`. Swiper v12 was installed and attempted first but its npm module imports don't work in this project's Wix build. The existing codebase pattern (vanilla JS, `data-*` attribute targeting) is the correct approach.
+  **A:** None. Swiper v12 was attempted but npm module imports don't resolve in the Wix Astro build. All carousel logic is vanilla JS following the `Slideshow.astro` pattern (`data-*` attributes, `setInterval`, `classList` toggling).
 
-- **Q:** What does "gets bigger" mean for the active slide — center-scale or 3D coverflow?
-  **A:** 3D coverflow. Initial answer during design ("center item scales up") was corrected after implementation. The final design shows 3 cards simultaneously: center card flat and full-size, side cards tilted back at `rotateY(±38deg)` and `scale(0.78)`. Clicking a side card navigates to it. Hovering or clicking the active card zooms it to `scale(1.18)` for readability.
+- **Q:** Crossfade or 3D coverflow?
+  **A:** 3D coverflow. Initial design session produced a "center item scales up" crossfade first (one card at a time), which the user rejected in favor of seeing 3 cards simultaneously with the side cards tilted back in 3D perspective. Coverflow implemented from scratch in vanilla JS + CSS `perspective`/`rotateY`.
+
+- **Q:** Arrow buttons for prev/next, or side-card-click only?
+  **A:** Both. Side cards are clickable to navigate; arrows provide explicit prev/next control and make looping obvious. A round of removing and restoring arrows happened mid-session due to a misdiagnosed cause (arrows were blamed for a visual regression that was actually caused by sparse CMS data). Arrows are correct; keep them.
+
+- **Q:** Where should the arrows be positioned?
+  **A:** Flanking the center card, not the page edges. `left/right: calc(50% - min(120px, 27.5vw) - 3.25rem)` — derived from card half-width so they stay adjacent to the card at all viewport sizes.
+
+- **Q:** Why did Astro scoped CSS break the carousel after extracting to a component?
+  **A:** Astro scopes `<style>` blocks by appending a hash attribute to selectors. JS-toggled classes like `pos-active` need the hash attribute on the element to match — which should work since the attribute is added at render time. But in the Wix build this was unreliable. Fixed with `<style is:global>`. The carousel class names (`coverflow-*`, `pos-*`) are specific enough that global scope is safe.
+
+- **Q:** Why doesn't hover-pause work correctly on mobile?
+  **A:** Mobile browsers synthesize `mouseenter`/`mouseleave` events around touch interactions. This caused the pause (from `mouseenter`) and resume (from `mouseleave`) to fire before the `click` event, fighting the click handler. Fixed by gating hover events behind `window.matchMedia("(hover: hover)")` — touch devices use click-only control.
+
+- **Q:** CMS `category` field is case-sensitive?
+  **A:** Yes. The code queries `category === "learning"` (lowercase). Entries typed as `"Learning"` in the dashboard won't appear. Document the valid slugs clearly in CONTRIBUTING.md and use lowercase consistently.
 
 ## Design
 
-**Route:** `/learn` → `src/pages/learn.astro`
+**Route:** `/learn` → `src/pages/learn.astro` (thin page — just fetches data and composes components)
 
-**Carousel:** Vanilla JS coverflow. Three cards visible simultaneously via absolute positioning + CSS 3D transforms. `perspective: 1100px` on stage. Active: `scale(1) rotateY(0)`. Side cards: `translateX(±82%) scale(0.78) rotateY(∓38deg)`. Hover/click on active card zooms to `scale(1.18)`. Autoplay 3s, pauses on section hover. Gold dot pagination. Side cards clickable to navigate.
+**Carousel component:** `src/components/CoverflowCarousel.astro`
+- Props: `items: Item[]`, `autoplayMs?: number` (default 3000)
+- `Item`: `{ title?, imageUrl?, embedUrl?, pdfUrl? }`
+- Three cards visible simultaneously: center `scale(1) rotateY(0)`, sides `translateX(±82%) scale(0.78) rotateY(±38deg) opacity(0.6)`
+- `perspective: 1100px` on `.coverflow-stage`
+- Hover on active card (desktop only): `scale(1.4)` zoom-in, cursor: zoom-in
+- Click active card: toggle locked zoom (`is-zoomed`), pause/resume autoplay
+- Click side card: navigate to it
+- Autoplay: 3s interval, pauses on active-card hover (desktop), resumes on mouseleave or click-outside
+- Gold dot pagination below stage
+- Prev/next arrows flanking the center card (not page edges)
+- `<style is:global>` required — scoped CSS doesn't reliably match JS-toggled classes in this build
 
-**Filter:** Server-rendered tag pills derived dynamically from `uniqueSubCategories(allLearning)` — no hardcoded list. Active tag drives `?sub=` URL param. "All" pill clears the filter. Gold active state, navy-700 inactive.
+**Filter:** Server-rendered pills from `uniqueSubCategories(allLearning)`. `?sub=` URL param. Gold active state.
 
-**Grid:** 1→2→3 column responsive grid. Each card has a `3:4` aspect-ratio iframe container (portrait flyer shape). Canva embeds use `allow="fullscreen"`. PDF-only flyers use Google Docs Viewer as iframe src. Both use `loading="lazy"`.
+**Grid:** 1→2→3 col, `aspect-[3/4]` cards. Renders `imageUrl` as `<img>`, `embedUrl` as Canva iframe, `pdfUrl` via Google Docs Viewer iframe. All `loading="lazy"`.
 
-**Empty states:** "Learning materials coming soon." (no flyers at all) / "No flyers for '…' yet." (filter with no matches).
-
-**CMS schema addition:** `subCategory` (TEXT) added to `Flyers` collection — optional, free-form, lowercase convention (e.g. `kashrus`, `shabbos`, `women`). Filter buttons auto-capitalize for display.
+**Flyer content types:** Three paths in priority order — `imageUrl` → `embedUrl` → `pdfUrl`. Canva embeds block on localhost (Canva's CSP); test on a preview deployment.
 
 ## Trade-offs
 
-- **Single sub-category per flyer.** A flyer that spans two topics (e.g., "Kashrus for Shabbos") can only be tagged once. Acceptable for now; the editor can duplicate the row if genuinely needed for both filters.
-- **No thumbnail in carousel.** Iframes load the full Canva embed per slide. `loading="lazy"` defers off-screen loads, but active + adjacent slides will load Canva. If performance becomes a concern, a `thumbnail` IMAGE field could be added to show a static preview until clicked.
-- **Swiper abandoned.** Installed but unused — npm module imports don't resolve in this Wix Astro build. Can be uninstalled if desired.
+- **CSS scoping:** `is:global` is required. If another component ever uses `.coverflow-card` or `.pos-active`, there will be a conflict. Unlikely given the specific naming.
+- **Single subCategory per flyer.** A flyer tagged with two topics needs a duplicate row. Acceptable at current scale.
+- **No thumbnail.** All three visible carousel cards load their full embed/image. `loading="lazy"` on side cards mitigates this but they're still in the DOM.
+- **Canva embeds break on localhost.** This is Canva's restriction, not a code bug. Always test Canva embeds on a preview deployment.
+- **`category` is case-sensitive.** Editors must use lowercase slugs exactly. CONTRIBUTING.md documents this.
 
 ## Verification
 
-`/learn` renders the PageHeader, carousel, filter pills (when subCategories exist), and grid. Empty CMS → "coming soon" message shown, no carousel section. Filter `?sub=kashrus` → only matching rows in grid; carousel unchanged. `wix dev` passes without TypeScript errors.
+`/learn` with ≥3 learning flyers shows full 3D coverflow. With 1 item, only center card shows (no side cards — expected). Filter pills appear only when subCategories exist. Empty collection → "coming soon." Arrows loop correctly in both directions. Mobile tap navigates and toggles zoom; hover-pause is desktop-only.
 
 ## Implementation Results
 
-- `src/pages/learn.astro` — page created
-- `src/lib/flyers.ts` — `subCategory` added to `Flyer` interface; `getFlyers` accepts optional `subCategory` param; `uniqueSubCategories` helper exported
-- `Flyers` CMS collection updated via API: `subCategory` TEXT field added
-- Swiper v12 installed (`npm install swiper`)
+- `src/pages/learn.astro` — created; later simplified to one-liner `<CoverflowCarousel>`
+- `src/components/CoverflowCarousel.astro` — extracted from learn.astro for reuse
+- `src/lib/flyers.ts` — `subCategory`, `imageUrl` added to `Flyer` interface; `uniqueSubCategories` helper
+- `Flyers` CMS collection — `subCategory` and `imageUrl` fields added via API
+- Swiper v12 installed but unused; can be uninstalled
