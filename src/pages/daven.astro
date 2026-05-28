@@ -25,7 +25,7 @@ const weekday = grouped.Weekday.map((group) => {
 
 const hasWeekday = weekday.length > 0;
 
-const scheduleFlyers = await getFlyers("schedules");
+const scheduleFlyers = await getFlyers("schedules", "daily");
 const scheduleFlyer = scheduleFlyers[0] ?? null;
 ---
 
