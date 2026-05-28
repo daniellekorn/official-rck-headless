@@ -17,12 +17,12 @@ const links = rawLinks.map((l) => ({
 ---
 
 <header
-	class="fixed inset-x-0 top-0 z-50 pt-3 sm:pt-5 transition-all duration-300"
+	class="fixed inset-x-0 top-0 z-50 pt-4 sm:pt-6 transition-all duration-300"
 	data-nav-header
 >
 	<div class="container-page">
 		<nav
-			class="mx-auto flex max-w-5xl items-center justify-between gap-3 sm:gap-6 rounded-full bg-white/95 px-4 sm:px-6 py-2.5 sm:py-3 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.25)] backdrop-blur ring-1 ring-black/5"
+			class="mx-auto flex max-w-6xl items-center justify-between gap-3 sm:gap-6 rounded-full bg-white/95 px-4 sm:px-6 py-2.5 sm:py-3 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.25)] backdrop-blur ring-1 ring-black/5"
 		>
 			<a href="/" class="flex items-center gap-2 sm:gap-3" aria-label="Ra'anana Community Kollel — Home">
 				<span
@@ -45,7 +45,7 @@ const links = rawLinks.map((l) => ({
 									"text-sm font-medium transition-colors whitespace-nowrap",
 									link.active
 										? "text-navy-600 underline underline-offset-[6px] decoration-2 decoration-gold-500"
-										: "text-navy-500 hover:text-navy-700",
+										: "text-navy-500 hover:text-gold-500",
 								]}
 							>
 								{link.label}
@@ -140,10 +140,10 @@ const links = rawLinks.map((l) => ({
 		const shouldScroll = window.scrollY > 16;
 		if (shouldScroll === scrolled) return;
 		scrolled = shouldScroll;
-		header?.classList.toggle("pt-1", scrolled);
-		header?.classList.toggle("pt-3", !scrolled);
-		header?.classList.toggle("sm:pt-2", scrolled);
-		header?.classList.toggle("sm:pt-5", !scrolled);
+		header?.classList.toggle("pt-2", scrolled);
+		header?.classList.toggle("pt-4", !scrolled);
+		header?.classList.toggle("sm:pt-3", scrolled);
+		header?.classList.toggle("sm:pt-6", !scrolled);
 	};
 	window.addEventListener("scroll", onScroll, { passive: true });
 	onScroll();
