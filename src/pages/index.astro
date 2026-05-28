@@ -7,14 +7,12 @@ import JoinUs from "../components/JoinUs.astro";
 import WhoWeAre from "../components/WhoWeAre.astro";
 import Footer from "../components/Footer.astro";
 
-import { getHomePage } from "../lib/homepage";
+import { getHomepage } from "../lib/homepage";
 import { getHomepageSlides } from "../lib/homepage-slides";
-import { getJoinUsCards } from "../lib/join-us-cards";
 
-const [homepage, slides, joinUsCards] = await Promise.all([
-	getHomePage(),
+const [homepage, slides] = await Promise.all([
+	getHomepage(),
 	getHomepageSlides(),
-	getJoinUsCards(),
 ]);
 
 // Defaults to keep the page rendering identically before the CMS is populated.
@@ -65,7 +63,13 @@ const torahVision = {
 			imageUrl={uniqueImpactful.imageUrl}
 		/>
 
-		<JoinUs cards={joinUsCards.map((c) => ({ title: c.title, subtitle: c.subtitle, href: c.href, icon: c.icon }))} />
+		<JoinUs
+			cards={[
+				{ title: homepage?.joinUsCard1Title, subtitle: homepage?.joinUsCard1Subtitle, href: homepage?.joinUsCard1Href, icon: homepage?.joinUsCard1Icon as "book" | "reader" | "people" | undefined },
+				{ title: homepage?.joinUsCard2Title, subtitle: homepage?.joinUsCard2Subtitle, href: homepage?.joinUsCard2Href, icon: homepage?.joinUsCard2Icon as "book" | "reader" | "people" | undefined },
+				{ title: homepage?.joinUsCard3Title, subtitle: homepage?.joinUsCard3Subtitle, href: homepage?.joinUsCard3Href, icon: homepage?.joinUsCard3Icon as "book" | "reader" | "people" | undefined },
+			].filter((c) => c.title)}
+		/>
 
 		<SplitFeature
 			eyebrowGold={torahVision.eyebrowGold}

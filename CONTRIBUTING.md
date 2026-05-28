@@ -22,10 +22,12 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Hero CTA buttons (label or link) | `HomePage` | `heroPrimaryCtaLabel` / `heroPrimaryCtaHref`, same for secondary |
 | Split section copy ("Unique Impactful", "Torah Vision") | `HomePage` | The `uniqueImpactful*` and `torahVision*` fields |
 | Slideshow under "Who We Are" | `HomepageSlides` | Add / reorder / hide rows. Image + title + caption per row |
-| Join Us cards (3 gold cards) | `JoinUsCards` | Edit the 3 rows. Title, subtitle, link, icon key |
+| Join Us cards (3 gold cards) | `HomePage` | `joinUsCard1*` / `joinUsCard2*` / `joinUsCard3*` fields on the single row |
 | Team members | `TeamMembers` | Add a row. Photo, name, role, bio, etc. |
 | Weekday davening times | `DaveningTimes` | Add / edit rows with `dayType = Weekday`. Shabbat is a static "Join us at KBA" section (no CMS rows needed). |
 | Flyers (Canva embeds or PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). |
+| Footer address, phone, email | `ContactInfo` | Edit the single row. Leave a field empty to hide it from the footer. |
+| Footer social links | `ContactInfo` | Fill in any of `facebookUrl`, `instagramUrl`, `youtubeUrl`, `twitterUrl`, `linkedinUrl`. Empty = icon hidden. |
 
 ### Two ways to edit content
 
@@ -100,6 +102,18 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | whoWeAreTitle | Text | "Who We Are" |
 | whoWeAreHebrew | Text | Hebrew tagline (Pirkei Avot) |
 | whoWeAreBody | Text | Paragraph |
+| joinUsCard1Title | Text | "Daven with Us" |
+| joinUsCard1Subtitle | Text | "Daily Tefillah & Minyanim" |
+| joinUsCard1Href | Text | "/daven" |
+| joinUsCard1Icon | Text | One of: `book`, `reader`, `people` |
+| joinUsCard2Title | Text | "Learn with Us" |
+| joinUsCard2Subtitle | Text | "Weekly Shiurim & Chavrutas" |
+| joinUsCard2Href | Text | "/learn" |
+| joinUsCard2Icon | Text | One of: `book`, `reader`, `people` |
+| joinUsCard3Title | Text | "Our Programs" |
+| joinUsCard3Subtitle | Text | "Connection & Community" |
+| joinUsCard3Href | Text | "/programming" |
+| joinUsCard3Icon | Text | One of: `book`, `reader`, `people` |
 
 #### `HomepageSlides` — one row per slide (5–10 typical)
 
@@ -110,17 +124,6 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | caption | Text | Shorter subtitle |
 | sortOrder | Number | Lower numbers first |
 | active | Boolean | Hide a slide without deleting it |
-
-#### `JoinUsCards` — exactly 3 rows
-
-| Field | Type | Notes |
-|---|---|---|
-| title | Text | "Daven with Us" |
-| subtitle | Text | "Daily Tefillah & Minyanim" |
-| href | Text | "/daven" |
-| icon | Text | One of: `book`, `reader`, `people` |
-| sortOrder | Number | Display order |
-| active | Boolean | |
 
 #### `TeamMembers`
 
@@ -155,6 +158,43 @@ One row per service-time variant. The page renders a flat, lean list grouped by 
 | notes | Text (opt) | Extra context only — e.g. `Followed by daf yomi`. **Do not** put day-of-week info here; that belongs in `daySpec`. |
 | sortOrder | Number | Display order within a service group (lower first) |
 | active | Boolean | Hide a row without deleting it |
+
+#### `ContactInfo` — exactly **one** row, never more
+
+| Field | Type | Notes |
+|---|---|---|
+| address | Text | Full address displayed in the footer. Leave empty to hide. |
+| phone | Text | Display string like "+972 9-123-4567". Leave empty to hide. |
+| email | Text | Used as display text and mailto: link. Leave empty to hide. |
+| facebookUrl | Text | Full URL. Leave empty to hide the icon. |
+| instagramUrl | Text | Full URL. Leave empty to hide the icon. |
+| youtubeUrl | Text | Full URL. Leave empty to hide the icon. |
+| twitterUrl | Text | Full URL. Leave empty to hide the icon. |
+| linkedinUrl | Text | Full URL. Leave empty to hide the icon. |
+
+#### `Flyers`
+
+One row per flyer. Either `embedUrl` or `pdfUrl` must be filled in — a row with neither set will render nothing and should have `isActive = false`.
+
+| Field | Type | Notes |
+|---|---|---|
+| title | Text | Display name shown on site |
+| category | Text | **Must be one of:** `schedules`, `learning`, `youth`, `events` (lowercase, exact). Wrong value = flyer silently hidden. |
+| embedUrl | Text | Canva "Publish to Web" `<iframe>` src URL. Preferred for Canva designs — stays live-synced to Canva. |
+| pdfUrl | Text | Direct public PDF URL. For non-Canva documents. |
+| isActive | Boolean | Show/hide without deleting. Default: true (checked). |
+| displayOrder | Number | Sort order within the category. Lower = first. |
+
+**Getting a Canva embed URL:** In Canva, open the design → Share → Publish to web → copy the URL from the embed code (`src="…"`). Paste only the URL (not the full `<iframe>` tag) into `embedUrl`.
+
+**Valid `category` slugs:**
+
+| Type this… | Shows under… |
+|---|---|
+| `schedules` | Schedules |
+| `learning` | Learning |
+| `youth` | Youth Programming |
+| `events` | Events |
 
 ### Permissions on every collection
 

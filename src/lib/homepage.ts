@@ -4,7 +4,7 @@ import { media } from "@wix/sdk";
 
 const COLLECTION_ID = "HomePage";
 
-export interface HomePageContent {
+export interface HomepageContent {
 	heroEyebrow?: string;
 	heroTitle?: string;
 	heroSubtitle?: string;
@@ -34,6 +34,21 @@ export interface HomePageContent {
 	whoWeAreTitle?: string;
 	whoWeAreHebrew?: string;
 	whoWeAreBody?: string;
+
+	joinUsCard1Title?: string;
+	joinUsCard1Subtitle?: string;
+	joinUsCard1Href?: string;
+	joinUsCard1Icon?: string;
+
+	joinUsCard2Title?: string;
+	joinUsCard2Subtitle?: string;
+	joinUsCard2Href?: string;
+	joinUsCard2Icon?: string;
+
+	joinUsCard3Title?: string;
+	joinUsCard3Subtitle?: string;
+	joinUsCard3Href?: string;
+	joinUsCard3Icon?: string;
 }
 
 function resolveImage(wixImageUrl?: string, w = 1600, h = 1000): string | undefined {
@@ -45,11 +60,11 @@ function resolveImage(wixImageUrl?: string, w = 1600, h = 1000): string | undefi
 	}
 }
 
-export async function getHomePage(): Promise<HomePageContent | null> {
+export async function getHomepage(): Promise<HomepageContent | null> {
 	try {
 		const elevated = auth.elevate(items.query);
 		const { items: results } = await elevated(COLLECTION_ID).limit(1).find();
-		const row = results[0] as HomePageContent | undefined;
+		const row = results[0] as HomepageContent | undefined;
 		if (!row) return null;
 
 		return {
