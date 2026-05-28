@@ -13,9 +13,9 @@ const { eyebrow, titleGold, titleNavy, subtitle } = Astro.props;
 	<div
 		class="absolute inset-0 -z-10"
 		style="background-image:
-			radial-gradient(900px 500px at 18% 25%, rgba(185,144,42,0.22), transparent 60%),
-			radial-gradient(700px 400px at 85% 80%, rgba(31,44,75,0.55), transparent 60%),
-			linear-gradient(135deg, #0f172a 0%, #16213d 60%, #1f2c4b 100%);"
+			radial-gradient(900px 500px at 18% 25%, rgba(214,162,30,0.22), transparent 60%),
+			radial-gradient(700px 400px at 85% 80%, rgba(36,60,99,0.55), transparent 60%),
+			linear-gradient(135deg, #07173a 0%, #102a56 60%, #243c63 100%);"
 		aria-hidden="true"
 	>
 	</div>
@@ -31,7 +31,7 @@ const { eyebrow, titleGold, titleNavy, subtitle } = Astro.props;
 			<p class="eyebrow text-gold-300">{eyebrow}</p>
 		)}
 		<h1
-			class="mt-3 sm:mt-4 font-sans text-[2.25rem] sm:text-5xl md:text-6xl lg:text-[4rem] leading-[1.05] font-black tracking-[-0.025em]"
+			class="mt-3 sm:mt-4 font-display text-[2.25rem] sm:text-5xl md:text-6xl lg:text-[4rem] leading-[1.05] font-medium"
 		>
 			{titleGold && <span class="text-gold-400">{titleGold} </span>}
 			<span class="text-white">{titleNavy}</span>

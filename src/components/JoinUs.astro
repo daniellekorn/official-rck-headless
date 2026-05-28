@@ -24,14 +24,14 @@ const cards: CardInput[] = Astro.props.cards && Astro.props.cards.length > 0 ? A
 	<div
 		class="absolute inset-0 -z-10"
 		style="background:
-			linear-gradient(180deg, rgba(15,23,42,0.55) 0%, rgba(15,23,42,0.35) 60%, rgba(15,23,42,0.65) 100%),
-			linear-gradient(135deg, #1f2c4b 0%, #3d4d6f 40%, #b9902a 100%);"
+			linear-gradient(180deg, rgba(7,23,58,0.55) 0%, rgba(7,23,58,0.35) 60%, rgba(7,23,58,0.65) 100%),
+			linear-gradient(135deg, #243c63 0%, #3e4d6b 40%, #d6a21e 100%);"
 		aria-hidden="true"
 	>
 	</div>
 
 	<div class="container-page">
-		<h2 class="text-center font-sans text-3xl sm:text-4xl md:text-5xl font-black tracking-[-0.025em] text-white">
+		<h2 class="text-center font-display text-3xl sm:text-4xl md:text-5xl font-medium text-white">
 			Join Us
 		</h2>
 		<span class="mx-auto mt-3 sm:mt-4 block h-[2px] w-16 bg-gold-400" aria-hidden="true"></span>
@@ -68,7 +68,7 @@ const cards: CardInput[] = Astro.props.cards && Astro.props.cards.length > 0 ? A
 						<p class="mt-5 text-xs uppercase tracking-[0.22em] text-white/85">
 							{card.subtitle}
 						</p>
-						<h3 class="mt-2 font-sans text-2xl font-extrabold tracking-[-0.015em]">
+						<h3 class="mt-2 font-display text-2xl font-medium">
 							{card.title}
 						</h3>
 					</a>

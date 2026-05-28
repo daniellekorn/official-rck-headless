@@ -1,33 +1,41 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand palette */
-  --color-gold-50:  #fbf5e1;
-  --color-gold-100: #f3e6b3;
-  --color-gold-200: #e8d27f;
-  --color-gold-300: #dcbb4d;
-  --color-gold-400: #cea531;
-  --color-gold-500: #b9902a;   /* primary gold */
-  --color-gold-600: #957021;
-  --color-gold-700: #6f521a;
+  /* Brand palette — anchors marked. 400/600 navy and 200/500 gold are the
+     authoritative brand colors; intermediate tints are derived from them. */
+  --color-gold-50:  #fdf8e0;
+  --color-gold-100: #fbeaa8;
+  --color-gold-200: #f6d66b;   /* anchor */
+  --color-gold-300: #ebbf42;
+  --color-gold-400: #dfb030;
+  --color-gold-500: #d6a21e;   /* anchor — primary gold */
+  --color-gold-600: #a47915;
+  --color-gold-700: #6f510e;
 
-  --color-navy-50:  #eef1f7;
-  --color-navy-100: #cfd5e3;
-  --color-navy-200: #9ba6c1;
-  --color-navy-300: #677697;
-  --color-navy-400: #3d4d6f;
-  --color-navy-500: #1f2c4b;
-  --color-navy-600: #16213d;   /* primary navy */
-  --color-navy-700: #0f172a;
+  --color-navy-50:  #eaedf3;
+  --color-navy-100: #c8cfdc;
+  --color-navy-200: #98a3b9;
+  --color-navy-300: #6b7790;
+  --color-navy-400: #3e4d6b;   /* anchor */
+  --color-navy-500: #243c63;
+  --color-navy-600: #102a56;   /* anchor — primary navy */
+  --color-navy-700: #07173a;
+
+  /* Bright-yellow accent — reserved for sparse highlights (focus rings,
+     badges, CTAs-on-dark). Not part of the gold scale; do not substitute
+     for gold-* tokens. */
+  --color-accent: #f6ed49;
 
   --color-ink: #1a1a1a;
   --color-paper: #ffffff;
   --color-mist: #f7f5f0;       /* warm off-white for section bands */
 
-  /* Fonts — single cohesive family (Inter) at heavy weights for display */
-  --font-display: "Inter", "Heebo", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-sans: "Inter", "Heebo", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-hebrew: "Heebo", "Inter", system-ui, sans-serif;
+  /* Fonts — Oswald (condensed, medium-weight) for display headings;
+     Onest for body and UI; Heebo for Hebrew. Heebo is also the fallback for
+     Hebrew characters inside English headings, since Oswald lacks them. */
+  --font-display: "Oswald", "Heebo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: "Onest", "Heebo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-hebrew: "Heebo", "Onest", system-ui, sans-serif;
 
   /* Type scale (display) */
   --text-display-sm: 2.25rem;
@@ -50,8 +58,7 @@
 
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
-    font-weight: 800;
+    font-weight: 500;
   }
 
   :lang(he), [dir="rtl"] {

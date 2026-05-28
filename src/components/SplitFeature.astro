@@ -1,4 +1,6 @@
 ---
+import Highlight from "./Highlight.astro";
+
 interface Props {
 	eyebrowGold: string;
 	eyebrowNavy: string;
@@ -44,7 +46,7 @@ const {
 					<div
 						class="relative aspect-[4/3] w-full overflow-hidden rounded-2xl ring-1 ring-navy-100"
 						style="background:
-							linear-gradient(135deg, #eef1f7 0%, #cfd5e3 50%, #f3e6b3 100%);"
+							linear-gradient(135deg, #eaedf3 0%, #c8cfdc 50%, #fbeaa8 100%);"
 						aria-label="Photo placeholder"
 					>
 						<div class="absolute inset-0 flex items-center justify-center">
@@ -62,13 +64,23 @@ const {
 					<span class="text-navy-600 ml-1.5">{eyebrowNavy}</span>
 				</p>
 
-				<h2 class="mt-4 font-sans text-[2rem] sm:text-[2.5rem] md:text-[3rem] leading-[1.05] font-black uppercase tracking-[-0.02em]">
-					<span class={subheadAccent === "line1" ? "text-gold-500" : "text-navy-600"}>{subheadLine1}</span>
+				<h2 class="mt-4 font-display text-[2rem] sm:text-[2.5rem] md:text-[3rem] leading-[1.05] font-medium uppercase text-navy-600">
+					{
+						subheadAccent === "line1" ? (
+							<Highlight duration={2800}>{subheadLine1}</Highlight>
+						) : (
+							<span>{subheadLine1}</span>
+						)
+					}
 					{
 						subheadLine2 && (
 							<>
 								{" "}
-								<span class={subheadAccent === "line2" ? "text-gold-500" : "text-navy-600"}>{subheadLine2}</span>
+								{subheadAccent === "line2" ? (
+									<Highlight duration={2800}>{subheadLine2}</Highlight>
+								) : (
+									<span>{subheadLine2}</span>
+								)}
 							</>
 						)
 					}

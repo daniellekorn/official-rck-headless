@@ -1,4 +1,6 @@
 ---
+import Highlight from "./Highlight.astro";
+
 interface Props {
 	eyebrow?: string;
 	title?: string;
@@ -20,9 +22,18 @@ const {
 	secondaryCtaLabel = "Our Programs",
 	secondaryCtaHref = "/programming",
 } = Astro.props;
+
+// Stagger the highlight on the last two words of the title — e.g.
+// "The Ra'anana Community Kollel" → highlight "Community", then "Kollel".
+// Falls back to a single highlight on the whole title if the pattern
+// doesn't match what the CMS returned.
+const titleSplit = title.match(/^(.*?)(\S+)\s+(\S+)$/);
+const titleLead = titleSplit?.[1].trimEnd();
+const titleSecondToLast = titleSplit?.[2];
+const titleLast = titleSplit?.[3];
 ---
 
-<section class="relative isolate overflow-hidden min-h-[640px] md:min-h-[720px] flex items-end">
+<section class="relative isolate overflow-hidden min-h-screen flex items-end">
 	{imageUrl ? (
 		<>
 			<img
@@ -39,9 +50,9 @@ const {
 			<div
 				class="absolute inset-0 -z-10 bg-navy-700"
 				style="background-image:
-					radial-gradient(1200px 600px at 20% 20%, rgba(185,144,42,0.18), transparent 60%),
-					radial-gradient(900px 500px at 85% 80%, rgba(31,44,75,0.6), transparent 60%),
-					linear-gradient(135deg, #0f172a 0%, #16213d 60%, #1f2c4b 100%);"
+					radial-gradient(1200px 600px at 20% 20%, rgba(214,162,30,0.18), transparent 60%),
+					radial-gradient(900px 500px at 85% 80%, rgba(36,60,99,0.6), transparent 60%),
+					linear-gradient(135deg, #07173a 0%, #102a56 60%, #243c63 100%);"
 				aria-hidden="true"
 			>
 			</div>
@@ -59,12 +70,20 @@ const {
 		<div class="max-w-3xl">
 			<p class="eyebrow text-gold-300">{eyebrow}</p>
 			<h1
-				class="mt-4 font-sans text-[2.5rem] leading-[1.02] text-white sm:text-5xl md:text-6xl lg:text-[4.5rem] font-black tracking-[-0.025em]"
+				class="mt-4 font-display text-[2.5rem] leading-[1.02] text-white sm:text-5xl md:text-6xl lg:text-[4.5rem] font-medium"
 			>
-				{title}
+				{titleSplit ? (
+					<>
+						{titleLead}{titleLead && " "}
+						<Highlight immediate delay={300} duration={1100}>{titleSecondToLast}</Highlight>
+						{" "}
+						<Highlight immediate delay={1500} duration={1100}>{titleLast}</Highlight>
+					</>
+				) : (
+					<Highlight immediate delay={300} duration={1400}>{title}</Highlight>
+				)}
 			</h1>
-			<span class="mt-6 block h-[3px] w-24 bg-gold-400" aria-hidden="true"></span>
-			<p class="mt-6 max-w-xl text-base sm:text-lg text-white/80 leading-relaxed">
+			<p class="mt-8 max-w-xl text-base sm:text-lg text-white/80 leading-relaxed">
 				{subtitle}
 			</p>
 		</div>
@@ -73,7 +92,7 @@ const {
 			{primaryCtaLabel && (
 				<a
 					href={primaryCtaHref}
-					class="inline-flex items-center justify-center rounded-sm border border-gold-400 px-7 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-colors hover:bg-gold-400 hover:text-navy-700"
+					class="inline-flex items-center justify-center rounded-sm bg-gold-500 border border-gold-500 px-7 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-navy-700 transition-colors hover:bg-gold-400 hover:border-gold-400"
 				>
 					{primaryCtaLabel}
 				</a>
@@ -81,7 +100,7 @@ const {
 			{secondaryCtaLabel && (
 				<a
 					href={secondaryCtaHref}
-					class="inline-flex items-center justify-center rounded-sm border border-gold-400 px-7 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-colors hover:bg-gold-400 hover:text-navy-700"
+					class="inline-flex items-center justify-center rounded-sm border border-gold-400 px-7 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-colors hover:bg-white/10"
 				>
 					{secondaryCtaLabel}
 				</a>

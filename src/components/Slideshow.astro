@@ -15,11 +15,11 @@ interface Props {
 }
 
 const placeholder: InternalSlide[] = [
-	{ title: "Beis Medrash", caption: "Daily Torah learning in our home", from: "#1f2c4b", to: "#b9902a" },
-	{ title: "Shiurim", caption: "Weekly classes for every level", from: "#3d4d6f", to: "#dcbb4d" },
-	{ title: "Community Tefillah", caption: "Vibrant minyanim throughout the day", from: "#16213d", to: "#957021" },
-	{ title: "Chavrutas", caption: "One-on-one learning partnerships", from: "#677697", to: "#cea531" },
-	{ title: "Special Events", caption: "Holidays, melaveh malka, and more", from: "#0f172a", to: "#e8d27f" },
+	{ title: "Beis Medrash", caption: "Daily Torah learning in our home", from: "#243c63", to: "#d6a21e" },
+	{ title: "Shiurim", caption: "Weekly classes for every level", from: "#3e4d6b", to: "#ebbf42" },
+	{ title: "Community Tefillah", caption: "Vibrant minyanim throughout the day", from: "#102a56", to: "#a47915" },
+	{ title: "Chavrutas", caption: "One-on-one learning partnerships", from: "#6b7790", to: "#dfb030" },
+	{ title: "Special Events", caption: "Holidays, melaveh malka, and more", from: "#07173a", to: "#f6d66b" },
 ];
 
 const slides: InternalSlide[] = Astro.props.slides && Astro.props.slides.length > 0
@@ -43,7 +43,7 @@ const slides: InternalSlide[] = Astro.props.slides && Astro.props.slides.length 
 					]}
 					style={slide.imageUrl
 						? undefined
-						: `background: linear-gradient(135deg, ${slide.from ?? "#1f2c4b"} 0%, ${slide.to ?? "#b9902a"} 100%);`}
+						: `background: linear-gradient(135deg, ${slide.from ?? "#243c63"} 0%, ${slide.to ?? "#d6a21e"} 100%);`}
 				>
 					{slide.imageUrl && (
 						<img

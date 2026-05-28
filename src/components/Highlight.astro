@@ -1,0 +1,107 @@
+---
+interface Props {
+	/**
+	 * Highlight color. Defaults to brand gold-500 (#D6A21E).
+	 * Pass an rgba(...) value if you want translucency.
+	 */
+	color?: string;
+	/**
+	 * Bar height as a CSS length. Defaults to "0.5em" — covers roughly the
+	 * lower half of the text, editorial half-highlight style.
+	 */
+	height?: string;
+	/**
+	 * Vertical position of the bar. 100% = sits flush with baseline,
+	 * 90% = lifted slightly. Defaults to "90%".
+	 */
+	position?: string;
+	/** Total animation duration in ms. Defaults to 2200. */
+	duration?: number;
+	/** Skip the scroll trigger; animate on page load instead. */
+	immediate?: boolean;
+	/** Delay (ms) between trigger and the start of the sweep. Defaults to 0. */
+	delay?: number;
+}
+
+const {
+	color = "#D6A21E",
+	height = "0.5em",
+	position = "90%",
+	duration = 2200,
+	immediate = false,
+	delay = 0,
+} = Astro.props;
+
+const inlineVars = `--rck-color:${color};--rck-height:${height};--rck-position:${position};--rck-duration:${duration}ms;--rck-delay:${delay}ms`;
+---
+
+<span
+	class:list={["rck-highlight", !immediate && "rck-highlight--scroll", immediate && "rck-highlight--immediate"]}
+	style={inlineVars}
+	data-rck-highlight={!immediate ? "" : undefined}
+>
+	<slot />
+</span>
+
+<style is:global>
+	.rck-highlight {
+		background-image: linear-gradient(var(--rck-color), var(--rck-color));
+		background-repeat: no-repeat;
+		background-size: 100% var(--rck-height);
+		background-position: 0 var(--rck-position);
+		box-decoration-break: clone;
+		-webkit-box-decoration-break: clone;
+		padding-inline: 0.04em;
+	}
+
+	.rck-highlight--scroll {
+		background-size: 0 var(--rck-height);
+		transition: background-size var(--rck-duration) cubic-bezier(0.22, 0.61, 0.36, 1);
+	}
+
+	.rck-highlight--scroll.is-visible {
+		background-size: 100% var(--rck-height);
+	}
+
+	.rck-highlight--immediate {
+		background-size: 0 var(--rck-height);
+		animation: rck-highlight-sweep var(--rck-duration) cubic-bezier(0.22, 0.61, 0.36, 1) var(--rck-delay) forwards;
+	}
+
+	@keyframes rck-highlight-sweep {
+		to {
+			background-size: 100% var(--rck-height);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.rck-highlight--scroll,
+		.rck-highlight--immediate {
+			background-size: 100% var(--rck-height);
+			transition: none;
+			animation: none;
+		}
+	}
+</style>
+
+<script is:inline>
+	(() => {
+		const targets = document.querySelectorAll("[data-rck-highlight]");
+		if (!targets.length) return;
+		if (typeof IntersectionObserver === "undefined") {
+			targets.forEach((el) => el.classList.add("is-visible"));
+			return;
+		}
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (!entry.isIntersecting) return;
+					entry.target.classList.add("is-visible");
+					observer.unobserve(entry.target);
+				});
+			},
+			{ threshold: 0.5, rootMargin: "0px 0px -8% 0px" },
+		);
+		targets.forEach((el) => observer.observe(el));
+	})();
+</script>
