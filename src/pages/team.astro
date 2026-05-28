@@ -149,22 +149,36 @@ const hasAny = team.length > 0;
 	/* Photo color drains to greyscale when the card is hovered (desktop)
 	   or expanded (set by JS on tap/click — works for touch + as a "pin
 	   open" affordance on desktop). Same trigger drives the bio overlay
-	   fade-in below. See design log #008. */
+	   fade-in below. See design log #008.
+
+	   The :hover rules are gated behind @media (hover: hover) because
+	   touch browsers "stick" :hover state after a tap — without the
+	   gate, tapping to collapse couldn't beat the stuck hover and the
+	   overlay would never close on mobile. */
 	.card-image {
 		transition: filter 400ms ease, transform 500ms ease;
 	}
-	.team-card:hover .card-image,
-	.team-card[aria-expanded="true"] .card-image {
-		filter: grayscale(1);
-		transform: scale(1.04);
-	}
-
 	.bio-overlay {
 		opacity: 0;
 		pointer-events: none;
 		transition: opacity 300ms ease;
 	}
-	.team-card:hover .bio-overlay,
+
+	@media (hover: hover) and (pointer: fine) {
+		.team-card:hover .card-image {
+			filter: grayscale(1);
+			transform: scale(1.04);
+		}
+		.team-card:hover .bio-overlay {
+			opacity: 1;
+			pointer-events: auto;
+		}
+	}
+
+	.team-card[aria-expanded="true"] .card-image {
+		filter: grayscale(1);
+		transform: scale(1.04);
+	}
 	.team-card[aria-expanded="true"] .bio-overlay {
 		opacity: 1;
 		pointer-events: auto;
