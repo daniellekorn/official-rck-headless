@@ -111,6 +111,9 @@ const hasAny = team.length > 0;
 														{m.role}
 													</p>
 												)}
+												{hasBio && (
+													<span class="bio-toggle-label mt-3 inline-flex items-center gap-1 font-sans text-[11px] font-bold uppercase tracking-[0.22em] text-gold-500" aria-hidden="true"></span>
+												)}
 											</div>
 										);
 
@@ -165,6 +168,26 @@ const hasAny = team.length > 0;
 	.team-card[aria-expanded="true"] .bio-overlay {
 		opacity: 1;
 		pointer-events: auto;
+	}
+
+	/* Touch-device affordance: hover-capable devices don't need a "Read
+	   bio" label because the photo greyscale + bio fade-in already
+	   advertise the interaction. On touch (no hover), the card looks
+	   static, so we show a small gold label that flips to "Hide bio"
+	   when expanded. Hidden on hover-capable devices entirely. */
+	.bio-toggle-label {
+		display: none;
+	}
+	.bio-toggle-label::after {
+		content: "Read bio →";
+	}
+	.team-card[aria-expanded="true"] .bio-toggle-label::after {
+		content: "Hide bio";
+	}
+	@media (hover: none), (pointer: coarse) {
+		.bio-toggle-label {
+			display: inline-flex;
+		}
 	}
 
 	/* Tighter, kollel-tinted scrollbar inside the bio overlay so it
