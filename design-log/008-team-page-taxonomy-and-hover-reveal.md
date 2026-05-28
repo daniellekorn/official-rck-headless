@@ -1,7 +1,7 @@
 ---
 # 008 — Team page: tighter taxonomy + hover-reveal bios
 
-**Status:** proposed
+**Status:** implemented
 **Date:** 2026-05-28
 **Author:** claude-session (danielle directing)
 **Related:** [#001](001-cms-driven-content-architecture.md), [#003](003-role-groups-rename-and-harden.md)
@@ -123,4 +123,8 @@ Three pieces:
 
 ## Implementation Results
 
-_(appended after work ships)_
+Shipped in commit `614c4ad` on `main` (2026-05-28).
+
+**Deviations from design:** none functionally. Bio overlay opacity tuned through two passes — landed on `from-navy-700/80 → via-navy-700/75 → to-navy-700/70` so the greyscale image bleeds through faintly behind the bio text. 95% (initial pass) was too dark; the lighter blend gives the photo a ghosted presence without compromising readability.
+
+**Follow-up for editor:** existing CMS rows may need `roleGroup` updates to land in the new active sections. "Demo Rabbi" currently routes to Kollel Avreichim via the `Kollel` alias and renders fine. When Rabbi Horwitz is added, his row should use `roleGroup: "Founder"` (or `"Director"`) to land in Founder & Director.
