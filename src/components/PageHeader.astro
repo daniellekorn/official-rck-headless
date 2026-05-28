@@ -9,36 +9,20 @@ interface Props {
 const { eyebrow, titleGold, titleNavy, subtitle } = Astro.props;
 ---
 
-<section class="relative isolate overflow-hidden bg-navy-700">
-	<div
-		class="absolute inset-0 -z-10"
-		style="background-image:
-			radial-gradient(900px 500px at 18% 25%, rgba(214,162,30,0.22), transparent 60%),
-			radial-gradient(700px 400px at 85% 80%, rgba(36,60,99,0.55), transparent 60%),
-			linear-gradient(135deg, #07173a 0%, #102a56 60%, #243c63 100%);"
-		aria-hidden="true"
-	>
-	</div>
-	<div
-		class="absolute inset-0 -z-10 opacity-[0.06]"
-		style="background-image: repeating-linear-gradient(45deg, #fff 0 1px, transparent 1px 14px);"
-		aria-hidden="true"
-	>
-	</div>
-
-	<div class="container-page pt-32 pb-16 sm:pt-40 sm:pb-20 md:pt-48 md:pb-24 text-center">
+<section class="pt-32 pb-0 sm:pt-36 text-center">
+	<div class="container-page">
 		{eyebrow && (
-			<p class="eyebrow text-gold-300">{eyebrow}</p>
+			<p class="eyebrow text-gold-500">{eyebrow}</p>
 		)}
 		<h1
-			class="mt-3 sm:mt-4 font-display text-[2.25rem] sm:text-5xl md:text-6xl lg:text-[4rem] leading-[1.05] font-medium"
+			class="mt-3 font-display text-[2.25rem] sm:text-5xl md:text-6xl leading-[1.05] font-medium"
 		>
 			{titleGold && <span class="text-gold-400">{titleGold} </span>}
-			<span class="text-white">{titleNavy}</span>
+			<span class="text-navy-700">{titleNavy}</span>
 		</h1>
-		<span class="mx-auto mt-5 sm:mt-6 block h-[3px] w-20 bg-gold-400" aria-hidden="true"></span>
+		<span class="mx-auto mt-4 sm:mt-5 block h-[2px] w-14 bg-gold-400" aria-hidden="true"></span>
 		{subtitle && (
-			<p class="mx-auto mt-5 sm:mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-white/80">
+			<p class="mx-auto mt-4 sm:mt-5 max-w-xl text-base sm:text-lg leading-relaxed text-navy-400">
 				{subtitle}
 			</p>
 		)}
