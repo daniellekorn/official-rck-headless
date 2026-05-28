@@ -17,7 +17,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 
 | Want to change… | Collection | How |
 |---|---|---|
-| Hero title, subtitle, eyebrow | `HomePage` | Edit the single row, change the relevant field |
+| Hero subtitle, eyebrow | `HomePage` | Edit the single row, change the relevant field. (The headline — "Welcome to RCK" + "The Ra'anana Community Kollel" — is brand, not content, and lives in code. See [#009](design-log/009-rck-brand-identity.md).) |
 | Hero background image | `HomePage` | `heroImage` field — upload new image |
 | Hero CTA buttons (label or link) | `HomePage` | `heroPrimaryCtaLabel` / `heroPrimaryCtaHref`, same for secondary |
 | Split section copy ("Unique Impactful", "Torah Vision") | `HomePage` | The `uniqueImpactful*` and `torahVision*` fields |
@@ -76,9 +76,9 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 
 | Field | Type | Notes |
 |---|---|---|
-| heroEyebrow | Text | "Welcome to" |
-| heroTitle | Text | "The Ra'anana Community Kollel" |
-| heroSubtitle | Text | One-line tagline |
+| heroEyebrow | Text | Optional promo line above the headline (e.g. "Chag Sameach!"). Leave empty for none. |
+| heroTitle | Text | **Unused — kept for legacy.** Headline is hardcoded ("Welcome to RCK" + brand line). See [design-log/009](design-log/009-rck-brand-identity.md). |
+| heroSubtitle | Text | One-line tagline under the brand line |
 | heroImage | Image | Optional — fallback gradient if empty |
 | heroPrimaryCtaLabel | Text | "Our Schedule" |
 | heroPrimaryCtaHref | Text | "/schedule" (relative path) |
