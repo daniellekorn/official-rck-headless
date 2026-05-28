@@ -31,12 +31,6 @@ Every visible string and image on the homepage required a code change → PR →
 - **Q:** Rich Text or plain Text for body copy?
   **A:** Plain Text for now. Bios on `TeamMembers` are Rich Text (Ricos JSON) because they're long-form. Homepage body copy is one short paragraph per section — no formatting needed, and Ricos rendering adds complexity.
 
-- **Q:** What if the friend creates two rows in the `HomePage` collection?
-  **A:** `getHomePage()` takes `limit(1).find()` — the dashboard order wins, but we document "exactly one row" in CONTRIBUTING.md and assume good faith. If this becomes a real problem, add a `key="main"` filter.
-
-- **Q:** Should we set up PR previews via GitHub Actions?
-  **A:** Not yet. Danielle pulls PRs locally for now. Revisit when code PRs become frequent enough that this hurts.
-
 ## Design
 
 Three new collections, fed via three new lib modules, consumed by the existing components (now prop-driven with internal defaults).
@@ -59,7 +53,7 @@ flowchart LR
 - `HomepageSlides` — one row per slide. Fields: `image`, `title`, `caption`, `sortOrder`, `active`.
 - `JoinUsCards` — one row per card (3 expected). Fields: `title`, `subtitle`, `href`, `icon` (one of: `book`, `reader`, `people`), `sortOrder`, `active`.
 
-**Lib pattern (per project convention from #N/A — see node_modules @wix/agent-skills/skills/wix-headless):**
+**Lib pattern** (per project convention from `node_modules/@wix/agent-skills/skills/wix-headless`):
 
 ```ts
 import * as items from "@wix/wix-data-items-sdk";
@@ -79,61 +73,13 @@ export async function getHomePage(): Promise<HomePageContent | null> {
 
 Two non-negotiables on every query: `auth.elevate` (without it, restricted collections silently return zero items) and try/catch (without it, an SSR exception truncates the Astro response mid-body — nav renders, then blank).
 
-**Component pattern:** each homepage component accepts optional content props with internal defaults matching the current hardcoded text/images.
-
-```astro
-const { title = "The Ra'anana Community Kollel" } = Astro.props;
-```
-
-When CMS returns nothing, defaults win → page looks identical to pre-CMS. When CMS returns content, that overrides → no code change needed. This is what lets us ship before the friend has populated anything.
-
-## Implementation Plan
-
-1. Install `@wix/wix-data-items-sdk` (the actual `items` API; `@wix/data` no longer re-exports it).
-2. `src/lib/homepage.ts`, `src/lib/homepage-slides.ts`, `src/lib/join-us-cards.ts`.
-3. Refactor `Hero`, `SplitFeature`, `JoinUs`, `Slideshow`, `WhoWeAre` to accept content props with internal fallbacks.
-4. `src/pages/index.astro` fetches all three collections via `Promise.all`, passes results to components.
-5. `CONTRIBUTING.md` documenting the editor's workflow + exact field names for each collection.
-
-## Examples
-
-✅ **Right** — component falls back to default when CMS row missing:
-```astro
-const { title = "The Ra'anana Community Kollel" } = Astro.props;
-```
-Page works on day one, before the office adds anything.
-
-❌ **Wrong** — requires content to exist:
-```astro
-const { title } = Astro.props;
-if (!title) throw new Error("Missing homepage content");
-```
-Forces the editor to populate everything before the page works.
-
-✅ **Right** — image resolution at the lib boundary, not in the component:
-```ts
-return { ...row, heroImageUrl: resolveImage(row.heroImage, 1920, 1200) };
-```
-Component takes a plain URL string; only the lib touches the Wix media SDK.
-
-❌ **Wrong** — every component calls `media.getScaledToFillImageUrl()` itself.
-Couples view code to the Wix SDK; harder to swap data layers later.
+**Component pattern:** each homepage component accepts optional content props with internal defaults matching the current hardcoded text/images. When CMS returns nothing, defaults win → page looks identical to pre-CMS. When CMS returns content, that overrides → no code change needed.
 
 ## Trade-offs
 
 - **Single-row `HomePage` is awkward in Wix's row-oriented dashboard.** The "Manage Items" UI assumes lists. One-row collections work but feel weird. Acceptable for now; if multiple "settings" emerge, consolidate into one `SiteSettings` row.
 - **Field names are stringly-typed contracts** between the dashboard and the code. A rename in the dashboard silently breaks queries (the row returns, but the typed field is `undefined`). Mitigation: documented exact names in `CONTRIBUTING.md` + this log; any future rename must be flagged in a new design log entry.
-- **No PR previews yet.** Every code PR requires Danielle pulling locally to verify visually. Acceptable until code PR frequency increases.
 - **Wix MCP setup is the friend's responsibility.** We're not automating his side of the wire. If he never sets it up, he uses the dashboard directly — slower but works.
-
-## Verification
-
-- [x] Homepage renders identically with all three collections empty (defaults take over).
-- [x] Homepage uses CMS data when collections are populated — verified by code review of `index.astro` (data flow correct); will re-verify visually once Danielle creates real rows.
-- [x] `CONTRIBUTING.md` lists every field name used by the code; any drift is a bug in either the doc or the code, not both.
-- [x] Existing `/team` and `/daven` routes unaffected (no shared component changes).
-- [ ] Friend successfully edits a homepage field via Wix dashboard without help. (Pending — not yet tested.)
-- [ ] Friend successfully adds a slide via Claude + Wix MCP. (Pending — not yet tested.)
 
 ## Implementation Results
 
@@ -142,4 +88,4 @@ Shipped in two commits:
 - **`805b84c`** — Team and Daven pages (precursor work; introduced the lib + try/catch + auth.elevate pattern this entry now extends to the homepage).
 - **`1b9d250`** — CMS-drive homepage content + add CONTRIBUTING.
 
-No deviations from the design above. The friend's actual usage will be the real verification — we'll know within the first week whether the field-name contract holds up under non-developer hands. If it doesn't, the most likely fix is adding a Zod (or hand-rolled) schema layer at the lib boundary that fails loud when fields are missing, instead of silently using `undefined`.
+Followup risk: the field-name contract is the most likely thing to break under non-developer hands. If it does, the fix is a Zod (or hand-rolled) schema layer at the lib boundary that fails loud when fields are missing, instead of silently using `undefined`.

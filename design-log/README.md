@@ -31,8 +31,27 @@ A persistent, in-repo memory for *why* this codebase looks the way it does. Chat
 
 ### After building
 
-1. Add a **Verification** section: how do we know it works? For us, that usually means: page renders correctly with empty CMS, page renders correctly with populated CMS, friend's workflow described in CONTRIBUTING.md still applies.
+1. Add a **Verification** section: how do we know it works? One short prose paragraph, not a long checklist. For us, that usually means: page renders correctly with empty CMS, page renders correctly with populated CMS, friend's workflow described in CONTRIBUTING.md still applies.
 2. If the change affected `CONTRIBUTING.md` (the non-technical contributor's instructions), confirm that doc was updated.
+3. **Trim the log.** Once shipped, the entry should shrink — see "Lifecycle" below.
+
+### Lifecycle: write big, trim down
+
+A log is meant to outlive the session that produced it. The size that's useful *during* the design is much bigger than the size that's useful *six months later*. When the entry moves from `accepted` → `implemented`, do a trim pass:
+
+- **Delete the Implementation Plan section.** It was scaffolding for the build. The commits are the actual record of what shipped.
+- **Collapse Verification to one or two sentences.** "Verified that X renders with empty and populated CMS; friend's editing workflow unchanged." Drop unchecked boxes — if a check never got performed, it's not going to.
+- **Delete one-time migration artifacts.** Old→new mapping tables, scripts that ran once, the list of rows you patched. The *decision* stays ("we re-anchored on the new brand spec and re-derived tints"); the migration mechanics go.
+- **Strip "files touched" lists.** `git log` and `git show <sha>` are authoritative; mirroring them in prose just rots.
+- **Cut Q&A items that didn't actually have an alternative.** "Should we do X — yes" carries no decision. Keep Q&A only where a real alternative was weighed.
+
+The log should get *smaller* over its lifecycle, not stay the same size. A 200-line log that explains five decisions is more useful than a 600-line log that buries them in process scaffolding.
+
+### Multi-pass design iterations
+
+If the design went through several attempts before landing (e.g. tried library A, then library B, then a CSS rewrite), write the **conclusion**, not the diary. One paragraph naming the rejected approaches + *why* they were wrong is enough — anyone reaching for one of them later needs the warning, not the play-by-play. The body of the log describes the *final* design as the design.
+
+Reach for a session transcript if you want the full chronology; the design log is a memory, not a journal.
 
 ## Structure of an entry
 
@@ -67,6 +86,7 @@ Include a mermaid diagram when it clarifies data flow.
 
 ## Implementation Plan
 Numbered steps. Each one should be small enough to commit independently.
+**Delete this section once the work has shipped — the commits are the record.**
 
 ## Examples
 Show good vs. bad patterns. Real code snippets.
@@ -88,6 +108,7 @@ What did we give up? What did we make harder for future work?
 
 ## Verification
 How we'll confirm the design is met. Concrete checks, not "tests pass".
+Prefer prose to checkboxes; after ship, collapse to one or two sentences.
 
 ## Implementation Results (appended after work ships)
 - Commit SHAs
@@ -101,6 +122,11 @@ How we'll confirm the design is met. Concrete checks, not "tests pass".
 - Logs that describe *what* the code does. The code is right there. Logs are for *why*.
 - Logs that don't name files, fields, or commit SHAs. A log without specifics rots into vague aspirations.
 - "Future work" sections that grow forever. If something is future work, open an issue or add a TODO in code; the design log records *this* decision.
+- **Stale verification checklists.** Pages of `- [ ]` checkboxes, some checked, some left pending forever ("friend will test in browser"). After ship, collapse to one prose line.
+- **Migration tables that have already run.** Old→new mappings, schema-revision bumps, row IDs you patched — these are exhaust from the build, not memory of the design.
+- **Pass-by-pass narratives of failed iterations.** A 2000-word account of "we tried A, user pushed back, we tried B, user pushed back" is a session transcript. Compress to: "Approaches A and B were rejected because X — don't reach for them again."
+- **Q&A where there's no actual alternative.** "Should we do the thing — yes" isn't a decision; it's a soliloquy. Keep Q&A for forks in the road.
+- **Recurring filler lines.** "Browser verification deferred to the user" repeated in every Verification section adds bytes and no information. Once is enough; better yet, just don't say it.
 
 ## Naming and numbering
 
