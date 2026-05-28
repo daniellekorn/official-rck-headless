@@ -129,14 +129,17 @@ Fields: `firstName`, `lastName`, `hebrewName` (opt), `role`, `roleGroup`, `bio` 
 
 | You type… | Lands in section |
 |---|---|
-| `Leadership`, `Founder`, `Director`, `President`, `Rosh Kollel` | **Leadership** |
-| `Rabbi`, `Rabbis`, `Rabbeim`, `Rabbanim`, `Rav`, `Maggid Shiur` | **Rabbis** |
-| `Kollel`, `Avreich`, `Avreichim`, `Yungerman`, `Yungerleit` | **Kollel** |
-| `Staff`, `Admin`, `Administration`, `Hanhala`, `Office` | **Staff** |
-| `Board`, `Board Member`, `Trustee` | **Board** |
+| `Founder`, `Director`, `Founder and Director`, `Executive Director`, `Leadership`, `President` | **Founder & Director** |
+| `Rosh Kollel`, `Rosh Chaburah`, `Roshei Kollel`, `Roshei Chaburos` | **Roshei Kollel** |
+| `Kollel`, `Avreich`, `Avrech`, `Avreichim`, `Avrechim`, `Yungerman`, `Yungerleit` | **Kollel Avreichim** |
+| `Rabbi`, `Rabbis`, `Rabbeim`, `Rabbanim`, `Rav`, `Maggid Shiur` | **Rabbis** (dormant — only shows if populated) |
+| `Staff`, `Admin`, `Administration`, `Hanhala`, `Office` | **Staff** (dormant) |
+| `Board`, `Board Member`, `Trustee` | **Board** (dormant) |
 | Anything else | **Team** (catch-all so nothing silently disappears) |
 
-If a value lands a member in the wrong section, either fix the spelling or ask the developer to extend the alias map in `src/lib/team.ts`.
+"Dormant" means the section header doesn't appear on /team unless at least one member is filed there. The taxonomy is biased toward the three active groups (**Founder & Director**, **Roshei Kollel**, **Kollel Avreichim**) but the dormant ones exist for flexibility — fill one and it appears automatically.
+
+If a value lands a member in the wrong section, either fix the spelling or ask the developer to extend the alias map in `src/lib/team.ts`. See design log [#008](design-log/008-team-page-taxonomy-and-hover-reveal.md) for the rationale behind the active vs. dormant split.
 
 #### `DaveningTimes`
 

@@ -5,44 +5,71 @@ import { media } from "@wix/sdk";
 const COLLECTION_ID = "TeamMembers";
 
 // Canonical role group keys. Add a new key here + extend ROLE_GROUP_ALIASES
-// below to introduce a new group. Groups with zero members don't render.
+// below to introduce a new group. Groups with zero members don't render —
+// the dormant ones (rabbis, staff, board) exist for editor flexibility, not
+// because they're guaranteed to populate. See design log #008.
 export type RoleGroup =
-	| "leadership"
-	| "rabbis"
+	| "founder_director"
+	| "roshei"
 	| "kollel"
+	| "rabbis"
 	| "staff"
 	| "board"
 	| "other";
 
 export const ROLE_GROUPS: { key: RoleGroup; label: string }[] = [
-	{ key: "leadership", label: "Leadership" },
+	{ key: "founder_director", label: "Founder & Director" },
+	{ key: "roshei", label: "Roshei Kollel" },
+	{ key: "kollel", label: "Kollel Avreichim" },
 	{ key: "rabbis", label: "Rabbis" },
-	{ key: "kollel", label: "Kollel" },
 	{ key: "staff", label: "Staff" },
 	{ key: "board", label: "Board" },
-	// "other" is the catch-all for values that don't match any alias.
-	// It renders at the bottom of the page so unmatched members never
-	// silently disappear — surfaces typos / new categories quickly.
+	// "other" is the catch-all for values that don't match any alias. It
+	// renders at the bottom so unmatched members never silently disappear.
 	{ key: "other", label: "Team" },
 ];
 
 // Map raw (lowercased, trimmed) roleGroup values from the CMS to canonical
-// keys. Extend liberally — the friend can type "Rabbi" or "rabbeim" or
+// keys. Extend liberally — the editor can type "Rabbi" or "rabbeim" or
 // "Rabbis" and they all land in the same place. Anything that doesn't match
 // here goes to "other" rather than getting dropped.
 const ROLE_GROUP_ALIASES: Record<string, RoleGroup> = {
-	// Leadership
-	"leadership": "leadership",
-	"leader": "leadership",
-	"founder": "leadership",
-	"founders": "leadership",
-	"director": "leadership",
-	"directors": "leadership",
-	"executive": "leadership",
-	"president": "leadership",
-	"rosh kollel": "leadership",
+	// Founder & Director — the singular leadership slot. Generic
+	// "leadership" terms route here intentionally; if the org ever needs a
+	// broader leadership bucket, add a separate key.
+	"founder": "founder_director",
+	"founders": "founder_director",
+	"director": "founder_director",
+	"directors": "founder_director",
+	"founder and director": "founder_director",
+	"founder & director": "founder_director",
+	"executive director": "founder_director",
+	"executive": "founder_director",
+	"leadership": "founder_director",
+	"leader": "founder_director",
+	"president": "founder_director",
 
-	// Rabbis
+	// Roshei Kollel — heads of the kollel and of chaburos within it.
+	"rosh kollel": "roshei",
+	"rosh chaburah": "roshei",
+	"rosh chabura": "roshei",
+	"roshei": "roshei",
+	"roshei kollel": "roshei",
+	"roshei chaburah": "roshei",
+	"roshei chaburos": "roshei",
+
+	// Kollel Avreichim — the rank-and-file kollel members.
+	"kollel": "kollel",
+	"kollel member": "kollel",
+	"kollel members": "kollel",
+	"avreich": "kollel",
+	"avrech": "kollel",
+	"avreichim": "kollel",
+	"avrechim": "kollel",
+	"yungerman": "kollel",
+	"yungerleit": "kollel",
+
+	// Rabbis (dormant by default — populated only if the editor adds rows).
 	"rabbi": "rabbis",
 	"rabbis": "rabbis",
 	"rabbeim": "rabbis",
@@ -50,17 +77,7 @@ const ROLE_GROUP_ALIASES: Record<string, RoleGroup> = {
 	"rav": "rabbis",
 	"maggid shiur": "rabbis",
 
-	// Kollel members
-	"kollel": "kollel",
-	"kollel member": "kollel",
-	"kollel members": "kollel",
-	"avrech": "kollel",
-	"avreich": "kollel",
-	"avreichim": "kollel",
-	"yungerman": "kollel",
-	"yungerleit": "kollel",
-
-	// Staff / Administration
+	// Staff (dormant).
 	"staff": "staff",
 	"admin": "staff",
 	"administration": "staff",
@@ -69,7 +86,7 @@ const ROLE_GROUP_ALIASES: Record<string, RoleGroup> = {
 	"hanhala": "staff",
 	"office": "staff",
 
-	// Board
+	// Board (dormant).
 	"board": "board",
 	"board member": "board",
 	"board members": "board",
@@ -131,9 +148,10 @@ export async function getTeam(): Promise<TeamMember[]> {
 
 export function groupByRole(members: TeamMember[]): Record<RoleGroup, TeamMember[]> {
 	const groups: Record<RoleGroup, TeamMember[]> = {
-		leadership: [],
-		rabbis: [],
+		founder_director: [],
+		roshei: [],
 		kollel: [],
+		rabbis: [],
 		staff: [],
 		board: [],
 		other: [],
