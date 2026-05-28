@@ -1,9 +1,9 @@
-# 007 — Animated highlight component
+# 006 — Animated highlight component
 
 **Status:** implemented
 **Date:** 2026-05-28
 **Author:** claude-session (danielle directing)
-**Related:** [#005](005-brand-palette-refresh.md), [#006](006-typography-refresh.md)
+**Related:** [#004](004-brand-palette-refresh.md), [#005](005-typography-refresh.md)
 
 ## Background
 
@@ -25,7 +25,7 @@ Three things to design at once:
   **A:** User selection in design conversation. The sweep reads as "marker pen" — it carries the connotation of someone highlighting important text, which aligns with how the underlying content uses it (the *emphasis* word of each subhead). Offset block was rejected as too stickerlike; underline draw was rejected as too restrained for headings already styled in light-weight Oswald.
 
 - **Q:** What color does the highlight bar use?
-  **A:** `--color-accent` (`#F6ED49`) at 70% opacity. This is the first real consumer of the accent token introduced in #005 — see "where should F6ED49 be used" Q&A there. A "highlighter pen" look canonically uses neon yellow at moderate opacity; at 70% the bright color reads as a marker pad behind navy text without overwhelming it. Earlier feedback ("the bright yellow underline is too light") was for a 1–2px decoration line where saturated yellow on white disappears; a 0.55em-tall bar behind dark text is the opposite case and reads strongly.
+  **A:** `--color-accent` (`#F6ED49`) at 70% opacity. This is the first real consumer of the accent token introduced in #004 — see "where should F6ED49 be used" Q&A there. A "highlighter pen" look canonically uses neon yellow at moderate opacity; at 70% the bright color reads as a marker pad behind navy text without overwhelming it. Earlier feedback ("the bright yellow underline is too light") was for a 1–2px decoration line where saturated yellow on white disappears; a 0.55em-tall bar behind dark text is the opposite case and reads strongly.
 
 - **Q:** Why not `gold-500` (`#D6A21E`) like the Nav underline?
   **A:** Different role. The nav underline is a single thin line on a white pill — needs saturated dark color to register. The highlight bar sits *behind* dark text in a heading — the bar is the canvas, the text is the figure. Neon yellow at 70% reads "marker mark", gold-500 at 70% reads "old paper background." If the user wants a brand-restrained version, swap the `--rck-highlight-color` CSS variable to `rgba(214, 162, 30, 0.35)` (gold-500 wash).

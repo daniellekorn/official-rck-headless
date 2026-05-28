@@ -1,9 +1,9 @@
-# 006 — Typography refresh: Oswald display + Onest body
+# 005 — Typography refresh: Oswald display + Onest body
 
 **Status:** implemented
 **Date:** 2026-05-28
 **Author:** claude-session (danielle directing)
-**Related:** [#001](001-cms-driven-content-architecture.md), [#005](005-brand-palette-refresh.md)
+**Related:** [#001](001-cms-driven-content-architecture.md), [#004](004-brand-palette-refresh.md)
 
 ## Background
 

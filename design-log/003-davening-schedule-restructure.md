@@ -1,4 +1,4 @@
-# 004 — Davening schedule: add daySpec field, service-grouped card layout
+# 003 — Davening schedule: add daySpec field, service-grouped card layout
 
 **Status:** implemented
 **Date:** 2026-05-28
@@ -32,7 +32,7 @@ Two coupled problems with a single fix:
   **A:** No — the editor explicitly said "Keep it as is for now" in a prior session. The dayType binary (Weekday / Shabbat) is the *top-level* split the page presents (two columns). Day-of-week specificity is a *secondary* axis within Weekday and belongs in its own field, not by exploding the enum.
 
 - **Q:** What's the right format for `daySpec` values?
-  **A:** Whatever's short and scannable. Examples documented in CONTRIBUTING: `Sunday`, `Mon, Thu`, `Tue, Wed, Fri`, `Sun – Thu`, `Rosh Chodesh`, `Erev Shabbat`, `Motzei Shabbat`. Free text — no alias map yet because there are only ~7 common values and they tend to be edited rarely. If editors start typing inconsistent variants (e.g. "Sundays" vs "Sunday"), reach for the alias-map pattern from #003.
+  **A:** Whatever's short and scannable. Examples documented in CONTRIBUTING: `Sunday`, `Mon, Thu`, `Tue, Wed, Fri`, `Sun – Thu`, `Rosh Chodesh`, `Erev Shabbat`, `Motzei Shabbat`. Free text — no alias map yet because there are only ~7 common values and they tend to be edited rarely. If editors start typing inconsistent variants (e.g. "Sundays" vs "Sunday"), reach for the alias-map pattern from #002.
 
 - **Q:** What's shown when `daySpec` is empty (e.g. the one Shabbat Shacharis row)?
   **A:** The card already has a "SHACHARIS" header, so the row's left label falls back to the column's dayType label ("Shabbat"). For a card with one variant, this reads naturally: SHACHARIS → "Shabbat 9:00 AM".
@@ -120,4 +120,4 @@ Shipped in commit `<sha>` (pending push). Schema PUT bumped revision 2 → 3. 10
 
 **Deviations from design:** none.
 
-**Follow-up:** once enough real schedules are entered, evaluate whether `daySpec` values are drifting and need an alias map (à la #003's role groups). Until then, free text is fine.
+**Follow-up:** once enough real schedules are entered, evaluate whether `daySpec` values are drifting and need an alias map (à la #002's role groups). Until then, free text is fine.

@@ -139,7 +139,7 @@ Fields: `firstName`, `lastName`, `hebrewName` (opt), `role`, `roleGroup`, `bio` 
 
 "Dormant" means the section header doesn't appear on /team unless at least one member is filed there. The taxonomy is biased toward the three active groups (**Founder & Director**, **Roshei Kollel**, **Kollel Avreichim**) but the dormant ones exist for flexibility — fill one and it appears automatically.
 
-If a value lands a member in the wrong section, either fix the spelling or ask the developer to extend the alias map in `src/lib/team.ts`. See design log [#008](design-log/008-team-page-taxonomy-and-hover-reveal.md) for the rationale behind the active vs. dormant split.
+If a value lands a member in the wrong section, either fix the spelling or ask the developer to extend the alias map in `src/lib/team.ts`. See design log [#007](design-log/007-team-page-taxonomy-and-hover-reveal.md) for the rationale behind the active vs. dormant split.
 
 #### `DaveningTimes`
 
@@ -184,10 +184,10 @@ npm run dev        # opens http://localhost:4321
 
 ### PR workflow
 
-- Branch from `main`. Open PR against `main`. Direct pushes to `main` are not technically enforced (branch protection requires GitHub Pro on private repos — see design log #002), but **always** go through a PR by convention so the preview workflow runs and someone reviews.
+- Branch from `main`. Open PR against `main`. Direct pushes to `main` are not technically enforced (branch protection requires GitHub Pro on private repos), but **always** go through a PR by convention so the preview workflow runs and someone reviews.
 - On PR open / commit push, `.github/workflows/pr-preview.yml` runs: `npm ci` → `astro check` (TypeScript) → `wix build` → `wix preview`. A bot comment with the unique preview URL lands on the PR; it updates in place on subsequent pushes (no comment spam).
 - Click the preview URL to verify visually instead of pulling locally for every PR. Local pull still works when you want to debug or step through code.
-- Merge to `main`. Ship with `wix release` (manual for now — see design log #002).
+- Merge to `main`. Ship with `wix release` (manual for now).
 
 ### Secrets
 

@@ -1,14 +1,14 @@
 ---
-# 008 — Team page: tighter taxonomy + hover-reveal bios
+# 007 — Team page: tighter taxonomy + hover-reveal bios
 
 **Status:** implemented
 **Date:** 2026-05-28
 **Author:** claude-session (danielle directing)
-**Related:** [#001](001-cms-driven-content-architecture.md), [#003](003-role-groups-rename-and-harden.md)
+**Related:** [#001](001-cms-driven-content-architecture.md), [#002](002-role-groups-rename-and-harden.md)
 
 ## Background
 
-#003 settled on six role groups (`leadership`, `rabbis`, `kollel`, `staff`, `board`, `other`) with a forgiving alias map. The "empty groups don't render" rule from that entry stays — but the active taxonomy was too generic for how the kollel actually thinks about its people.
+#002 settled on six role groups (`leadership`, `rabbis`, `kollel`, `staff`, `board`, `other`) with a forgiving alias map. The "empty groups don't render" rule from that entry stays — but the active taxonomy was too generic for how the kollel actually thinks about its people.
 
 The team page also currently uses a click → full-screen modal to show bios. Functional, but it's a heavy interaction layer for what's mostly a "scan + read a paragraph" flow.
 
@@ -26,9 +26,9 @@ The team page also currently uses a click → full-screen modal to show bios. Fu
   **A:** `roshei`, displayed as **Roshei Kollel**. Both posts are "heads" within the kollel structure; `roshei` (plural of rosh) is the natural umbrella. The display label leans on "Roshei Kollel" because most visitors recognize it; the alias map routes both `rosh kollel` and `rosh chaburah` to the same key.
 
 - **Q:** What about the existing `rabbis`, `staff`, `board`, `other` groups — drop them?
-  **A:** Keep them dormant. Per #003 they only render if populated. Removing them is a one-way door for content the editor might legitimately want later (e.g., visiting Maggidei Shiur, an administrator). Cost of keeping them is zero LOC and zero render time.
+  **A:** Keep them dormant. Per #002 they only render if populated. Removing them is a one-way door for content the editor might legitimately want later (e.g., visiting Maggidei Shiur, an administrator). Cost of keeping them is zero LOC and zero render time.
 
-- **Q:** Rabbi Horwitz currently has `roleGroup: "Rabbi"` (per #003's resolution). Does he still render after this change?
+- **Q:** Rabbi Horwitz currently has `roleGroup: "Rabbi"` (per #002's resolution). Does he still render after this change?
   **A:** He renders, but in the **Rabbis** bucket — which is now dormant unless someone else lands there too. A single member in a dormant bucket still renders (the empty-group skip only fires when the array is literally empty). However, the *intent* is for him to land in **Founder & Director**. CONTRIBUTING.md will tell the editor to change his `roleGroup` to `Founder` or `Director` (both alias to `founder_director`). Not a code-side migration — editor action.
 
 - **Q:** Hover reveal — what happens on touch devices?

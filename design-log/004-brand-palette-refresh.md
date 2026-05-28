@@ -1,4 +1,4 @@
-# 005 — Brand palette refresh: anchor + derive
+# 004 — Brand palette refresh: anchor + derive
 
 **Status:** implemented
 **Date:** 2026-05-28

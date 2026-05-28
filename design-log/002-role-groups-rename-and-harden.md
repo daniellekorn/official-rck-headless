@@ -1,4 +1,4 @@
-# 003 — Rename team role groups + make matching forgiving
+# 002 — Rename team role groups + make matching forgiving
 
 **Status:** implemented
 **Date:** 2026-05-27
