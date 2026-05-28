@@ -4,6 +4,7 @@ import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
 import PageHeader from "../components/PageHeader.astro";
 import { getDaveningGrouped } from "../lib/davening";
+import { getFlyers } from "../lib/flyers";
 
 const grouped = await getDaveningGrouped();
 
@@ -23,6 +24,9 @@ const weekday = grouped.Weekday.map((group) => {
 });
 
 const hasWeekday = weekday.length > 0;
+
+const scheduleFlyers = await getFlyers("schedules");
+const scheduleFlyer = scheduleFlyers[0] ?? null;
 ---
 
 <Layout
@@ -111,6 +115,52 @@ const hasWeekday = weekday.length > 0;
 				</p>
 			</div>
 		</section>
+		{scheduleFlyer && (
+			<section class="py-16 sm:py-20 border-t border-navy-100">
+				<div class="container-page">
+					<div class="mx-auto max-w-sm">
+						<p class="mb-6 font-sans text-xs font-bold uppercase tracking-[0.22em] text-gold-500 text-center">
+							Daily Learning Schedule
+						</p>
+
+						<div class="rounded-2xl overflow-hidden shadow-xl ring-1 ring-navy-100">
+							{scheduleFlyer.imageUrl ? (
+								<img
+									src={scheduleFlyer.imageUrl}
+									alt={scheduleFlyer.title ?? "Daily Learning Schedule"}
+									class="w-full h-auto"
+								/>
+							) : scheduleFlyer.embedUrl ? (
+								<div class="aspect-[3/4]">
+									<iframe
+										src={scheduleFlyer.embedUrl}
+										title={scheduleFlyer.title ?? "Daily Learning Schedule"}
+										loading="lazy"
+										allow="fullscreen"
+										class="w-full h-full border-0"
+									/>
+								</div>
+							) : null}
+						</div>
+
+						<div class="mt-5 text-center">
+							<a
+								href={scheduleFlyer.imageUrl ?? scheduleFlyer.pdfUrl ?? scheduleFlyer.embedUrl ?? "#"}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-navy-700 text-white text-sm font-medium hover:bg-navy-800 transition-colors"
+							>
+								<svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
+									<path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
+									<path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
+								</svg>
+								Download Schedule
+							</a>
+						</div>
+					</div>
+				</div>
+			</section>
+		)}
 	</main>
 	<Footer />
 </Layout>
