@@ -102,17 +102,6 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 					</div>
 
 				</div>
-
-				<p class="mx-auto mt-12 sm:mt-16 max-w-2xl text-center text-xs sm:text-sm text-navy-400">
-					Times may change seasonally and around chagim. For the most current schedule, contact the
-					office at{" "}
-					<a
-						href="mailto:office@rckollel.org"
-						class="text-navy-600 hover:text-gold-500 transition-colors"
-					>
-						office@rckollel.org
-					</a>.
-				</p>
 			</div>
 		</section>
 		{scheduleFlyer && (
@@ -143,20 +132,12 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 							) : null}
 						</div>
 
-						<div class="mt-5 text-center">
-							<a
-								href={scheduleFlyer.imageUrl ?? scheduleFlyer.pdfUrl ?? scheduleFlyer.embedUrl ?? "#"}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-navy-700 text-white text-sm font-medium hover:bg-navy-800 transition-colors"
-							>
-								<svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
-									<path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
-									<path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
-								</svg>
-								Download Schedule
+						<p class="mt-6 text-center text-sm text-navy-400 leading-relaxed">
+							Looking for more than set weekly times?{" "}
+							<a href="/learn" class="text-navy-600 font-medium hover:text-gold-500 transition-colors">
+								Explore our learning opportunities →
 							</a>
-						</div>
+						</p>
 					</div>
 				</div>
 			</section>

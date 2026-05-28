@@ -197,6 +197,16 @@ One row per flyer. Either `embedUrl` or `pdfUrl` must be filled in — a row wit
 | `youth` | Youth Programming |
 | `events` | Events |
 
+**Special reserved `subCategory` values — do not reuse for general filtering:**
+
+| category | subCategory | Where it appears |
+|---|---|---|
+| `schedules` | `daily` | Featured daily learning schedule on the Daven with Us page, below the minyan times. Only the first active row matching this combination is shown. |
+
+To swap the daily schedule: edit the one row with `category = schedules` and `subCategory = daily`. Update `imageUrl` (for a static image) or `embedUrl` (for a live Canva design). No code change needed.
+
+Canva embeds include a built-in expand/download control — no separate download button is shown on the site.
+
 ### Permissions on every collection
 
 Set **"Anyone can read"** when you create a collection. This is what lets the public site render the data. Editing remains restricted to logged-in collaborators.
