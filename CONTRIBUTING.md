@@ -28,19 +28,21 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 
 ### Two ways to edit content
 
-**1. Wix dashboard (always works, no extra setup).**
+**1. Wix dashboard**
 Open `https://manage.wix.com` → pick the site → CMS → click the collection → edit rows.
 
-**2. Claude.ai + Wix MCP (faster for bulk operations).**
-Connect the Wix MCP to your Claude.ai account once. Then:
+**2. Claude.ai + Wix MCP**
+Connect the Wix connector/MCP to your Claude.ai account once. Then, tell the chat that you have a Wix site that you want to update content for. The content is all managed in CMS collections, so you can also ask the chat to list those collections first and what they include (they're listed above here too).
 
-- "Add this image to the homepage slideshow with title 'Beis Medrash'" — Claude uploads + creates the row
-- "Add these five images as new slides" — done in one prompt
-- "Add a team member: Rabbi Cohen, role 'Maggid Shiur', group 'rabbeim'…" — done
+Examples:
 
-Connection setup: `https://dev.wix.com/docs/mcp/getting-started` — login + grant permission to the site. Use the same Wix account you've been given Content Manager access on.
+- "Add this image to the homepage slideshow of my Wix site <id> with title 'Beis Medrash'" — Claude uploads + creates the row
+- "Add these five images as new slides on the homepage of my Wix site <id>" — done in one prompt
+- "Add a team member to my Wix site <id>: Rabbi Cohen, role 'Maggid Shiur', ..." — done
 
-> **You don't have site admin.** You should be given **Content Manager** access (or "Contributor with CMS"), which lets you edit collections but not change site settings, billing, or domains. If something isn't editable, that's intentional.
+Connection setup: `https://dev.wix.com/docs/mcp/getting-started`:
+Login + grant permission to the site.
+Use the same Wix account you've been given site access on.
 
 ### What you *cannot* change without a code PR
 
