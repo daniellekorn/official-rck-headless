@@ -3,14 +3,14 @@ import Layout from "../layouts/Layout.astro";
 import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
 import PageHeader from "../components/PageHeader.astro";
-import { getDaveningByDayType, type DaveningTime, type DayType } from "../lib/davening";
+import { getDaveningGrouped, type DayType, type ServiceGroup } from "../lib/davening";
 
-const grouped = await getDaveningByDayType();
+const grouped = await getDaveningGrouped();
 const hasAny = grouped.Weekday.length > 0 || grouped.Shabbat.length > 0;
 
-const cards: { key: DayType; label: string; times: DaveningTime[] }[] = [
-	{ key: "Weekday", label: "Weekday", times: grouped.Weekday },
-	{ key: "Shabbat", label: "Shabbat", times: grouped.Shabbat },
+const columns: { key: DayType; label: string; groups: ServiceGroup[] }[] = [
+	{ key: "Weekday", label: "Weekday", groups: grouped.Weekday },
+	{ key: "Shabbat", label: "Shabbat", groups: grouped.Shabbat },
 ];
 ---
 
@@ -42,44 +42,55 @@ const cards: { key: DayType; label: string; times: DaveningTime[] }[] = [
 				)}
 
 				{hasAny && (
-					<div class="grid gap-6 sm:gap-8 lg:gap-10 md:grid-cols-2">
-						{cards.map((card) => (
-							<article class="rounded-2xl bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_18px_40px_-24px_rgba(15,23,42,0.25)]">
-								<header class="bg-navy-700 px-6 sm:px-8 py-5">
-									<p class="font-sans text-[11px] font-bold uppercase tracking-[0.22em] text-gold-300">
+					<div class="grid gap-10 sm:gap-12 lg:gap-16 md:grid-cols-2">
+						{columns.map((col) => (
+							<div>
+								<div class="mb-6 sm:mb-8 text-center md:text-left">
+									<p class="font-sans text-xs sm:text-sm font-bold uppercase tracking-[0.22em] text-gold-500">
 										Schedule
 									</p>
-									<h2 class="mt-1 font-sans text-2xl sm:text-3xl font-black tracking-[-0.02em] uppercase text-white">
-										{card.label}
+									<h2 class="mt-1 font-sans text-3xl sm:text-4xl font-black uppercase tracking-[-0.02em] text-navy-600">
+										{col.label}
 									</h2>
-								</header>
+								</div>
 
-								{card.times.length === 0 ? (
-									<div class="px-6 sm:px-8 py-10 text-center text-sm text-navy-400">
-										No {card.label.toLowerCase()} times listed yet.
-									</div>
+								{col.groups.length === 0 ? (
+									<p class="text-sm text-navy-400">
+										No {col.label.toLowerCase()} times listed yet.
+									</p>
 								) : (
-									<ul class="divide-y divide-navy-50">
-										{card.times.map((t) => (
-											<li class="flex items-baseline justify-between gap-4 px-6 sm:px-8 py-4 sm:py-5">
-												<div class="min-w-0">
-													<p class="font-sans text-base sm:text-lg font-bold text-navy-600 leading-tight">
-														{t.service}
-													</p>
-													{t.notes && (
-														<p class="mt-1 text-xs sm:text-sm text-navy-400 leading-snug">
-															{t.notes}
-														</p>
-													)}
-												</div>
-												<p class="font-sans text-xl sm:text-2xl font-black tracking-[-0.015em] text-gold-500 whitespace-nowrap">
-													{t.time}
-												</p>
-											</li>
+									<div class="space-y-5 sm:space-y-6">
+										{col.groups.map((group) => (
+											<article class="rounded-2xl bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_12px_30px_-22px_rgba(15,23,42,0.25)] transition-shadow hover:shadow-[0_20px_42px_-22px_rgba(15,23,42,0.4)]">
+												<header class="bg-navy-700 px-5 sm:px-6 py-4">
+													<h3 class="font-sans text-xl sm:text-2xl font-black tracking-[-0.02em] uppercase text-white">
+														{group.service}
+													</h3>
+												</header>
+												<ul class="divide-y divide-navy-50">
+													{group.rows.map((t) => (
+														<li class="flex items-baseline justify-between gap-4 px-5 sm:px-6 py-4">
+															<div class="min-w-0">
+																<p class="font-sans text-sm sm:text-[0.9375rem] font-bold text-navy-600 leading-tight">
+																	{t.daySpec || col.label}
+																</p>
+																{t.notes && (
+																	<p class="mt-1 text-xs sm:text-sm text-navy-400 leading-snug">
+																		{t.notes}
+																	</p>
+																)}
+															</div>
+															<p class="font-sans text-lg sm:text-xl font-black tracking-[-0.015em] text-gold-500 whitespace-nowrap">
+																{t.time}
+															</p>
+														</li>
+													))}
+												</ul>
+											</article>
 										))}
-									</ul>
+									</div>
 								)}
-							</article>
+							</div>
 						))}
 					</div>
 				)}

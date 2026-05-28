@@ -138,7 +138,17 @@ If a value lands a member in the wrong section, either fix the spelling or ask t
 
 #### `DaveningTimes`
 
-Fields: `service`, `dayType` (exactly `Weekday` or `Shabbat`), `time` (display string like "7:00 AM"), `notes` (opt), `sortOrder`, `active`.
+One row per service-time variant. The page groups rows into cards by service within each `dayType`, so add as many rows as you need per service (e.g. four Shacharis rows for Sun / Mon&Thu / Tue-Wed-Fri / Rosh Chodesh).
+
+| Field | Type | Notes |
+|---|---|---|
+| service | Text | `Shacharis`, `Mincha`, `Maariv`, `Selichos` |
+| dayType | Text | Exactly `Weekday` or `Shabbat` (case-sensitive) |
+| daySpec | Text (opt) | Day-of-week specificity shown as the row label: `Sunday`, `Mon, Thu`, `Tue, Wed, Fri`, `Sun – Thu`, `Rosh Chodesh`, `Erev Shabbat`, `Motzei Shabbat`. Leave empty for the default schedule of a dayType (e.g. a single Shabbat Shacharis just shows the time). |
+| time | Text | Display string like `7:00 AM`, `Plag`, `Candle lighting time`. Wall-clock text, not a parsed time. |
+| notes | Text (opt) | Extra context only — e.g. `Followed by daf yomi`, `Hallel recited`. **Do not** put day-of-week info here; that belongs in `daySpec`. |
+| sortOrder | Number | Display order within a service-dayType group (lower first) |
+| active | Boolean | Hide a row without deleting it |
 
 ### Permissions on every collection
 
