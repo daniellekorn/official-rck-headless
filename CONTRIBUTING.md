@@ -24,7 +24,8 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Slideshow under "Who We Are" | `HomepageSlides` | Add / reorder / hide rows. Image + title + caption per row |
 | Join Us cards (3 gold cards) | `JoinUsCards` | Edit the 3 rows. Title, subtitle, link, icon key |
 | Team members | `TeamMembers` | Add a row. Photo, name, role, bio, etc. |
-| Davening times | `DaveningTimes` | Add / edit rows. `dayType` is exactly "Weekday" or "Shabbat" |
+| Weekday davening times | `DaveningTimes` | Add / edit rows with `dayType = Weekday`. Shabbat is a static "Join us at KBA" section (no CMS rows needed). |
+| Flyers (Canva embeds or PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). |
 
 ### Two ways to edit content
 
@@ -143,16 +144,16 @@ If a value lands a member in the wrong section, either fix the spelling or ask t
 
 #### `DaveningTimes`
 
-One row per service-time variant. The page groups rows into cards by service within each `dayType`, so add as many rows as you need per service (e.g. four Shacharis rows for Sun / Mon&Thu / Tue-Wed-Fri / Rosh Chodesh).
+One row per service-time variant. The page renders a flat, lean list grouped by service name. Add as many rows as you need per service (e.g. two Mincha rows for different time slots). **Only `dayType = Weekday` rows are shown on the page.** Shabbat davening is a static "Join us at KBA" section — no rows needed.
 
 | Field | Type | Notes |
 |---|---|---|
 | service | Text | `Shacharis`, `Mincha`, `Maariv`, `Selichos` |
-| dayType | Text | Exactly `Weekday` or `Shabbat` (case-sensitive) |
-| daySpec | Text (opt) | Day-of-week specificity shown as the row label: `Sunday`, `Mon, Thu`, `Tue, Wed, Fri`, `Sun – Thu`, `Rosh Chodesh`, `Erev Shabbat`, `Motzei Shabbat`. Leave empty for the default schedule of a dayType (e.g. a single Shabbat Shacharis just shows the time). |
-| time | Text | Display string like `7:00 AM`, `Plag`, `Candle lighting time`. Wall-clock text, not a parsed time. |
-| notes | Text (opt) | Extra context only — e.g. `Followed by daf yomi`, `Hallel recited`. **Do not** put day-of-week info here; that belongs in `daySpec`. |
-| sortOrder | Number | Display order within a service-dayType group (lower first) |
+| dayType | Text | Use `Weekday`. (`Shabbat` rows are stored but not currently rendered — Shabbat is hardcoded.) |
+| daySpec | Text (opt) | Days shown next to each service: `Sunday`, `Mon, Thu`, `Sun – Thu`, etc. Leave empty only if day specificity doesn't apply. |
+| time | Text | Display string like `7:00 AM`, `Plag`, `10 min before Shkiya`. Wall-clock text, not a parsed time. |
+| notes | Text (opt) | Extra context only — e.g. `Followed by daf yomi`. **Do not** put day-of-week info here; that belongs in `daySpec`. |
+| sortOrder | Number | Display order within a service group (lower first) |
 | active | Boolean | Hide a row without deleting it |
 
 ### Permissions on every collection
