@@ -56,6 +56,26 @@ const { items, autoplayMs = 3000 } = Astro.props;
 			</div>
 		))}
 
+		<button
+			type="button"
+			data-coverflow-prev
+			aria-label="Previous"
+			class="coverflow-arrow coverflow-arrow-prev"
+		>
+			<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
+				<path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
+			</svg>
+		</button>
+		<button
+			type="button"
+			data-coverflow-next
+			aria-label="Next"
+			class="coverflow-arrow coverflow-arrow-next"
+		>
+			<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
+				<path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+			</svg>
+		</button>
 	</div>
 
 	<div class="flex justify-center gap-2 mt-6" data-coverflow-dots>
@@ -153,6 +173,30 @@ const { items, autoplayMs = 3000 } = Astro.props;
 		pointer-events: none;
 	}
 
+	.coverflow-arrow {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		z-index: 30;
+		width: 2.75rem;
+		height: 2.75rem;
+		border-radius: 9999px;
+		background: rgba(0, 0, 0, 0.4);
+		color: white;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		backdrop-filter: blur(4px);
+		transition: background 0.2s;
+	}
+
+	.coverflow-arrow:hover {
+		background: rgba(0, 0, 0, 0.65);
+	}
+
+	.coverflow-arrow-prev { left: 0.75rem; }
+	.coverflow-arrow-next { right: 0.75rem; }
+
 
 </style>
 
@@ -162,6 +206,8 @@ const { items, autoplayMs = 3000 } = Astro.props;
 		const cards = Array.from(stage.querySelectorAll<HTMLElement>(".coverflow-card"));
 		const dotsWrap = section.querySelector<HTMLElement>("[data-coverflow-dots]");
 		const dots = dotsWrap ? Array.from(dotsWrap.querySelectorAll<HTMLButtonElement>("[data-dot]")) : [];
+		const prevBtn = stage.querySelector<HTMLButtonElement>("[data-coverflow-prev]");
+		const nextBtn = stage.querySelector<HTMLButtonElement>("[data-coverflow-next]");
 		if (cards.length === 0) return;
 
 		const n = cards.length;
@@ -196,6 +242,9 @@ const { items, autoplayMs = 3000 } = Astro.props;
 		const stop = () => {
 			if (timer) clearInterval(timer);
 		};
+
+		prevBtn?.addEventListener("click", () => { go(current - 1); start(); });
+		nextBtn?.addEventListener("click", () => { go(current + 1); start(); });
 
 		cards.forEach((card, i) => {
 			card.addEventListener("click", () => {
