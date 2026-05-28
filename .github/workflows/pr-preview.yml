@@ -27,14 +27,37 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
+          # Pin to 20. Astro 5.x supports it. We deliberately do NOT set
+          # cache: "npm" — actions/setup-node's cache restore is a cited
+          # contributor to the npm "Exit handler never called!" bug we
+          # hit in earlier attempts on this branch.
           node-version: "20"
-          cache: "npm"
 
       - name: Install dependencies
-        run: npm ci
+        # --ignore-scripts is the actual fix. Without it, workerd's
+        # postinstall (transitive via @wix/cloud-provider-fetch-adapter →
+        # @astrojs/cloudflare → wrangler) downloads a ~30MB native binary
+        # and exits in a way that triggers npm/cli#8203 ("Exit handler
+        # never called!"). The exit handler is what wires up
+        # node_modules/.bin/* symlinks — skip it and the local binaries
+        # never appear, so the next step can't find ./node_modules/.bin/astro.
+        #
+        # We don't actually run workerd at build time (it's the runtime
+        # Wix uses for prod hosting), so skipping its postinstall is safe.
+        # esbuild's postinstall picks the platform-specific binary it
+        # needs at build time; we restore that explicitly below.
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Rebuild esbuild's platform binary
+        # esbuild ships per-platform binaries via optionalDependencies;
+        # its postinstall picks the right one. We skipped it above, so
+        # rebuild it explicitly. Astro/Vite need this to compile.
+        run: npm rebuild esbuild
 
       - name: Type check
-        run: npx astro check
+        # Use the local binary directly so a flaky `npm ci` can't silently
+        # fall back to npx-installing a newer astro than package.json pins.
+        run: ./node_modules/.bin/astro check
 
       - name: Authenticate to Wix
         env:
@@ -44,16 +67,16 @@ jobs:
             echo "::error::WIX_API_KEY secret is not set on this repository."
             exit 1
           fi
-          npx wix login --api-key "$WIX_API_KEY"
+          ./node_modules/.bin/wix login --api-key "$WIX_API_KEY"
 
       - name: Build project
-        run: npx wix build
+        run: ./node_modules/.bin/wix build
 
       - name: Create preview deployment
         id: preview
         run: |
           # `wix preview` prints a unique preview URL on success.
-          OUTPUT=$(npx wix preview 2>&1)
+          OUTPUT=$(./node_modules/.bin/wix preview 2>&1)
           echo "$OUTPUT"
 
           # Extract the first HTTPS URL from the output — Wix prints the
