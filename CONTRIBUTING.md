@@ -184,6 +184,7 @@ One row per flyer. Either `embedUrl` or `pdfUrl` must be filled in — a row wit
 | pdfUrl | Text | Direct public PDF URL. For non-Canva documents. |
 | isActive | Boolean | Show/hide without deleting. Default: true (checked). |
 | displayOrder | Number | Sort order within the category. Lower = first. |
+| subCategory | Text | Optional. Sub-topic for filtering (e.g. `kashrus`, `shabbos`, `women`). One value per flyer. Leave empty if no sub-filtering needed. |
 
 **Getting a Canva embed URL:** In Canva, open the design → Share → Publish to web → copy the URL from the embed code (`src="…"`). Paste only the URL (not the full `<iframe>` tag) into `embedUrl`.
 

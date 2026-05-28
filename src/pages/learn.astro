@@ -1,0 +1,208 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import PageHeader from "../components/PageHeader.astro";
+import { getFlyers, uniqueSubCategories } from "../lib/flyers";
+
+const selectedSub = Astro.url.searchParams.get("sub") ?? null;
+
+const allLearning = await getFlyers("learning");
+const subCategories = uniqueSubCategories(allLearning);
+
+const gridFlyers = selectedSub
+	? allLearning.filter((f) => f.subCategory === selectedSub)
+	: allLearning;
+---
+
+<Layout
+	title="Learn With Us — RCK"
+	description="Torah classes, programs, and learning resources from RCK — The Ra'anana Community Kollel."
+>
+	<Nav />
+
+	<PageHeader
+		eyebrow="LEARNING"
+		titleGold="Learn"
+		titleNavy="With Us"
+		subtitle="Torah learning opportunities for the whole community."
+	/>
+
+	{allLearning.length > 0 && (
+		<section class="py-12 sm:py-16 bg-navy-800 overflow-hidden">
+			<div class="learn-swiper swiper">
+				<div class="swiper-wrapper">
+					{allLearning.map((flyer) => (
+						<div class="swiper-slide">
+							<div class="flyer-frame">
+								{flyer.embedUrl ? (
+									<iframe
+										src={flyer.embedUrl}
+										title={flyer.title}
+										loading="lazy"
+										allow="fullscreen"
+										class="absolute inset-0 w-full h-full border-0"
+									/>
+								) : flyer.pdfUrl ? (
+									<iframe
+										src={`https://docs.google.com/viewer?url=${encodeURIComponent(flyer.pdfUrl)}&embedded=true`}
+										title={flyer.title}
+										loading="lazy"
+										class="absolute inset-0 w-full h-full border-0"
+									/>
+								) : null}
+							</div>
+							{flyer.title && (
+								<p class="mt-3 text-center text-sm text-white/70 px-2">{flyer.title}</p>
+							)}
+						</div>
+					))}
+				</div>
+				<div class="swiper-pagination" />
+			</div>
+		</section>
+	)}
+
+	<section class="py-10 sm:py-14 bg-navy-900">
+		<div class="container-page">
+			{subCategories.length > 0 && (
+				<div class="flex flex-wrap gap-2 justify-center mb-10">
+					<a
+						href="/learn"
+						class:list={[
+							"px-4 py-1.5 rounded-full text-sm font-medium transition-colors",
+							!selectedSub
+								? "bg-gold-400 text-navy-900"
+								: "bg-navy-700 text-white/80 hover:bg-navy-600",
+						]}
+					>
+						All
+					</a>
+					{subCategories.map((sub) => (
+						<a
+							href={`/learn?sub=${encodeURIComponent(sub)}`}
+							class:list={[
+								"px-4 py-1.5 rounded-full text-sm font-medium capitalize transition-colors",
+								selectedSub === sub
+									? "bg-gold-400 text-navy-900"
+									: "bg-navy-700 text-white/80 hover:bg-navy-600",
+							]}
+						>
+							{sub}
+						</a>
+					))}
+				</div>
+			)}
+
+			{gridFlyers.length > 0 ? (
+				<div class="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+					{gridFlyers.map((flyer) => (
+						<div class="rounded-xl overflow-hidden bg-navy-800 shadow-lg">
+							<div class="relative aspect-[3/4]">
+								{flyer.embedUrl ? (
+									<iframe
+										src={flyer.embedUrl}
+										title={flyer.title}
+										loading="lazy"
+										allow="fullscreen"
+										class="absolute inset-0 w-full h-full border-0"
+									/>
+								) : flyer.pdfUrl ? (
+									<iframe
+										src={`https://docs.google.com/viewer?url=${encodeURIComponent(flyer.pdfUrl)}&embedded=true`}
+										title={flyer.title}
+										loading="lazy"
+										class="absolute inset-0 w-full h-full border-0"
+									/>
+								) : null}
+							</div>
+							{(flyer.title || flyer.subCategory) && (
+								<div class="p-4">
+									{flyer.title && (
+										<p class="font-medium text-white text-sm">{flyer.title}</p>
+									)}
+									{flyer.subCategory && (
+										<p class="mt-1 text-xs text-gold-400 capitalize">{flyer.subCategory}</p>
+									)}
+								</div>
+							)}
+						</div>
+					))}
+				</div>
+			) : (
+				<p class="text-center text-white/50 py-16">
+					{selectedSub
+						? `No flyers for "${selectedSub}" yet.`
+						: "Learning materials coming soon."}
+				</p>
+			)}
+		</div>
+	</section>
+
+	<Footer />
+</Layout>
+
+<style is:global>
+	@import "swiper/css";
+	@import "swiper/css/pagination";
+
+	.learn-swiper {
+		padding-bottom: 2.5rem;
+	}
+
+	.learn-swiper .swiper-slide {
+		transform: scale(0.88);
+		opacity: 0.6;
+		transition:
+			transform 0.4s ease,
+			opacity 0.4s ease;
+	}
+
+	.learn-swiper .swiper-slide-active {
+		transform: scale(1);
+		opacity: 1;
+	}
+
+	.flyer-frame {
+		position: relative;
+		aspect-ratio: 3 / 4;
+		border-radius: 0.75rem;
+		overflow: hidden;
+		background: #0b1b38;
+	}
+
+	.learn-swiper .swiper-pagination-bullet {
+		background: rgba(255, 255, 255, 0.35);
+		opacity: 1;
+	}
+
+	.learn-swiper .swiper-pagination-bullet-active {
+		background: #d6a21e;
+	}
+</style>
+
+<script>
+	import Swiper from "swiper";
+	import { Autoplay, Pagination } from "swiper/modules";
+
+	new Swiper(".learn-swiper", {
+		modules: [Autoplay, Pagination],
+		centeredSlides: true,
+		slidesPerView: 1.15,
+		spaceBetween: 20,
+		loop: true,
+		autoplay: {
+			delay: 5000,
+			pauseOnMouseEnter: true,
+			disableOnInteraction: false,
+		},
+		pagination: {
+			el: ".swiper-pagination",
+			clickable: true,
+		},
+		breakpoints: {
+			640: { slidesPerView: 1.4, spaceBetween: 24 },
+			1024: { slidesPerView: 1.8, spaceBetween: 32 },
+		},
+	});
+</script>

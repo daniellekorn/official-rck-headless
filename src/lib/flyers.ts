@@ -9,17 +9,19 @@ export interface Flyer {
 	_id: string;
 	title: string;
 	category: FlyerCategory;
+	subCategory?: string;
 	embedUrl?: string;
 	pdfUrl?: string;
 	isActive?: boolean;
 	displayOrder?: number;
 }
 
-export async function getFlyers(category?: FlyerCategory): Promise<Flyer[]> {
+export async function getFlyers(category?: FlyerCategory, subCategory?: string): Promise<Flyer[]> {
 	try {
 		const elevated = auth.elevate(items.query);
 		let q = elevated(COLLECTION_ID).eq("isActive", true).ascending("displayOrder").limit(100);
 		if (category) q = q.eq("category", category);
+		if (subCategory) q = q.eq("subCategory", subCategory);
 		const { items: results } = await q.find();
 		return results as Flyer[];
 	} catch (err) {
@@ -42,4 +44,8 @@ export async function getFlyersByCategory(): Promise<Record<FlyerCategory, Flyer
 		}
 	}
 	return grouped;
+}
+
+export function uniqueSubCategories(flyers: Flyer[]): string[] {
+	return [...new Set(flyers.map((f) => f.subCategory).filter((s): s is string => Boolean(s)))].sort();
 }
