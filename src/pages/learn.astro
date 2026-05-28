@@ -29,36 +29,58 @@ const gridFlyers = selectedSub
 	/>
 
 	{allLearning.length > 0 && (
-		<section class="py-12 sm:py-16 bg-navy-800 overflow-hidden">
-			<div class="learn-swiper swiper">
-				<div class="swiper-wrapper">
-					{allLearning.map((flyer) => (
-						<div class="swiper-slide">
-							<div class="flyer-frame">
-								{flyer.embedUrl ? (
-									<iframe
-										src={flyer.embedUrl}
-										title={flyer.title}
-										loading="lazy"
-										allow="fullscreen"
-										class="absolute inset-0 w-full h-full border-0"
-									/>
-								) : flyer.pdfUrl ? (
-									<iframe
-										src={`https://docs.google.com/viewer?url=${encodeURIComponent(flyer.pdfUrl)}&embedded=true`}
-										title={flyer.title}
-										loading="lazy"
-										class="absolute inset-0 w-full h-full border-0"
-									/>
-								) : null}
-							</div>
-							{flyer.title && (
-								<p class="mt-3 text-center text-sm text-white/70 px-2">{flyer.title}</p>
-							)}
+		<section class="bg-navy-800 py-24 sm:py-28 overflow-hidden" data-coverflow-section>
+			<div class="coverflow-stage" data-coverflow>
+				{allLearning.map((flyer, i) => (
+					<div
+						class:list={["coverflow-card", i === 0 ? "pos-active" : i === 1 ? "pos-next" : i === allLearning.length - 1 ? "pos-prev" : "pos-far"]}
+						data-index={i}
+					>
+						<div class="coverflow-inner">
+							{flyer.imageUrl ? (
+								<img
+									src={flyer.imageUrl}
+									alt={flyer.title ?? ""}
+									loading={i === 0 ? "eager" : "lazy"}
+									class="w-full h-full object-contain"
+								/>
+							) : flyer.embedUrl ? (
+								<iframe
+									src={flyer.embedUrl}
+									title={flyer.title}
+									loading="lazy"
+									allow="fullscreen"
+									class="absolute inset-0 w-full h-full border-0"
+								/>
+							) : flyer.pdfUrl ? (
+								<iframe
+									src={`https://docs.google.com/viewer?url=${encodeURIComponent(flyer.pdfUrl)}&embedded=true`}
+									title={flyer.title}
+									loading="lazy"
+									class="absolute inset-0 w-full h-full border-0"
+								/>
+							) : null}
 						</div>
-					))}
-				</div>
-				<div class="swiper-pagination" />
+						{flyer.title && (
+							<p class="coverflow-label">{flyer.title}</p>
+						)}
+					</div>
+				))}
+			</div>
+
+			<div class="flex justify-center gap-2 mt-6" data-coverflow-dots>
+				{allLearning.map((_, i) => (
+					<button
+						type="button"
+						data-dot
+						data-index={i}
+						aria-label={`Go to slide ${i + 1}`}
+						class:list={[
+							"rounded-full transition-all duration-300 h-1.5",
+							i === 0 ? "w-6 bg-gold-400" : "w-1.5 bg-white/30 hover:bg-white/60",
+						]}
+					/>
+				))}
 			</div>
 		</section>
 	)}
@@ -99,7 +121,14 @@ const gridFlyers = selectedSub
 					{gridFlyers.map((flyer) => (
 						<div class="rounded-xl overflow-hidden bg-navy-800 shadow-lg">
 							<div class="relative aspect-[3/4]">
-								{flyer.embedUrl ? (
+								{flyer.imageUrl ? (
+									<img
+										src={flyer.imageUrl}
+										alt={flyer.title ?? ""}
+										loading="lazy"
+										class="absolute inset-0 w-full h-full object-contain"
+									/>
+								) : flyer.embedUrl ? (
 									<iframe
 										src={flyer.embedUrl}
 										title={flyer.title}
@@ -142,67 +171,169 @@ const gridFlyers = selectedSub
 	<Footer />
 </Layout>
 
-<style is:global>
-	@import "swiper/css";
-	@import "swiper/css/pagination";
-
-	.learn-swiper {
-		padding-bottom: 2.5rem;
-	}
-
-	.learn-swiper .swiper-slide {
-		transform: scale(0.88);
-		opacity: 0.6;
-		transition:
-			transform 0.4s ease,
-			opacity 0.4s ease;
-	}
-
-	.learn-swiper .swiper-slide-active {
-		transform: scale(1);
-		opacity: 1;
-	}
-
-	.flyer-frame {
+<style>
+	/* ── Stage ── */
+	.coverflow-stage {
 		position: relative;
-		aspect-ratio: 3 / 4;
+		height: clamp(300px, 50vh, 460px);
+		perspective: 1100px;
+		perspective-origin: 50% 50%;
+	}
+
+	/* ── Each card ── */
+	.coverflow-card {
+		position: absolute;
+		width: min(240px, 55vw);
+		height: 100%;
+		left: 50%;
+		top: 0;
+		margin-left: calc(-1 * min(120px, 27.5vw)); /* center horizontally */
+		border-radius: 0.75rem;
+		transition:
+			transform 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+			opacity 0.32s ease,
+			z-index 0s;
+		cursor: pointer;
+	}
+
+	.coverflow-inner {
+		width: 100%;
+		height: 100%;
 		border-radius: 0.75rem;
 		overflow: hidden;
 		background: #0b1b38;
+		box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55);
+		position: relative;
 	}
 
-	.learn-swiper .swiper-pagination-bullet {
-		background: rgba(255, 255, 255, 0.35);
+	.coverflow-label {
+		text-align: center;
+		font-size: 0.75rem;
+		color: rgba(255, 255, 255, 0.6);
+		margin-top: 0.6rem;
+		padding: 0 0.5rem;
+		position: absolute;
+		inset-inline: 0;
+		bottom: -1.5rem;
+	}
+
+	/* ── Positions ── */
+	.coverflow-card.pos-active {
+		transform: translateX(0) scale(1) rotateY(0deg);
 		opacity: 1;
+		z-index: 10;
 	}
 
-	.learn-swiper .swiper-pagination-bullet-active {
-		background: #d6a21e;
+	.coverflow-card.pos-active:hover,
+	.coverflow-card.pos-active.is-zoomed {
+		transform: translateX(0) scale(1.4) rotateY(0deg);
+		z-index: 20;
+		cursor: zoom-in;
+	}
+
+	.coverflow-card.pos-active.is-zoomed {
+		cursor: zoom-out;
+	}
+
+	.coverflow-card.pos-prev {
+		transform: translateX(-82%) scale(0.78) rotateY(38deg);
+		opacity: 0.6;
+		z-index: 5;
+	}
+
+	.coverflow-card.pos-next {
+		transform: translateX(82%) scale(0.78) rotateY(-38deg);
+		opacity: 0.6;
+		z-index: 5;
+	}
+
+	.coverflow-card.pos-far {
+		transform: translateX(0) scale(0.55) rotateY(0deg);
+		opacity: 0;
+		z-index: 1;
+		pointer-events: none;
 	}
 </style>
 
 <script>
-	import Swiper from "swiper";
-	import { Autoplay, Pagination } from "swiper/modules";
+	const AUTOPLAY_MS = 3000;
 
-	new Swiper(".learn-swiper", {
-		modules: [Autoplay, Pagination],
-		centeredSlides: true,
-		slidesPerView: 1.15,
-		spaceBetween: 20,
-		loop: true,
-		autoplay: {
-			delay: 5000,
-			pauseOnMouseEnter: true,
-			disableOnInteraction: false,
-		},
-		pagination: {
-			el: ".swiper-pagination",
-			clickable: true,
-		},
-		breakpoints: {
-			640: { slidesPerView: 1.4, spaceBetween: 24 },
-			1024: { slidesPerView: 1.8, spaceBetween: 32 },
-		},
+	document.querySelectorAll<HTMLElement>("[data-coverflow]").forEach((stage) => {
+		const section = stage.closest<HTMLElement>("[data-coverflow-section]")!;
+		const cards = Array.from(stage.querySelectorAll<HTMLElement>(".coverflow-card"));
+		const dotsWrap = section.querySelector<HTMLElement>("[data-coverflow-dots]");
+		const dots = dotsWrap ? Array.from(dotsWrap.querySelectorAll<HTMLButtonElement>("[data-dot]")) : [];
+		if (cards.length === 0) return;
+
+		const n = cards.length;
+		let current = 0;
+		let timer: ReturnType<typeof setInterval> | undefined;
+
+		const go = (idx: number) => {
+			current = (idx + n) % n;
+			cards.forEach((c) => c.classList.remove("is-zoomed"));
+			cards.forEach((card, i) => {
+				const diff = (i - current + n) % n;
+				card.classList.remove("pos-active", "pos-next", "pos-prev", "pos-far");
+				if (diff === 0) card.classList.add("pos-active");
+				else if (diff === 1) card.classList.add("pos-next");
+				else if (diff === n - 1) card.classList.add("pos-prev");
+				else card.classList.add("pos-far");
+			});
+			dots.forEach((d, i) => {
+				const active = i === current;
+				d.classList.toggle("w-6", active);
+				d.classList.toggle("bg-gold-400", active);
+				d.classList.toggle("w-1.5", !active);
+				d.classList.toggle("bg-white/30", !active);
+			});
+		};
+
+		const start = () => {
+			stop();
+			timer = setInterval(() => go(current + 1), AUTOPLAY_MS);
+		};
+		const stop = () => {
+			if (timer) clearInterval(timer);
+		};
+
+		cards.forEach((card, i) => {
+			card.addEventListener("click", () => {
+				if (card.classList.contains("pos-active")) {
+					const nowZoomed = card.classList.toggle("is-zoomed");
+					if (nowZoomed) {
+						stop();
+					} else {
+						start();
+					}
+				} else {
+					go(i);
+					start();
+				}
+			});
+			card.addEventListener("mouseenter", () => {
+				if (card.classList.contains("pos-active")) stop();
+			});
+			card.addEventListener("mouseleave", () => {
+				if (!card.classList.contains("is-zoomed")) start();
+			});
+		});
+
+		// Tap/click outside the stage clears zoom and resumes
+		document.addEventListener("click", (e) => {
+			if (!stage.contains(e.target as Node)) {
+				cards.forEach((c) => c.classList.remove("is-zoomed"));
+				start();
+			}
+		});
+
+		dots.forEach((dot) => {
+			dot.addEventListener("click", () => {
+				go(Number(dot.dataset.index));
+				start();
+			});
+		});
+
+		start();
 	});
 </script>

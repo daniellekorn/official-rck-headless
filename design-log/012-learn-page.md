@@ -25,13 +25,16 @@ No `/learn` route existed. Learning flyers added to the CMS had nowhere to displ
   **A:** Rejected — see the reasoning in #010. The Canva Connect API can detect new designs in a folder but can't produce a public embed URL (only temporary user-scoped URLs). The office would still need CMS access for tags regardless, making the automation save only ~20 seconds per flyer at the cost of significant infrastructure. Full manual CMS entry wins.
 
 - **Q:** Carousel library?
-  **A:** Swiper.js (v12). Has `centeredSlides`, CSS-driven scale effect on non-active slides, built-in `pauseOnMouseEnter` autoplay, and clickable pagination dots. Picked over Embla (less built-in, more custom code) and CSS scroll-snap (no autoplay, no pause-on-hover without JS anyway).
+  **A:** None — vanilla JS, following the same pattern as `Slideshow.astro`. Swiper v12 was installed and attempted first but its npm module imports don't work in this project's Wix build. The existing codebase pattern (vanilla JS, `data-*` attribute targeting) is the correct approach.
+
+- **Q:** What does "gets bigger" mean for the active slide — center-scale or 3D coverflow?
+  **A:** 3D coverflow. Initial answer during design ("center item scales up") was corrected after implementation. The final design shows 3 cards simultaneously: center card flat and full-size, side cards tilted back at `rotateY(±38deg)` and `scale(0.78)`. Clicking a side card navigates to it. Hovering or clicking the active card zooms it to `scale(1.18)` for readability.
 
 ## Design
 
 **Route:** `/learn` → `src/pages/learn.astro`
 
-**Carousel:** Swiper, `centeredSlides: true`, 1.15–1.8 slides visible depending on viewport, 5s autoplay with `pauseOnMouseEnter`, loop. Non-active slides scale to 88% / 60% opacity via CSS on `.swiper-slide` vs `.swiper-slide-active`. Gold pagination dots.
+**Carousel:** Vanilla JS coverflow. Three cards visible simultaneously via absolute positioning + CSS 3D transforms. `perspective: 1100px` on stage. Active: `scale(1) rotateY(0)`. Side cards: `translateX(±82%) scale(0.78) rotateY(∓38deg)`. Hover/click on active card zooms to `scale(1.18)`. Autoplay 3s, pauses on section hover. Gold dot pagination. Side cards clickable to navigate.
 
 **Filter:** Server-rendered tag pills derived dynamically from `uniqueSubCategories(allLearning)` — no hardcoded list. Active tag drives `?sub=` URL param. "All" pill clears the filter. Gold active state, navy-700 inactive.
 
@@ -45,7 +48,7 @@ No `/learn` route existed. Learning flyers added to the CMS had nowhere to displ
 
 - **Single sub-category per flyer.** A flyer that spans two topics (e.g., "Kashrus for Shabbos") can only be tagged once. Acceptable for now; the editor can duplicate the row if genuinely needed for both filters.
 - **No thumbnail in carousel.** Iframes load the full Canva embed per slide. `loading="lazy"` defers off-screen loads, but active + adjacent slides will load Canva. If performance becomes a concern, a `thumbnail` IMAGE field could be added to show a static preview until clicked.
-- **Swiper CSS is `is:global`.** Swiper injects class names at runtime so scoped styles can't reach them. The `is:global` block is scoped to classes prefixed `learn-swiper` / `flyer-frame` to minimize bleed.
+- **Swiper abandoned.** Installed but unused — npm module imports don't resolve in this Wix Astro build. Can be uninstalled if desired.
 
 ## Verification
 

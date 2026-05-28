@@ -12,6 +12,7 @@ export interface Flyer {
 	subCategory?: string;
 	embedUrl?: string;
 	pdfUrl?: string;
+	imageUrl?: string;
 	isActive?: boolean;
 	displayOrder?: number;
 }
