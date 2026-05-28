@@ -147,7 +147,7 @@ Trigger logic preserved: `data-immediate="true"` fires after `requestAnimationFr
 
 **Files changed:** `src/components/Highlight.astro` (full rewrite), `src/components/Hero.astro` (wrapped title, removed static rule), `src/components/SplitFeature.astro` (tuned props), `package.json` (rough-notation@^0.5.1).
 
-Pending commit.
+**Reverted before commit** — superseded by the third pass below. Never reached `main`.
 
 ---
 
@@ -187,6 +187,6 @@ SplitFeature consumer: `<Highlight duration={2800}>` on "in Israel" / "Torah and
 
 **Lesson learned:** library choice matters more than animation tuning. The first CSS pass failed because the design was flat (full-rectangle, fast, single-pass). The rough-notation pass failed because the design was *too much* (sketchy, multi-pass, full-coverage). The third pass succeeded by switching the *shape of the mark itself* — lower-half bar, single sweep — which is what the user had in mind from the start but couldn't easily describe until they had a reference (the flyer). When the user reaches for analogies and reference images, the visual aesthetic is the real spec, not the technical word ("highlight" / "animation").
 
-**Files changed (third pass):** `src/components/Highlight.astro` (rewrite — CSS only again, new API), `src/components/Hero.astro` (removed iterations/padding props from the Highlight usage), `src/components/SplitFeature.astro` (removed iterations/padding from both Highlight usages), `package.json` (rough-notation removed).
+**Files changed (third pass):** `src/components/Highlight.astro` (rewrite — CSS only again, new API), `src/components/Hero.astro` (removed iterations/padding props from the Highlight usage; later split into staggered highlights on the last two words of the title), `src/components/SplitFeature.astro` (removed iterations/padding from both Highlight usages), `package.json` (rough-notation removed).
 
-Pending commit.
+Shipped in commit `74b4f73` ("Brand refresh: palette, type, half-highlight component").

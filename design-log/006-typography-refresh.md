@@ -98,4 +98,4 @@ Files **not** touched (intentional, see Q&A):
 
 ## Implementation Results
 
-Pending commit. To be appended once shipped.
+Shipped in commit `74b4f73` ("Brand refresh: palette, type, half-highlight component").
