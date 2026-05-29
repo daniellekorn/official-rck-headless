@@ -59,22 +59,23 @@ const {
 
 	<div class="container-page pb-20 pt-40 md:pt-48 md:pb-24 w-full">
 		<div class="max-w-3xl">
-			{eyebrow && <p class="eyebrow text-gold-300">{eyebrow}</p>}
+			{eyebrow && <p class="eyebrow text-gold-300" data-reveal="up">{eyebrow}</p>}
 			<h1
 				class="mt-4 font-display text-[2.5rem] leading-[1.02] text-white sm:text-5xl md:text-6xl lg:text-[4.5rem] font-medium"
+				data-reveal="left"
 			>
 				Welcome to{" "}
-				<Highlight immediate delay={300} duration={1100}>RCK</Highlight>
+				<Highlight immediate delay={650} duration={1100}>RCK</Highlight>
 			</h1>
-			<p class="mt-4 font-display text-xl sm:text-2xl md:text-3xl text-gold-300 font-medium">
+			<p class="mt-4 font-display text-xl sm:text-2xl md:text-3xl text-gold-300 font-medium" data-reveal="up" data-reveal-delay="150">
 				The Ra'anana Community Kollel
 			</p>
-			<p class="mt-8 max-w-xl text-base sm:text-lg text-white/80 leading-relaxed">
+			<p class="mt-8 max-w-xl text-base sm:text-lg text-white/80 leading-relaxed" data-reveal="up" data-reveal-delay="300">
 				{subtitle}
 			</p>
 		</div>
 
-		<div class="mt-12 flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-4">
+		<div class="mt-12 flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-4" data-reveal="up" data-reveal-delay="450">
 			{primaryCtaLabel && (
 				<a
 					href={primaryCtaHref}

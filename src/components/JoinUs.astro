@@ -31,17 +31,18 @@ const cards: CardInput[] = Astro.props.cards && Astro.props.cards.length > 0 ? A
 	</div>
 
 	<div class="container-page">
-		<h2 class="text-center font-display text-3xl sm:text-4xl md:text-5xl font-medium text-white">
+		<h2 class="text-center font-display text-3xl sm:text-4xl md:text-5xl font-medium text-white" data-reveal="up">
 			Join Us
 		</h2>
-		<span class="mx-auto mt-3 sm:mt-4 block h-[2px] w-16 bg-gold-400" aria-hidden="true"></span>
+		<span class="mx-auto mt-3 sm:mt-4 block h-[2px] w-16 bg-gold-400" aria-hidden="true" data-reveal="up" data-reveal-delay="100"></span>
 
 		<div class="mt-10 sm:mt-14 grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 md:gap-8">
 			{
-				cards.map((card) => (
+				cards.map((card, i) => (
+					<div data-reveal="up" data-reveal-delay={150 + i * 120} class="flex">
 					<a
 						href={card.href}
-						class="group relative flex flex-col items-center rounded-2xl bg-gold-500/85 px-8 py-10 text-center text-white shadow-[0_18px_40px_-20px_rgba(0,0,0,0.55)] ring-1 ring-gold-300/40 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:bg-gold-500"
+						class="group relative flex w-full flex-col items-center rounded-2xl bg-gold-500/85 px-8 py-10 text-center text-white shadow-[0_18px_40px_-20px_rgba(0,0,0,0.55)] ring-1 ring-gold-300/40 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:bg-gold-500"
 					>
 						<span class="flex h-16 w-16 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/30">
 							{card.icon === "book" && (
@@ -72,6 +73,7 @@ const cards: CardInput[] = Astro.props.cards && Astro.props.cards.length > 0 ? A
 							{card.title}
 						</h3>
 					</a>
+					</div>
 				))
 			}
 		</div>

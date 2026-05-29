@@ -80,3 +80,40 @@
   margin-inline: auto;
   padding-inline: 1.5rem;
 }
+
+/* ── Scroll-reveal ──────────────────────────────────────────────────────────
+   Titles slide in from the left, paragraphs/blocks rise from below — the
+   pattern the client liked on dallastorah.org. Travel is generous and the
+   easing is a slow-settling expo-out so motion reads as deliberate, not jittery.
+   The IntersectionObserver lives in Layout.astro; it toggles .is-revealed and
+   honors an optional data-reveal-delay (ms) for staggering siblings.
+   Pair with <Highlight> on a title to get the gold bar sweeping in *behind*
+   the text as it lands. */
+[data-reveal] {
+  opacity: 0;
+  will-change: transform, opacity;
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+[data-reveal="left"] {
+  transform: translate3d(-3rem, 0, 0);
+}
+[data-reveal="right"] {
+  transform: translate3d(3rem, 0, 0);
+}
+[data-reveal="up"] {
+  transform: translate3d(0, 2rem, 0);
+}
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
