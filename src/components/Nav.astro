@@ -1,47 +1,63 @@
 ---
 const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
+const isHome = pathname === "/";
 
-const rawLinks = [
+const navLinks = [
 	{ label: "Home", href: "/" },
 	{ label: "Meet the Team", href: "/team" },
 	{ label: "Daven with Us", href: "/daven" },
 	{ label: "Learn with Us", href: "/learn" },
 	{ label: "Programming", href: "/programming" },
-	{ label: "Donate", href: "/donate" },
-];
-
-const links = rawLinks.map((l) => ({
+].map((l) => ({
 	...l,
 	active: l.href === "/" ? pathname === "/" : pathname.startsWith(l.href),
 }));
+
+const isContactActive = pathname === "/contact";
+
+// On the homepage the nav floats over the dark hero and only turns solid on
+// scroll. On every interior page the background is white from the top, so a
+// translucent white pill would be invisible — start solid there immediately.
 ---
 
 <header
-	class="fixed inset-x-0 top-0 z-50 pt-4 sm:pt-6 transition-all duration-300"
+	class:list={[
+		"fixed inset-x-0 top-0 z-50 pt-4 sm:pt-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+		!isHome && "nav-solid",
+	]}
 	data-nav-header
+	data-nav-home={isHome ? "" : undefined}
 >
 	<div class="container-page">
 		<nav
-			class="mx-auto flex max-w-6xl items-center justify-between gap-3 sm:gap-6 rounded-full bg-white/95 px-4 sm:px-6 py-2.5 sm:py-3 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.25)] backdrop-blur ring-1 ring-black/5"
+			class="nav-pill mx-auto flex max-w-6xl items-center justify-between gap-3 sm:gap-4 rounded-full bg-white/95 px-4 sm:px-6 py-2.5 sm:py-3 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.25)] ring-1 ring-black/5 backdrop-blur transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
 		>
-			<a href="/" aria-label="RCK — The Ra'anana Community Kollel — Home">
+			<a href="/" class="nav-logo relative block" aria-label="RCK — The Ra'anana Community Kollel — Home">
+				<!-- Dark logo for the light/translucent state -->
 				<img
 					src="/logo-white.png"
 					alt="RCK — Ra'anana Community Kollel"
-					class="h-9 sm:h-11 w-auto"
+					class="nav-logo-light h-10 sm:h-11 w-auto transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+				/>
+				<!-- Light logo for the solid navy state -->
+				<img
+					src="/logo-black.png"
+					alt=""
+					aria-hidden="true"
+					class="nav-logo-dark absolute inset-0 h-10 sm:h-11 w-auto opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
 				/>
 			</a>
 
-			<ul class="hidden items-center gap-5 lg:gap-7 md:flex">
+			<ul class="hidden items-center gap-4 lg:gap-6 md:flex">
 				{
-					links.map((link) => (
+					navLinks.map((link) => (
 						<li>
 							<a
 								href={link.href}
 								class:list={[
-									"text-sm font-medium transition-colors whitespace-nowrap",
+									"nav-link text-sm font-medium transition-colors whitespace-nowrap",
 									link.active
-										? "text-navy-600 underline underline-offset-[6px] decoration-2 decoration-gold-500"
+										? "nav-link-active text-navy-600 underline underline-offset-[6px] decoration-2 decoration-gold-500"
 										: "text-navy-500 hover:text-gold-500",
 								]}
 							>
@@ -52,13 +68,33 @@ const links = rawLinks.map((l) => ({
 				}
 			</ul>
 
+			<div class="hidden md:flex items-center gap-2 shrink-0">
+				<a
+					href="/contact"
+					class:list={[
+						"nav-contact-btn rounded-full border px-4 py-1.5 text-sm font-medium transition-colors whitespace-nowrap",
+						isContactActive
+							? "border-gold-500 text-gold-600 bg-gold-50"
+							: "border-navy-200 text-navy-500 hover:bg-navy-50",
+					]}
+				>
+					Contact
+				</a>
+				<a
+					href="/donate"
+					class="rounded-full bg-gold-500 px-5 py-2 text-sm font-semibold text-navy-700 shadow-sm transition-all hover:bg-gold-400 hover:shadow-md whitespace-nowrap"
+				>
+					Donate
+				</a>
+			</div>
+
 			<button
 				type="button"
 				data-mobile-toggle
 				aria-controls="mobile-menu"
 				aria-expanded="false"
 				aria-label="Toggle menu"
-				class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full text-navy-600 hover:bg-navy-50"
+				class="nav-toggle md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full text-navy-600 hover:bg-navy-50 transition-colors"
 			>
 				<svg data-icon="open" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
 					<path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
@@ -76,7 +112,7 @@ const links = rawLinks.map((l) => ({
 		>
 			<ul class="flex flex-col p-2">
 				{
-					links.map((link) => (
+					navLinks.map((link) => (
 						<li>
 							<a
 								href={link.href}
@@ -92,10 +128,86 @@ const links = rawLinks.map((l) => ({
 						</li>
 					))
 				}
+				<li class="mt-1 border-t border-navy-50 pt-1">
+					<a
+						href="/contact"
+						class:list={[
+							"block rounded-xl px-4 py-3 text-base font-medium transition-colors",
+							isContactActive ? "bg-navy-50 text-navy-700" : "text-navy-600 hover:bg-navy-50",
+						]}
+					>
+						Contact
+					</a>
+				</li>
+				<li class="p-2">
+					<a
+						href="/donate"
+						class="block w-full rounded-xl bg-gold-500 px-4 py-3 text-center text-base font-semibold text-navy-700 hover:bg-gold-400 transition-colors"
+					>
+						Donate
+					</a>
+				</li>
 			</ul>
 		</div>
 	</div>
 </header>
+
+<style is:global>
+	/* ── Solid state ─────────────────────────────────────────────────────────
+	   Applied when the header has .nav-solid — either an interior page (set
+	   server-side) or the homepage scrolled past the hero (toggled by script).
+	   The pill changes SHAPE (rounded-full → tighter radius), shrinks, and
+	   turns into a solid navy bar with white text. Logos cross-fade. */
+	.nav-solid .nav-pill {
+		background: rgba(7, 23, 58, 0.96);
+		border-radius: 1rem; /* pill → softer rectangle */
+		padding-top: 0.5rem;
+		padding-bottom: 0.5rem;
+		box-shadow: 0 10px 34px -12px rgba(7, 23, 58, 0.55);
+		--tw-ring-color: rgba(255, 255, 255, 0.08);
+	}
+	.nav-solid .nav-logo-light {
+		opacity: 0;
+		height: 2.25rem; /* h-9 — logo shrinks on scroll */
+	}
+	.nav-solid .nav-logo-dark {
+		opacity: 1;
+		height: 2.25rem;
+	}
+	.nav-solid .nav-link:not(.nav-link-active) {
+		color: rgba(255, 255, 255, 0.78);
+	}
+	.nav-solid .nav-link:not(.nav-link-active):hover {
+		color: var(--color-gold-300);
+	}
+	.nav-solid .nav-link-active {
+		color: #fff;
+		text-decoration-color: var(--color-gold-400);
+	}
+	.nav-solid .nav-contact-btn:not(.bg-gold-50) {
+		border-color: rgba(255, 255, 255, 0.28);
+		color: rgba(255, 255, 255, 0.85);
+	}
+	.nav-solid .nav-contact-btn:not(.bg-gold-50):hover {
+		background: rgba(255, 255, 255, 0.08);
+		color: var(--color-gold-300);
+	}
+	.nav-solid .nav-toggle {
+		color: rgba(255, 255, 255, 0.9);
+	}
+	.nav-solid .nav-toggle:hover {
+		background: rgba(255, 255, 255, 0.1);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		[data-nav-header],
+		.nav-pill,
+		.nav-logo-light,
+		.nav-logo-dark {
+			transition: none !important;
+		}
+	}
+</style>
 
 <script>
 	const header = document.querySelector<HTMLElement>("[data-nav-header]");
@@ -121,27 +233,30 @@ const links = rawLinks.map((l) => ({
 		setOpen(!isOpen);
 	});
 
-	// Close on link click (within mobile menu)
 	menu?.querySelectorAll("a").forEach((a) => {
 		a.addEventListener("click", () => setOpen(false));
 	});
 
-	// Close on escape
 	document.addEventListener("keydown", (e) => {
 		if (e.key === "Escape") setOpen(false);
 	});
 
-	// Add subtle shadow/background tint once user scrolls past hero
-	let scrolled = false;
-	const onScroll = () => {
-		const shouldScroll = window.scrollY > 16;
-		if (shouldScroll === scrolled) return;
-		scrolled = shouldScroll;
-		header?.classList.toggle("pt-2", scrolled);
-		header?.classList.toggle("pt-4", !scrolled);
-		header?.classList.toggle("sm:pt-3", scrolled);
-		header?.classList.toggle("sm:pt-6", !scrolled);
-	};
-	window.addEventListener("scroll", onScroll, { passive: true });
-	onScroll();
+	// Homepage only: float over the hero, then turn solid past the fold.
+	// Interior pages render with .nav-solid already and don't toggle.
+	const isHome = header?.hasAttribute("data-nav-home");
+	if (isHome) {
+		let solid = false;
+		const onScroll = () => {
+			const shouldSolid = window.scrollY > 64;
+			if (shouldSolid === solid) return;
+			solid = shouldSolid;
+			header?.classList.toggle("nav-solid", solid);
+			header?.classList.toggle("pt-2", solid);
+			header?.classList.toggle("pt-4", !solid);
+			header?.classList.toggle("sm:pt-3", solid);
+			header?.classList.toggle("sm:pt-6", !solid);
+		};
+		window.addEventListener("scroll", onScroll, { passive: true });
+		onScroll();
+	}
 </script>
