@@ -27,7 +27,7 @@ const isContactActive = pathname === "/contact";
 >
 	<div class="container-page">
 		<nav
-			class="nav-pill mx-auto flex max-w-6xl items-center justify-between gap-3 sm:gap-4 rounded-full bg-white px-4 sm:px-6 py-2.5 sm:py-3 ring-1 ring-gold-400/60 shadow-[0_14px_40px_-14px_rgba(15,23,42,0.35)] transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+			class="nav-pill mx-auto flex max-w-6xl items-center justify-between gap-3 sm:gap-4 rounded-full bg-white px-4 sm:px-6 py-2.5 sm:py-3 ring-1 ring-gold-400/70 shadow-[0_16px_44px_-16px_rgba(15,23,42,0.45),0_0_22px_-4px_rgba(214,162,30,0.45)] transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
 		>
 			<a href="/" aria-label="RCK — The Ra'anana Community Kollel — Home">
 				<img
@@ -145,7 +145,9 @@ const isContactActive = pathname === "/contact";
 	/* Scrolled: deepen the pill's shadow so the page reads as sliding under a
 	   floating bar. No color or size change — same white-and-gold pill. */
 	.nav-scrolled .nav-pill {
-		box-shadow: 0 20px 50px -16px rgba(15, 23, 42, 0.45);
+		box-shadow:
+			0 22px 54px -18px rgba(15, 23, 42, 0.5),
+			0 0 26px -4px rgba(214, 162, 30, 0.5);
 	}
 
 	@media (prefers-reduced-motion: reduce) {
