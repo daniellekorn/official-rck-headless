@@ -65,6 +65,46 @@ One of `embedUrl` or `pdfUrl` must be present; a row with neither renders nothin
 
 Page queries `Flyers` collection filtered by `category` slug; items with `isActive = false` are excluded. Canva embed URL renders in an `<iframe>`; PDF URL falls through to Google Docs Viewer. Empty collection returns empty list, no error.
 
+## Revision — 2026-05-30: `removeAfter` field + automation re-examined
+
+The office revisited two things deferred above: auto-expiry, and whether the
+Canva → site step could be automated.
+
+- **`removeAfter` (Date, optional) added.** Reverses the "No expiry date field"
+  trade-off above. Empty = never expires (the common case — standing schedules,
+  ongoing learning). A date = the last day shown; the flyer drops off by itself
+  the morning after, compared **date-only in `Asia/Jerusalem`** so it doesn't
+  hinge on where the server runs. Filtering happens at **query time** in
+  `getFlyers` (`src/lib/flyers.ts`), not via a cron flipping `isActive` — it's
+  stateless, the row survives, and the office can revive a flyer by pushing the
+  date forward. An unparseable date fails open (hides nothing) rather than
+  silently dropping a flyer.
+
+- **Full automation rejected again, now with the concrete blocker.** Re-confirmed
+  #010's original "no" and pinned down *why* in case it comes up a third time:
+  the live-sync that makes embeds valuable comes only from Canva's manual
+  *Publish to web* action. The Canva Connect API cannot mint that embed URL — it
+  only *exports* a design to a static PNG/PDF on an expiring URL. So any
+  "watch-a-folder" automation would replace live embeds with stale snapshots
+  **and** add an OAuth app + token refresh + re-hosting pipeline. Worse on both
+  axes.
+
+- **Integration check (asked because we're on Wix Headless).** No official Canva
+  app exists in the Wix App Market. The third-party connectors that show up
+  (Zapier, Make, Albato, Latenode) target the classic drag-and-drop Wix editor,
+  not a headless Astro site, and in any case only move static assets — they don't
+  solve the live-embed problem. Conclusion unchanged: manual *Publish to web* +
+  paste, with the friction reduced by doing the paste through Claude.ai + Wix MCP
+  (example prompts now in CONTRIBUTING).
+
 ## Implementation Results
 
-(To be appended after work ships.)
+- `removeAfter` field added to the `Flyer` interface and an `isExpired` query-time
+  filter added to `getFlyers` in `src/lib/flyers.ts`.
+- `CONTRIBUTING.md`: schema row for `removeAfter`; a *Publish to web* vs *Copy link*
+  warning; an "easy way to add a flyer" chat section with example MCP prompts; a
+  plain-language "why flyers aren't pulled automatically" note for the office.
+- **Action still needed in Wix:** add the `removeAfter` field (type **Date**) to
+  the `Flyers` collection in the CMS dashboard. Until it exists, rows simply have
+  no expiry and nothing breaks.
+- Commit SHA: (pending).

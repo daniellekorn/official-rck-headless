@@ -25,7 +25,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Join Us cards (3 gold cards) | `HomePage` | `joinUsCard1*` / `joinUsCard2*` / `joinUsCard3*` fields on the single row |
 | Team members | `TeamMembers` | Add a row. Photo, name, role, bio, etc. |
 | Weekday davening times | `DaveningTimes` | Add / edit rows with `dayType = Weekday`. Shabbat is a static "Join us at KBA" section (no CMS rows needed). |
-| Flyers (Canva embeds or PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). |
+| Flyers (Canva embeds or PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). For event flyers, set `removeAfter` so they drop off the site on their own. |
 | Footer address, phone, email | `ContactInfo` | Edit the single row. Leave a field empty to hide it from the footer. |
 | Footer social links | `ContactInfo` | Fill in any of `facebookUrl`, `instagramUrl`, `youtubeUrl`, `twitterUrl`, `linkedinUrl`. Empty = icon hidden. |
 
@@ -190,8 +190,11 @@ One row per flyer. Either `embedUrl` or `pdfUrl` must be filled in — a row wit
 | isActive | Boolean | Show/hide without deleting. Default: true (checked). |
 | displayOrder | Number | Sort order within the category. Lower = first. |
 | subCategory | Text | Optional. Sub-topic for filtering (e.g. `kashrus`, `shabbos`, `women`). One value per flyer. Leave empty if no sub-filtering needed. |
+| removeAfter | Date | Optional. The last day the flyer should appear. It stays up through that whole day (Israel time) and drops off the site by itself the next morning. **Leave empty for anything evergreen** (a standing schedule, a learning program). Only put a date on things that go stale — mainly event flyers. The row is *not* deleted: to bring a flyer back, just change the date to a future one. |
 
-**Getting a Canva embed URL:** In Canva, open the design → Share → Publish to web → copy the URL from the embed code (`src="…"`). Paste only the URL (not the full `<iframe>` tag) into `embedUrl`.
+**Getting a Canva embed URL:** In Canva, open the design → **Share → Publish to web** → copy the URL from the embed code (`src="…"`). Paste only the URL (not the full `<iframe>` tag) into `embedUrl`.
+
+> ⚠️ **Use "Publish to web" — not the "Copy link" button.** The plain *Copy link* (the one in the design's `⋯` menu) gives a *view* link, which usually refuses to display embedded on the site and can ask visitors to log in to Canva. Only the **Publish to web** URL embeds correctly and stays live-synced.
 
 **Valid `category` slugs:**
 
@@ -211,6 +214,30 @@ One row per flyer. Either `embedUrl` or `pdfUrl` must be filled in — a row wit
 To swap the daily schedule: edit the one row with `category = schedules` and `subCategory = daily`. Update `imageUrl` (for a static image) or `embedUrl` (for a live Canva design). No code change needed.
 
 Canva embeds include a built-in expand/download control — no separate download button is shown on the site.
+
+#### The easy way to add a flyer (chat, no dashboard)
+
+You don't have to hunt through the CMS dashboard. Once the Wix connector is linked to your Claude.ai account (see "Claude.ai + Wix MCP" above), you can just describe the flyer and let Claude fill in the row. Copy the **Publish to web** URL from Canva, then say something like:
+
+> Add a flyer to my Wix site `<site-id>`: title "Shavuos Night Learning", category `events`, embed URL `https://www.canva.com/design/…/view?embed`. Take it down after June 2, 2026.
+
+Claude creates the row with the right `category` slug and sets `removeAfter` for you. A few more examples:
+
+> Add this to the `learning` flyers, title "Summer Chaburah Schedule", no end date — it's ongoing. Embed URL: `…`
+
+> The Pesach event flyer is over — set its `removeAfter` to yesterday so it drops off. (Or: hide it by setting `isActive` to false.)
+
+The **one** thing only you can do is the Canva step: open the design, Publish to web, copy the URL. Everything after that is a sentence.
+
+#### Why flyers aren't pulled from Canva automatically
+
+A fair question: why can't the site just *watch* a Canva folder and show whatever's in it? We looked into it, and the short version is that automating it would make the site **worse**, not easier:
+
+- **The "live" magic comes from one button.** When you *Publish to web* and paste that link, editing the design in Canva updates the site automatically — no re-upload, ever. That live link is only created by that button. Canva's automation tools can't generate it; they can only send the site a flat *picture* of the design. So an "automatic" version would turn your live flyers into frozen snapshots that go out of date the moment you edit them in Canva.
+- **There's no official Canva ↔ Wix connection** — and the few third-party "connectors" (Zapier, Make) are built for the old drag-and-drop Wix editor, not the custom site we run. They wouldn't apply here.
+- **It would add fragile machinery** for very little gain. Adding a flyer is already two clicks in Canva plus one sentence to Claude. A background sync would be a lot of plumbing that quietly breaks and shows stale designs.
+
+The `removeAfter` date is the part of "automatic" that's actually worth having: you set a take-down date once, and old event flyers disappear on their own. That's the cleanup nobody wants to remember to do — so we automated *that*, and left the publishing as a quick, deliberate step.
 
 ### Permissions on every collection
 
