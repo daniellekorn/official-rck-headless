@@ -1,6 +1,5 @@
 ---
 const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
-const isHome = pathname === "/";
 
 const navLinks = [
 	{ label: "Home", href: "/" },
@@ -15,36 +14,26 @@ const navLinks = [
 
 const isContactActive = pathname === "/contact";
 
-// On the homepage the nav floats over the dark hero and only turns solid on
-// scroll. On every interior page the background is white from the top, so a
-// translucent white pill would be invisible — start solid there immediately.
+// One consistent treatment on every page: a white pill, lifted off the page by
+// a soft shadow, with a hairline gold edge for brand definition. It reads the
+// same over the dark homepage hero and on white interior pages. On scroll the
+// shadow deepens slightly and the bar settles toward the top — no color or
+// size change.
 ---
 
 <header
-	class:list={[
-		"fixed inset-x-0 top-0 z-50 pt-4 sm:pt-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-		!isHome && "nav-solid",
-	]}
+	class="fixed inset-x-0 top-0 z-50 pt-4 sm:pt-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
 	data-nav-header
-	data-nav-home={isHome ? "" : undefined}
 >
 	<div class="container-page">
 		<nav
-			class="nav-pill mx-auto flex max-w-6xl items-center justify-between gap-3 sm:gap-4 rounded-full bg-white/95 px-4 sm:px-6 py-2.5 sm:py-3 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.25)] ring-1 ring-black/5 backdrop-blur transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+			class="nav-pill mx-auto flex max-w-6xl items-center justify-between gap-3 sm:gap-4 rounded-full bg-white px-4 sm:px-6 py-2.5 sm:py-3 ring-1 ring-gold-400/60 shadow-[0_14px_40px_-14px_rgba(15,23,42,0.35)] transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
 		>
-			<a href="/" class="nav-logo relative block" aria-label="RCK — The Ra'anana Community Kollel — Home">
-				<!-- Dark logo for the light/translucent state -->
+			<a href="/" aria-label="RCK — The Ra'anana Community Kollel — Home">
 				<img
 					src="/logo-white.png"
 					alt="RCK — Ra'anana Community Kollel"
-					class="nav-logo-light h-10 sm:h-11 w-auto transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-				/>
-				<!-- Light logo for the solid navy state -->
-				<img
-					src="/logo-black.png"
-					alt=""
-					aria-hidden="true"
-					class="nav-logo-dark absolute inset-0 h-10 sm:h-11 w-auto opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+					class="h-10 sm:h-11 w-auto"
 				/>
 			</a>
 
@@ -55,9 +44,9 @@ const isContactActive = pathname === "/contact";
 							<a
 								href={link.href}
 								class:list={[
-									"nav-link text-sm font-medium transition-colors whitespace-nowrap",
+									"text-sm font-medium transition-colors whitespace-nowrap",
 									link.active
-										? "nav-link-active text-navy-600 underline underline-offset-[6px] decoration-2 decoration-gold-500"
+										? "text-navy-600 underline underline-offset-[6px] decoration-2 decoration-gold-500"
 										: "text-navy-500 hover:text-gold-500",
 								]}
 							>
@@ -72,7 +61,7 @@ const isContactActive = pathname === "/contact";
 				<a
 					href="/contact"
 					class:list={[
-						"nav-contact-btn rounded-full border px-4 py-1.5 text-sm font-medium transition-colors whitespace-nowrap",
+						"rounded-full border px-4 py-1.5 text-sm font-medium transition-colors whitespace-nowrap",
 						isContactActive
 							? "border-gold-500 text-gold-600 bg-gold-50"
 							: "border-navy-200 text-navy-500 hover:bg-navy-50",
@@ -94,7 +83,7 @@ const isContactActive = pathname === "/contact";
 				aria-controls="mobile-menu"
 				aria-expanded="false"
 				aria-label="Toggle menu"
-				class="nav-toggle md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full text-navy-600 hover:bg-navy-50 transition-colors"
+				class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full text-navy-600 hover:bg-navy-50 transition-colors"
 			>
 				<svg data-icon="open" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
 					<path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
@@ -153,53 +142,15 @@ const isContactActive = pathname === "/contact";
 </header>
 
 <style is:global>
-	/* ── Solid state ─────────────────────────────────────────────────────────
-	   Applied when the header has .nav-solid — either an interior page (set
-	   server-side) or the homepage scrolled past the hero (toggled by script).
-	   The pill changes SHAPE (rounded-full → tighter radius), shrinks, and
-	   turns into a solid navy bar with white text. Logos cross-fade. */
-	.nav-solid .nav-pill {
-		background: rgba(7, 23, 58, 0.96);
-		border-radius: 1rem; /* pill → softer rectangle */
-		box-shadow: 0 10px 34px -12px rgba(7, 23, 58, 0.55);
-		--tw-ring-color: rgba(255, 255, 255, 0.08);
-	}
-	.nav-solid .nav-logo-light {
-		opacity: 0;
-	}
-	.nav-solid .nav-logo-dark {
-		opacity: 1;
-	}
-	.nav-solid .nav-link:not(.nav-link-active) {
-		color: rgba(255, 255, 255, 0.78);
-	}
-	.nav-solid .nav-link:not(.nav-link-active):hover {
-		color: var(--color-gold-300);
-	}
-	.nav-solid .nav-link-active {
-		color: #fff;
-		text-decoration-color: var(--color-gold-400);
-	}
-	.nav-solid .nav-contact-btn:not(.bg-gold-50) {
-		border-color: rgba(255, 255, 255, 0.28);
-		color: rgba(255, 255, 255, 0.85);
-	}
-	.nav-solid .nav-contact-btn:not(.bg-gold-50):hover {
-		background: rgba(255, 255, 255, 0.08);
-		color: var(--color-gold-300);
-	}
-	.nav-solid .nav-toggle {
-		color: rgba(255, 255, 255, 0.9);
-	}
-	.nav-solid .nav-toggle:hover {
-		background: rgba(255, 255, 255, 0.1);
+	/* Scrolled: deepen the pill's shadow so the page reads as sliding under a
+	   floating bar. No color or size change — same white-and-gold pill. */
+	.nav-scrolled .nav-pill {
+		box-shadow: 0 20px 50px -16px rgba(15, 23, 42, 0.45);
 	}
 
 	@media (prefers-reduced-motion: reduce) {
 		[data-nav-header],
-		.nav-pill,
-		.nav-logo-light,
-		.nav-logo-dark {
+		.nav-pill {
 			transition: none !important;
 		}
 	}
@@ -237,22 +188,18 @@ const isContactActive = pathname === "/contact";
 		if (e.key === "Escape") setOpen(false);
 	});
 
-	// Homepage only: float over the hero, then turn solid past the fold.
-	// Interior pages render with .nav-solid already and don't toggle.
-	const isHome = header?.hasAttribute("data-nav-home");
-	if (isHome) {
-		let solid = false;
-		const onScroll = () => {
-			const shouldSolid = window.scrollY > 64;
-			if (shouldSolid === solid) return;
-			solid = shouldSolid;
-			header?.classList.toggle("nav-solid", solid);
-			header?.classList.toggle("pt-2", solid);
-			header?.classList.toggle("pt-4", !solid);
-			header?.classList.toggle("sm:pt-3", solid);
-			header?.classList.toggle("sm:pt-6", !solid);
-		};
-		window.addEventListener("scroll", onScroll, { passive: true });
-		onScroll();
-	}
+	// Subtle scroll response (every page): deepen shadow, settle the bar up.
+	let scrolled = false;
+	const onScroll = () => {
+		const shouldScroll = window.scrollY > 24;
+		if (shouldScroll === scrolled) return;
+		scrolled = shouldScroll;
+		header?.classList.toggle("nav-scrolled", scrolled);
+		header?.classList.toggle("pt-2", scrolled);
+		header?.classList.toggle("pt-4", !scrolled);
+		header?.classList.toggle("sm:pt-3", scrolled);
+		header?.classList.toggle("sm:pt-6", !scrolled);
+	};
+	window.addEventListener("scroll", onScroll, { passive: true });
+	onScroll();
 </script>
