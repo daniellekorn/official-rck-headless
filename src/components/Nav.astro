@@ -14,20 +14,20 @@ const navLinks = [
 
 const isContactActive = pathname === "/contact";
 
-// One consistent treatment on every page: a white pill, lifted off the page by
-// a soft shadow, with a hairline gold edge for brand definition. It reads the
-// same over the dark homepage hero and on white interior pages. On scroll the
-// shadow deepens slightly and the bar settles toward the top — no color or
-// size change.
+// One consistent treatment on every page, unchanging on scroll: a white pill,
+// lifted off the page by a soft drop shadow plus a gold glow, with a hairline
+// gold edge for brand definition. It reads the same over the dark homepage
+// hero and on white interior pages — and never changes, so nothing visually
+// shifts as you scroll.
 ---
 
 <header
-	class="fixed inset-x-0 top-0 z-50 pt-4 sm:pt-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+	class="fixed inset-x-0 top-0 z-50 pt-4 sm:pt-6"
 	data-nav-header
 >
 	<div class="container-page">
 		<nav
-			class="nav-pill mx-auto flex max-w-6xl items-center justify-between gap-3 sm:gap-4 rounded-full bg-white px-4 sm:px-6 py-2.5 sm:py-3 ring-1 ring-gold-400/70 shadow-[0_16px_44px_-16px_rgba(15,23,42,0.45),0_0_22px_-4px_rgba(214,162,30,0.45)] transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+			class="nav-pill mx-auto flex max-w-6xl items-center justify-between gap-3 sm:gap-4 rounded-full bg-white px-4 sm:px-6 py-2.5 sm:py-3 ring-1 ring-gold-400/70 shadow-[0_16px_44px_-16px_rgba(15,23,42,0.45),0_0_22px_-4px_rgba(214,162,30,0.45)]"
 		>
 			<a href="/" aria-label="RCK — The Ra'anana Community Kollel — Home">
 				<img
@@ -141,25 +141,7 @@ const isContactActive = pathname === "/contact";
 	</div>
 </header>
 
-<style is:global>
-	/* Scrolled: deepen the pill's shadow so the page reads as sliding under a
-	   floating bar. No color or size change — same white-and-gold pill. */
-	.nav-scrolled .nav-pill {
-		box-shadow:
-			0 22px 54px -18px rgba(15, 23, 42, 0.5),
-			0 0 26px -4px rgba(214, 162, 30, 0.5);
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		[data-nav-header],
-		.nav-pill {
-			transition: none !important;
-		}
-	}
-</style>
-
 <script>
-	const header = document.querySelector<HTMLElement>("[data-nav-header]");
 	const toggle = document.querySelector<HTMLButtonElement>("[data-mobile-toggle]");
 	const menu = document.querySelector<HTMLElement>("[data-mobile-menu]");
 	const openIcon = toggle?.querySelector<SVGElement>('[data-icon="open"]');
@@ -189,19 +171,4 @@ const isContactActive = pathname === "/contact";
 	document.addEventListener("keydown", (e) => {
 		if (e.key === "Escape") setOpen(false);
 	});
-
-	// Subtle scroll response (every page): deepen shadow, settle the bar up.
-	let scrolled = false;
-	const onScroll = () => {
-		const shouldScroll = window.scrollY > 24;
-		if (shouldScroll === scrolled) return;
-		scrolled = shouldScroll;
-		header?.classList.toggle("nav-scrolled", scrolled);
-		header?.classList.toggle("pt-2", scrolled);
-		header?.classList.toggle("pt-4", !scrolled);
-		header?.classList.toggle("sm:pt-3", scrolled);
-		header?.classList.toggle("sm:pt-6", !scrolled);
-	};
-	window.addEventListener("scroll", onScroll, { passive: true });
-	onScroll();
 </script>
