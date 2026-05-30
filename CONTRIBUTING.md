@@ -21,7 +21,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Hero background image | `HomePage` | `heroImage` field — upload new image |
 | Hero CTA buttons (label or link) | `HomePage` | `heroPrimaryCtaLabel` / `heroPrimaryCtaHref`, same for secondary |
 | Split section copy ("Unique Impactful", "Torah Vision") | `HomePage` | The `uniqueImpactful*` and `torahVision*` fields |
-| Slideshow under "Who We Are" | `HomepageSlides` | Add / reorder / hide rows. Image + title + caption per row |
+| History timeline under "Who We Are" | `OurHistory` | Add / reorder / hide rows. Each row is one milestone: image + year + title + caption |
 | Join Us cards (3 gold cards) | `HomePage` | `joinUsCard1*` / `joinUsCard2*` / `joinUsCard3*` fields on the single row |
 | Team members | `TeamMembers` | Add a row. Photo, name, role, bio, etc. |
 | Weekday davening times | `DaveningTimes` | Add / edit rows with `dayType = Weekday`. Shabbat is a static "Join us at KBA" section (no CMS rows needed). |
@@ -39,8 +39,8 @@ Connect the Wix connector/MCP to your Claude.ai account once. Then, tell the cha
 
 Examples:
 
-- "Add this image to the homepage slideshow of my Wix site <id> with title 'Beis Medrash'" — Claude uploads + creates the row
-- "Add these five images as new slides on the homepage of my Wix site <id>" — done in one prompt
+- "Add this image to the 'Who We Are' history timeline of my Wix site <id> with year 2021 and title 'Beis Medrash Opens'" — Claude uploads + creates the row
+- "Add these five milestones to the OurHistory collection on my Wix site <id>, each with a year, title, and caption" — done in one prompt
 - "Add a team member to my Wix site <id>: Rabbi Cohen, role 'Maggid Shiur', ..." — done
 
 Connection setup: `https://dev.wix.com/docs/mcp/getting-started`:
@@ -115,15 +115,20 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | joinUsCard3Href | Text | "/programming" |
 | joinUsCard3Icon | Text | One of: `book`, `reader`, `people` |
 
-#### `HomepageSlides` — one row per slide (5–10 typical)
+#### `OurHistory` — one row per milestone (5–10 typical)
+
+Drives the slow auto-panning history timeline under "Who We Are" on the homepage. Rows are ordered by `year` (then `sortOrder` as a tiebreak), so the timeline always reads chronologically.
 
 | Field | Type | Notes |
 |---|---|---|
-| image | Image | Required |
-| title | Text | Shown on the slide |
-| caption | Text | Shorter subtitle |
-| sortOrder | Number | Lower numbers first |
-| active | Boolean | Hide a slide without deleting it |
+| image | Image | Required. Shown as the milestone photo (cropped to a 4:3 card). |
+| year | Number | The milestone year, e.g. `2021`. Drives chronological order and is shown as the big gold label on the timeline. |
+| title | Text | Milestone heading shown under the photo |
+| caption | Text | One-line description under the title |
+| sortOrder | Number | Tiebreak when two rows share a year. Lower numbers first. |
+| active | Boolean | Hide a milestone without deleting it |
+
+> Renamed from the old `HomepageSlides` collection (which had no `year`). See [design-log/015](design-log/015-history-timeline.md).
 
 #### `TeamMembers`
 

@@ -1,7 +1,8 @@
 ---
-import Slideshow from "./Slideshow.astro";
+import HistoryTimeline from "./HistoryTimeline.astro";
 
-interface SlideInput {
+interface EntryInput {
+	year?: number;
 	title?: string;
 	caption?: string;
 	imageUrl?: string;
@@ -11,14 +12,14 @@ interface Props {
 	title?: string;
 	hebrew?: string;
 	body?: string;
-	slides?: SlideInput[];
+	entries?: EntryInput[];
 }
 
 const {
 	title = "Who We Are",
 	hebrew = "דע מאין באת ולאן אתה הולך",
 	body = "Rooted in the timeless wisdom of our tradition, we are a community building a future of Torah learning, meaningful prayer, and deep connection — in the heart of Ra'anana.",
-	slides,
+	entries,
 } = Astro.props;
 ---
 
@@ -49,7 +50,7 @@ const {
 		</div>
 
 		<div class="mt-14 md:mt-16">
-			<Slideshow slides={slides} />
+			<HistoryTimeline entries={entries} />
 		</div>
 	</div>
 </section>
