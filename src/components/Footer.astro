@@ -10,7 +10,8 @@ const quickLinks = [
 	{ label: "Meet the Team", href: "/team" },
 	{ label: "Daven with Us", href: "/daven" },
 	{ label: "Learn with Us", href: "/learn" },
-	{ label: "Programming", href: "/programming" },
+	{ label: "Events", href: "/events" },
+	{ label: "Youth", href: "/youth" },
 	{ label: "Contact", href: "/contact" },
 	{ label: "Donate", href: "/donate" },
 ];
@@ -31,7 +32,12 @@ const mapSrc = contact?.address
 	: null;
 ---
 
-<footer class="bg-navy-700 text-white">
+<footer class="relative bg-navy-700 text-white">
+	<!-- Seam: a gold-glow hairline marks the break between the lighter navy of
+	     the section above and the darker footer, so two dark zones no longer
+	     bleed into one muddy block. -->
+	<div aria-hidden="true" class="h-px w-full bg-gradient-to-r from-transparent via-gold-500/70 to-transparent shadow-[0_0_18px_2px_rgba(214,162,30,0.35)]"></div>
+
 	<div class="container-page py-16 sm:py-20">
 		<div class="grid gap-12 md:grid-cols-12 md:gap-10 text-center md:text-left">
 			<!-- Brand: logo + tagline (title with subtitle) -->

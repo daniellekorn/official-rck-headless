@@ -3,7 +3,7 @@ interface CardInput {
 	title?: string;
 	subtitle?: string;
 	href?: string;
-	icon?: "book" | "reader" | "people";
+	icon?: "book" | "reader" | "people" | "minyan";
 }
 
 interface Props {
@@ -11,71 +11,139 @@ interface Props {
 }
 
 const fallback: CardInput[] = [
-	{ title: "Daven with Us", subtitle: "Daily Tefillah & Minyanim", href: "/daven", icon: "book" },
+	{ title: "Daven with Us", subtitle: "Daily Tefillah & Minyanim", href: "/daven", icon: "minyan" },
 	{ title: "Learn with Us", subtitle: "Weekly Shiurim & Chavrutas", href: "/learn", icon: "reader" },
-	{ title: "Our Programs", subtitle: "Connection & Community", href: "/programming", icon: "people" },
+	{ title: "Our Programs", subtitle: "Connection & Community", href: "/events", icon: "people" },
 ];
 
 const cards: CardInput[] = Astro.props.cards && Astro.props.cards.length > 0 ? Astro.props.cards : fallback;
 ---
 
-<section class="relative isolate overflow-hidden py-16 sm:py-20 md:py-32">
-	<!-- Cityscape placeholder backdrop -->
+<section class="relative isolate overflow-hidden py-20 sm:py-24 md:py-32">
+	<!-- Atmospheric navy canvas: a gold glow behind the heading, a deep-navy
+	     pool bottom-right, fading toward a lighter navy at the base so the
+	     darker navy-700 footer reads as a distinct zone below the seam. -->
 	<div
 		class="absolute inset-0 -z-10"
 		style="background:
-			linear-gradient(180deg, rgba(7,23,58,0.55) 0%, rgba(7,23,58,0.35) 60%, rgba(7,23,58,0.65) 100%),
-			linear-gradient(135deg, #243c63 0%, #3e4d6b 40%, #d6a21e 100%);"
+			radial-gradient(1100px 520px at 50% -12%, rgba(214,162,30,0.22), transparent 60%),
+			radial-gradient(900px 620px at 88% 112%, rgba(36,60,99,0.55), transparent 55%),
+			linear-gradient(180deg, #07173a 0%, #0b1f47 55%, #102a56 100%);"
+		aria-hidden="true"
+	>
+	</div>
+	<!-- fine diagonal line texture, matching the hero's no-image fallback -->
+	<div
+		class="absolute inset-0 -z-10 opacity-[0.05]"
+		style="background-image: repeating-linear-gradient(45deg, #fff 0 1px, transparent 1px 14px);"
 		aria-hidden="true"
 	>
 	</div>
 
 	<div class="container-page">
-		<h2 class="text-center font-display text-3xl sm:text-4xl md:text-5xl font-medium text-white" data-reveal="up">
+		<p class="eyebrow text-center text-gold-300" data-reveal="up">Get Involved</p>
+		<h2 class="mt-3 text-center font-display text-4xl sm:text-5xl md:text-6xl font-medium text-white" data-reveal="up" data-reveal-delay="100">
 			Join Us
 		</h2>
-		<span class="mx-auto mt-3 sm:mt-4 block h-[2px] w-16 bg-gold-400" aria-hidden="true" data-reveal="up" data-reveal-delay="100"></span>
+		<span class="mx-auto mt-4 block h-[3px] w-16 rounded-full bg-gold-400" aria-hidden="true" data-reveal="up" data-reveal-delay="180"></span>
 
-		<div class="mt-10 sm:mt-14 grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 md:gap-8">
+		<div data-joinus-grid class="mt-12 sm:mt-16 grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 md:gap-8">
 			{
-				cards.map((card, i) => (
-					<div data-reveal="up" data-reveal-delay={150 + i * 120} class="flex">
+				cards.map((card) => (
+					<div data-joinus-card class="flex" style="opacity:0">
 					<a
 						href={card.href}
-						class="group relative flex w-full flex-col items-center rounded-2xl bg-gold-500/85 px-8 py-10 text-center text-white shadow-[0_18px_40px_-20px_rgba(0,0,0,0.55)] ring-1 ring-gold-300/40 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:bg-gold-500"
+						class="group relative flex w-full flex-col overflow-hidden rounded-3xl bg-gradient-to-br from-gold-400 via-gold-500 to-gold-600 p-8 sm:p-9 ring-1 ring-inset ring-white/25 shadow-[0_26px_54px_-22px_rgba(214,162,30,0.55),0_2px_0_0_rgba(255,255,255,0.25)_inset] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_40px_72px_-24px_rgba(214,162,30,0.7)]"
 					>
-						<span class="flex h-16 w-16 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/30">
+						{/* sheen that sweeps across on hover for depth */}
+						<span aria-hidden="true" class="pointer-events-none absolute inset-0">
+							<span class="absolute -inset-y-4 -left-1/3 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/35 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[340%]"></span>
+						</span>
+
+						{/* navy icon tile — high contrast against the gold card */}
+						<span class="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-navy-700 text-gold-300 shadow-[0_10px_24px_-10px_rgba(7,23,58,0.8)] transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-3">
 							{card.icon === "book" && (
-								<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.5">
+								<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.6">
 									<path d="M3 5.5C3 4.67 3.67 4 4.5 4H10c1.1 0 2 .9 2 2v13c0-1.1-.9-2-2-2H4.5a1.5 1.5 0 0 1-1.5-1.5v-10ZM21 5.5c0-.83-.67-1.5-1.5-1.5H14c-1.1 0-2 .9-2 2v13c0-1.1.9-2 2-2h5.5a1.5 1.5 0 0 0 1.5-1.5v-10Z" stroke-linejoin="round"/>
 								</svg>
 							)}
-							{card.icon === "reader" && (
-								<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.5">
-									<circle cx="12" cy="6" r="2.5" />
-									<path d="M4 19v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2" stroke-linecap="round" />
-									<path d="M8 16h8" stroke-linecap="round" />
-								</svg>
-							)}
-							{card.icon === "people" && (
-								<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.5">
+							{card.icon === "minyan" && (
+								/* Three figures gathered — a minyan / community at tefillah */
+								<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.6">
 									<circle cx="7" cy="8" r="2.5" />
 									<circle cx="17" cy="8" r="2.5" />
 									<circle cx="12" cy="6.5" r="2.5" />
 									<path d="M2 19c0-2.5 2.5-4 5-4M22 19c0-2.5-2.5-4-5-4M7 19c0-2.5 2.5-4 5-4s5 1.5 5 4" stroke-linecap="round" />
 								</svg>
 							)}
+							{card.icon === "reader" && (
+								/* Sefer Torah — two rolls with parchment + text lines */
+								<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.6">
+									<rect x="3.5" y="3.5" width="3" height="17" rx="1.5" />
+									<rect x="17.5" y="3.5" width="3" height="17" rx="1.5" />
+									<path d="M6.5 5.5h11M6.5 18.5h11" stroke-linecap="round" />
+									<path d="M9 9h6M9 12h6M9 15h4" stroke-linecap="round" />
+								</svg>
+							)}
+							{card.icon === "people" && (
+								/* Chesed — open hands cradling a heart (connection & community) */
+								<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.6">
+									<path d="M12 8.4 11.3 7.6a2.4 2.4 0 0 0-3.5 3.3l4.2 4.3 4.2-4.3a2.4 2.4 0 0 0-3.5-3.3l-.7.8Z" stroke-linejoin="round" />
+									<path d="M3.5 13.5 6 16.5c.5.6 1.2.9 2 .9h4.7c.7 0 1-.8.5-1.3l-2-1.8" stroke-linecap="round" stroke-linejoin="round" />
+									<path d="M20.5 13.5 18 16.5c-.5.6-1.2.9-2 .9" stroke-linecap="round" stroke-linejoin="round" />
+								</svg>
+							)}
 						</span>
-						<p class="mt-5 text-xs uppercase tracking-[0.22em] text-white/85">
+
+						<p class="relative mt-7 text-xs uppercase tracking-[0.22em] text-navy-700/70">
 							{card.subtitle}
 						</p>
-						<h3 class="mt-2 font-display text-2xl font-medium">
+						<h3 class="relative mt-1.5 font-display text-3xl sm:text-[2rem] leading-tight font-medium text-navy-700">
 							{card.title}
 						</h3>
+
+						{/* navy underline rule that grows on hover */}
+						<span aria-hidden="true" class="relative mt-5 block h-[2px] w-10 rounded-full bg-navy-700/40 transition-all duration-300 group-hover:w-20"></span>
+
+						<span class="relative mt-5 inline-flex items-center gap-2 text-sm font-semibold text-navy-700/75 transition-colors duration-300 group-hover:text-navy-700">
+							Explore
+							<svg viewBox="0 0 24 24" class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+						</span>
 					</a>
 					</div>
 				))
 			}
 		</div>
 	</div>
+
+	<noscript>
+		<style>[data-joinus-card] { opacity: 1 !important; }</style>
+	</noscript>
 </section>
+
+<script>
+	import { animate, inView, stagger } from "motion";
+
+	const cards = document.querySelectorAll<HTMLElement>("[data-joinus-card]");
+	const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+	if (!cards.length) {
+		// nothing to do
+	} else if (reduce) {
+		cards.forEach((c) => (c.style.opacity = "1"));
+	} else {
+		inView(
+			"[data-joinus-grid]",
+			() => {
+				animate(
+					cards,
+					{ opacity: [0, 1], y: [48, 0], scale: [0.94, 1] },
+					{ duration: 0.7, delay: stagger(0.12), ease: [0.16, 1, 0.3, 1] },
+				);
+			},
+			{ amount: 0.25 },
+		);
+	}
+</script>

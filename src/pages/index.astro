@@ -61,13 +61,14 @@ const torahVision = {
 			body={uniqueImpactful.body}
 			imageOn="left"
 			imageUrl={uniqueImpactful.imageUrl}
+			rays
 		/>
 
 		<JoinUs
 			cards={[
-				{ title: homepage?.joinUsCard1Title, subtitle: homepage?.joinUsCard1Subtitle, href: homepage?.joinUsCard1Href, icon: homepage?.joinUsCard1Icon as "book" | "reader" | "people" | undefined },
-				{ title: homepage?.joinUsCard2Title, subtitle: homepage?.joinUsCard2Subtitle, href: homepage?.joinUsCard2Href, icon: homepage?.joinUsCard2Icon as "book" | "reader" | "people" | undefined },
-				{ title: homepage?.joinUsCard3Title, subtitle: homepage?.joinUsCard3Subtitle, href: homepage?.joinUsCard3Href, icon: homepage?.joinUsCard3Icon as "book" | "reader" | "people" | undefined },
+				{ title: homepage?.joinUsCard1Title, subtitle: homepage?.joinUsCard1Subtitle, href: homepage?.joinUsCard1Href, icon: homepage?.joinUsCard1Icon as "book" | "reader" | "people" | "minyan" | undefined },
+				{ title: homepage?.joinUsCard2Title, subtitle: homepage?.joinUsCard2Subtitle, href: homepage?.joinUsCard2Href, icon: homepage?.joinUsCard2Icon as "book" | "reader" | "people" | "minyan" | undefined },
+				{ title: homepage?.joinUsCard3Title, subtitle: homepage?.joinUsCard3Subtitle, href: homepage?.joinUsCard3Href, icon: homepage?.joinUsCard3Icon as "book" | "reader" | "people" | "minyan" | undefined },
 			].filter((c) => c.title)}
 		/>
 

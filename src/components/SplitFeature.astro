@@ -1,5 +1,6 @@
 ---
 import Highlight from "./Highlight.astro";
+import LightRays from "./LightRays.astro";
 
 interface Props {
 	eyebrowGold: string;
@@ -11,6 +12,8 @@ interface Props {
 	imageOn?: "left" | "right";
 	imageUrl?: string;
 	imageAlt?: string;
+	/** Render the looping gold sunburst behind the image. */
+	rays?: boolean;
 }
 
 const {
@@ -23,10 +26,11 @@ const {
 	imageOn = "left",
 	imageUrl,
 	imageAlt = "",
+	rays = false,
 } = Astro.props;
 ---
 
-<section class="py-20 md:py-28">
+<section class="relative overflow-hidden py-20 md:py-28">
 	<div class="container-page">
 		<div
 			class:list={[
@@ -34,7 +38,8 @@ const {
 				"md:grid-cols-2",
 			]}
 		>
-			<div class:list={[imageOn === "right" ? "md:order-2" : "md:order-1"]} data-reveal={imageOn === "right" ? "right" : "left"}>
+			<div class:list={["relative", imageOn === "right" ? "md:order-2" : "md:order-1"]} data-reveal={imageOn === "right" ? "right" : "left"}>
+				{rays && <LightRays class="h-[135%] w-[135%] min-h-[460px] min-w-[460px]" opacity={0.5} />}
 				{imageUrl ? (
 					<img
 						src={imageUrl}

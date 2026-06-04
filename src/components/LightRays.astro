@@ -1,0 +1,114 @@
+---
+/**
+ * LightRays — soft volumetric "streaming light" that radiates from a center
+ * point, fading toward the edges so it reads as glow rather than hard lines
+ * (cue: yukollella.com). Built from a masked conic-gradient, so the beams are
+ * crisp vector rays but with soft, gradient edges — no draw-on "popping".
+ *
+ * Drop it as the first child of a `relative` wrapper and the light radiates
+ * from that wrapper's center, spilling past its edges. Decorative + inert.
+ *
+ * Motion: the field slowly breathes (spreads out, eases back) and drifts in
+ * rotation — both continuous, so there is no restart "jump". Honors
+ * prefers-reduced-motion by holding a static glow.
+ */
+interface Props {
+	/** Number of beams around the full circle. */
+	count?: number;
+	/** Beam color (any CSS color). Defaults to brand gold-400. */
+	color?: string;
+	/** Peak opacity of the light field. */
+	opacity?: number;
+	/** Breathing cycle (spread out → ease back), in ms. */
+	duration?: number;
+	/** Extra classes for sizing/placement of the (square) light field. */
+	class?: string;
+}
+
+const {
+	count = 40,
+	color = "#dfb030",
+	opacity = 0.45,
+	duration = 8000,
+	class: className = "",
+} = Astro.props;
+
+const period = 360 / count;
+const vars = [
+	`--rck-rc:${color}`,
+	`--rck-period:${period}deg`,
+	`--rck-opacity:${opacity}`,
+	`--rck-dur:${duration}ms`,
+].join(";");
+---
+
+<div
+	class:list={["rck-rays pointer-events-none absolute left-1/2 top-1/2 -z-10 aspect-square -translate-x-1/2 -translate-y-1/2", className]}
+	aria-hidden="true"
+	style={vars}
+>
+	<div class="rck-rays__spread">
+		<div class="rck-rays__beams"></div>
+	</div>
+</div>
+
+<style is:global>
+	.rck-rays {
+		/* keep it square regardless of the width class passed in */
+		isolation: isolate;
+	}
+	.rck-rays__spread,
+	.rck-rays__beams {
+		position: absolute;
+		inset: 0;
+	}
+	.rck-rays__spread {
+		opacity: var(--rck-opacity);
+		animation: rck-rays-breathe var(--rck-dur) ease-in-out infinite;
+		will-change: transform, opacity;
+	}
+	.rck-rays__beams {
+		/* Crisp vector beams with soft gradient edges: each `period` ramps
+		   transparent → color → transparent, so the rays never hard-edge. */
+		background: repeating-conic-gradient(
+			from 0deg,
+			color-mix(in srgb, var(--rck-rc), transparent 100%) 0deg,
+			var(--rck-rc) calc(var(--rck-period) / 2),
+			color-mix(in srgb, var(--rck-rc), transparent 100%) var(--rck-period)
+		);
+		/* fade the center (so light reads as coming from behind the element)
+		   and the outer edge (volumetric falloff) */
+		-webkit-mask-image: radial-gradient(closest-side, transparent 4%, #000 16%, #000 52%, transparent 84%);
+		mask-image: radial-gradient(closest-side, transparent 4%, #000 16%, #000 52%, transparent 84%);
+		animation: rck-rays-drift calc(var(--rck-dur) * 9) linear infinite;
+		will-change: transform;
+	}
+
+	@keyframes rck-rays-breathe {
+		0%,
+		100% {
+			transform: scale(0.82);
+			opacity: calc(var(--rck-opacity) * 0.55);
+		}
+		50% {
+			transform: scale(1.06);
+			opacity: var(--rck-opacity);
+		}
+	}
+	@keyframes rck-rays-drift {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.rck-rays__spread {
+			transform: scale(1);
+			opacity: var(--rck-opacity);
+			animation: none;
+		}
+		.rck-rays__beams {
+			animation: none;
+		}
+	}
+</style>

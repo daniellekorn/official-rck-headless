@@ -1,30 +1,49 @@
 ---
 interface Props {
 	eyebrow?: string;
+	/** Optional leading word. Rendered in the same color as the rest of the
+	    title (kept as a separate prop only for existing call sites). */
 	titleGold?: string;
 	titleNavy: string;
 	subtitle?: string;
 }
 
 const { eyebrow, titleGold, titleNavy, subtitle } = Astro.props;
+const title = [titleGold, titleNavy].filter(Boolean).join(" ");
 ---
 
-<section class="pt-32 pb-0 sm:pt-36 text-center">
+<section class="relative isolate overflow-hidden pt-28 pb-10 sm:pt-32 sm:pb-12 text-center">
+	<!-- Deep-navy band: gives interior headers presence and lets the white
+	     nav pill pop, while creating a clean navy→white seam into the page. -->
+	<div
+		class="absolute inset-0 -z-10 bg-navy-700"
+		style="background-image:
+			radial-gradient(900px 380px at 50% -20%, rgba(214,162,30,0.20), transparent 65%),
+			linear-gradient(180deg, #07173a 0%, #0b1f47 70%, #102a56 100%);"
+		aria-hidden="true"
+	>
+	</div>
+	<div
+		class="absolute inset-0 -z-10 opacity-[0.05]"
+		style="background-image: repeating-linear-gradient(45deg, #fff 0 1px, transparent 1px 14px);"
+		aria-hidden="true"
+	>
+	</div>
+
 	<div class="container-page">
 		{eyebrow && (
-			<p class="eyebrow text-gold-500" data-reveal="up">{eyebrow}</p>
+			<p class="eyebrow text-gold-300" data-reveal="up">{eyebrow}</p>
 		)}
 		<h1
-			class="mt-3 font-display text-3xl sm:text-4xl md:text-5xl leading-[1.05] font-medium"
+			class="mt-3 font-display text-4xl sm:text-5xl md:text-6xl leading-[1.04] font-medium text-white"
 			data-reveal="up"
 			data-reveal-delay="100"
 		>
-			{titleGold && <span class="text-gold-400">{titleGold} </span>}
-			<span class="text-navy-700">{titleNavy}</span>
+			{title}
 		</h1>
-		<span class="mx-auto mt-4 sm:mt-5 block h-[2px] w-14 bg-gold-400" aria-hidden="true" data-reveal="up" data-reveal-delay="200"></span>
+		<span class="mx-auto mt-5 block h-[3px] w-16 rounded-full bg-gold-400" aria-hidden="true" data-reveal="up" data-reveal-delay="200"></span>
 		{subtitle && (
-			<p class="mx-auto mt-4 sm:mt-5 max-w-xl text-base sm:text-lg leading-relaxed text-navy-400" data-reveal="up" data-reveal-delay="280">
+			<p class="mx-auto mt-5 max-w-xl text-base sm:text-lg leading-relaxed text-white/75" data-reveal="up" data-reveal-delay="280">
 				{subtitle}
 			</p>
 		)}
