@@ -21,11 +21,11 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Hero background image | `HomePage` | `heroImage` field — upload new image |
 | Hero CTA buttons (label or link) | `HomePage` | `heroPrimaryCtaLabel` / `heroPrimaryCtaHref`, same for secondary |
 | Split section copy ("Unique Impactful", "Torah Vision") | `HomePage` | The `uniqueImpactful*` and `torahVision*` fields |
-| Slideshow under "Who We Are" | `HomepageSlides` | Add / reorder / hide rows. Image + title + caption per row |
+| History timeline under "Who We Are" | `OurHistory` | Add / reorder / hide rows. Each row is one milestone: image + year + title + caption |
 | Join Us cards (3 gold cards) | `HomePage` | `joinUsCard1*` / `joinUsCard2*` / `joinUsCard3*` fields on the single row |
 | Team members | `TeamMembers` | Add a row. Photo, name, role, bio, etc. |
 | Weekday davening times | `DaveningTimes` | Add / edit rows with `dayType = Weekday`. Shabbat is a static "Join us at KBA" section (no CMS rows needed). |
-| Flyers (Canva embeds or PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). |
+| Flyers (Canva embeds or PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). For event flyers, set `removeAfter` so they drop off the site on their own. |
 | Footer address, phone, email | `ContactInfo` | Edit the single row. Leave a field empty to hide it from the footer. |
 | Footer social links | `ContactInfo` | Fill in any of `facebookUrl`, `instagramUrl`, `youtubeUrl`, `twitterUrl`, `linkedinUrl`. Empty = icon hidden. |
 
@@ -39,8 +39,8 @@ Connect the Wix connector/MCP to your Claude.ai account once. Then, tell the cha
 
 Examples:
 
-- "Add this image to the homepage slideshow of my Wix site <id> with title 'Beis Medrash'" — Claude uploads + creates the row
-- "Add these five images as new slides on the homepage of my Wix site <id>" — done in one prompt
+- "Add this image to the 'Who We Are' history timeline of my Wix site <id> with year 2021 and title 'Beis Medrash Opens'" — Claude uploads + creates the row
+- "Add these five milestones to the OurHistory collection on my Wix site <id>, each with a year, title, and caption" — done in one prompt
 - "Add a team member to my Wix site <id>: Rabbi Cohen, role 'Maggid Shiur', ..." — done
 
 Connection setup: `https://dev.wix.com/docs/mcp/getting-started`:
@@ -115,15 +115,20 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | joinUsCard3Href | Text | "/programming" |
 | joinUsCard3Icon | Text | One of: `book`, `reader`, `people` |
 
-#### `HomepageSlides` — one row per slide (5–10 typical)
+#### `OurHistory` — one row per milestone (5–10 typical)
+
+Drives the slow auto-panning history timeline under "Who We Are" on the homepage. Rows are ordered by `year` (then `sortOrder` as a tiebreak), so the timeline always reads chronologically.
 
 | Field | Type | Notes |
 |---|---|---|
-| image | Image | Required |
-| title | Text | Shown on the slide |
-| caption | Text | Shorter subtitle |
-| sortOrder | Number | Lower numbers first |
-| active | Boolean | Hide a slide without deleting it |
+| image | Image | Required. Shown as the milestone photo (cropped to a 4:3 card). |
+| year | Number | The milestone year, e.g. `2021`. Drives chronological order and is shown as the big gold label on the timeline. |
+| title | Text | Milestone heading shown under the photo |
+| caption | Text | One-line description under the title |
+| sortOrder | Number | Tiebreak when two rows share a year. Lower numbers first. |
+| active | Boolean | Hide a milestone without deleting it |
+
+> Renamed from the old `HomepageSlides` collection (which had no `year`). See [design-log/015](design-log/015-history-timeline.md).
 
 #### `TeamMembers`
 
@@ -185,8 +190,11 @@ One row per flyer. Either `embedUrl` or `pdfUrl` must be filled in — a row wit
 | isActive | Boolean | Show/hide without deleting. Default: true (checked). |
 | displayOrder | Number | Sort order within the category. Lower = first. |
 | subCategory | Text | Optional. Sub-topic for filtering (e.g. `kashrus`, `shabbos`, `women`). One value per flyer. Leave empty if no sub-filtering needed. |
+| removeAfter | Date | Optional. The last day the flyer should appear. It stays up through that whole day (Israel time) and drops off the site by itself the next morning. **Leave empty for anything evergreen** (a standing schedule, a learning program). Only put a date on things that go stale — mainly event flyers. The row is *not* deleted: to bring a flyer back, just change the date to a future one. |
 
-**Getting a Canva embed URL:** In Canva, open the design → Share → Publish to web → copy the URL from the embed code (`src="…"`). Paste only the URL (not the full `<iframe>` tag) into `embedUrl`.
+**Getting a Canva embed URL:** In Canva, open the design → **Share → Publish to web** → copy the URL from the embed code (`src="…"`). Paste only the URL (not the full `<iframe>` tag) into `embedUrl`.
+
+> ⚠️ **Use "Publish to web" — not the "Copy link" button.** The plain *Copy link* (the one in the design's `⋯` menu) gives a *view* link, which usually refuses to display embedded on the site and can ask visitors to log in to Canva. Only the **Publish to web** URL embeds correctly and stays live-synced.
 
 **Valid `category` slugs:**
 
@@ -206,6 +214,30 @@ One row per flyer. Either `embedUrl` or `pdfUrl` must be filled in — a row wit
 To swap the daily schedule: edit the one row with `category = schedules` and `subCategory = daily`. Update `imageUrl` (for a static image) or `embedUrl` (for a live Canva design). No code change needed.
 
 Canva embeds include a built-in expand/download control — no separate download button is shown on the site.
+
+#### The easy way to add a flyer (chat, no dashboard)
+
+You don't have to hunt through the CMS dashboard. Once the Wix connector is linked to your Claude.ai account (see "Claude.ai + Wix MCP" above), you can just describe the flyer and let Claude fill in the row. Copy the **Publish to web** URL from Canva, then say something like:
+
+> Add a flyer to my Wix site `<site-id>`: title "Shavuos Night Learning", category `events`, embed URL `https://www.canva.com/design/…/view?embed`. Take it down after June 2, 2026.
+
+Claude creates the row with the right `category` slug and sets `removeAfter` for you. A few more examples:
+
+> Add this to the `learning` flyers, title "Summer Chaburah Schedule", no end date — it's ongoing. Embed URL: `…`
+
+> The Pesach event flyer is over — set its `removeAfter` to yesterday so it drops off. (Or: hide it by setting `isActive` to false.)
+
+The **one** thing only you can do is the Canva step: open the design, Publish to web, copy the URL. Everything after that is a sentence.
+
+#### Why flyers aren't pulled from Canva automatically
+
+A fair question: why can't the site just *watch* a Canva folder and show whatever's in it? We looked into it, and the short version is that automating it would make the site **worse**, not easier:
+
+- **The "live" magic comes from one button.** When you *Publish to web* and paste that link, editing the design in Canva updates the site automatically — no re-upload, ever. That live link is only created by that button. Canva's automation tools can't generate it; they can only send the site a flat *picture* of the design. So an "automatic" version would turn your live flyers into frozen snapshots that go out of date the moment you edit them in Canva.
+- **There's no official Canva ↔ Wix connection** — and the few third-party "connectors" (Zapier, Make) are built for the old drag-and-drop Wix editor, not the custom site we run. They wouldn't apply here.
+- **It would add fragile machinery** for very little gain. Adding a flyer is already two clicks in Canva plus one sentence to Claude. A background sync would be a lot of plumbing that quietly breaks and shows stale designs.
+
+The `removeAfter` date is the part of "automatic" that's actually worth having: you set a take-down date once, and old event flyers disappear on their own. That's the cleanup nobody wants to remember to do — so we automated *that*, and left the publishing as a quick, deliberate step.
 
 ### Permissions on every collection
 

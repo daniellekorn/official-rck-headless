@@ -2,19 +2,20 @@ import * as items from "@wix/wix-data-items-sdk";
 import { auth } from "@wix/essentials";
 import { media } from "@wix/sdk";
 
-const COLLECTION_ID = "HomepageSlides";
+const COLLECTION_ID = "OurHistory";
 
-export interface HomepageSlide {
+export interface HistoryEntry {
 	_id: string;
 	image?: string;
 	imageUrl?: string;
 	title?: string;
 	caption?: string;
+	year?: number;
 	sortOrder?: number;
 	active?: boolean;
 }
 
-function resolveImage(wixImageUrl?: string, w = 1600, h = 900): string | undefined {
+function resolveImage(wixImageUrl?: string, w = 1200, h = 900): string | undefined {
 	if (!wixImageUrl) return undefined;
 	try {
 		return media.getScaledToFillImageUrl(wixImageUrl, w, h, {});
@@ -23,21 +24,22 @@ function resolveImage(wixImageUrl?: string, w = 1600, h = 900): string | undefin
 	}
 }
 
-export async function getHomepageSlides(): Promise<HomepageSlide[]> {
+export async function getHistory(): Promise<HistoryEntry[]> {
 	try {
 		const elevated = auth.elevate(items.query);
 		const { items: results } = await elevated(COLLECTION_ID)
 			.eq("active", true)
+			.ascending("year")
 			.ascending("sortOrder")
 			.limit(50)
 			.find();
 
-		return (results as HomepageSlide[]).map((s) => ({
-			...s,
-			imageUrl: resolveImage(s.image),
+		return (results as HistoryEntry[]).map((entry) => ({
+			...entry,
+			imageUrl: resolveImage(entry.image),
 		}));
 	} catch (err) {
-		console.error(`[homepage-slides] query failed:`, err);
+		console.error(`[history] query failed:`, err);
 		return [];
 	}
 }

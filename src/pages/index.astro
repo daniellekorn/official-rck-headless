@@ -8,11 +8,11 @@ import WhoWeAre from "../components/WhoWeAre.astro";
 import Footer from "../components/Footer.astro";
 
 import { getHomepage } from "../lib/homepage";
-import { getHomepageSlides } from "../lib/homepage-slides";
+import { getHistory } from "../lib/history";
 
-const [homepage, slides] = await Promise.all([
+const [homepage, history] = await Promise.all([
 	getHomepage(),
-	getHomepageSlides(),
+	getHistory(),
 ]);
 
 // Defaults to keep the page rendering identically before the CMS is populated.
@@ -86,7 +86,7 @@ const torahVision = {
 			title={homepage?.whoWeAreTitle}
 			hebrew={homepage?.whoWeAreHebrew}
 			body={homepage?.whoWeAreBody}
-			slides={slides.map((s) => ({ title: s.title, caption: s.caption, imageUrl: s.imageUrl }))}
+			entries={history.map((h) => ({ year: h.year, title: h.title, caption: h.caption, imageUrl: h.imageUrl }))}
 		/>
 	</main>
 	<Footer />

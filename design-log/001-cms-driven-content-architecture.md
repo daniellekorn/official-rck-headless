@@ -39,10 +39,10 @@ Three new collections, fed via three new lib modules, consumed by the existing c
 flowchart LR
   Editor[Editor: Wix dashboard or Claude+Wix MCP] --> CMS[(Wix CMS)]
   CMS -- HomePage row --> homepageTs[src/lib/homepage.ts]
-  CMS -- HomepageSlides rows --> slidesTs[src/lib/homepage-slides.ts]
+  CMS -- OurHistory rows --> historyTs[src/lib/history.ts]
   CMS -- JoinUsCards rows --> cardsTs[src/lib/join-us-cards.ts]
   homepageTs --> indexAstro[src/pages/index.astro]
-  slidesTs --> indexAstro
+  historyTs --> indexAstro
   cardsTs --> indexAstro
   indexAstro --> Hero & SplitFeature & JoinUs & WhoWeAre
 ```
@@ -50,7 +50,7 @@ flowchart LR
 **Collections:**
 
 - `HomePage` — single row, ~24 typed fields covering hero, two split sections, Who We Are. Image fields are Wix Image type (returns `wix:image://...` URL resolved via `media.getScaledToFillImageUrl`).
-- `HomepageSlides` — one row per slide. Fields: `image`, `title`, `caption`, `sortOrder`, `active`.
+- `OurHistory` (originally `HomepageSlides`, renamed + reframed as a timeline in [#015](015-history-timeline.md)) — one row per milestone. Fields: `image`, `year`, `title`, `caption`, `sortOrder`, `active`.
 - `JoinUsCards` — one row per card (3 expected). Fields: `title`, `subtitle`, `href`, `icon` (one of: `book`, `reader`, `people`), `sortOrder`, `active`.
 
 **Lib pattern** (per project convention from `node_modules/@wix/agent-skills/skills/wix-headless`):
