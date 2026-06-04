@@ -1,0 +1,292 @@
+---
+/**
+ * PhotoGallery — adaptive image display that scales with how many photos it's
+ * given:
+ *   1 photo  → a single wide feature banner
+ *   2 photos → a side-by-side pair
+ *   3 photos → a mosaic (one wide + two squares)
+ *   4+ photos → a modern crossfade slideshow (thumbnails on desktop, dots on
+ *               mobile, arrows, swipe, autoplay with hover/focus pause)
+ *
+ * Vanilla JS following the project carousel convention (no npm carousel libs —
+ * they don't resolve in the Wix build; see design log #012). Styles are
+ * `is:global` because the JS toggles classes that scoped CSS doesn't reliably
+ * match in this build. Multiple galleries per page are each wired independently.
+ */
+interface Props {
+	images: string[];
+	label?: string;
+	autoplayMs?: number;
+}
+
+const { images, label = "", autoplayMs = 5000 } = Astro.props;
+const n = images.length;
+const alt = (i: number) => (label ? `${label} — photo ${i + 1}` : `Photo ${i + 1}`);
+
+const frame =
+	"w-full rounded-2xl object-cover ring-1 ring-navy-100 shadow-[0_30px_64px_-34px_rgba(7,23,58,0.5)]";
+---
+
+{n === 1 && (
+	<img src={images[0]} alt={alt(0)} loading="lazy" class:list={[frame, "aspect-[16/9]"]} />
+)}
+
+{n === 2 && (
+	<div class="grid grid-cols-2 gap-3 sm:gap-4">
+		{images.map((src, i) => (
+			<img src={src} alt={alt(i)} loading="lazy" class:list={[frame, "aspect-[4/3]"]} />
+		))}
+	</div>
+)}
+
+{n === 3 && (
+	<div class="grid grid-cols-2 gap-3 sm:gap-4">
+		<img src={images[0]} alt={alt(0)} loading="lazy" class:list={[frame, "col-span-2 aspect-[16/9]"]} />
+		<img src={images[1]} alt={alt(1)} loading="lazy" class:list={[frame, "aspect-square !rounded-xl"]} />
+		<img src={images[2]} alt={alt(2)} loading="lazy" class:list={[frame, "aspect-square !rounded-xl"]} />
+	</div>
+)}
+
+{n >= 4 && (
+	<div class="rck-gal" data-gallery data-autoplay-ms={autoplayMs}>
+		<div class="rck-gal-stage" data-gal-stage>
+			{images.map((src, i) => (
+				<img
+					src={src}
+					alt={alt(i)}
+					loading={i === 0 ? "eager" : "lazy"}
+					data-gal-slide
+					data-index={i}
+					class:list={["rck-gal-slide", i === 0 && "is-active"]}
+				/>
+			))}
+
+			<button type="button" data-gal-prev aria-label="Previous photo" class="rck-gal-arrow rck-gal-arrow-prev">
+				<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
+			</button>
+			<button type="button" data-gal-next aria-label="Next photo" class="rck-gal-arrow rck-gal-arrow-next">
+				<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
+			</button>
+
+			<span class="rck-gal-count" data-gal-count>1 / {n}</span>
+		</div>
+
+		{/* Thumbnails — desktop */}
+		<div class="rck-gal-thumbs" data-gal-thumbs>
+			{images.map((src, i) => (
+				<button
+					type="button"
+					data-gal-thumb
+					data-index={i}
+					aria-label={`Show photo ${i + 1}`}
+					class:list={["rck-gal-thumb", i === 0 && "is-active"]}
+				>
+					<img src={src} alt="" loading="lazy" />
+				</button>
+			))}
+		</div>
+
+		{/* Dots — mobile */}
+		<div class="rck-gal-dots" data-gal-dots>
+			{images.map((_, i) => (
+				<button
+					type="button"
+					data-gal-dot
+					data-index={i}
+					aria-label={`Show photo ${i + 1}`}
+					class:list={["rck-gal-dot", i === 0 && "is-active"]}
+				/>
+			))}
+		</div>
+	</div>
+)}
+
+<style is:global>
+	.rck-gal-stage {
+		position: relative;
+		aspect-ratio: 16 / 9;
+		border-radius: 1rem;
+		overflow: hidden;
+		background: #0b1b38;
+		box-shadow: 0 34px 70px -34px rgba(7, 23, 58, 0.55), 0 0 55px -18px rgba(214, 162, 30, 0.4);
+		touch-action: pan-y;
+	}
+	.rck-gal-slide {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		opacity: 0;
+		transition: opacity 0.6s ease;
+		pointer-events: none;
+	}
+	.rck-gal-slide.is-active {
+		opacity: 1;
+	}
+
+	.rck-gal-arrow {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		z-index: 3;
+		width: 2.75rem;
+		height: 2.75rem;
+		border-radius: 9999px;
+		background: rgba(7, 23, 58, 0.45);
+		color: #fff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		backdrop-filter: blur(4px);
+		transition: background 0.2s;
+	}
+	.rck-gal-arrow:hover {
+		background: rgba(7, 23, 58, 0.75);
+	}
+	.rck-gal-arrow-prev {
+		left: 0.75rem;
+	}
+	.rck-gal-arrow-next {
+		right: 0.75rem;
+	}
+
+	.rck-gal-count {
+		position: absolute;
+		bottom: 0.75rem;
+		right: 0.75rem;
+		z-index: 3;
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.05em;
+		color: #fff;
+		background: rgba(7, 23, 58, 0.5);
+		backdrop-filter: blur(4px);
+		padding: 0.2rem 0.6rem;
+		border-radius: 9999px;
+	}
+
+	/* Thumbnails — hidden on mobile, shown sm+ */
+	.rck-gal-thumbs {
+		display: none;
+	}
+	@media (min-width: 640px) {
+		.rck-gal-thumbs {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.6rem;
+			margin-top: 0.85rem;
+		}
+	}
+	.rck-gal-thumb {
+		width: 5rem;
+		height: 3.5rem;
+		border-radius: 0.5rem;
+		overflow: hidden;
+		opacity: 0.5;
+		outline: 2px solid transparent;
+		outline-offset: 2px;
+		transition: opacity 0.2s, outline-color 0.2s;
+	}
+	.rck-gal-thumb img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+	.rck-gal-thumb:hover {
+		opacity: 0.85;
+	}
+	.rck-gal-thumb.is-active {
+		opacity: 1;
+		outline-color: var(--color-gold-400, #dfb030);
+	}
+
+	/* Dots — shown on mobile, hidden sm+ */
+	.rck-gal-dots {
+		display: flex;
+		justify-content: center;
+		gap: 0.5rem;
+		margin-top: 0.85rem;
+	}
+	@media (min-width: 640px) {
+		.rck-gal-dots {
+			display: none;
+		}
+	}
+	.rck-gal-dot {
+		height: 0.375rem;
+		width: 0.375rem;
+		border-radius: 9999px;
+		background: rgba(16, 42, 86, 0.25);
+		transition: all 0.3s;
+	}
+	.rck-gal-dot.is-active {
+		width: 1.5rem;
+		background: var(--color-gold-400, #dfb030);
+	}
+</style>
+
+<script>
+	document.querySelectorAll<HTMLElement>("[data-gallery]").forEach((root) => {
+		const slides = Array.from(root.querySelectorAll<HTMLElement>("[data-gal-slide]"));
+		const thumbs = Array.from(root.querySelectorAll<HTMLButtonElement>("[data-gal-thumb]"));
+		const dots = Array.from(root.querySelectorAll<HTMLButtonElement>("[data-gal-dot]"));
+		const stage = root.querySelector<HTMLElement>("[data-gal-stage]");
+		const prevBtn = root.querySelector<HTMLButtonElement>("[data-gal-prev]");
+		const nextBtn = root.querySelector<HTMLButtonElement>("[data-gal-next]");
+		const counter = root.querySelector<HTMLElement>("[data-gal-count]");
+		const n = slides.length;
+		if (n === 0) return;
+
+		const AUTOPLAY_MS = Number(root.dataset.autoplayMs) || 5000;
+		let current = 0;
+		let timer: ReturnType<typeof setInterval> | undefined;
+
+		const setActive = (els: HTMLElement[], idx: number) =>
+			els.forEach((el, i) => el.classList.toggle("is-active", i === idx));
+
+		const go = (idx: number) => {
+			current = ((idx % n) + n) % n;
+			setActive(slides, current);
+			setActive(thumbs, current);
+			setActive(dots, current);
+			if (counter) counter.textContent = `${current + 1} / ${n}`;
+		};
+
+		const start = () => {
+			stop();
+			timer = setInterval(() => go(current + 1), AUTOPLAY_MS);
+		};
+		const stop = () => {
+			if (timer) clearInterval(timer);
+		};
+
+		prevBtn?.addEventListener("click", () => { go(current - 1); start(); });
+		nextBtn?.addEventListener("click", () => { go(current + 1); start(); });
+		thumbs.forEach((t) => t.addEventListener("click", () => { go(Number(t.dataset.index)); start(); }));
+		dots.forEach((d) => d.addEventListener("click", () => { go(Number(d.dataset.index)); start(); }));
+
+		// Pause on hover/focus (pointer devices)
+		if (window.matchMedia("(hover: hover)").matches) {
+			root.addEventListener("mouseenter", stop);
+			root.addEventListener("mouseleave", start);
+		}
+		root.addEventListener("focusin", stop);
+		root.addEventListener("focusout", start);
+
+		// Swipe (touch)
+		let startX = 0;
+		stage?.addEventListener("touchstart", (e) => { startX = e.touches[0].clientX; stop(); }, { passive: true });
+		stage?.addEventListener("touchend", (e) => {
+			const dx = e.changedTouches[0].clientX - startX;
+			if (Math.abs(dx) > 40) go(current + (dx < 0 ? 1 : -1));
+			start();
+		}, { passive: true });
+
+		start();
+	});
+</script>

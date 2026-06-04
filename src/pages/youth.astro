@@ -3,7 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
 import PageHeader from "../components/PageHeader.astro";
-import LightRays from "../components/LightRays.astro";
+import PhotoGallery from "../components/PhotoGallery.astro";
 import { getYouthPrograms, hasFlyer } from "../lib/youth-programs";
 import { ricosToPlainText } from "../lib/ricos";
 
@@ -30,172 +30,116 @@ const programs = await getYouthPrograms();
 			{programs.map((program, i) => {
 				const description = program.description ? ricosToPlainText(program.description) : "";
 				const flyer = hasFlyer(program);
-				const [featuredPhoto, ...morePhotos] = program.galleryUrls;
-				const hasVisual = Boolean(featuredPhoto) || flyer;
-				const imageOn = i % 2 === 0 ? "right" : "left";
+				const hasPhotos = program.galleryUrls.length > 0;
+				const hasContact = Boolean(program.contactName || program.contactEmail);
 				// Alternate a warm off-white band against white for rhythm.
 				const banded = i % 2 === 1;
 
 				return (
 					<section class:list={["py-16 sm:py-20 md:py-24", banded && "bg-mist"]}>
 						<div class="container-page">
-							<div
-								class:list={[
-									"grid items-center gap-10 md:gap-14 lg:gap-20",
-									hasVisual && "md:grid-cols-2",
-								]}
-							>
-								{/* Visual column: program photo (with sunburst behind) and/or flyer */}
-								{hasVisual && (
-									<div
-										class:list={[
-											"relative flex flex-col gap-6",
-											imageOn === "right" ? "md:order-2" : "md:order-1",
-										]}
-										data-reveal={imageOn === "right" ? "right" : "left"}
-									>
-										{featuredPhoto && (
-											<div class="relative">
-												<LightRays class="h-[150%] w-[150%]" opacity={0.35} />
-												<img
-													src={featuredPhoto}
-													alt={program.title}
-													loading="lazy"
-													class="relative aspect-[4/3] w-full overflow-hidden rounded-2xl object-cover ring-1 ring-navy-100 shadow-[0_30px_60px_-30px_rgba(7,23,58,0.55)]"
-												/>
-											</div>
-										)}
-
-										{morePhotos.length > 0 && (
-											<div class="grid grid-cols-2 gap-3 sm:gap-4">
-												{morePhotos.map((url, p) => (
-													<img
-														src={url}
-														alt={`${program.title} — photo ${p + 2}`}
-														loading="lazy"
-														class="aspect-square w-full overflow-hidden rounded-xl object-cover ring-1 ring-navy-100 shadow-[0_18px_40px_-28px_rgba(7,23,58,0.5)]"
-													/>
-												))}
-											</div>
-										)}
-
-										{flyer && (
-											<div class="relative overflow-hidden rounded-2xl bg-navy-800 ring-1 ring-navy-100 shadow-lg">
-												<div class="relative aspect-[3/4]">
-													{program.flyerImageUrl ? (
-														<img
-															src={program.flyerImageUrl}
-															alt={`${program.title} flyer`}
-															loading="lazy"
-															class="absolute inset-0 h-full w-full object-contain"
-														/>
-													) : program.flyerEmbedUrl ? (
-														<iframe
-															src={program.flyerEmbedUrl}
-															title={`${program.title} flyer`}
-															loading="lazy"
-															allow="fullscreen"
-															class="absolute inset-0 h-full w-full border-0"
-														/>
-													) : program.flyerPdfUrl ? (
-														<iframe
-															src={`https://docs.google.com/viewer?url=${encodeURIComponent(program.flyerPdfUrl)}&embedded=true`}
-															title={`${program.title} flyer`}
-															loading="lazy"
-															class="absolute inset-0 h-full w-full border-0"
-														/>
-													) : null}
-												</div>
-											</div>
-										)}
-									</div>
-								)}
-
-								{/* Content column */}
-								<div
-									class:list={[
-										hasVisual
-											? imageOn === "right"
-												? "md:order-1"
-												: "md:order-2"
-											: "mx-auto max-w-2xl text-center",
-									]}
-								>
-									<p class="eyebrow text-gold-500" data-reveal="up">
+							{/* Header: title block left, contact card right (stacks on mobile) */}
+							<div class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between md:gap-12">
+								<div data-reveal="up">
+									<p class="eyebrow text-gold-500">
 										{String(i + 1).padStart(2, "0")} · Youth Program
 									</p>
-
-									<h2
-										class="mt-3 font-display text-3xl sm:text-4xl md:text-[2.75rem] leading-[1.05] font-medium uppercase text-navy-600"
-										data-reveal="up"
-										data-reveal-delay="100"
-									>
+									<h2 class="mt-3 font-display text-3xl sm:text-4xl md:text-[2.75rem] leading-[1.05] font-medium uppercase text-navy-600">
 										{program.title}
 									</h2>
-
-									<span
-										class:list={[
-											"mt-5 block h-[2px] w-14 bg-gold-400",
-											!hasVisual && "mx-auto",
-										]}
-										aria-hidden="true"
-									></span>
-
-									{description && (
-										<p
-											class="mt-6 max-w-prose text-base md:text-[1.0625rem] leading-relaxed text-navy-500 whitespace-pre-line"
-											class:list={[!hasVisual && "mx-auto"]}
-											data-reveal="up"
-											data-reveal-delay="180"
-										>
-											{description}
-										</p>
-									)}
-
-									{(program.contactName || program.contactEmail) && (
-										<div
-											class:list={[
-												"mt-8 inline-flex flex-col gap-3 rounded-2xl bg-white p-5 ring-1 ring-navy-100 shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)]",
-												!hasVisual && "mx-auto",
-											]}
-											data-reveal="up"
-											data-reveal-delay="240"
-										>
-											<p class="font-sans text-[11px] font-bold uppercase tracking-[0.22em] text-navy-300">
-												Program Contact
-											</p>
-											{program.contactName && (
-												<p class="font-display text-xl font-medium text-navy-700">
-													{program.contactName}
-												</p>
-											)}
-											<div class="flex flex-wrap items-center gap-3">
-												{program.contactEmail && (
-													<a
-														href={`mailto:${program.contactEmail}`}
-														class="inline-flex items-center gap-2 text-sm font-medium text-navy-500 transition-colors hover:text-gold-600"
-													>
-														<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
-															<rect x="3" y="5" width="18" height="14" rx="2" />
-															<path d="m3 7 9 6 9-6" stroke-linecap="round" stroke-linejoin="round" />
-														</svg>
-														Email
-													</a>
-												)}
-												<a
-													href="/contact"
-													class="inline-flex items-center gap-1.5 rounded-full bg-gold-500 px-4 py-1.5 text-sm font-semibold text-navy-700 transition-colors hover:bg-gold-400"
-												>
-													Contact
-													<svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2">
-														<path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
-													</svg>
-												</a>
-											</div>
-										</div>
-									)}
+									<span class="mt-5 block h-[2px] w-14 bg-gold-400" aria-hidden="true"></span>
 								</div>
+
+								{hasContact && (
+									<div
+										class="w-full md:w-auto md:shrink-0 flex flex-col gap-3 rounded-2xl bg-white p-5 sm:p-6 ring-1 ring-navy-100 shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)]"
+										data-reveal="up"
+										data-reveal-delay="120"
+									>
+										<p class="font-sans text-[11px] font-bold uppercase tracking-[0.22em] text-navy-300">
+											Program Contact
+										</p>
+										{program.contactName && (
+											<p class="font-display text-xl font-medium text-navy-700">
+												{program.contactName}
+											</p>
+										)}
+										<div class="flex flex-wrap items-center gap-3">
+											{program.contactEmail && (
+												<a
+													href={`mailto:${program.contactEmail}`}
+													class="inline-flex items-center gap-2 text-sm font-medium text-navy-500 transition-colors hover:text-gold-600"
+												>
+													<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+														<rect x="3" y="5" width="18" height="14" rx="2" />
+														<path d="m3 7 9 6 9-6" stroke-linecap="round" stroke-linejoin="round" />
+													</svg>
+													Email
+												</a>
+											)}
+											<a
+												href="/contact"
+												class="inline-flex items-center gap-1.5 rounded-full bg-gold-500 px-4 py-1.5 text-sm font-semibold text-navy-700 transition-colors hover:bg-gold-400"
+											>
+												Contact
+												<svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2">
+													<path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+												</svg>
+											</a>
+										</div>
+									</div>
+								)}
 							</div>
+
+							{description && (
+								<p
+									class="mt-8 max-w-3xl text-base md:text-[1.0625rem] leading-relaxed text-navy-500 whitespace-pre-line"
+									data-reveal="up"
+									data-reveal-delay="160"
+								>
+									{description}
+								</p>
+							)}
+
+							{/* Gallery: adaptive — feature / pair / mosaic / slideshow */}
+							{hasPhotos && (
+								<div class="mt-10 sm:mt-12" data-reveal="up" data-reveal-delay="200">
+									<PhotoGallery images={program.galleryUrls} label={program.title} />
+								</div>
+							)}
+
+							{/* Flyer: contained frame, not full bleed */}
+							{flyer && (
+								<div class="mt-10 max-w-sm" data-reveal="up" data-reveal-delay="200">
+									<div class="overflow-hidden rounded-2xl bg-navy-800 ring-1 ring-navy-100 shadow-lg">
+										<div class="relative aspect-[3/4]">
+											{program.flyerImageUrl ? (
+												<img
+													src={program.flyerImageUrl}
+													alt={`${program.title} flyer`}
+													loading="lazy"
+													class="absolute inset-0 h-full w-full object-contain"
+												/>
+											) : program.flyerEmbedUrl ? (
+												<iframe
+													src={program.flyerEmbedUrl}
+													title={`${program.title} flyer`}
+													loading="lazy"
+													allow="fullscreen"
+													class="absolute inset-0 h-full w-full border-0"
+												/>
+											) : program.flyerPdfUrl ? (
+												<iframe
+													src={`https://docs.google.com/viewer?url=${encodeURIComponent(program.flyerPdfUrl)}&embedded=true`}
+													title={`${program.title} flyer`}
+													loading="lazy"
+													class="absolute inset-0 h-full w-full border-0"
+												/>
+											) : null}
+										</div>
+									</div>
+								</div>
+							)}
 						</div>
 					</section>
 				);

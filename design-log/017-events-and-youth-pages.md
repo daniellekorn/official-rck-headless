@@ -61,12 +61,22 @@ a flat flyer grid, so it gets its own CMS collection rather than overloading
   or WhatsApp — a privacy call the office didn't opt into.
 
 - **Q:** Layout — uniform card grid or stacked sections?
-  **A:** Stacked, alternating sections (image side flips per row, warm-mist band
-  alternates with white), in the bold direction from #016. A program with a photo
-  shows it with a `LightRays` sunburst behind it; a flyer renders in a 3:4 frame
-  in the same visual column; a program with neither collapses to a centered
-  single-column band. This makes each program read as its own "moment," not a
-  tile.
+  **A:** Stacked, full-width sections (warm-mist band alternates with white) in
+  the bold direction from #016. Each program is a header row (title left, contact
+  card right), an optional description, then a photo gallery, then an optional
+  flyer. An earlier two-column (image beside text) version was scrapped: with
+  descriptions still empty it left a tall photo column beside a near-empty,
+  vertically-centered text column — badly unbalanced. The stacked layout degrades
+  gracefully (no description → header + gallery still reads intentionally).
+
+- **Q:** How are the gallery photos shown?
+  **A:** An adaptive `PhotoGallery` component keyed to count: 1 → wide feature
+  banner; 2 → side-by-side pair; 3 → mosaic (one wide + two squares); **4+ → a
+  crossfade slideshow** (thumbnail strip on desktop, dots on mobile, arrows,
+  swipe, autoplay with hover/focus pause). Vanilla JS per the no-carousel-lib
+  rule (#012). The `LightRays` sunburst was dropped from program photos — behind
+  a real photo it leaked a stray ray-fan above the image; a contained gold glow
+  shadow replaces it.
 
 - **Q:** Where do the kids/teens images come from, and how many per program?
   **A:** A per-program `gallery` field (Wix Media Gallery) — the office adds as
@@ -106,7 +116,7 @@ a flat flyer grid, so it gets its own CMS collection rather than overloading
 |---|---|---|
 | `title` | TEXT | Program name (e.g. "Dor L'Dor", "Matmidim Chaburos") |
 | `description` | RICH TEXT | Program info; rendered as plain text (paragraphs preserved) |
-| `gallery` | MEDIA_GALLERY | Optional program/kids photos. First image is featured (sunburst behind it); the rest render as a scattered grid. |
+| `gallery` | MEDIA_GALLERY | Optional program/kids photos. Display adapts to count: 1 banner, 2 pair, 3 mosaic, 4+ slideshow. |
 | `flyerEmbedUrl` | TEXT | Optional Canva "Publish to Web" iframe src |
 | `flyerPdfUrl` | TEXT | Optional direct PDF URL |
 | `flyerImage` | IMAGE | Optional static flyer image |
