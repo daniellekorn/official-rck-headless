@@ -39,7 +39,7 @@ const {
 			]}
 		>
 			<div class:list={["relative", imageOn === "right" ? "md:order-2" : "md:order-1"]} data-reveal={imageOn === "right" ? "right" : "left"}>
-				{rays && <LightRays class="h-[135%] w-[135%] min-h-[460px] min-w-[460px]" opacity={0.5} />}
+				{rays && <LightRays class="w-[205%] min-w-[600px]" opacity={0.24} count={26} duration={11000} />}
 				{imageUrl ? (
 					<img
 						src={imageUrl}
