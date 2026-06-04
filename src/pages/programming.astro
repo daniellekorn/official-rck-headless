@@ -1,0 +1,8 @@
+---
+// Legacy route. "Programming" split into /events (Upcoming Events) and /youth
+// (Youth Programming) — see design log #017. Nothing in code links here; this
+// only catches the CMS-driven hero/JoinUs CTA hrefs that still say
+// "/programming" and any external bookmarks. Lands on Events as the general
+// "what's on" page.
+return Astro.redirect("/events", 308);
+---

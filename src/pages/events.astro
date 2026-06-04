@@ -1,0 +1,152 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import PageHeader from "../components/PageHeader.astro";
+import CoverflowCarousel from "../components/CoverflowCarousel.astro";
+import { getFlyers, uniqueSubCategories } from "../lib/flyers";
+
+const selectedSub = Astro.url.searchParams.get("sub") ?? null;
+
+const allEvents = await getFlyers("events");
+const subCategories = uniqueSubCategories(allEvents);
+
+const gridFlyers = selectedSub
+	? allEvents.filter((f) => f.subCategory === selectedSub)
+	: allEvents;
+---
+
+<Layout
+	title="Upcoming Events — RCK"
+	description="Upcoming events, programs, and community happenings at RCK — The Ra'anana Community Kollel."
+>
+	<Nav />
+
+	<PageHeader
+		eyebrow="EVENTS"
+		titleGold="Upcoming"
+		titleNavy="Events"
+	/>
+
+	{allEvents.length > 0 && <CoverflowCarousel items={allEvents} />}
+
+	{/* Discoverable cross-link to the youth page — events split by audience,
+	    so someone who lands here first still finds youth-specific content. */}
+	<section class="py-8 sm:py-10">
+		<div class="container-page">
+			<a
+				href="/youth"
+				class="group relative flex flex-col gap-4 overflow-hidden rounded-2xl bg-navy-700 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8 ring-1 ring-navy-600 transition-all hover:ring-gold-400/70 hover:shadow-[0_20px_50px_-24px_rgba(214,162,30,0.55)]"
+				data-reveal="up"
+			>
+				<span
+					class="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gold-500/15 blur-2xl transition-opacity group-hover:opacity-100 sm:opacity-70"
+					aria-hidden="true"
+				></span>
+				<div class="relative">
+					<p class="eyebrow text-gold-400">For Kids &amp; Teens</p>
+					<h2 class="mt-2 font-display text-2xl sm:text-3xl font-medium text-white">
+						Looking for Youth Programming?
+					</h2>
+					<p class="mt-2 max-w-xl text-sm sm:text-base leading-relaxed text-white/70">
+						Chaburos, teen learning, and youth events run by our rabbeim live on
+						their own page.
+					</p>
+				</div>
+				<span
+					class="relative inline-flex shrink-0 items-center gap-2 self-start rounded-full bg-gold-500 px-5 py-2.5 text-sm font-semibold text-navy-700 transition-colors group-hover:bg-gold-400 sm:self-auto"
+				>
+					Explore Youth Programming
+					<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+					</svg>
+				</span>
+			</a>
+		</div>
+	</section>
+
+	<section class="py-10 sm:py-14 bg-navy-900">
+		<div class="container-page">
+			{subCategories.length > 0 && (
+				<div class="flex flex-wrap gap-2 justify-center mb-10">
+					<a
+						href="/events"
+						class:list={[
+							"px-4 py-1.5 rounded-full text-sm font-medium transition-colors",
+							!selectedSub
+								? "bg-gold-400 text-navy-900"
+								: "bg-navy-700 text-white/80 hover:bg-navy-600",
+						]}
+					>
+						All
+					</a>
+					{subCategories.map((sub) => (
+						<a
+							href={`/events?sub=${encodeURIComponent(sub)}`}
+							class:list={[
+								"px-4 py-1.5 rounded-full text-sm font-medium capitalize transition-colors",
+								selectedSub === sub
+									? "bg-gold-400 text-navy-900"
+									: "bg-navy-700 text-white/80 hover:bg-navy-600",
+							]}
+						>
+							{sub}
+						</a>
+					))}
+				</div>
+			)}
+
+			{gridFlyers.length > 0 ? (
+				<div class="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+					{gridFlyers.map((flyer) => (
+						<div class="rounded-xl overflow-hidden bg-navy-800 shadow-lg">
+							<div class="relative aspect-[3/4]">
+								{flyer.imageUrl ? (
+									<img
+										src={flyer.imageUrl}
+										alt={flyer.title ?? ""}
+										loading="lazy"
+										class="absolute inset-0 w-full h-full object-contain"
+									/>
+								) : flyer.embedUrl ? (
+									<iframe
+										src={flyer.embedUrl}
+										title={flyer.title}
+										loading="lazy"
+										allow="fullscreen"
+										class="absolute inset-0 w-full h-full border-0"
+									/>
+								) : flyer.pdfUrl ? (
+									<iframe
+										src={`https://docs.google.com/viewer?url=${encodeURIComponent(flyer.pdfUrl)}&embedded=true`}
+										title={flyer.title}
+										loading="lazy"
+										class="absolute inset-0 w-full h-full border-0"
+									/>
+								) : null}
+							</div>
+							{(flyer.title || flyer.subCategory) && (
+								<div class="p-4">
+									{flyer.title && (
+										<p class="font-medium text-white text-sm">{flyer.title}</p>
+									)}
+									{flyer.subCategory && (
+										<p class="mt-1 text-xs text-gold-400 capitalize">{flyer.subCategory}</p>
+									)}
+								</div>
+							)}
+						</div>
+					))}
+				</div>
+			) : (
+				<p class="text-center text-white/50 py-16">
+					{selectedSub
+						? `No events for "${selectedSub}" yet.`
+						: "Upcoming events will be posted here soon."}
+				</p>
+			)}
+		</div>
+	</section>
+
+	<Footer />
+</Layout>

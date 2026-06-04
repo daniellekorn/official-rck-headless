@@ -13,6 +13,7 @@ export type RoleGroup =
 	| "roshei"
 	| "kollel"
 	| "rabbis"
+	| "youth"
 	| "staff"
 	| "board"
 	| "other";
@@ -22,6 +23,10 @@ export const ROLE_GROUPS: { key: RoleGroup; label: string }[] = [
 	{ key: "roshei", label: "Roshei Kollel" },
 	{ key: "kollel", label: "Kollel Avreichim" },
 	{ key: "rabbis", label: "Rabbis" },
+	// Youth programming leads. Renders on /team like any other group (only
+	// when populated) AND drives the /youth page, which reads this bucket and
+	// shows each member's `role` as the program name. See design log #017.
+	{ key: "youth", label: "Youth Programming" },
 	{ key: "staff", label: "Staff" },
 	{ key: "board", label: "Board" },
 	// "other" is the catch-all for values that don't match any alias. It
@@ -76,6 +81,21 @@ const ROLE_GROUP_ALIASES: Record<string, RoleGroup> = {
 	"rabbanim": "rabbis",
 	"rav": "rabbis",
 	"maggid shiur": "rabbis",
+
+	// Youth Programming — leads of the youth chaburos and programs. Editors
+	// normally type "Youth"; the program-name aliases below are a safety net
+	// in case someone types the program itself into roleGroup. See #017.
+	"youth": "youth",
+	"youth programming": "youth",
+	"youth program": "youth",
+	"youth programs": "youth",
+	"teen": "youth",
+	"teens": "youth",
+	"teen learning": "youth",
+	"dor l'dor": "youth",
+	"dor ldor": "youth",
+	"matmidim": "youth",
+	"pirchei": "youth",
 
 	// Staff (dormant).
 	"staff": "staff",
@@ -152,6 +172,7 @@ export function groupByRole(members: TeamMember[]): Record<RoleGroup, TeamMember
 		roshei: [],
 		kollel: [],
 		rabbis: [],
+		youth: [],
 		staff: [],
 		board: [],
 		other: [],

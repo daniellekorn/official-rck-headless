@@ -1,0 +1,179 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import PageHeader from "../components/PageHeader.astro";
+import PhotoGallery from "../components/PhotoGallery.astro";
+import { getYouthPrograms, hasFlyer } from "../lib/youth-programs";
+import { ricosToPlainText } from "../lib/ricos";
+
+// Each program is its own stacked section: always a title + description and a
+// contact rabbi, optionally a photo and/or a flyer. See design log #017.
+const programs = await getYouthPrograms();
+---
+
+<Layout
+	title="Youth Programming — RCK"
+	description="Chaburos, teen learning, and youth programs at RCK — The Ra'anana Community Kollel. Each program with its own info and contact rabbi."
+>
+	<Nav />
+
+	<PageHeader
+		eyebrow="YOUTH"
+		titleGold="Youth"
+		titleNavy="Programming"
+		subtitle="Chaburos, teen learning, and programs that build the next generation of bnei and bnos Torah in Ra'anana — each led by a rabbi you can reach directly."
+	/>
+
+	{programs.length > 0 ? (
+		<div>
+			{programs.map((program, i) => {
+				const description = program.description ? ricosToPlainText(program.description) : "";
+				const flyer = hasFlyer(program);
+				const hasPhotos = program.galleryUrls.length > 0;
+				const hasContact = Boolean(program.contactName || program.contactEmail);
+				// Alternate a warm off-white band against white for rhythm.
+				const banded = i % 2 === 1;
+				// Alternate the flyer's side per program for a more stylish rhythm.
+				const flyerLeft = i % 2 === 0;
+
+				return (
+					<section class:list={["py-16 sm:py-20 md:py-24", banded && "bg-mist"]}>
+						<div class="container-page">
+							{/* Header */}
+							<div data-reveal="up">
+								<p class="eyebrow text-gold-500">
+									{String(i + 1).padStart(2, "0")} · Youth Program
+								</p>
+								<h2 class="mt-3 font-display text-3xl sm:text-4xl md:text-[2.75rem] leading-[1.05] font-medium uppercase text-navy-600">
+									{program.title}
+								</h2>
+								<span class="mt-5 block h-[2px] w-14 bg-gold-400" aria-hidden="true"></span>
+							</div>
+
+							{/* Flyer + description/contact — two columns, alternating sides.
+							    With no flyer, the text column simply spans the width. */}
+							<div
+								class:list={[
+									"mt-10 sm:mt-12 grid items-center gap-10 md:gap-14 lg:gap-20",
+									flyer && "md:grid-cols-2",
+								]}
+							>
+								{flyer && (
+									<div
+										class:list={["flex justify-center", flyerLeft ? "md:order-1" : "md:order-2"]}
+										data-reveal={flyerLeft ? "left" : "right"}
+									>
+										<div class="w-full max-w-sm overflow-hidden rounded-2xl bg-navy-800 ring-1 ring-navy-100 shadow-[0_30px_64px_-34px_rgba(7,23,58,0.55)]">
+											<div class="relative aspect-[3/4]">
+												{program.flyerImageUrl ? (
+													<img
+														src={program.flyerImageUrl}
+														alt={`${program.title} flyer`}
+														loading="lazy"
+														class="absolute inset-0 h-full w-full object-contain"
+													/>
+												) : program.flyerEmbedUrl ? (
+													<iframe
+														src={program.flyerEmbedUrl}
+														title={`${program.title} flyer`}
+														loading="lazy"
+														allow="fullscreen"
+														class="absolute inset-0 h-full w-full border-0"
+													/>
+												) : program.flyerPdfUrl ? (
+													<iframe
+														src={`https://docs.google.com/viewer?url=${encodeURIComponent(program.flyerPdfUrl)}&embedded=true`}
+														title={`${program.title} flyer`}
+														loading="lazy"
+														class="absolute inset-0 h-full w-full border-0"
+													/>
+												) : null}
+											</div>
+										</div>
+									</div>
+								)}
+
+								<div
+									class:list={[flyer && (flyerLeft ? "md:order-2" : "md:order-1")]}
+									data-reveal={flyer ? (flyerLeft ? "right" : "left") : "up"}
+								>
+									{description && (
+										<p class="max-w-prose text-base md:text-[1.0625rem] leading-relaxed text-navy-500 whitespace-pre-line">
+											{description}
+										</p>
+									)}
+
+									{hasContact && (
+										<div
+											class:list={[
+												"inline-flex flex-col gap-3 rounded-2xl bg-white p-5 sm:p-6 ring-1 ring-navy-100 shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)]",
+												description && "mt-8",
+											]}
+										>
+											<p class="font-sans text-[11px] font-bold uppercase tracking-[0.22em] text-navy-300">
+												Program Contact
+											</p>
+											{program.contactName && (
+												<p class="font-display text-xl font-medium text-navy-700">
+													{program.contactName}
+												</p>
+											)}
+											<div class="flex flex-wrap items-center gap-3">
+												{program.contactEmail && (
+													<a
+														href={`mailto:${program.contactEmail}`}
+														class="inline-flex items-center gap-2 text-sm font-medium text-navy-500 transition-colors hover:text-gold-600"
+													>
+														<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+															<rect x="3" y="5" width="18" height="14" rx="2" />
+															<path d="m3 7 9 6 9-6" stroke-linecap="round" stroke-linejoin="round" />
+														</svg>
+														Email
+													</a>
+												)}
+												<a
+													href="/contact"
+													class="inline-flex items-center gap-1.5 rounded-full bg-gold-500 px-4 py-1.5 text-sm font-semibold text-navy-700 transition-colors hover:bg-gold-400"
+												>
+													Contact
+													<svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2">
+														<path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+													</svg>
+												</a>
+											</div>
+										</div>
+									)}
+								</div>
+							</div>
+
+							{/* One big slideshow of the program's photos, full width below */}
+							{hasPhotos && (
+								<div class="mt-12 sm:mt-14" data-reveal="up" data-reveal-delay="120">
+									<PhotoGallery images={program.galleryUrls} label={program.title} />
+								</div>
+							)}
+						</div>
+					</section>
+				);
+			})}
+		</div>
+	) : (
+		<section class="py-24">
+			<div class="container-page text-center">
+				<p class="eyebrow text-gold-500">Coming soon</p>
+				<h2 class="mt-3 font-display text-3xl md:text-4xl font-medium text-navy-600">
+					Youth programming on the way
+				</h2>
+				<p class="mx-auto mt-4 max-w-xl text-base text-navy-500 leading-relaxed">
+					Each program (added to the
+					<code class="rounded bg-navy-50 px-1.5 py-0.5 text-sm">YouthPrograms</code>
+					collection — title, description, contact rabbi, and an optional photo or
+					flyer) will appear here automatically once the office adds it.
+				</p>
+			</div>
+		</section>
+	)}
+
+	<Footer />
+</Layout>
