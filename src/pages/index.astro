@@ -5,7 +5,18 @@ import Hero from "../components/Hero.astro";
 import SplitFeature from "../components/SplitFeature.astro";
 import JoinUs from "../components/JoinUs.astro";
 import WhoWeAre from "../components/WhoWeAre.astro";
+import SectionPager from "../components/SectionPager.astro";
 import Footer from "../components/Footer.astro";
+
+// Right-edge section pager (desktop). ids/themes are mirrored onto the
+// section wrappers below so the dots can scroll-spy and recolor per section.
+const pagerSections = [
+	{ id: "welcome", label: "Welcome" },
+	{ id: "about", label: "About" },
+	{ id: "join", label: "Join Us" },
+	{ id: "vision", label: "Vision" },
+	{ id: "history", label: "History" },
+];
 
 import { getHomepage } from "../lib/homepage";
 import { getHistory } from "../lib/history";
@@ -41,54 +52,93 @@ const torahVision = {
 
 <Layout>
 	<Nav />
+	<SectionPager sections={pagerSections} />
 	<main>
-		<Hero
-			eyebrow={homepage?.heroEyebrow}
-			subtitle={homepage?.heroSubtitle}
-			imageUrl={homepage?.heroImageUrl}
-			primaryCtaLabel={homepage?.heroPrimaryCtaLabel}
-			primaryCtaHref={homepage?.heroPrimaryCtaHref}
-			secondaryCtaLabel={homepage?.heroSecondaryCtaLabel}
-			secondaryCtaHref={homepage?.heroSecondaryCtaHref}
-		/>
+		<div id="welcome" data-pager-section data-pager-theme="dark">
+			<Hero
+				eyebrow={homepage?.heroEyebrow}
+				subtitle={homepage?.heroSubtitle}
+				imageUrl={homepage?.heroImageUrl}
+				primaryCtaLabel={homepage?.heroPrimaryCtaLabel}
+				primaryCtaHref={homepage?.heroPrimaryCtaHref}
+				secondaryCtaLabel={homepage?.heroSecondaryCtaLabel}
+				secondaryCtaHref={homepage?.heroSecondaryCtaHref}
+			/>
+		</div>
 
-		<SplitFeature
-			eyebrowGold={uniqueImpactful.eyebrowGold}
-			eyebrowNavy={uniqueImpactful.eyebrowNavy}
-			subheadLine1={uniqueImpactful.subheadLine1}
-			subheadLine2={uniqueImpactful.subheadLine2}
-			subheadAccent="line2"
-			body={uniqueImpactful.body}
-			imageOn="left"
-			imageUrl={uniqueImpactful.imageUrl}
-			rays
-		/>
+		<div id="about" data-pager-section data-pager-theme="light" data-section-reveal class="scroll-mt-24">
+			<SplitFeature
+				eyebrowGold={uniqueImpactful.eyebrowGold}
+				eyebrowNavy={uniqueImpactful.eyebrowNavy}
+				subheadLine1={uniqueImpactful.subheadLine1}
+				subheadLine2={uniqueImpactful.subheadLine2}
+				subheadAccent="line2"
+				body={uniqueImpactful.body}
+				imageOn="left"
+				imageUrl={uniqueImpactful.imageUrl}
+				rays
+			/>
+		</div>
 
-		<JoinUs
-			cards={[
-				{ title: homepage?.joinUsCard1Title, subtitle: homepage?.joinUsCard1Subtitle, href: homepage?.joinUsCard1Href, icon: homepage?.joinUsCard1Icon as "book" | "reader" | "people" | "minyan" | undefined },
-				{ title: homepage?.joinUsCard2Title, subtitle: homepage?.joinUsCard2Subtitle, href: homepage?.joinUsCard2Href, icon: homepage?.joinUsCard2Icon as "book" | "reader" | "people" | "minyan" | undefined },
-				{ title: homepage?.joinUsCard3Title, subtitle: homepage?.joinUsCard3Subtitle, href: homepage?.joinUsCard3Href, icon: homepage?.joinUsCard3Icon as "book" | "reader" | "people" | "minyan" | undefined },
-			].filter((c) => c.title)}
-		/>
+		<div id="join" data-pager-section data-pager-theme="dark" data-section-reveal class="scroll-mt-24">
+			<JoinUs
+				cards={[
+					{ title: homepage?.joinUsCard1Title, subtitle: homepage?.joinUsCard1Subtitle, href: homepage?.joinUsCard1Href, icon: homepage?.joinUsCard1Icon as "book" | "reader" | "people" | "minyan" | undefined },
+					{ title: homepage?.joinUsCard2Title, subtitle: homepage?.joinUsCard2Subtitle, href: homepage?.joinUsCard2Href, icon: homepage?.joinUsCard2Icon as "book" | "reader" | "people" | "minyan" | undefined },
+					{ title: homepage?.joinUsCard3Title, subtitle: homepage?.joinUsCard3Subtitle, href: homepage?.joinUsCard3Href, icon: homepage?.joinUsCard3Icon as "book" | "reader" | "people" | "minyan" | undefined },
+				].filter((c) => c.title)}
+			/>
+		</div>
 
-		<SplitFeature
-			eyebrowGold={torahVision.eyebrowGold}
-			eyebrowNavy={torahVision.eyebrowNavy}
-			subheadLine1={torahVision.subheadLine1}
-			subheadLine2={torahVision.subheadLine2}
-			subheadAccent="line2"
-			body={torahVision.body}
-			imageOn="left"
-			imageUrl={torahVision.imageUrl}
-		/>
+		<div id="vision" data-pager-section data-pager-theme="light" data-section-reveal class="scroll-mt-24">
+			<SplitFeature
+				eyebrowGold={torahVision.eyebrowGold}
+				eyebrowNavy={torahVision.eyebrowNavy}
+				subheadLine1={torahVision.subheadLine1}
+				subheadLine2={torahVision.subheadLine2}
+				subheadAccent="line2"
+				body={torahVision.body}
+				imageOn="right"
+				imageUrl={torahVision.imageUrl}
+			/>
+		</div>
 
-		<WhoWeAre
-			title={homepage?.whoWeAreTitle}
-			hebrew={homepage?.whoWeAreHebrew}
-			body={homepage?.whoWeAreBody}
-			entries={history.map((h) => ({ year: h.year, title: h.title, caption: h.caption, imageUrl: h.imageUrl }))}
-		/>
+		<div id="history" data-pager-section data-pager-theme="dark" data-section-reveal class="scroll-mt-24">
+			<WhoWeAre
+				title={homepage?.whoWeAreTitle}
+				hebrew={homepage?.whoWeAreHebrew}
+				body={homepage?.whoWeAreBody}
+				entries={history.map((h) => ({ year: h.year, title: h.title, caption: h.caption, imageUrl: h.imageUrl }))}
+			/>
+		</div>
 	</main>
 	<Footer />
 </Layout>
+
+<script>
+	// Motion-driven section reveal: each wrapper glides up as it enters view.
+	// Transform-only (no opacity) so it layers over — rather than fights — the
+	// per-element CSS reveals (data-reveal) already inside each section.
+	import { animate, inView } from "motion";
+
+	const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	const wrappers = document.querySelectorAll<HTMLElement>("[data-section-reveal]");
+
+	if (!reduce && wrappers.length) {
+		wrappers.forEach((el) => {
+			el.style.transform = "translateY(56px)";
+			el.style.willChange = "transform";
+		});
+		inView(
+			"[data-section-reveal]",
+			(element) => {
+				animate(
+					element,
+					{ transform: ["translateY(56px)", "translateY(0px)"] },
+					{ duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+				);
+			},
+			{ amount: 0.18 },
+		);
+	}
+</script>
