@@ -24,6 +24,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | History timeline under "Who We Are" | `OurHistory` | Add / reorder / hide rows. Each row is one milestone: image + year + title + caption |
 | Join Us cards (3 gold cards) | `HomePage` | `joinUsCard1*` / `joinUsCard2*` / `joinUsCard3*` fields on the single row |
 | Team members | `TeamMembers` | Add a row. Photo, name, role, bio, etc. |
+| Youth programs (on /youth) | `YouthPrograms` | Add a row per program: title, description, contact rabbi, optional photo + flyer. |
 | Weekday davening times | `DaveningTimes` | Add / edit rows with `dayType = Weekday`. Shabbat is a static "Join us at KBA" section (no CMS rows needed). |
 | Flyers (Canva embeds or PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). For event flyers, set `removeAfter` so they drop off the site on their own. |
 | Footer address, phone, email | `ContactInfo` | Edit the single row. Leave a field empty to hide it from the footer. |
@@ -142,13 +143,37 @@ Fields: `firstName`, `lastName`, `hebrewName` (opt), `role`, `roleGroup`, `bio` 
 | `Rosh Kollel`, `Rosh Chaburah`, `Roshei Kollel`, `Roshei Chaburos` | **Roshei Kollel** |
 | `Kollel`, `Avreich`, `Avrech`, `Avreichim`, `Avrechim`, `Yungerman`, `Yungerleit` | **Kollel Avreichim** |
 | `Rabbi`, `Rabbis`, `Rabbeim`, `Rabbanim`, `Rav`, `Maggid Shiur` | **Rabbis** (dormant — only shows if populated) |
+| `Youth`, `Youth Programming`, `Teen`, `Teens`, `Dor L'Dor`, `Matmidim` | **Youth Programming** — shows on /team (the /youth page itself is driven by a separate `YouthPrograms` collection, see below) |
 | `Staff`, `Admin`, `Administration`, `Hanhala`, `Office` | **Staff** (dormant) |
 | `Board`, `Board Member`, `Trustee` | **Board** (dormant) |
 | Anything else | **Team** (catch-all so nothing silently disappears) |
 
 "Dormant" means the section header doesn't appear on /team unless at least one member is filed there. The taxonomy is biased toward the three active groups (**Founder & Director**, **Roshei Kollel**, **Kollel Avreichim**) but the dormant ones exist for flexibility — fill one and it appears automatically.
 
+**Youth rabbis — two separate places:** a member with `roleGroup = Youth` shows in a "Youth Programming" section on **/team** (the staff directory). The **/youth page itself is *not* built from `TeamMembers`** — it's built from the `YouthPrograms` collection (see its schema below), where each program names its own contact rabbi. So to put a rabbi's chaburah on the youth page, add a **`YouthPrograms`** row, not a team member. The two are independent: a rabbi can be in both (a `TeamMembers` row for their directory bio *and* the contact on a `YouthPrograms` row). See [design-log/017](design-log/017-events-and-youth-pages.md).
+
 If a value lands a member in the wrong section, either fix the spelling or ask the developer to extend the alias map in `src/lib/team.ts`. See design log [#007](design-log/007-team-page-taxonomy-and-hover-reveal.md) for the rationale behind the active vs. dormant split.
+
+#### `YouthPrograms` — one row per youth program
+
+Drives the **Youth Programming page** (`/youth`). Each row is one program (Dor L'Dor, Matmidim Chaburos, Teen Learning, …) and renders as its own section on the page. A program **always** needs a `title`, a `description`, and a contact rabbi; the photo and flyer are **optional** — a program with neither just shows as a centered text block. Rows are ordered by `sortOrder`.
+
+| Field | Type | Notes |
+|---|---|---|
+| `title` | Text | Program name, e.g. `Dor L'Dor`, `Matmidim Chaburos`, `Teen Learning`. Shown as the big section heading. |
+| `description` | Rich Text | What the program is. Paragraphs are preserved. |
+| `gallery` | Media Gallery (opt) | Photos of the program's kids/teens — add as many as you like. The **first** image is featured (shown large with a gold sunburst behind it); the rest appear as a small grid in that program's section. Leave empty for none. |
+| `flyerEmbedUrl` | Text (opt) | Canva "Publish to Web" iframe src URL — live-synced to Canva. |
+| `flyerPdfUrl` | Text (opt) | Direct public PDF URL (for non-Canva flyers). |
+| `flyerImage` | Image (opt) | A static flyer image. Use this *or* one of the URL fields — they're checked image → embed → pdf. |
+| `contactName` | Text | The contact rabbi's name, e.g. `Rav Avraham Aharon`. |
+| `contactEmail` | Text | The contact rabbi's email — becomes the "Email" link. Leave empty to show only the generic "Contact" button. |
+| `sortOrder` | Number | Order of sections, lower first. |
+| `active` | Boolean | Show/hide without deleting. |
+
+**To add a rabbi's chaburah to the youth page:** add a `YouthPrograms` row — `title` = the program, `description` = the info, `contactName` + `contactEmail` = the rabbi. That's all that's required; add photos to `gallery` and/or a flyer if you have them. (This is separate from `TeamMembers` — see the note above.)
+
+> The `Flyers` collection still has a `youth` category, but the `/youth` page no longer reads it — youth flyers belong on the `YouthPrograms` row now. Put youth flyers there.
 
 #### `DaveningTimes`
 
