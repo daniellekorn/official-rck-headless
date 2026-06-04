@@ -28,17 +28,17 @@ const isContactActive = pathname === "/contact";
 >
 	<div class="mx-auto w-full max-w-7xl px-6">
 		<nav
-			class="nav-pill mx-auto flex max-w-7xl items-center justify-between gap-3 sm:gap-4 rounded-full bg-white px-5 sm:px-7 py-3.5 sm:py-4 ring-1 ring-gold-400/70 shadow-[0_16px_44px_-16px_rgba(15,23,42,0.45),0_0_22px_-4px_rgba(214,162,30,0.45)]"
+			class="nav-pill mx-auto flex max-w-7xl items-center justify-between gap-3 sm:gap-4 rounded-full bg-white px-5 sm:px-6 py-2.5 sm:py-3 ring-1 ring-gold-400/70 shadow-[0_16px_44px_-16px_rgba(15,23,42,0.45),0_0_22px_-4px_rgba(214,162,30,0.45)]"
 		>
 			<a href="/" aria-label="RCK — The Ra'anana Community Kollel — Home">
 				<img
 					src="/logo-white.png"
 					alt="RCK — Ra'anana Community Kollel"
-					class="h-12 sm:h-14 w-auto"
+					class="h-11 sm:h-12 w-auto"
 				/>
 			</a>
 
-			<ul class="hidden items-center gap-5 lg:gap-7 md:flex">
+			<ul class="hidden items-center gap-4 lg:gap-6 md:flex">
 				{
 					navLinks.map((link) => (
 						<li>
@@ -46,7 +46,7 @@ const isContactActive = pathname === "/contact";
 								href={link.href}
 								aria-current={link.active ? "page" : undefined}
 								class:list={[
-									"text-lg font-medium transition-colors whitespace-nowrap",
+									"text-[17px] font-medium transition-colors whitespace-nowrap",
 									link.active
 										? "text-navy-600 underline underline-offset-[6px] decoration-2 decoration-gold-500"
 										: "text-navy-500 hover:text-gold-500",
@@ -63,7 +63,7 @@ const isContactActive = pathname === "/contact";
 				<a
 					href="/contact"
 					class:list={[
-						"rounded-full border px-5 py-2 text-lg font-medium transition-colors whitespace-nowrap",
+						"rounded-full border px-4 py-2 text-[17px] font-medium transition-colors whitespace-nowrap",
 						isContactActive
 							? "border-gold-500 text-gold-600 bg-gold-50"
 							: "border-navy-200 text-navy-500 hover:bg-navy-50",
@@ -73,7 +73,7 @@ const isContactActive = pathname === "/contact";
 				</a>
 				<a
 					href="/donate"
-					class="group inline-flex items-center gap-1.5 rounded-full bg-gold-500 px-6 py-2.5 text-lg font-semibold text-navy-700 shadow-sm transition-all hover:bg-gold-400 hover:shadow-md whitespace-nowrap"
+					class="group inline-flex items-center gap-1.5 rounded-full bg-gold-500 px-5 py-2 text-[17px] font-semibold text-navy-700 shadow-sm transition-all hover:bg-gold-400 hover:shadow-md whitespace-nowrap"
 				>
 					<svg viewBox="0 0 24 24" class="h-4 w-4 transition-transform duration-300 group-hover:scale-110" fill="currentColor" aria-hidden="true">
 						<path d="M12 20.3 4.6 13a4.6 4.6 0 0 1 6.5-6.5l.9.9.9-.9A4.6 4.6 0 0 1 19.4 13L12 20.3Z" />
