@@ -162,7 +162,7 @@ Drives the **Youth Programming page** (`/youth`). Each row is one program (Dor L
 |---|---|---|
 | `title` | Text | Program name, e.g. `Dor L'Dor`, `Matmidim Chaburos`, `Teen Learning`. Shown as the big section heading. |
 | `description` | Rich Text | What the program is. Paragraphs are preserved. |
-| `gallery` | Media Gallery (opt) | Photos of the program's kids/teens — add as many as you like. The display adapts automatically: **1** photo shows as a wide banner, **2** side-by-side, **3** as a mosaic, and **4 or more** become a swipeable slideshow (with thumbnails on desktop, dots on mobile). Leave empty for none. |
+| `gallery` | Media Gallery (opt) | Photos of the program's kids/teens — add as many as you like. **One** photo shows as a big banner; **more than one** becomes a big swipeable slideshow (with thumbnails on desktop, dots on mobile) below the flyer/description. Leave empty for none. |
 | `flyerEmbedUrl` | Text (opt) | Canva "Publish to Web" iframe src URL — live-synced to Canva. |
 | `flyerPdfUrl` | Text (opt) | Direct public PDF URL (for non-Canva flyers). |
 | `flyerImage` | Image (opt) | A static flyer image. Use this *or* one of the URL fields — they're checked image → embed → pdf. |

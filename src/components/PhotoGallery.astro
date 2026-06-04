@@ -1,12 +1,8 @@
 ---
 /**
- * PhotoGallery — adaptive image display that scales with how many photos it's
- * given:
- *   1 photo  → a single wide feature banner
- *   2 photos → a side-by-side pair
- *   3 photos → a mosaic (one wide + two squares)
- *   4+ photos → a modern crossfade slideshow (thumbnails on desktop, dots on
- *               mobile, arrows, swipe, autoplay with hover/focus pause)
+ * PhotoGallery — one big image when given a single photo, or one big crossfade
+ * slideshow when given more than one (thumbnails on desktop, dots on mobile,
+ * arrows, swipe, autoplay with hover/focus pause).
  *
  * Vanilla JS following the project carousel convention (no npm carousel libs —
  * they don't resolve in the Wix build; see design log #012). Styles are
@@ -31,23 +27,7 @@ const frame =
 	<img src={images[0]} alt={alt(0)} loading="lazy" class:list={[frame, "aspect-[16/9]"]} />
 )}
 
-{n === 2 && (
-	<div class="grid grid-cols-2 gap-3 sm:gap-4">
-		{images.map((src, i) => (
-			<img src={src} alt={alt(i)} loading="lazy" class:list={[frame, "aspect-[4/3]"]} />
-		))}
-	</div>
-)}
-
-{n === 3 && (
-	<div class="grid grid-cols-2 gap-3 sm:gap-4">
-		<img src={images[0]} alt={alt(0)} loading="lazy" class:list={[frame, "col-span-2 aspect-[16/9]"]} />
-		<img src={images[1]} alt={alt(1)} loading="lazy" class:list={[frame, "aspect-square !rounded-xl"]} />
-		<img src={images[2]} alt={alt(2)} loading="lazy" class:list={[frame, "aspect-square !rounded-xl"]} />
-	</div>
-)}
-
-{n >= 4 && (
+{n >= 2 && (
 	<div class="rck-gal" data-gallery data-autoplay-ms={autoplayMs}>
 		<div class="rck-gal-stage" data-gal-stage>
 			{images.map((src, i) => (

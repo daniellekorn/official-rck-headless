@@ -62,20 +62,22 @@ a flat flyer grid, so it gets its own CMS collection rather than overloading
 
 - **Q:** Layout — uniform card grid or stacked sections?
   **A:** Stacked, full-width sections (warm-mist band alternates with white) in
-  the bold direction from #016. Each program is a header row (title left, contact
-  card right), an optional description, then a photo gallery, then an optional
-  flyer. An earlier two-column (image beside text) version was scrapped: with
-  descriptions still empty it left a tall photo column beside a near-empty,
-  vertically-centered text column — badly unbalanced. The stacked layout degrades
-  gracefully (no description → header + gallery still reads intentionally).
+  the bold direction from #016. Each program: a full-width header (number +
+  title), then a **two-column row of flyer + description/contact whose sides
+  alternate per program** (flyer left on even, right on odd) for editorial
+  rhythm, then **one big full-width photo slideshow** below. Earlier tries —
+  image-beside-text, and a featured-banner+thumbnail mosaic — were scrapped: with
+  descriptions empty they left tall photo columns beside near-empty text, and the
+  flyer floated narrow and alone. Flyer-with-text on top + one big slideshow below
+  reads cleaner and degrades well (no flyer → text spans full width; no photos →
+  no slideshow).
 
 - **Q:** How are the gallery photos shown?
-  **A:** An adaptive `PhotoGallery` component keyed to count: 1 → wide feature
-  banner; 2 → side-by-side pair; 3 → mosaic (one wide + two squares); **4+ → a
-  crossfade slideshow** (thumbnail strip on desktop, dots on mobile, arrows,
-  swipe, autoplay with hover/focus pause). Vanilla JS per the no-carousel-lib
-  rule (#012). The `LightRays` sunburst was dropped from program photos — behind
-  a real photo it leaked a stray ray-fan above the image; a contained gold glow
+  **A:** A `PhotoGallery` component: a single big banner for one photo, or **one
+  big crossfade slideshow** for more than one (thumbnail strip on desktop, dots on
+  mobile, arrows, swipe, autoplay with hover/focus pause). Vanilla JS per the
+  no-carousel-lib rule (#012). The `LightRays` sunburst was dropped from program
+  photos — behind a real photo it leaked a stray ray-fan above the image; a contained gold glow
   shadow replaces it.
 
 - **Q:** Where do the kids/teens images come from, and how many per program?
@@ -116,7 +118,7 @@ a flat flyer grid, so it gets its own CMS collection rather than overloading
 |---|---|---|
 | `title` | TEXT | Program name (e.g. "Dor L'Dor", "Matmidim Chaburos") |
 | `description` | RICH TEXT | Program info; rendered as plain text (paragraphs preserved) |
-| `gallery` | MEDIA_GALLERY | Optional program/kids photos. Display adapts to count: 1 banner, 2 pair, 3 mosaic, 4+ slideshow. |
+| `gallery` | MEDIA_GALLERY | Optional program/kids photos. One photo = big banner; more than one = one big slideshow. |
 | `flyerEmbedUrl` | TEXT | Optional Canva "Publish to Web" iframe src |
 | `flyerPdfUrl` | TEXT | Optional direct PDF URL |
 | `flyerImage` | IMAGE | Optional static flyer image |
