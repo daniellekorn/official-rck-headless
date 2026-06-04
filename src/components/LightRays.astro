@@ -78,20 +78,20 @@ const vars = [
 		);
 		/* fade the center (so light reads as coming from behind the element)
 		   and the outer edge (volumetric falloff) */
-		-webkit-mask-image: radial-gradient(closest-side, transparent 4%, #000 16%, #000 52%, transparent 84%);
-		mask-image: radial-gradient(closest-side, transparent 4%, #000 16%, #000 52%, transparent 84%);
-		animation: rck-rays-drift calc(var(--rck-dur) * 9) linear infinite;
+		-webkit-mask-image: radial-gradient(closest-side, transparent 4%, #000 14%, #000 72%, transparent 99%);
+		mask-image: radial-gradient(closest-side, transparent 4%, #000 14%, #000 72%, transparent 99%);
+		animation: rck-rays-drift calc(var(--rck-dur) * 16) linear infinite;
 		will-change: transform;
 	}
 
 	@keyframes rck-rays-breathe {
 		0%,
 		100% {
-			transform: scale(0.82);
-			opacity: calc(var(--rck-opacity) * 0.55);
+			transform: scale(0.99);
+			opacity: calc(var(--rck-opacity) * 0.85);
 		}
 		50% {
-			transform: scale(1.06);
+			transform: scale(1.03);
 			opacity: var(--rck-opacity);
 		}
 	}
