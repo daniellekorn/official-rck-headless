@@ -76,9 +76,10 @@ CMS-driven SSR HTML is edge-cached with a content-independent `ETag`, so
 `must-revalidate` returns `304` and serves stale until the *build* changes (a
 release) or the entry evicts.
 
-The `src/middleware.ts` from this change is therefore currently a **no-op**.
-Leave-or-revert is tracked as follow-up; reverting needs another release, so
-it's deferred rather than churned on its own.
+The `src/middleware.ts` from this change is a **no-op**, so it was reverted
+(deleted) and re-released. The findings + the bug report
+(`wix-stale-cache-bug-report.md`, to send to Wix) are the lasting artifacts of
+this entry.
 
 ## Follow-up
 
