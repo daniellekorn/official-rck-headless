@@ -68,8 +68,10 @@ new-with-legacy-fallback; `index.astro` consumes `imageTextSection1` /
 code except the intentional fallback lookups. CONTRIBUTING.md schema + "what you
 can change" tables updated.
 
-## Follow-up (not done in this change)
+## Implementation Results (transition complete)
 
-Delete the 16 legacy fields (`uniqueImpactful*`, `torahVision*`) from the
-HomePage collection **after** this ships via `wix release` and the homepage is
-verified. Until then they remain as the fallback source.
+Shipped via `wix release`. Once the released site was confirmed reading the new
+keys, the 16 legacy fields (`uniqueImpactful*`, `torahVision*`) were deleted
+from the HomePage collection and the `new ?? legacy` fallback in `getHomepage`
+was removed — it now reads the new keys directly. No legacy keys remain in the
+CMS or the code.

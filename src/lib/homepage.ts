@@ -101,36 +101,14 @@ export async function getHomepage(): Promise<HomepageContent | null> {
 	try {
 		const elevated = auth.elevate(items.query);
 		const { items: results } = await elevated(COLLECTION_ID).limit(1).find();
-		const row = results[0] as Record<string, unknown> | undefined;
+		const row = results[0] as HomepageContent | undefined;
 		if (!row) return null;
 
-		// Read the new generic keys, falling back to the legacy keys
-		// (uniqueImpactful*/torahVision*) so nothing breaks during the window
-		// before the old fields are deleted. See design-log/019.
-		const pick = (next: string, legacy: string): string | undefined =>
-			(row[next] as string | undefined) ?? (row[legacy] as string | undefined);
-
 		return {
-			...(row as HomepageContent),
-			heroImageUrl: resolveImage(row.heroImage as string | undefined, 1920, 1200),
-
-			imageTextSection1EyebrowGold: pick("imageTextSection1EyebrowGold", "uniqueImpactfulEyebrowGold"),
-			imageTextSection1EyebrowNavy: pick("imageTextSection1EyebrowNavy", "uniqueImpactfulEyebrowNavy"),
-			imageTextSection1TitleLine1: pick("imageTextSection1TitleLine1", "uniqueImpactfulTitleLine1"),
-			imageTextSection1TitleLine2: pick("imageTextSection1TitleLine2", "uniqueImpactfulTitleLine2"),
-			imageTextSection1Body: pick("imageTextSection1Body", "uniqueImpactfulBody"),
-			imageTextSection1ImageOn: pick("imageTextSection1ImageOn", "uniqueImpactfulImageOn"),
-			imageTextSection1AccentLine: pick("imageTextSection1AccentLine", "uniqueImpactfulAccentLine"),
-			imageTextSection1ImageUrl: resolveImage(pick("imageTextSection1Image", "uniqueImpactfulImage"), 1000, 750),
-
-			imageTextSection2EyebrowGold: pick("imageTextSection2EyebrowGold", "torahVisionEyebrowGold"),
-			imageTextSection2EyebrowNavy: pick("imageTextSection2EyebrowNavy", "torahVisionEyebrowNavy"),
-			imageTextSection2TitleLine1: pick("imageTextSection2TitleLine1", "torahVisionTitleLine1"),
-			imageTextSection2TitleLine2: pick("imageTextSection2TitleLine2", "torahVisionTitleLine2"),
-			imageTextSection2Body: pick("imageTextSection2Body", "torahVisionBody"),
-			imageTextSection2ImageOn: pick("imageTextSection2ImageOn", "torahVisionImageOn"),
-			imageTextSection2AccentLine: pick("imageTextSection2AccentLine", "torahVisionAccentLine"),
-			imageTextSection2ImageUrl: resolveImage(pick("imageTextSection2Image", "torahVisionImage"), 1000, 750),
+			...row,
+			heroImageUrl: resolveImage(row.heroImage, 1920, 1200),
+			imageTextSection1ImageUrl: resolveImage(row.imageTextSection1Image, 1000, 750),
+			imageTextSection2ImageUrl: resolveImage(row.imageTextSection2Image, 1000, 750),
 		};
 	} catch (err) {
 		console.error(`[homepage] query failed:`, err);
