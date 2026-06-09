@@ -15,25 +15,29 @@ export interface HomepageContent {
 	heroSecondaryCtaLabel?: string;
 	heroSecondaryCtaHref?: string;
 
-	uniqueImpactfulEyebrowGold?: string;
-	uniqueImpactfulEyebrowNavy?: string;
-	uniqueImpactfulTitleLine1?: string;
-	uniqueImpactfulTitleLine2?: string;
-	uniqueImpactfulBody?: string;
-	uniqueImpactfulImage?: string;
-	uniqueImpactfulImageUrl?: string;
-	uniqueImpactfulImageOn?: string;
-	uniqueImpactfulAccentLine?: string;
+	// The two stacked "image + text" bands on the homepage. Named by position
+	// (Section 1 = first, Section 2 = second), NOT by their current content, so
+	// the office can repurpose what each band is about without the field names
+	// lying. Renamed from uniqueImpactful*/torahVision* — see design-log/019.
+	imageTextSection1EyebrowGold?: string;
+	imageTextSection1EyebrowNavy?: string;
+	imageTextSection1TitleLine1?: string;
+	imageTextSection1TitleLine2?: string;
+	imageTextSection1Body?: string;
+	imageTextSection1Image?: string;
+	imageTextSection1ImageUrl?: string;
+	imageTextSection1ImageOn?: string;
+	imageTextSection1AccentLine?: string;
 
-	torahVisionEyebrowGold?: string;
-	torahVisionEyebrowNavy?: string;
-	torahVisionTitleLine1?: string;
-	torahVisionTitleLine2?: string;
-	torahVisionBody?: string;
-	torahVisionImage?: string;
-	torahVisionImageUrl?: string;
-	torahVisionImageOn?: string;
-	torahVisionAccentLine?: string;
+	imageTextSection2EyebrowGold?: string;
+	imageTextSection2EyebrowNavy?: string;
+	imageTextSection2TitleLine1?: string;
+	imageTextSection2TitleLine2?: string;
+	imageTextSection2Body?: string;
+	imageTextSection2Image?: string;
+	imageTextSection2ImageUrl?: string;
+	imageTextSection2ImageOn?: string;
+	imageTextSection2AccentLine?: string;
 
 	whoWeAreTitle?: string;
 	whoWeAreHebrew?: string;
@@ -97,14 +101,36 @@ export async function getHomepage(): Promise<HomepageContent | null> {
 	try {
 		const elevated = auth.elevate(items.query);
 		const { items: results } = await elevated(COLLECTION_ID).limit(1).find();
-		const row = results[0] as HomepageContent | undefined;
+		const row = results[0] as Record<string, unknown> | undefined;
 		if (!row) return null;
 
+		// Read the new generic keys, falling back to the legacy keys
+		// (uniqueImpactful*/torahVision*) so nothing breaks during the window
+		// before the old fields are deleted. See design-log/019.
+		const pick = (next: string, legacy: string): string | undefined =>
+			(row[next] as string | undefined) ?? (row[legacy] as string | undefined);
+
 		return {
-			...row,
-			heroImageUrl: resolveImage(row.heroImage, 1920, 1200),
-			uniqueImpactfulImageUrl: resolveImage(row.uniqueImpactfulImage, 1000, 750),
-			torahVisionImageUrl: resolveImage(row.torahVisionImage, 1000, 750),
+			...(row as HomepageContent),
+			heroImageUrl: resolveImage(row.heroImage as string | undefined, 1920, 1200),
+
+			imageTextSection1EyebrowGold: pick("imageTextSection1EyebrowGold", "uniqueImpactfulEyebrowGold"),
+			imageTextSection1EyebrowNavy: pick("imageTextSection1EyebrowNavy", "uniqueImpactfulEyebrowNavy"),
+			imageTextSection1TitleLine1: pick("imageTextSection1TitleLine1", "uniqueImpactfulTitleLine1"),
+			imageTextSection1TitleLine2: pick("imageTextSection1TitleLine2", "uniqueImpactfulTitleLine2"),
+			imageTextSection1Body: pick("imageTextSection1Body", "uniqueImpactfulBody"),
+			imageTextSection1ImageOn: pick("imageTextSection1ImageOn", "uniqueImpactfulImageOn"),
+			imageTextSection1AccentLine: pick("imageTextSection1AccentLine", "uniqueImpactfulAccentLine"),
+			imageTextSection1ImageUrl: resolveImage(pick("imageTextSection1Image", "uniqueImpactfulImage"), 1000, 750),
+
+			imageTextSection2EyebrowGold: pick("imageTextSection2EyebrowGold", "torahVisionEyebrowGold"),
+			imageTextSection2EyebrowNavy: pick("imageTextSection2EyebrowNavy", "torahVisionEyebrowNavy"),
+			imageTextSection2TitleLine1: pick("imageTextSection2TitleLine1", "torahVisionTitleLine1"),
+			imageTextSection2TitleLine2: pick("imageTextSection2TitleLine2", "torahVisionTitleLine2"),
+			imageTextSection2Body: pick("imageTextSection2Body", "torahVisionBody"),
+			imageTextSection2ImageOn: pick("imageTextSection2ImageOn", "torahVisionImageOn"),
+			imageTextSection2AccentLine: pick("imageTextSection2AccentLine", "torahVisionAccentLine"),
+			imageTextSection2ImageUrl: resolveImage(pick("imageTextSection2Image", "torahVisionImage"), 1000, 750),
 		};
 	} catch (err) {
 		console.error(`[homepage] query failed:`, err);

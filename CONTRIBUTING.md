@@ -20,9 +20,9 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Hero subtitle, eyebrow | `HomePage` | Edit the single row, change the relevant field. (The headline — "Welcome to RCK" + "The Ra'anana Community Kollel" — is brand, not content, and lives in code. See [#009](design-log/009-rck-brand-identity.md).) |
 | Hero background image | `HomePage` | `heroImage` field — upload new image |
 | Hero CTA buttons (label or link) | `HomePage` | `heroPrimaryCtaLabel` / `heroPrimaryCtaHref`, same for secondary |
-| Split section copy ("Unique Impactful", "Torah Vision") | `HomePage` | The `uniqueImpactful*` and `torahVision*` fields |
-| Which side the photo sits on in a split section | `HomePage` | `uniqueImpactfulImageOn` / `torahVisionImageOn` — type `left` or `right` |
-| Which headline line gets the gold marker in a split section | `HomePage` | `uniqueImpactfulAccentLine` / `torahVisionAccentLine` — type `line1` or `line2` |
+| Copy in the two image+text bands on the homepage | `HomePage` | The `imageTextSection1*` and `imageTextSection2*` fields (dashboard labels start "Section 1 —" / "Section 2 —") |
+| Which side the photo sits on in an image+text band | `HomePage` | `imageTextSection1ImageOn` / `imageTextSection2ImageOn` — type `left` or `right` |
+| Which headline line gets the gold marker in an image+text band | `HomePage` | `imageTextSection1AccentLine` / `imageTextSection2AccentLine` — type `line1` or `line2` |
 | History timeline under "Who We Are" | `OurHistory` | Add / reorder / hide rows. Each row is one milestone: image + year + title + caption |
 | Join Us cards (3 gold cards) | `HomePage` | `joinUsCard1*` / `joinUsCard2*` / `joinUsCard3*` fields on the single row |
 | Team members | `TeamMembers` | Add a row. Photo, name, role, bio, etc. |
@@ -60,19 +60,7 @@ These are code/design changes:
 - Changing how the slideshow behaves (auto-advance speed, transitions)
 - Anything involving CSS, HTML structure, or JavaScript
 
-For these, ask Danielle, or open a PR yourself (see the code-PR workflow below).
-
-### Code-PR workflow (for design / structural changes)
-
-You don't need a local dev environment. You can open code PRs entirely from your browser using Claude.ai + the GitHub MCP.
-
-1. **One-time:** connect the [GitHub MCP](https://github.com/github/github-mcp-server) to your Claude.ai account, and ask Danielle to add you as a collaborator on `daniellekorn/official-rck-headless` with **write** access.
-2. In Claude.ai, say what you want — "make the hero title purple", "round the corners on the Join Us cards more". Claude opens a PR on a new branch. **Never push directly to `main`** — always open a PR so the preview workflow runs and Danielle reviews.
-3. **GitHub Actions builds a preview.** Within a few minutes of opening the PR, a bot comment appears with a **Preview URL**. Click it to see your change live on a temporary Wix preview deployment.
-4. The preview comment updates automatically every time you (or Claude) push new commits to the PR branch.
-5. Danielle reviews the diff + the preview URL, then merges. After merging, Danielle ships the change manually via `wix release`.
-
-**If the workflow fails:** the PR will show a red ✕ — open the failing job in GitHub Actions to see what broke. Most commonly it's a TypeScript error caught by the `astro check` step. Ask Claude to fix it in the same PR.
+For these, ask Danielle.
 
 ### Collection schemas (fields)
 
@@ -90,23 +78,25 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | heroPrimaryCtaHref | Text | "/schedule" (relative path) |
 | heroSecondaryCtaLabel | Text | "Our Programs" |
 | heroSecondaryCtaHref | Text | "/programming" |
-| uniqueImpactfulEyebrowGold | Text | "UNIQUE" |
-| uniqueImpactfulEyebrowNavy | Text | "IMPACTFUL" |
-| uniqueImpactfulTitleLine1 | Text | "A Community Kollel" |
-| uniqueImpactfulTitleLine2 | Text | "in Israel" |
-| uniqueImpactfulBody | Text | Paragraph |
-| uniqueImpactfulImage | Image | Optional |
-| uniqueImpactfulImageOn | Text | Which side the photo sits on: `left` or `right`. Empty = `left`. Forgiving about case/spacing. |
-| uniqueImpactfulAccentLine | Text | Which headline line gets the animated gold marker: `line1` or `line2`. Empty = `line2`. Also accepts `first`/`second`. |
-| torahVisionEyebrowGold | Text | |
-| torahVisionEyebrowNavy | Text | |
-| torahVisionTitleLine1 | Text | |
-| torahVisionTitleLine2 | Text | |
-| torahVisionBody | Text | |
-| torahVisionImage | Image | Optional |
-| torahVisionImageOn | Text | Which side the photo sits on: `left` or `right`. Empty = `right`. Forgiving about case/spacing. |
-| torahVisionAccentLine | Text | Which headline line gets the animated gold marker: `line1` or `line2`. Empty = `line2`. Also accepts `first`/`second`. |
+| imageTextSection1EyebrowGold | Text | Section 1 (first image+text band). Dashboard label "Section 1 — Eyebrow word (gold)". Default "UNIQUE". |
+| imageTextSection1EyebrowNavy | Text | Default "IMPACTFUL" |
+| imageTextSection1TitleLine1 | Text | Default "A Community Kollel" |
+| imageTextSection1TitleLine2 | Text | Default "in Israel" |
+| imageTextSection1Body | Text | Paragraph |
+| imageTextSection1Image | Image | Optional |
+| imageTextSection1ImageOn | Text | Which side the photo sits on: `left` or `right`. Empty = `left`. Forgiving about case/spacing. |
+| imageTextSection1AccentLine | Text | Which headline line gets the animated gold marker: `line1` or `line2`. Empty = `line2`. Also accepts `first`/`second`. |
+| imageTextSection2EyebrowGold | Text | Section 2 (second image+text band). Default "TORAH". |
+| imageTextSection2EyebrowNavy | Text | Default "VISION" |
+| imageTextSection2TitleLine1 | Text | Default "A Kollel Dedicated to" |
+| imageTextSection2TitleLine2 | Text | Default "Torah and Growth" |
+| imageTextSection2Body | Text | Paragraph |
+| imageTextSection2Image | Image | Optional |
+| imageTextSection2ImageOn | Text | Which side the photo sits on: `left` or `right`. Empty = `right`. Forgiving about case/spacing. |
+| imageTextSection2AccentLine | Text | Which headline line gets the animated gold marker: `line1` or `line2`. Empty = `line2`. Also accepts `first`/`second`. |
 | whoWeAreTitle | Text | "Who We Are" |
+
+> **Naming note:** these two bands are named by position (Section 1 / Section 2), not by their current content, so the office can repurpose what each is about without the field names lying. Renamed from `uniqueImpactful*`/`torahVision*` — see [design-log/019](design-log/019-generic-split-section-field-names.md). The legacy keys still exist in the CMS during the transition and are deleted after the rename ships; code reads the new keys with a fallback to the legacy ones.
 | whoWeAreHebrew | Text | Hebrew tagline (Pirkei Avot) |
 | whoWeAreBody | Text | Paragraph |
 | joinUsCard1Title | Text | "Daven with Us" |

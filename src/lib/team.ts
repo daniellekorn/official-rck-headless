@@ -23,9 +23,10 @@ export const ROLE_GROUPS: { key: RoleGroup; label: string }[] = [
 	{ key: "roshei", label: "Roshei Kollel" },
 	{ key: "kollel", label: "Kollel Avreichim" },
 	{ key: "rabbis", label: "Rabbis" },
-	// Youth programming leads. Renders on /team like any other group (only
-	// when populated) AND drives the /youth page, which reads this bucket and
-	// shows each member's `role` as the program name. See design log #017.
+	// Youth programming leads. Renders as a "Youth Programming" section on
+	// /team like any other group (only when populated). It does NOT drive the
+	// /youth page — that page is built entirely from the separate YouthPrograms
+	// collection (see youth.astro + design log #017). roleGroup affects /team only.
 	{ key: "youth", label: "Youth Programming" },
 	{ key: "staff", label: "Staff" },
 	{ key: "board", label: "Board" },
