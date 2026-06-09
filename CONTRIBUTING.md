@@ -21,6 +21,8 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Hero background image | `HomePage` | `heroImage` field — upload new image |
 | Hero CTA buttons (label or link) | `HomePage` | `heroPrimaryCtaLabel` / `heroPrimaryCtaHref`, same for secondary |
 | Split section copy ("Unique Impactful", "Torah Vision") | `HomePage` | The `uniqueImpactful*` and `torahVision*` fields |
+| Which side the photo sits on in a split section | `HomePage` | `uniqueImpactfulImageOn` / `torahVisionImageOn` — type `left` or `right` |
+| Which headline line gets the gold marker in a split section | `HomePage` | `uniqueImpactfulAccentLine` / `torahVisionAccentLine` — type `line1` or `line2` |
 | History timeline under "Who We Are" | `OurHistory` | Add / reorder / hide rows. Each row is one milestone: image + year + title + caption |
 | Join Us cards (3 gold cards) | `HomePage` | `joinUsCard1*` / `joinUsCard2*` / `joinUsCard3*` fields on the single row |
 | Team members | `TeamMembers` | Add a row. Photo, name, role, bio, etc. |
@@ -94,12 +96,16 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | uniqueImpactfulTitleLine2 | Text | "in Israel" |
 | uniqueImpactfulBody | Text | Paragraph |
 | uniqueImpactfulImage | Image | Optional |
+| uniqueImpactfulImageOn | Text | Which side the photo sits on: `left` or `right`. Empty = `left`. Forgiving about case/spacing. |
+| uniqueImpactfulAccentLine | Text | Which headline line gets the animated gold marker: `line1` or `line2`. Empty = `line2`. Also accepts `first`/`second`. |
 | torahVisionEyebrowGold | Text | |
 | torahVisionEyebrowNavy | Text | |
 | torahVisionTitleLine1 | Text | |
 | torahVisionTitleLine2 | Text | |
 | torahVisionBody | Text | |
 | torahVisionImage | Image | Optional |
+| torahVisionImageOn | Text | Which side the photo sits on: `left` or `right`. Empty = `right`. Forgiving about case/spacing. |
+| torahVisionAccentLine | Text | Which headline line gets the animated gold marker: `line1` or `line2`. Empty = `line2`. Also accepts `first`/`second`. |
 | whoWeAreTitle | Text | "Who We Are" |
 | whoWeAreHebrew | Text | Hebrew tagline (Pirkei Avot) |
 | whoWeAreBody | Text | Paragraph |

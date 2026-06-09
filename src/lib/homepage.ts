@@ -22,6 +22,8 @@ export interface HomepageContent {
 	uniqueImpactfulBody?: string;
 	uniqueImpactfulImage?: string;
 	uniqueImpactfulImageUrl?: string;
+	uniqueImpactfulImageOn?: string;
+	uniqueImpactfulAccentLine?: string;
 
 	torahVisionEyebrowGold?: string;
 	torahVisionEyebrowNavy?: string;
@@ -30,6 +32,8 @@ export interface HomepageContent {
 	torahVisionBody?: string;
 	torahVisionImage?: string;
 	torahVisionImageUrl?: string;
+	torahVisionImageOn?: string;
+	torahVisionAccentLine?: string;
 
 	whoWeAreTitle?: string;
 	whoWeAreHebrew?: string;
@@ -49,6 +53,35 @@ export interface HomepageContent {
 	joinUsCard3Subtitle?: string;
 	joinUsCard3Href?: string;
 	joinUsCard3Icon?: string;
+}
+
+/**
+ * Normalize a CMS "image side" value to "left" | "right".
+ * Forgiving on purpose — a content editor might type "Left", "RIGHT", " left ".
+ * Anything unrecognized falls back to the section's hardcoded default.
+ */
+export function normalizeImageOn(
+	value: string | undefined,
+	fallback: "left" | "right",
+): "left" | "right" {
+	const v = value?.trim().toLowerCase();
+	if (v === "left" || v === "right") return v;
+	return fallback;
+}
+
+/**
+ * Normalize a CMS "accent line" value to "line1" | "line2".
+ * Accepts the techy form ("line1"/"line2") and friendlier forms
+ * ("1"/"2", "first"/"second", "top"/"bottom"). Unrecognized → fallback.
+ */
+export function normalizeAccentLine(
+	value: string | undefined,
+	fallback: "line1" | "line2",
+): "line1" | "line2" {
+	const v = value?.trim().toLowerCase();
+	if (v === "line1" || v === "1" || v === "first" || v === "top") return "line1";
+	if (v === "line2" || v === "2" || v === "second" || v === "bottom") return "line2";
+	return fallback;
 }
 
 function resolveImage(wixImageUrl?: string, w = 1600, h = 1000): string | undefined {

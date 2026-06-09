@@ -18,7 +18,7 @@ const pagerSections = [
 	{ id: "history", label: "History" },
 ];
 
-import { getHomepage } from "../lib/homepage";
+import { getHomepage, normalizeImageOn, normalizeAccentLine } from "../lib/homepage";
 import { getHistory } from "../lib/history";
 
 const [homepage, history] = await Promise.all([
@@ -36,6 +36,8 @@ const uniqueImpactful = {
 		homepage?.uniqueImpactfulBody ??
 		"Where the depth of Torah meets the warmth of community, RCK is building something distinct in Israel — inspiring Jewish growth, meaningful connection, and a vibrant Torah-centered home for the Anglo community and beyond.",
 	imageUrl: homepage?.uniqueImpactfulImageUrl,
+	imageOn: normalizeImageOn(homepage?.uniqueImpactfulImageOn, "left"),
+	accentLine: normalizeAccentLine(homepage?.uniqueImpactfulAccentLine, "line2"),
 };
 
 const torahVision = {
@@ -47,6 +49,8 @@ const torahVision = {
 		homepage?.torahVisionBody ??
 		"At RCK, we believe that everyone can grow — grow in their connection to Torah, Hashem, self, and community. Everyone can learn. Everyone can connect.",
 	imageUrl: homepage?.torahVisionImageUrl,
+	imageOn: normalizeImageOn(homepage?.torahVisionImageOn, "right"),
+	accentLine: normalizeAccentLine(homepage?.torahVisionAccentLine, "line2"),
 };
 ---
 
@@ -72,9 +76,9 @@ const torahVision = {
 				eyebrowNavy={uniqueImpactful.eyebrowNavy}
 				subheadLine1={uniqueImpactful.subheadLine1}
 				subheadLine2={uniqueImpactful.subheadLine2}
-				subheadAccent="line2"
+				subheadAccent={uniqueImpactful.accentLine}
 				body={uniqueImpactful.body}
-				imageOn="left"
+				imageOn={uniqueImpactful.imageOn}
 				imageUrl={uniqueImpactful.imageUrl}
 				rays
 			/>
@@ -96,9 +100,9 @@ const torahVision = {
 				eyebrowNavy={torahVision.eyebrowNavy}
 				subheadLine1={torahVision.subheadLine1}
 				subheadLine2={torahVision.subheadLine2}
-				subheadAccent="line2"
+				subheadAccent={torahVision.accentLine}
 				body={torahVision.body}
-				imageOn="right"
+				imageOn={torahVision.imageOn}
 				imageUrl={torahVision.imageUrl}
 				rays
 			/>
