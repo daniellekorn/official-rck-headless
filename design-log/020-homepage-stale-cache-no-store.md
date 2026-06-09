@@ -1,6 +1,6 @@
 # 020 — Stop the CDN serving a stale homepage (HTML `no-store`)
 
-**Status:** implemented
+**Status:** attempted — **did NOT work** (Wix overrides our `Cache-Control`); root cause is platform-side, see Outcome
 **Date:** 2026-06-09
 **Author:** claude-session
 **Related:** #001 (CMS-driven content)
@@ -57,10 +57,37 @@ this site's traffic. If traffic ever grows enough to matter, revisit with a
 short positive `max-age` (e.g. 30–60s) instead of `no-store` — but only if the
 ETag is also made content-aware, or stale reads return.
 
-## Verification
+## Outcome — the middleware does not fix it
 
-After release, re-measure: `curl -sI /` should show `x-cache: MISS` (or a
-response with `cache-control: no-store`) and a homepage text edit should appear
-on a normal refresh within seconds — matching the editor expectation in
-CONTRIBUTING.md. `astro check` clean (the lone `process` error in
-`astro.config.mjs` is pre-existing and unrelated).
+Built and released (minor version, 2026-06-09), then re-measured with
+`curl -sI /`:
+
+- The client-facing header is **still** `cache-control: public, max-age=0,
+  must-revalidate` — our `no-store` never reaches the client.
+- Hammering `/` shows it **re-caches**: `x-cache` flips to `HIT` and `age`
+  climbs (40 → 68s within 24s). The `wix release` only *purged* the entry, so
+  the page is fresh right now, but the stale-serving mechanism is intact.
+
+**Conclusion:** Wix's serving/edge layer sets the `Cache-Control` (and the
+build-keyed `ETag`) on SSR HTML and overrides whatever our Astro middleware
+emits. There is no documented app-side knob (checked headless + CLI docs). So
+this is **not fixable in our codebase** — it's a Wix platform behavior: dynamic,
+CMS-driven SSR HTML is edge-cached with a content-independent `ETag`, so
+`must-revalidate` returns `304` and serves stale until the *build* changes (a
+release) or the entry evicts.
+
+The `src/middleware.ts` from this change is therefore currently a **no-op**.
+Leave-or-revert is tracked as follow-up; reverting needs another release, so
+it's deferred rather than churned on its own.
+
+## Follow-up
+
+1. Raise with Wix (we have a contact): SSR responses for CMS-driven content are
+   served stale because the edge caches HTML with a build-keyed `ETag` +
+   `max-age=0, must-revalidate`. Ask for either a content-aware validator or a
+   supported way to opt a route out of edge caching. This is the real fix.
+2. Until then: homepage content edits lag until cache eviction or a republish;
+   `/team` and other low-traffic routes are unaffected (always MISS). Verify
+   live content any time with a cache-busting query string (`/?v=1`).
+3. `astro check` stayed clean throughout (the lone `process` error in
+   `astro.config.mjs` is pre-existing and unrelated).
