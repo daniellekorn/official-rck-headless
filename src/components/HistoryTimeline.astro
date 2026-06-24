@@ -1,4 +1,14 @@
 ---
+/**
+ * HistoryTimeline — the "Our History" timeline. Widescreen (16:9) panels with an
+ * oversized year, title, and caption overlaid on the photo, scrolling in a
+ * continuous slow marquee that pauses on hover. A blurred copy of the same photo
+ * fills any letterbox gaps when an image's aspect doesn't match the 16:9 card.
+ *
+ * Ported from the "A · Widescreen" demo option (see design log #024 / the /demo
+ * page) into the live site. Pure-CSS marquee — no JS — with a reduced-motion
+ * fallback that turns the strip into a normal horizontal scroller.
+ */
 interface EntryInput {
 	year?: number;
 	title?: string;
@@ -13,6 +23,8 @@ interface InternalEntry extends EntryInput {
 
 interface Props {
 	entries?: EntryInput[];
+	/** Seconds the marquee takes per card — controls pan speed. */
+	secondsPerCard?: number;
 }
 
 const placeholder: InternalEntry[] = [
@@ -23,159 +35,152 @@ const placeholder: InternalEntry[] = [
 	{ year: 2025, title: "Looking Ahead", caption: "Building the next chapter of RCK, together.", from: "#07173a", to: "#f6d66b" },
 ];
 
-const entries: InternalEntry[] = Astro.props.entries && Astro.props.entries.length > 0
-	? Astro.props.entries
-	: placeholder;
+const { secondsPerCard = 7 } = Astro.props;
+const entries: InternalEntry[] =
+	Astro.props.entries && Astro.props.entries.length > 0 ? Astro.props.entries : placeholder;
+
+// Duplicate the list so the marquee can wrap seamlessly (translateX -50%).
+const loop = [...entries, ...entries];
+const dur = Math.max(entries.length, 1) * secondsPerCard;
 ---
 
-<div class="relative" data-history>
-	<!-- edge fades hint that there's more to either side -->
-	<div aria-hidden="true" class="pointer-events-none absolute inset-y-0 left-0 z-20 w-8 bg-gradient-to-r from-mist to-transparent sm:w-16"></div>
-	<div aria-hidden="true" class="pointer-events-none absolute inset-y-0 right-0 z-20 w-8 bg-gradient-to-l from-mist to-transparent sm:w-16"></div>
+<div class="history-tl" style={`--marquee-dur:${dur}s`}>
+	<div class="history-tl__viewport">
+		<div class="history-tl__track">
+			{loop.map((entry, i) => (
+				<article
+					class="history-card aspect-[16/9] w-[88vw] sm:w-[60vw] lg:w-[48vw]"
+					aria-hidden={i >= entries.length ? "true" : undefined}
+				>
+					{/* blurred same-image fill behind, so odd ratios look intentional */}
+					{entry.imageUrl ? (
+						<>
+							<img src={entry.imageUrl} alt="" aria-hidden="true" class="history-card__bg" />
+							<img src={entry.imageUrl} alt={entry.title ?? ""} class="history-card__img" loading="lazy" />
+						</>
+					) : (
+						<div
+							class="history-card__placeholder"
+							style={`background: linear-gradient(135deg, ${entry.from ?? "#243c63"} 0%, ${entry.to ?? "#d6a21e"} 100%);`}
+							aria-hidden="true"
+						/>
+					)}
 
-	<div
-		data-history-track
-		tabindex="0"
-		role="group"
-		aria-label="RCK history timeline — scroll horizontally to explore"
-		class="no-scrollbar flex gap-6 overflow-x-auto px-6 pb-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-300 sm:px-12"
-	>
-		{
-			entries.map((entry, i) => (
-				<article class="group/card relative flex w-[260px] shrink-0 flex-col sm:w-[320px]">
-					{/* timeline spine + year node */}
-					<div class="relative mb-5 flex items-center">
-						<span aria-hidden="true" class="absolute left-0 top-[7px] h-px w-[calc(100%+1.5rem)] bg-navy-600/15" />
-						<span class="relative z-10 h-3.5 w-3.5 shrink-0 rounded-sm bg-gold-500 ring-4 ring-mist" />
-						<span class="relative z-10 ml-3 bg-mist pr-2 font-display text-2xl font-medium text-gold-600 sm:text-3xl">
-							{entry.year ?? "—"}
-						</span>
+					{/* legibility gradient */}
+					<div class="history-card__scrim" aria-hidden="true"></div>
+
+					<div class="history-card__overlay">
+						{entry.year && <span class="history-card__year">{entry.year}</span>}
+						{entry.title && <h3 class="history-card__title">{entry.title}</h3>}
+						{entry.caption && <p class="history-card__caption">{entry.caption}</p>}
 					</div>
-
-					<figure
-						class="relative aspect-[4/3] w-full overflow-hidden rounded-md shadow-[0_24px_48px_-28px_rgba(7,23,58,0.45)] ring-1 ring-navy-100"
-						style={entry.imageUrl
-							? undefined
-							: `background: linear-gradient(135deg, ${entry.from ?? "#243c63"} 0%, ${entry.to ?? "#d6a21e"} 100%);`}
-					>
-						{entry.imageUrl && (
-							<img
-								src={entry.imageUrl}
-								alt={entry.title ?? ""}
-								loading={i < 2 ? "eager" : "lazy"}
-								class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover/card:scale-105"
-							/>
-						)}
-						<div class="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
-					</figure>
-
-					{entry.title && (
-						<h3 class="mt-4 font-sans text-lg font-bold tracking-[-0.01em] text-navy-700 sm:text-xl">
-							{entry.title}
-						</h3>
-					)}
-					{entry.caption && (
-						<p class="mt-1 text-sm leading-relaxed text-navy-500">{entry.caption}</p>
-					)}
 				</article>
-			))
-		}
+			))}
+		</div>
 	</div>
 </div>
 
 <style>
-	.no-scrollbar {
-		scrollbar-width: none;
-		-ms-overflow-style: none;
+	.history-tl__viewport {
+		overflow: hidden;
+		-webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+		mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
 	}
-	.no-scrollbar::-webkit-scrollbar {
-		display: none;
+	.history-tl__track {
+		display: flex;
+		width: max-content;
+		animation: history-marquee var(--marquee-dur) linear infinite;
+		will-change: transform;
+	}
+	.history-tl:hover .history-tl__track {
+		animation-play-state: paused;
+	}
+	@keyframes history-marquee {
+		to {
+			transform: translateX(-50%);
+		}
+	}
+
+	.history-card {
+		position: relative;
+		flex: 0 0 auto;
+		margin-right: 1.25rem;
+		overflow: hidden;
+		border-radius: 0.375rem;
+		background: #07173a;
+		box-shadow: 0 28px 60px -34px rgba(7, 23, 58, 0.7);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+	}
+	@media (min-width: 640px) {
+		.history-card {
+			margin-right: 1.5rem;
+		}
+	}
+
+	.history-card__bg {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transform: scale(1.15);
+		filter: blur(22px) saturate(1.1) brightness(0.65);
+	}
+	.history-card__img {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
+	.history-card__placeholder {
+		position: absolute;
+		inset: 0;
+	}
+	.history-card__scrim {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(to top, rgba(2, 8, 23, 0.92) 4%, rgba(2, 8, 23, 0.45) 34%, transparent 62%);
+	}
+
+	.history-card__overlay {
+		position: absolute;
+		inset-inline: 0;
+		bottom: 0;
+		padding: 1.5rem 1.8rem 1.7rem;
+		color: #fff;
+	}
+	.history-card__year {
+		display: block;
+		font-family: var(--font-display);
+		font-weight: 500;
+		line-height: 0.9;
+		font-size: 3.4rem;
+		letter-spacing: -0.01em;
+		color: var(--color-gold-200, #f6d66b);
+	}
+	.history-card__title {
+		margin-top: 0.4rem;
+		font-family: var(--font-sans);
+		font-weight: 700;
+		letter-spacing: -0.01em;
+		font-size: 1.4rem;
+		color: #fff;
+	}
+	.history-card__caption {
+		margin-top: 0.3rem;
+		font-size: 0.95rem;
+		line-height: 1.45;
+		max-width: 52ch;
+		color: rgba(255, 255, 255, 0.78);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.history-tl__viewport {
+			overflow-x: auto;
+		}
+		.history-tl__track {
+			animation: none;
+		}
 	}
 </style>
-
-<script>
-	const SPEED = 24; // px per second — a slow, readable pan
-	const END_DWELL = 1100; // ms pause at each end before reversing
-	const RESUME_DELAY = 2800; // ms to wait after the visitor scrolls manually
-
-	const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-	document.querySelectorAll<HTMLElement>("[data-history]").forEach((root) => {
-		const track = root.querySelector<HTMLElement>("[data-history-track]");
-		if (!track) return;
-
-		let dir = 1;
-		let paused = false; // pointer/focus is engaged
-		let dwellUntil = 0; // pause window at the ends
-		let resumeAt = 0; // pause window after manual scroll
-		let last = performance.now();
-		let raf = 0;
-
-		const maxScroll = () => track.scrollWidth - track.clientWidth;
-
-		const tick = (now: number) => {
-			const dt = Math.min((now - last) / 1000, 0.05);
-			last = now;
-			const max = maxScroll();
-			const blocked = paused || now < resumeAt || now < dwellUntil;
-			if (!blocked && max > 1) {
-				track.scrollLeft += dir * SPEED * dt;
-				if (track.scrollLeft >= max - 0.5) {
-					track.scrollLeft = max;
-					dir = -1;
-					dwellUntil = now + END_DWELL;
-				} else if (track.scrollLeft <= 0.5) {
-					track.scrollLeft = 0;
-					dir = 1;
-					dwellUntil = now + END_DWELL;
-				}
-			}
-			raf = requestAnimationFrame(tick);
-		};
-
-		const start = () => {
-			if (prefersReduced.matches || raf) return;
-			last = performance.now();
-			raf = requestAnimationFrame(tick);
-		};
-		const stop = () => {
-			if (raf) {
-				cancelAnimationFrame(raf);
-				raf = 0;
-			}
-		};
-
-		// Hover and keyboard focus hold the pan so visitors can read.
-		root.addEventListener("mouseenter", () => (paused = true));
-		root.addEventListener("mouseleave", () => (paused = false));
-		track.addEventListener("focusin", () => (paused = true));
-		track.addEventListener("focusout", () => (paused = false));
-
-		// Manual scroll takes over, then the pan resumes from wherever they left it.
-		const bump = () => {
-			resumeAt = performance.now() + RESUME_DELAY;
-			last = performance.now();
-		};
-		track.addEventListener("wheel", bump, { passive: true });
-		track.addEventListener("touchstart", () => (paused = true), { passive: true });
-		track.addEventListener("touchend", () => {
-			paused = false;
-			bump();
-		}, { passive: true });
-		track.addEventListener("pointerdown", () => (paused = true));
-		window.addEventListener("pointerup", () => (paused = false));
-
-		// Don't burn cycles while the tab is hidden.
-		document.addEventListener("visibilitychange", () => {
-			if (document.hidden) stop();
-			else start();
-		});
-
-		prefersReduced.addEventListener?.("change", () => {
-			stop();
-			start();
-		});
-
-		start();
-	});
-</script>

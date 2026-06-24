@@ -44,3 +44,16 @@ trim this entry to record the decisions.
 ## Verification
 `astro check` passes (only the pre-existing `astro.config.mjs` `process` error).
 Page renders at `/demo`; LightRays default unchanged elsewhere.
+
+## Implementation Results
+- **Timeline → "A · Widescreen" chosen.** The `wide` variant was promoted into the
+  live site: `HistoryTimeline.astro` was rewritten to the widescreen (16:9)
+  marquee — oversized year, title + caption overlaid on a scrim, blurred
+  same-image fill, pure-CSS marquee that pauses on hover, reduced-motion
+  fallback. It keeps the old component's `entries` interface and placeholder
+  fallback, so `WhoWeAre.astro` / `OurHistory` wiring is unchanged. `WhoWeAre`
+  now renders the strip **full-bleed** (outside `container-page`) to match the
+  demo presentation. The old auto-pan/reverse JS timeline was removed.
+- Light-effect and PageHeader-background options are still pending a pick; `/demo`
+  and `DemoTimeline.astro` stay until those are decided, then both get removed and
+  this entry trimmed. (Commit SHA to be added when committed.)
