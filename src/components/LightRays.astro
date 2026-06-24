@@ -21,6 +21,15 @@ interface Props {
 	opacity?: number;
 	/** Breathing cycle (spread out → ease back), in ms. */
 	duration?: number;
+	/**
+	 * Motion style:
+	 * - "drift" (default): slow circular spin + gentle breathe (current homepage look)
+	 * - "burst": rays shoot outward and retract, on a loop
+	 * - "burst-static": rays shoot outward once on load, then hold
+	 * - "spiral": counter-rotating layers + zoom — fancy spiral
+	 * - "sweep": a single bright wedge rotates like a lighthouse beam
+	 */
+	variant?: "drift" | "burst" | "burst-static" | "spiral" | "sweep";
 	/** Extra classes for sizing/placement of the (square) light field. */
 	class?: string;
 }
@@ -30,6 +39,7 @@ const {
 	color = "#dfb030",
 	opacity = 0.45,
 	duration = 8000,
+	variant = "drift",
 	class: className = "",
 } = Astro.props;
 
@@ -43,7 +53,7 @@ const vars = [
 ---
 
 <div
-	class:list={["rck-rays pointer-events-none absolute left-1/2 top-1/2 -z-10 aspect-square -translate-x-1/2 -translate-y-1/2", className]}
+	class:list={["rck-rays pointer-events-none absolute left-1/2 top-1/2 -z-10 aspect-square -translate-x-1/2 -translate-y-1/2", `rck-rays--${variant}`, className]}
 	aria-hidden="true"
 	style={vars}
 >
@@ -101,6 +111,70 @@ const vars = [
 		}
 	}
 
+	/* ── Variants ───────────────────────────────────────────────────────────
+	   The default ("drift") uses the rules above. Each variant below overrides
+	   only the spread/beams animations, so the field keeps the same masked
+	   conic-gradient beams. */
+
+	/* BURST — shoot outward and retract, looping. */
+	.rck-rays--burst .rck-rays__spread {
+		animation: rck-rays-burst var(--rck-dur) cubic-bezier(0.16, 0.8, 0.3, 1) infinite;
+	}
+	.rck-rays--burst .rck-rays__beams {
+		animation: rck-rays-drift calc(var(--rck-dur) * 26) linear infinite;
+	}
+	@keyframes rck-rays-burst {
+		0% { transform: scale(0.2); opacity: calc(var(--rck-opacity) * 0.1); }
+		38% { transform: scale(1.35); opacity: var(--rck-opacity); }
+		60% { transform: scale(1.1); opacity: calc(var(--rck-opacity) * 0.7); }
+		100% { transform: scale(0.2); opacity: calc(var(--rck-opacity) * 0.1); }
+	}
+
+	/* BURST-STATIC — shoot outward once on load, then hold (beams static). */
+	.rck-rays--burst-static .rck-rays__spread {
+		transform: scale(0.2);
+		opacity: 0;
+		animation: rck-rays-burst-in var(--rck-dur) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+	}
+	.rck-rays--burst-static .rck-rays__beams {
+		animation: none;
+	}
+	@keyframes rck-rays-burst-in {
+		0% { transform: scale(0.2); opacity: 0; }
+		100% { transform: scale(1); opacity: var(--rck-opacity); }
+	}
+
+	/* SPIRAL — counter-rotating layers + zoom for a fancy spiral. */
+	.rck-rays--spiral .rck-rays__spread {
+		animation: rck-rays-spiral-spread calc(var(--rck-dur) * 2.2) ease-in-out infinite;
+	}
+	.rck-rays--spiral .rck-rays__beams {
+		animation: rck-rays-spiral-beams calc(var(--rck-dur) * 3.2) linear infinite;
+	}
+	@keyframes rck-rays-spiral-spread {
+		0%, 100% { transform: rotate(0deg) scale(0.8); opacity: calc(var(--rck-opacity) * 0.65); }
+		50% { transform: rotate(45deg) scale(1.22); opacity: var(--rck-opacity); }
+	}
+	@keyframes rck-rays-spiral-beams {
+		to { transform: rotate(-360deg); }
+	}
+
+	/* SWEEP — a single soft bright wedge rotates like a lighthouse beam. */
+	.rck-rays--sweep .rck-rays__spread {
+		animation: none;
+		opacity: var(--rck-opacity);
+	}
+	.rck-rays--sweep .rck-rays__beams {
+		background: conic-gradient(
+			from 0deg,
+			color-mix(in srgb, var(--rck-rc), transparent 100%) 0deg,
+			var(--rck-rc) 16deg,
+			color-mix(in srgb, var(--rck-rc), transparent 100%) 64deg,
+			color-mix(in srgb, var(--rck-rc), transparent 100%) 360deg
+		);
+		animation: rck-rays-drift calc(var(--rck-dur) * 1.5) linear infinite;
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		.rck-rays__spread {
 			transform: scale(1);
@@ -109,6 +183,10 @@ const vars = [
 		}
 		.rck-rays__beams {
 			animation: none;
+		}
+		.rck-rays--burst-static .rck-rays__spread {
+			transform: scale(1);
+			opacity: var(--rck-opacity);
 		}
 	}
 </style>

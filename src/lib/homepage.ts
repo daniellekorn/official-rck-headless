@@ -49,16 +49,22 @@ export interface HomepageContent {
 	joinUsCard1Subtitle?: string;
 	joinUsCard1Href?: string;
 	joinUsCard1Icon?: string;
+	joinUsCard1Image?: string;
+	joinUsCard1ImageUrl?: string;
 
 	joinUsCard2Title?: string;
 	joinUsCard2Subtitle?: string;
 	joinUsCard2Href?: string;
 	joinUsCard2Icon?: string;
+	joinUsCard2Image?: string;
+	joinUsCard2ImageUrl?: string;
 
 	joinUsCard3Title?: string;
 	joinUsCard3Subtitle?: string;
 	joinUsCard3Href?: string;
 	joinUsCard3Icon?: string;
+	joinUsCard3Image?: string;
+	joinUsCard3ImageUrl?: string;
 }
 
 /**
@@ -111,6 +117,9 @@ export async function getHomepage(): Promise<HomepageContent | null> {
 			heroImageUrl: resolveImage(row.heroImage, 1920, 1200),
 			imageTextSection1ImageUrl: resolveImage(row.imageTextSection1Image, 1000, 750),
 			imageTextSection2ImageUrl: resolveImage(row.imageTextSection2Image, 1000, 750),
+				joinUsCard1ImageUrl: resolveImage(row.joinUsCard1Image, 800, 1000),
+				joinUsCard2ImageUrl: resolveImage(row.joinUsCard2Image, 800, 1000),
+				joinUsCard3ImageUrl: resolveImage(row.joinUsCard3Image, 800, 1000),
 		};
 	} catch (err) {
 		console.error(`[homepage] query failed:`, err);

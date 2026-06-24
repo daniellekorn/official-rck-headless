@@ -4,6 +4,7 @@ interface CardInput {
 	subtitle?: string;
 	href?: string;
 	icon?: "book" | "reader" | "people" | "minyan";
+	imageUrl?: string;
 }
 
 interface Props {
@@ -11,7 +12,7 @@ interface Props {
 }
 
 const fallback: CardInput[] = [
-	{ title: "Daven with Us", subtitle: "Daily Tefillah & Minyanim", href: "/daven", icon: "minyan" },
+	{ title: "Daven with Us", subtitle: "Daily Tefillah & Minyanim", href: "/daven", icon: "book" },
 	{ title: "Learn with Us", subtitle: "Weekly Shiurim & Chavrutas", href: "/learn", icon: "reader" },
 	{ title: "Our Programs", subtitle: "Connection & Community", href: "/events", icon: "people" },
 ];
@@ -33,8 +34,24 @@ const cards: CardInput[] = Astro.props.cards && Astro.props.cards.length > 0 ? A
 					<div data-joinus-card class="flex" style="opacity:0">
 					<a
 						href={card.href}
-						class="group relative flex w-full flex-col overflow-hidden rounded-md bg-gradient-to-br from-gold-400 via-gold-500 to-gold-600 p-8 sm:p-9 ring-1 ring-inset ring-white/25 shadow-[0_26px_54px_-22px_rgba(214,162,30,0.55),0_2px_0_0_rgba(255,255,255,0.25)_inset] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_40px_72px_-24px_rgba(214,162,30,0.7)]"
+						class="group relative flex min-h-[300px] sm:min-h-[340px] w-full flex-col overflow-hidden rounded-md bg-gradient-to-br from-gold-400 via-gold-500 to-gold-600 p-8 sm:p-9 ring-1 ring-inset ring-white/25 shadow-[0_26px_54px_-22px_rgba(214,162,30,0.55),0_2px_0_0_rgba(255,255,255,0.25)_inset] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_40px_72px_-24px_rgba(214,162,30,0.7)]"
 					>
+						{card.imageUrl && (
+							<>
+								<img
+									src={card.imageUrl}
+									alt=""
+									aria-hidden="true"
+									loading="lazy"
+									class="absolute inset-0 h-full w-full object-cover"
+								/>
+								{/* Light yellow wash, kept the brand hue but lightened so the
+								    photo reads through — stronger toward the bottom so the
+								    text below stays legible. */}
+								<span aria-hidden="true" class="absolute inset-0 bg-gradient-to-t from-gold-500/85 via-gold-400/35 to-gold-300/15"></span>
+							</>
+						)}
+
 						{/* sheen that sweeps across on hover for depth */}
 						<span aria-hidden="true" class="pointer-events-none absolute inset-0">
 							<span class="absolute -inset-y-4 -left-1/3 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/35 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[340%]"></span>
@@ -75,15 +92,18 @@ const cards: CardInput[] = Astro.props.cards && Astro.props.cards.length > 0 ? A
 							)}
 						</span>
 
-						<p class="relative mt-7 text-xs uppercase tracking-[0.22em] text-navy-700/70">
-							{card.subtitle}
-						</p>
-						<h3 class="relative mt-1.5 font-display text-3xl sm:text-[2rem] leading-tight font-medium text-navy-700">
-							{card.title}
-						</h3>
+						{/* Text pushed to the bottom (mt-auto) so the photo stays visible above it */}
+						<div class="relative mt-auto pt-10">
+							<p class="text-xs uppercase tracking-[0.22em] text-navy-700/70">
+								{card.subtitle}
+							</p>
+							<h3 class="mt-1.5 font-display text-3xl sm:text-[2rem] leading-tight font-medium text-navy-700">
+								{card.title}
+							</h3>
 
-						{/* navy underline rule that grows on hover */}
-						<span aria-hidden="true" class="relative mt-5 block h-[2px] w-10 rounded-sm bg-navy-700/40 transition-all duration-300 group-hover:w-20"></span>
+							{/* navy underline rule that grows on hover */}
+							<span aria-hidden="true" class="mt-5 block h-[2px] w-10 rounded-sm bg-navy-700/40 transition-all duration-300 group-hover:w-20"></span>
+						</div>
 					</a>
 					</div>
 				))

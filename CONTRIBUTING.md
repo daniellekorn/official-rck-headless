@@ -104,15 +104,18 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | joinUsCard1Title | Text | "Daven with Us" |
 | joinUsCard1Subtitle | Text | "Daily Tefillah & Minyanim" |
 | joinUsCard1Href | Text | "/daven" |
-| joinUsCard1Icon | Text | One of: `book`, `reader`, `people` |
+| joinUsCard1Icon | Text | One of: `book`, `reader`, `people`, `minyan` |
+| joinUsCard1Image | Image | Optional photo behind the card. A lightened yellow wash sits over it (keeps the brand color, photo still shows). Empty = plain gold card. |
 | joinUsCard2Title | Text | "Learn with Us" |
 | joinUsCard2Subtitle | Text | "Weekly Shiurim & Chavrutas" |
 | joinUsCard2Href | Text | "/learn" |
-| joinUsCard2Icon | Text | One of: `book`, `reader`, `people` |
+| joinUsCard2Icon | Text | One of: `book`, `reader`, `people`, `minyan` |
+| joinUsCard2Image | Image | Optional photo behind the card (see card 1). |
 | joinUsCard3Title | Text | "Our Programs" |
 | joinUsCard3Subtitle | Text | "Connection & Community" |
 | joinUsCard3Href | Text | "/programming" |
-| joinUsCard3Icon | Text | One of: `book`, `reader`, `people` |
+| joinUsCard3Icon | Text | One of: `book`, `reader`, `people`, `minyan` |
+| joinUsCard3Image | Image | Optional photo behind the card (see card 1). |
 
 #### `OurHistory` — one row per milestone (5–10 typical)
 
