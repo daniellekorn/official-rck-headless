@@ -21,7 +21,7 @@ const rayEffects = [
 	{ key: "drift", mode: "rays", count: 30, label: "A · Current", tag: "on the site now", desc: "The radial rays slowly spinning behind the image — today's look." },
 	{ key: "sweep", mode: "rays", count: 30, label: "B · Sweep", tag: "", desc: "A single bright beam circles the image like a lighthouse." },
 	{ key: "godrays", mode: "behind", count: 0, label: "C · Sunbeams", tag: "", desc: "Parallel warm beams stream diagonally past the image, drifting like sun through a window." },
-	{ key: "ripple", mode: "behind", count: 0, label: "D · Ripple", tag: "", desc: "Concentric rings of light pulse outward from behind the image." },
+	{ key: "shards", mode: "behind", count: 0, label: "D · Rugged rays", tag: "", desc: "Uneven, jagged shafts of light shoot outward from behind the image — pulsing out and back, not uniform." },
 	{ key: "drift", mode: "rays", count: 9, label: "E · Sparse rays", tag: "", desc: "The same radial light as Current, but with far fewer beams — distinct shafts haloing the image, calmer." },
 	{ key: "aurora", mode: "behind", count: 0, label: "F · Aurora", tag: "", desc: "Soft gold light flows and breathes behind the image — organic, not geometric." },
 ] as const;
@@ -85,11 +85,7 @@ const timelineVariants = [
 							{e.mode === "rays" && (
 								<LightRays variant={e.key} class="w-[200%] min-w-[440px]" count={e.count} opacity={0.5} duration={7000} />
 							)}
-							{e.mode === "behind" && (
-								<div class={`fx fx-${e.key}`} aria-hidden="true">
-									{e.key === "ripple" && (<><span></span><span></span><span></span></>)}
-								</div>
-							)}
+							{e.mode === "behind" && <div class={`fx fx-${e.key}`} aria-hidden="true"></div>}
 							<img
 								src={sampleImage}
 								alt=""
@@ -227,23 +223,31 @@ const timelineVariants = [
 		to { transform: translate(6%, 6%); }
 	}
 
-	/* C — ripple: concentric rings pulsing outward */
-	.fx-ripple span {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		width: 42%;
-		aspect-ratio: 1 / 1;
-		border-radius: 9999px;
-		border: 2px solid rgba(214, 162, 30, 0.45);
-		animation: fx-ripple 3.6s ease-out infinite;
+	/* D — rugged rays: uneven shafts shooting outward, pulsing out and back.
+	   Two conic ray-fields at different periods overlap, so the beams land at
+	   irregular widths/gaps rather than the even Current field. */
+	.fx-shards {
+		inset: -12%;
+		background:
+			repeating-conic-gradient(from 6deg,
+				transparent 0deg 9deg,
+				rgba(214, 162, 30, 0.5) 9deg 12.5deg,
+				transparent 12.5deg 27deg),
+			repeating-conic-gradient(from 0deg,
+				transparent 0deg 15deg,
+				rgba(235, 191, 66, 0.38) 15deg 18deg,
+				transparent 18deg 41deg);
+		-webkit-mask-image: radial-gradient(closest-side, transparent 16%, #000 30%, #000 68%, transparent 99%);
+		mask-image: radial-gradient(closest-side, transparent 16%, #000 30%, #000 68%, transparent 99%);
+		transform-origin: 50% 50%;
+		animation: fx-shoot 4.6s cubic-bezier(0.16, 0.85, 0.3, 1) infinite;
 		will-change: transform, opacity;
 	}
-	.fx-ripple span:nth-child(2) { animation-delay: 1.2s; }
-	.fx-ripple span:nth-child(3) { animation-delay: 2.4s; }
-	@keyframes fx-ripple {
-		0% { transform: translate(-50%, -50%) scale(0.35); opacity: 0.85; }
-		100% { transform: translate(-50%, -50%) scale(2.6); opacity: 0; }
+	@keyframes fx-shoot {
+		0% { transform: scale(0.5); opacity: 0.12; }
+		42% { transform: scale(1.22); opacity: 0.95; }
+		66% { transform: scale(1.06); opacity: 0.65; }
+		100% { transform: scale(0.5); opacity: 0.12; }
 	}
 
 	/* E — aurora: soft gold light flowing behind the image */
