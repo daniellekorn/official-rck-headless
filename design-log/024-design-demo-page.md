@@ -19,9 +19,9 @@ photos with mixed aspect ratios** (picsum) to exercise the blur-fill.
    radial field) was rejected as too samey. Current set is six structurally
    different ideas judged on cream: `current` (the drift rays on the site now)
    and `sweep` (liked) — both the `LightRays` `variant` prop — plus demo-only CSS
-   effects `god-rays` (diagonal streaming beams), `ripple` (expanding rings),
-   `orbit` (glow circling the image edge), and `aurora` (flowing gold light).
-   Shimmer was dropped. The four CSS effects live in `demo.astro` and get built
+   effects `sunbeams` (diagonal streaming beams), `ripple` (expanding rings),
+   and `aurora` (flowing gold light), plus a sparse-beam `drift` (the Current
+   radial rays at a low beam count). Shimmer and the orbiting glow were dropped. The four CSS effects live in `demo.astro` and get built
    properly once chosen. A "Replay" button restarts the fields. Timeline demos
    use ~4 mixed-ratio placeholder photos (the expected real count).
 2. **PageHeader backgrounds** — 6 navy treatments shown at header size:

@@ -18,12 +18,12 @@ const demoEntries = [
 const sampleImage = "https://static.wixstatic.com/media/0b7189_7d4d18bebcaf4012aaa6093c9b316397~mv2.jpg";
 
 const rayEffects = [
-	{ key: "drift", mode: "rays", label: "A · Current", tag: "on the site now", desc: "The radial rays slowly spinning behind the image — today's look." },
-	{ key: "sweep", mode: "rays", label: "B · Sweep", tag: "you liked this", desc: "A single bright beam circles the image like a lighthouse." },
-	{ key: "godrays", mode: "behind", label: "C · God-rays", tag: "", desc: "Parallel warm beams stream diagonally past the image, drifting like sun through a window." },
-	{ key: "ripple", mode: "behind", label: "D · Ripple", tag: "", desc: "Concentric rings of light pulse outward from behind the image." },
-	{ key: "orbit", mode: "behind", label: "E · Orbiting glow", tag: "", desc: "A soft warm orb of light slowly circles the image's edge." },
-	{ key: "aurora", mode: "behind", label: "F · Aurora", tag: "", desc: "Soft gold light flows and breathes behind the image — organic, not geometric." },
+	{ key: "drift", mode: "rays", count: 30, label: "A · Current", tag: "on the site now", desc: "The radial rays slowly spinning behind the image — today's look." },
+	{ key: "sweep", mode: "rays", count: 30, label: "B · Sweep", tag: "you liked this", desc: "A single bright beam circles the image like a lighthouse." },
+	{ key: "godrays", mode: "behind", count: 0, label: "C · Sunbeams", tag: "", desc: "Parallel warm beams stream diagonally past the image, drifting like sun through a window." },
+	{ key: "ripple", mode: "behind", count: 0, label: "D · Ripple", tag: "", desc: "Concentric rings of light pulse outward from behind the image." },
+	{ key: "drift", mode: "rays", count: 9, label: "E · Sparse rays", tag: "", desc: "The same radial light as Current, but with far fewer beams — distinct shafts haloing the image, calmer." },
+	{ key: "aurora", mode: "behind", count: 0, label: "F · Aurora", tag: "", desc: "Soft gold light flows and breathes behind the image — organic, not geometric." },
 ] as const;
 
 const headerVariants = [
@@ -83,7 +83,7 @@ const timelineVariants = [
 					<figure class="flex flex-col">
 						<div class="raycard relative isolate grid place-items-center overflow-hidden rounded-md bg-white px-10 py-12 ring-1 ring-navy-100 sm:px-12 sm:py-14">
 							{e.mode === "rays" && (
-								<LightRays variant={e.key} class="w-[200%] min-w-[440px]" count={30} opacity={0.5} duration={7000} />
+								<LightRays variant={e.key} class="w-[200%] min-w-[440px]" count={e.count} opacity={0.5} duration={7000} />
 							)}
 							{e.mode === "behind" && (
 								<div class={`fx fx-${e.key}`} aria-hidden="true">
@@ -130,7 +130,7 @@ const timelineVariants = [
 							<div class="relative z-10 w-full px-6 text-center">
 								<p class="eyebrow text-gold-300">Tefillah Schedule</p>
 								<p class="mt-2 font-display text-3xl sm:text-4xl md:text-5xl font-medium text-white">
-									<span class="text-gold-300">Daven</span> with Us
+									Daven with Us
 								</p>
 								<span class="mx-auto mt-4 block h-[3px] w-16 rounded-sm bg-gold-400" aria-hidden="true"></span>
 							</div>
@@ -244,28 +244,6 @@ const timelineVariants = [
 	@keyframes fx-ripple {
 		0% { transform: translate(-50%, -50%) scale(0.35); opacity: 0.85; }
 		100% { transform: translate(-50%, -50%) scale(2.6); opacity: 0; }
-	}
-
-	/* D — orbit: a soft warm orb circling the image's edge */
-	.fx-orbit {
-		animation: fx-spin 7s linear infinite;
-		will-change: transform;
-	}
-	.fx-orbit::before {
-		content: "";
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		width: 44%;
-		aspect-ratio: 1 / 1;
-		/* center, then lift up so the orb orbits out around the image edge */
-		transform: translate(-50%, -50%) translateY(-92%);
-		border-radius: 9999px;
-		background: radial-gradient(circle, rgba(235, 191, 66, 0.9), rgba(214, 162, 30, 0.4) 42%, transparent 70%);
-		filter: blur(20px);
-	}
-	@keyframes fx-spin {
-		to { transform: rotate(360deg); }
 	}
 
 	/* E — aurora: soft gold light flowing behind the image */
