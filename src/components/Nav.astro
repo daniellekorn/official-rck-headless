@@ -1,16 +1,52 @@
 ---
+import { getYouthPrograms } from "../lib/youth-programs";
+import { getTeam, groupByRole, ROLE_GROUPS } from "../lib/team";
+
 const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
 
-const navLinks = [
-	{ label: "Home", href: "/" },
-	{ label: "Meet the Team", href: "/team" },
+// Submenus expose in-page sections so visitors can jump straight to them from
+// anywhere. Home's are static anchors; Team and Youth are built from the CMS so
+// they always match what's actually on those pages. Links use absolute hrefs
+// (e.g. /youth#dor-ldor) so they work from any page, not just the target page.
+const [youthPrograms, team] = await Promise.all([getYouthPrograms(), getTeam()]);
+const grouped = groupByRole(team);
+
+const youthChildren = youthPrograms.map((p) => ({ label: p.title, href: `/youth#${p.slug}` }));
+const teamChildren = ROLE_GROUPS
+	.filter((g) => grouped[g.key].length > 0)
+	.map((g) => ({ label: g.label, href: `/team#${g.key}` }));
+
+interface NavChild {
+	label: string;
+	href: string;
+}
+interface NavItem {
+	label: string;
+	href: string;
+	children?: NavChild[];
+}
+
+const baseLinks: NavItem[] = [
+	{
+		label: "Home",
+		href: "/",
+		children: [
+			{ label: "Join Us", href: "/#join" },
+			{ label: "Our History", href: "/#history" },
+		],
+	},
+	{ label: "Meet the Team", href: "/team", children: teamChildren },
 	{ label: "Daven with Us", href: "/daven" },
 	{ label: "Learn with Us", href: "/learn" },
 	{ label: "Events", href: "/events" },
-	{ label: "Youth", href: "/youth" },
-].map((l) => ({
+	{ label: "Youth", href: "/youth", children: youthChildren },
+];
+
+const navLinks = baseLinks.map((l) => ({
 	...l,
 	active: l.href === "/" ? pathname === "/" : pathname.startsWith(l.href),
+	// Drop empty submenus (e.g. CMS not populated yet) so no empty dropdown shows.
+	children: l.children && l.children.length > 0 ? l.children : undefined,
 }));
 
 const isContactActive = pathname === "/contact";
@@ -41,19 +77,47 @@ const isContactActive = pathname === "/contact";
 			<ul class="hidden items-center gap-4 lg:gap-6 md:flex">
 				{
 					navLinks.map((link) => (
-						<li>
+						<li class:list={["relative", link.children && "group"]}>
 							<a
 								href={link.href}
 								aria-current={link.active ? "page" : undefined}
 								class:list={[
-									"text-[17px] font-medium transition-colors whitespace-nowrap",
+									"inline-flex items-center gap-1 text-[17px] font-medium transition-colors whitespace-nowrap",
 									link.active
 										? "text-navy-600 underline underline-offset-[6px] decoration-2 decoration-gold-500"
 										: "text-navy-500 hover:text-gold-500",
 								]}
 							>
 								{link.label}
+								{link.children && (
+									<svg
+										viewBox="0 0 24 24"
+										class="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2.2"
+										aria-hidden="true"
+									>
+										<path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+									</svg>
+								)}
 							</a>
+							{link.children && (
+								<div class="invisible absolute left-1/2 top-full z-50 -translate-x-1/2 translate-y-1 pt-3 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+									<ul class="min-w-[210px] rounded-sm bg-white p-1.5 ring-1 ring-navy-100 shadow-[0_18px_44px_-16px_rgba(15,23,42,0.4)]">
+										{link.children.map((child) => (
+											<li>
+												<a
+													href={child.href}
+													class="block rounded-sm px-3 py-2 text-[15px] font-medium text-navy-600 transition-colors hover:bg-navy-50 hover:text-gold-600 whitespace-nowrap"
+												>
+													{child.label}
+												</a>
+											</li>
+										))}
+									</ul>
+								</div>
+							)}
 						</li>
 					))
 				}
@@ -108,17 +172,53 @@ const isContactActive = pathname === "/contact";
 				{
 					navLinks.map((link) => (
 						<li>
-							<a
-								href={link.href}
-								class:list={[
-									"block rounded-md px-4 py-3 text-base font-medium transition-colors",
-									link.active
-										? "bg-navy-50 text-navy-700"
-										: "text-navy-600 hover:bg-navy-50",
-								]}
-							>
-								{link.label}
-							</a>
+							<div class="flex items-center">
+								<a
+									href={link.href}
+									class:list={[
+										"flex-1 block rounded-md px-4 py-3 text-base font-medium transition-colors",
+										link.active
+											? "bg-navy-50 text-navy-700"
+											: "text-navy-600 hover:bg-navy-50",
+									]}
+								>
+									{link.label}
+								</a>
+								{link.children && (
+									<button
+										type="button"
+										data-submenu-toggle
+										aria-expanded="false"
+										aria-label={`Toggle ${link.label} sections`}
+										class="ml-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-navy-500 transition-colors hover:bg-navy-50"
+									>
+										<svg
+											viewBox="0 0 24 24"
+											class="h-4 w-4 transition-transform duration-200"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2.2"
+											aria-hidden="true"
+										>
+											<path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+										</svg>
+									</button>
+								)}
+							</div>
+							{link.children && (
+								<ul data-submenu class="hidden ml-4 mb-1 border-l border-navy-100 pl-3">
+									{link.children.map((child) => (
+										<li>
+											<a
+												href={child.href}
+												class="block rounded-md px-4 py-2 text-sm font-medium text-navy-500 transition-colors hover:bg-navy-50 hover:text-gold-600"
+											>
+												{child.label}
+											</a>
+										</li>
+									))}
+								</ul>
+							)}
 						</li>
 					))
 				}
@@ -171,6 +271,19 @@ const isContactActive = pathname === "/contact";
 
 	menu?.querySelectorAll("a").forEach((a) => {
 		a.addEventListener("click", () => setOpen(false));
+	});
+
+	// Mobile submenu accordions: the caret toggles its sibling list; the parent
+	// link still navigates to the page itself.
+	menu?.querySelectorAll<HTMLButtonElement>("[data-submenu-toggle]").forEach((btn) => {
+		btn.addEventListener("click", () => {
+			const sub = btn.closest("li")?.querySelector<HTMLElement>("[data-submenu]");
+			const caret = btn.querySelector<SVGElement>("svg");
+			if (!sub) return;
+			const open = !sub.classList.toggle("hidden");
+			btn.setAttribute("aria-expanded", String(open));
+			if (caret) caret.style.transform = open ? "rotate(180deg)" : "";
+		});
 	});
 
 	document.addEventListener("keydown", (e) => {

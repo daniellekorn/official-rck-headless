@@ -1,6 +1,7 @@
 import * as items from "@wix/wix-data-items-sdk";
 import { auth } from "@wix/essentials";
 import { media } from "@wix/sdk";
+import { slugify } from "./slug";
 
 const COLLECTION_ID = "YouthPrograms";
 
@@ -10,6 +11,7 @@ const COLLECTION_ID = "YouthPrograms";
 export interface YouthProgram {
 	_id: string;
 	title: string;
+	slug: string; // anchor id, derived from title (e.g. "dor-ldor")
 	description?: unknown; // Ricos rich text — extracted to plain text for render
 	galleryUrls: string[]; // resolved program photos; [0] is the featured one
 	flyerEmbedUrl?: string; // Canva "Publish to Web" iframe src
@@ -57,13 +59,14 @@ export async function getYouthPrograms(): Promise<YouthProgram[]> {
 			.limit(100)
 			.find();
 
-		return (results as YouthProgramRow[]).map((row) => {
+		return (results as YouthProgramRow[]).map((row, i) => {
 			const galleryUrls = (row.gallery ?? [])
 				.map(galleryItemUrl)
 				.map((u) => resolveImage(u))
 				.filter((u): u is string => Boolean(u));
 			return {
 				...row,
+				slug: slugify(row.title ?? "") || `program-${i + 1}`,
 				galleryUrls,
 				flyerImageUrl: resolveImage(row.flyerImage, 900, 1200),
 			};
