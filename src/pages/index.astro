@@ -30,6 +30,7 @@ const [homepage, history] = await Promise.all([
 // (see design-log/019). Defaults keep the page rendering identically before
 // the CMS is populated.
 const imageTextSection1 = {
+	eyebrowLead: homepage?.imageTextSection1EyebrowLead ?? undefined,
 	eyebrowGold: homepage?.imageTextSection1EyebrowGold ?? "UNIQUE",
 	eyebrowNavy: homepage?.imageTextSection1EyebrowNavy ?? "IMPACTFUL",
 	subheadLine1: homepage?.imageTextSection1TitleLine1 ?? "A Community Kollel",
@@ -43,6 +44,7 @@ const imageTextSection1 = {
 };
 
 const imageTextSection2 = {
+	eyebrowLead: homepage?.imageTextSection2EyebrowLead ?? "VIBRANT",
 	eyebrowGold: homepage?.imageTextSection2EyebrowGold ?? "TORAH",
 	eyebrowNavy: homepage?.imageTextSection2EyebrowNavy ?? "VISION",
 	subheadLine1: homepage?.imageTextSection2TitleLine1 ?? "A Kollel Dedicated to",
@@ -74,6 +76,7 @@ const imageTextSection2 = {
 
 		<div id="about" data-pager-section data-pager-theme="light" data-section-reveal class="scroll-mt-24">
 			<SplitFeature
+				eyebrowLead={imageTextSection1.eyebrowLead}
 				eyebrowGold={imageTextSection1.eyebrowGold}
 				eyebrowNavy={imageTextSection1.eyebrowNavy}
 				subheadLine1={imageTextSection1.subheadLine1}
@@ -86,7 +89,7 @@ const imageTextSection2 = {
 			/>
 		</div>
 
-		<div id="join" data-pager-section data-pager-theme="dark" data-section-reveal class="scroll-mt-24">
+		<div id="join" data-pager-section data-pager-theme="light" data-section-reveal class="scroll-mt-24">
 			<JoinUs
 				cards={[
 					{ title: homepage?.joinUsCard1Title, subtitle: homepage?.joinUsCard1Subtitle, href: homepage?.joinUsCard1Href, icon: homepage?.joinUsCard1Icon as "book" | "reader" | "people" | "minyan" | undefined },
@@ -98,6 +101,7 @@ const imageTextSection2 = {
 
 		<div id="vision" data-pager-section data-pager-theme="light" data-section-reveal class="scroll-mt-24">
 			<SplitFeature
+				eyebrowLead={imageTextSection2.eyebrowLead}
 				eyebrowGold={imageTextSection2.eyebrowGold}
 				eyebrowNavy={imageTextSection2.eyebrowNavy}
 				subheadLine1={imageTextSection2.subheadLine1}

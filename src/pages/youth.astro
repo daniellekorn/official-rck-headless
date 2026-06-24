@@ -64,7 +64,7 @@ const programs = await getYouthPrograms();
 										class:list={["flex justify-center", flyerLeft ? "md:order-1" : "md:order-2"]}
 										data-reveal={flyerLeft ? "left" : "right"}
 									>
-										<div class="w-full max-w-sm overflow-hidden rounded-2xl bg-navy-800 ring-1 ring-navy-100 shadow-[0_30px_64px_-34px_rgba(7,23,58,0.55)]">
+										<div class="w-full max-w-sm overflow-hidden rounded-md bg-navy-800 ring-1 ring-navy-100 shadow-[0_30px_64px_-34px_rgba(7,23,58,0.55)]">
 											<div class="relative aspect-[3/4]">
 												{program.flyerImageUrl ? (
 													<img
@@ -107,7 +107,7 @@ const programs = await getYouthPrograms();
 									{hasContact && (
 										<div
 											class:list={[
-												"inline-flex flex-col gap-3 rounded-2xl bg-white p-5 sm:p-6 ring-1 ring-navy-100 shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)]",
+												"inline-flex flex-col gap-3 rounded-md bg-white p-5 sm:p-6 ring-1 ring-navy-100 shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)]",
 												description && "mt-8",
 											]}
 										>
@@ -134,12 +134,9 @@ const programs = await getYouthPrograms();
 												)}
 												<a
 													href="/contact"
-													class="inline-flex items-center gap-1.5 rounded-full bg-gold-500 px-4 py-1.5 text-sm font-semibold text-navy-700 transition-colors hover:bg-gold-400"
+													class="inline-flex items-center gap-1.5 rounded-sm bg-gold-500 px-4 py-1.5 text-sm font-semibold text-navy-700 transition-colors hover:bg-gold-400"
 												>
 													Contact
-													<svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2">
-														<path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
-													</svg>
 												</a>
 											</div>
 										</div>

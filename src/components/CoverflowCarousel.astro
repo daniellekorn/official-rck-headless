@@ -86,7 +86,7 @@ const { items, autoplayMs = 3000 } = Astro.props;
 				data-index={i}
 				aria-label={`Go to slide ${i + 1}`}
 				class:list={[
-					"rounded-full transition-all duration-300 h-1.5",
+					"rounded-sm transition-all duration-300 h-1.5",
 					i === 0 ? "w-6 bg-gold-400" : "w-1.5 bg-white/30 hover:bg-white/60",
 				]}
 			/>
@@ -180,7 +180,7 @@ const { items, autoplayMs = 3000 } = Astro.props;
 		z-index: 30;
 		width: 2.75rem;
 		height: 2.75rem;
-		border-radius: 9999px;
+		border-radius: 0.125rem;
 		background: rgba(0, 0, 0, 0.4);
 		color: white;
 		display: flex;

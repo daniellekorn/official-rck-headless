@@ -30,8 +30,8 @@ const entries: InternalEntry[] = Astro.props.entries && Astro.props.entries.leng
 
 <div class="relative" data-history>
 	<!-- edge fades hint that there's more to either side -->
-	<div aria-hidden="true" class="pointer-events-none absolute inset-y-0 left-0 z-20 w-8 bg-gradient-to-r from-navy-700 to-transparent sm:w-16"></div>
-	<div aria-hidden="true" class="pointer-events-none absolute inset-y-0 right-0 z-20 w-8 bg-gradient-to-l from-navy-700 to-transparent sm:w-16"></div>
+	<div aria-hidden="true" class="pointer-events-none absolute inset-y-0 left-0 z-20 w-8 bg-gradient-to-r from-mist to-transparent sm:w-16"></div>
+	<div aria-hidden="true" class="pointer-events-none absolute inset-y-0 right-0 z-20 w-8 bg-gradient-to-l from-mist to-transparent sm:w-16"></div>
 
 	<div
 		data-history-track
@@ -45,15 +45,15 @@ const entries: InternalEntry[] = Astro.props.entries && Astro.props.entries.leng
 				<article class="group/card relative flex w-[260px] shrink-0 flex-col sm:w-[320px]">
 					{/* timeline spine + year node */}
 					<div class="relative mb-5 flex items-center">
-						<span aria-hidden="true" class="absolute left-0 top-[7px] h-px w-[calc(100%+1.5rem)] bg-white/15" />
-						<span class="relative z-10 h-3.5 w-3.5 shrink-0 rounded-full bg-gold-400 ring-4 ring-navy-700" />
-						<span class="relative z-10 ml-3 bg-navy-700 pr-2 font-display text-2xl font-medium text-gold-300 sm:text-3xl">
+						<span aria-hidden="true" class="absolute left-0 top-[7px] h-px w-[calc(100%+1.5rem)] bg-navy-600/15" />
+						<span class="relative z-10 h-3.5 w-3.5 shrink-0 rounded-sm bg-gold-500 ring-4 ring-mist" />
+						<span class="relative z-10 ml-3 bg-mist pr-2 font-display text-2xl font-medium text-gold-600 sm:text-3xl">
 							{entry.year ?? "—"}
 						</span>
 					</div>
 
 					<figure
-						class="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-[0_24px_48px_-24px_rgba(0,0,0,0.7)] ring-1 ring-white/10"
+						class="relative aspect-[4/3] w-full overflow-hidden rounded-md shadow-[0_24px_48px_-28px_rgba(7,23,58,0.45)] ring-1 ring-navy-100"
 						style={entry.imageUrl
 							? undefined
 							: `background: linear-gradient(135deg, ${entry.from ?? "#243c63"} 0%, ${entry.to ?? "#d6a21e"} 100%);`}
@@ -70,12 +70,12 @@ const entries: InternalEntry[] = Astro.props.entries && Astro.props.entries.leng
 					</figure>
 
 					{entry.title && (
-						<h3 class="mt-4 font-sans text-lg font-bold tracking-[-0.01em] text-white sm:text-xl">
+						<h3 class="mt-4 font-sans text-lg font-bold tracking-[-0.01em] text-navy-700 sm:text-xl">
 							{entry.title}
 						</h3>
 					)}
 					{entry.caption && (
-						<p class="mt-1 text-sm leading-relaxed text-white/70">{entry.caption}</p>
+						<p class="mt-1 text-sm leading-relaxed text-navy-500">{entry.caption}</p>
 					)}
 				</article>
 			))

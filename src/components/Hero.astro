@@ -1,5 +1,4 @@
 ---
-import Highlight from "./Highlight.astro";
 
 interface Props {
 	eyebrow?: string;
@@ -34,7 +33,7 @@ const {
 				loading="eager"
 				aria-hidden="true"
 			/>
-			<div class="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-black/40 to-black/80" aria-hidden="true"></div>
+			<div class="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-black/25 to-black/55" aria-hidden="true"></div>
 		</>
 	) : (
 		<>
@@ -59,19 +58,18 @@ const {
 
 	<div class="container-page pb-20 pt-40 md:pt-48 md:pb-24 w-full">
 		<div class="max-w-3xl">
-			{eyebrow && <p class="eyebrow text-gold-300" data-reveal="up">{eyebrow}</p>}
+			{eyebrow && <p class="eyebrow text-base! sm:text-lg! text-gold-300" data-reveal="up">{eyebrow}</p>}
 			<h1
 				class="mt-4 font-display text-[2.5rem] leading-[1.02] text-white sm:text-5xl md:text-6xl lg:text-[4.5rem] font-medium"
 				data-reveal="left"
 			>
-				Welcome to{" "}
-				<Highlight immediate delay={650} duration={1100}>RCK</Highlight>
+				RCK
 			</h1>
 			<p class="mt-4 font-display text-xl sm:text-2xl md:text-3xl text-gold-300 font-medium" data-reveal="up" data-reveal-delay="150">
 				The Ra'anana Community Kollel
 			</p>
 			<div class="mt-8 flex max-w-xl gap-4" data-reveal="up" data-reveal-delay="300">
-				<span class="block w-[3px] shrink-0 self-stretch rounded-full bg-gold-400" aria-hidden="true"></span>
+				<span class="block w-[3px] shrink-0 self-stretch rounded-sm bg-gold-400" aria-hidden="true"></span>
 				<p class="text-base sm:text-lg text-white/85 leading-relaxed">
 					{subtitle}
 				</p>

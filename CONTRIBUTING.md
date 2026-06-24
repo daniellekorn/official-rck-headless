@@ -78,6 +78,7 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | heroPrimaryCtaHref | Text | "/schedule" (relative path) |
 | heroSecondaryCtaLabel | Text | "Our Programs" |
 | heroSecondaryCtaHref | Text | "/programming" |
+| imageTextSection1EyebrowLead | Text | Optional leading eyebrow word, shown navy *before* the gold word (so the row reads navy → gold → navy). Leave empty for none. Section 1 default: empty. |
 | imageTextSection1EyebrowGold | Text | Section 1 (first image+text band). Dashboard label "Section 1 — Eyebrow word (gold)". Default "UNIQUE". |
 | imageTextSection1EyebrowNavy | Text | Default "IMPACTFUL" |
 | imageTextSection1TitleLine1 | Text | Default "A Community Kollel" |
@@ -86,6 +87,7 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | imageTextSection1Image | Image | Optional |
 | imageTextSection1ImageOn | Text | Which side the photo sits on: `left` or `right`. Empty = `left`. Forgiving about case/spacing. |
 | imageTextSection1AccentLine | Text | Which headline line gets the animated gold marker: `line1` or `line2`. Empty = `line2`. Also accepts `first`/`second`. |
+| imageTextSection2EyebrowLead | Text | Optional leading eyebrow word, shown navy *before* the gold word (navy → gold → navy). Section 2 default: "VIBRANT" (so the eyebrow reads VIBRANT · TORAH · VISION = blue · yellow · blue). |
 | imageTextSection2EyebrowGold | Text | Section 2 (second image+text band). Default "TORAH". |
 | imageTextSection2EyebrowNavy | Text | Default "VISION" |
 | imageTextSection2TitleLine1 | Text | Default "A Kollel Dedicated to" |

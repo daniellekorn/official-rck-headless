@@ -84,7 +84,7 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 							Shabbat
 						</p>
 						<div class="flex items-start gap-5">
-							<div class="shrink-0 w-20 h-14 rounded-xl border-2 border-dashed border-navy-200 flex items-center justify-center">
+							<div class="shrink-0 w-20 h-14 rounded-md border-2 border-dashed border-navy-200 flex items-center justify-center">
 								<span class="font-sans text-[0.6rem] font-bold uppercase tracking-wide text-navy-300"
 									>KBA logo</span
 								>
@@ -104,14 +104,14 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 			</div>
 		</section>
 		{scheduleFlyer && (
-			<section class="py-16 sm:py-20 border-t border-navy-100">
+			<section class="py-16 sm:py-20 bg-mist">
 				<div class="container-page">
 					<div class="mx-auto max-w-sm">
 						<p class="mb-6 font-sans text-xs font-bold uppercase tracking-[0.22em] text-gold-500 text-center">
 							Daily Learning Schedule
 						</p>
 
-						<div class="rounded-2xl overflow-hidden shadow-xl ring-1 ring-navy-100">
+						<div class="rounded-md overflow-hidden shadow-xl ring-1 ring-navy-100">
 							{scheduleFlyer.imageUrl ? (
 								<a href={scheduleFlyer.imageUrl} target="_blank" rel="noopener noreferrer" title="Click to view full size">
 									<img
@@ -141,7 +141,7 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 						<p class="mt-6 text-center text-sm text-navy-400 leading-relaxed">
 							Looking for more?{" "}
 							<a href="/learn" class="text-navy-600 font-medium hover:text-gold-500 transition-colors">
-								Explore our learning opportunities →
+								Explore our learning opportunities
 							</a>
 						</p>
 					</div>

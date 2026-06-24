@@ -57,7 +57,7 @@ const { sections } = Astro.props;
 		display: block;
 		width: 0.4rem;
 		height: 0.4rem;
-		border-radius: 9999px;
+		border-radius: 0.125rem;
 		background: var(--dot);
 		opacity: 0.4;
 		transition:
@@ -84,7 +84,7 @@ const { sections } = Astro.props;
 		top: 50%;
 		transform: translateY(-50%) translateX(0.25rem);
 		white-space: nowrap;
-		border-radius: 9999px;
+		border-radius: 0.125rem;
 		background: #07173a;
 		color: #fff;
 		padding: 0.25rem 0.7rem;
@@ -100,7 +100,8 @@ const { sections } = Astro.props;
 			transform 0.25s ease;
 	}
 	[data-pager-dot]:hover .pager-label,
-	[data-pager-dot]:focus-visible .pager-label {
+	[data-pager-dot]:focus-visible .pager-label,
+	[data-pager-dot].is-peek .pager-label {
 		opacity: 1;
 		transform: translateY(-50%) translateX(0);
 	}
@@ -108,7 +109,7 @@ const { sections } = Astro.props;
 	:focus-visible {
 		outline: 2px solid #d6a21e;
 		outline-offset: 3px;
-		border-radius: 9999px;
+		border-radius: 0.125rem;
 	}
 </style>
 
@@ -120,6 +121,12 @@ const { sections } = Astro.props;
 			document.querySelectorAll<HTMLElement>("[data-pager-section]"),
 		);
 
+		// Briefly flash a section's label when it becomes active (scrolling into
+		// it, up or down). It fades back out after ~1.2s unless the visitor is
+		// hovering the dot, in which case the :hover rule keeps it shown.
+		let lastActiveId: string | null = null;
+		let peekTimer: ReturnType<typeof setTimeout> | undefined;
+
 		const setActive = (id: string) => {
 			dots.forEach((d) =>
 				d.setAttribute("aria-current", String(d.dataset.target === id)),
@@ -127,6 +134,17 @@ const { sections } = Astro.props;
 			const section = document.getElementById(id);
 			const theme = section?.dataset.pagerTheme === "light" ? "light" : "dark";
 			pager.dataset.theme = theme;
+
+			if (id !== lastActiveId) {
+				lastActiveId = id;
+				const activeDot = dots.find((d) => d.dataset.target === id);
+				if (activeDot) {
+					dots.forEach((d) => d.classList.remove("is-peek"));
+					activeDot.classList.add("is-peek");
+					if (peekTimer) clearTimeout(peekTimer);
+					peekTimer = setTimeout(() => activeDot.classList.remove("is-peek"), 1200);
+				}
+			}
 		};
 
 		// A section is "active" while it crosses a thin band through the

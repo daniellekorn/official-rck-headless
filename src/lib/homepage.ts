@@ -19,6 +19,7 @@ export interface HomepageContent {
 	// (Section 1 = first, Section 2 = second), NOT by their current content, so
 	// the office can repurpose what each band is about without the field names
 	// lying. Renamed from uniqueImpactful*/torahVision* — see design-log/019.
+	imageTextSection1EyebrowLead?: string;
 	imageTextSection1EyebrowGold?: string;
 	imageTextSection1EyebrowNavy?: string;
 	imageTextSection1TitleLine1?: string;
@@ -29,6 +30,7 @@ export interface HomepageContent {
 	imageTextSection1ImageOn?: string;
 	imageTextSection1AccentLine?: string;
 
+	imageTextSection2EyebrowLead?: string;
 	imageTextSection2EyebrowGold?: string;
 	imageTextSection2EyebrowNavy?: string;
 	imageTextSection2TitleLine1?: string;

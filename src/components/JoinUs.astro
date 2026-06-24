@@ -19,41 +19,21 @@ const fallback: CardInput[] = [
 const cards: CardInput[] = Astro.props.cards && Astro.props.cards.length > 0 ? Astro.props.cards : fallback;
 ---
 
-<section class="relative isolate overflow-hidden py-20 sm:py-24 md:py-32">
-	<!-- Atmospheric navy canvas: a gold glow behind the heading, a deep-navy
-	     pool bottom-right, fading toward a lighter navy at the base so the
-	     darker navy-700 footer reads as a distinct zone below the seam. -->
-	<div
-		class="absolute inset-0 -z-10"
-		style="background:
-			radial-gradient(1100px 520px at 50% -12%, rgba(214,162,30,0.22), transparent 60%),
-			radial-gradient(900px 620px at 88% 112%, rgba(36,60,99,0.55), transparent 55%),
-			linear-gradient(180deg, #07173a 0%, #0b1f47 55%, #102a56 100%);"
-		aria-hidden="true"
-	>
-	</div>
-	<!-- fine diagonal line texture, matching the hero's no-image fallback -->
-	<div
-		class="absolute inset-0 -z-10 opacity-[0.05]"
-		style="background-image: repeating-linear-gradient(45deg, #fff 0 1px, transparent 1px 14px);"
-		aria-hidden="true"
-	>
-	</div>
-
+<section class="relative isolate overflow-hidden bg-mist py-12 sm:py-14 md:py-16">
 	<div class="container-page">
-		<p class="eyebrow text-center text-gold-300" data-reveal="up">Get Involved</p>
-		<h2 class="mt-3 text-center font-display text-4xl sm:text-5xl md:text-6xl font-medium text-white" data-reveal="up" data-reveal-delay="100">
+		<p class="eyebrow text-base! sm:text-lg! text-center text-gold-600" data-reveal="up">Get Involved</p>
+		<h2 class="mt-3 text-center font-display text-4xl sm:text-5xl md:text-6xl font-medium text-navy-600" data-reveal="up" data-reveal-delay="100">
 			Join Us
 		</h2>
-		<span class="mx-auto mt-4 block h-[3px] w-16 rounded-full bg-gold-400" aria-hidden="true" data-reveal="up" data-reveal-delay="180"></span>
+		<span class="mx-auto mt-4 block h-[3px] w-16 rounded-sm bg-gold-400" aria-hidden="true" data-reveal="up" data-reveal-delay="180"></span>
 
-		<div data-joinus-grid class="mt-12 sm:mt-16 grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 md:gap-8">
+		<div data-joinus-grid class="mx-auto mt-10 sm:mt-12 grid max-w-5xl gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 md:gap-8">
 			{
 				cards.map((card) => (
 					<div data-joinus-card class="flex" style="opacity:0">
 					<a
 						href={card.href}
-						class="group relative flex w-full flex-col overflow-hidden rounded-3xl bg-gradient-to-br from-gold-400 via-gold-500 to-gold-600 p-8 sm:p-9 ring-1 ring-inset ring-white/25 shadow-[0_26px_54px_-22px_rgba(214,162,30,0.55),0_2px_0_0_rgba(255,255,255,0.25)_inset] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_40px_72px_-24px_rgba(214,162,30,0.7)]"
+						class="group relative flex w-full flex-col overflow-hidden rounded-md bg-gradient-to-br from-gold-400 via-gold-500 to-gold-600 p-8 sm:p-9 ring-1 ring-inset ring-white/25 shadow-[0_26px_54px_-22px_rgba(214,162,30,0.55),0_2px_0_0_rgba(255,255,255,0.25)_inset] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_40px_72px_-24px_rgba(214,162,30,0.7)]"
 					>
 						{/* sheen that sweeps across on hover for depth */}
 						<span aria-hidden="true" class="pointer-events-none absolute inset-0">
@@ -61,7 +41,7 @@ const cards: CardInput[] = Astro.props.cards && Astro.props.cards.length > 0 ? A
 						</span>
 
 						{/* navy icon tile — high contrast against the gold card */}
-						<span class="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-navy-700 text-gold-300 shadow-[0_10px_24px_-10px_rgba(7,23,58,0.8)] transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-3">
+						<span class="relative flex h-16 w-16 items-center justify-center rounded-md bg-navy-700 text-gold-300 shadow-[0_10px_24px_-10px_rgba(7,23,58,0.8)] transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-3">
 							{card.icon === "book" && (
 								<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.6">
 									<path d="M3 5.5C3 4.67 3.67 4 4.5 4H10c1.1 0 2 .9 2 2v13c0-1.1-.9-2-2-2H4.5a1.5 1.5 0 0 1-1.5-1.5v-10ZM21 5.5c0-.83-.67-1.5-1.5-1.5H14c-1.1 0-2 .9-2 2v13c0-1.1.9-2 2-2h5.5a1.5 1.5 0 0 0 1.5-1.5v-10Z" stroke-linejoin="round"/>
@@ -103,14 +83,7 @@ const cards: CardInput[] = Astro.props.cards && Astro.props.cards.length > 0 ? A
 						</h3>
 
 						{/* navy underline rule that grows on hover */}
-						<span aria-hidden="true" class="relative mt-5 block h-[2px] w-10 rounded-full bg-navy-700/40 transition-all duration-300 group-hover:w-20"></span>
-
-						<span class="relative mt-5 inline-flex items-center gap-2 text-sm font-semibold text-navy-700/75 transition-colors duration-300 group-hover:text-navy-700">
-							Explore
-							<svg viewBox="0 0 24 24" class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
-							</svg>
-						</span>
+						<span aria-hidden="true" class="relative mt-5 block h-[2px] w-10 rounded-sm bg-navy-700/40 transition-all duration-300 group-hover:w-20"></span>
 					</a>
 					</div>
 				))

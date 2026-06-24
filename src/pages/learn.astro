@@ -30,17 +30,17 @@ const gridFlyers = selectedSub
 
 	{allLearning.length > 0 && <CoverflowCarousel items={allLearning} />}
 
-	<section class="py-10 sm:py-14 bg-navy-900">
+	<section class="py-10 sm:py-14 bg-mist">
 		<div class="container-page">
 			{subCategories.length > 0 && (
 				<div class="flex flex-wrap gap-2 justify-center mb-10">
 					<a
 						href="/learn"
 						class:list={[
-							"px-4 py-1.5 rounded-full text-sm font-medium transition-colors",
+							"px-4 py-1.5 rounded-sm text-sm font-medium transition-colors",
 							!selectedSub
 								? "bg-gold-400 text-navy-900"
-								: "bg-navy-700 text-white/80 hover:bg-navy-600",
+								: "bg-white text-navy-600 ring-1 ring-navy-200 hover:bg-navy-50",
 						]}
 					>
 						All
@@ -49,10 +49,10 @@ const gridFlyers = selectedSub
 						<a
 							href={`/learn?sub=${encodeURIComponent(sub)}`}
 							class:list={[
-								"px-4 py-1.5 rounded-full text-sm font-medium capitalize transition-colors",
+								"px-4 py-1.5 rounded-sm text-sm font-medium capitalize transition-colors",
 								selectedSub === sub
 									? "bg-gold-400 text-navy-900"
-									: "bg-navy-700 text-white/80 hover:bg-navy-600",
+									: "bg-white text-navy-600 ring-1 ring-navy-200 hover:bg-navy-50",
 							]}
 						>
 							{sub}
@@ -64,7 +64,7 @@ const gridFlyers = selectedSub
 			{gridFlyers.length > 0 ? (
 				<div class="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
 					{gridFlyers.map((flyer) => (
-						<div class="rounded-xl overflow-hidden bg-navy-800 shadow-lg">
+						<div class="rounded-md overflow-hidden bg-white ring-1 ring-navy-100 shadow-sm">
 							<div class="relative aspect-[3/4]">
 								{flyer.imageUrl ? (
 									<img
@@ -93,10 +93,10 @@ const gridFlyers = selectedSub
 							{(flyer.title || flyer.subCategory) && (
 								<div class="p-4">
 									{flyer.title && (
-										<p class="font-medium text-white text-sm">{flyer.title}</p>
+										<p class="font-medium text-navy-700 text-sm">{flyer.title}</p>
 									)}
 									{flyer.subCategory && (
-										<p class="mt-1 text-xs text-gold-400 capitalize">{flyer.subCategory}</p>
+										<p class="mt-1 text-xs text-gold-600 capitalize">{flyer.subCategory}</p>
 									)}
 								</div>
 							)}
@@ -104,7 +104,7 @@ const gridFlyers = selectedSub
 					))}
 				</div>
 			) : (
-				<p class="text-center text-white/50 py-16">
+				<p class="text-center text-navy-400 py-16">
 					{selectedSub
 						? `No flyers for "${selectedSub}" yet.`
 						: "Learning materials coming soon."}

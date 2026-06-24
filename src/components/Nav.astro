@@ -15,20 +15,20 @@ const navLinks = [
 
 const isContactActive = pathname === "/contact";
 
-// One consistent treatment on every page, unchanging on scroll: a white pill,
-// lifted off the page by a soft drop shadow plus a gold glow, with a hairline
-// gold edge for brand definition. It reads the same over the dark homepage
-// hero and on white interior pages — and never changes, so nothing visually
-// shifts as you scroll.
+// A wide white bar that extends close to the screen edges: crisp gold hairline
+// + a light, tight drop shadow (no glow). It reads the same over the dark
+// homepage hero and on white interior pages. Scroll behavior (JS below): it
+// slides out of the way on scroll-down and snaps back on scroll-up, so it stays
+// out of the way while reading without losing quick access.
 ---
 
 <header
-	class="fixed inset-x-0 top-0 z-50 pt-4 sm:pt-6"
+	class="fixed inset-x-0 top-0 z-50 pt-3 sm:pt-4 transition-transform duration-300 will-change-transform"
 	data-nav-header
 >
-	<div class="mx-auto w-full max-w-7xl px-6">
+	<div class="mx-auto w-full max-w-[1600px] px-3 sm:px-5">
 		<nav
-			class="nav-pill mx-auto flex max-w-7xl items-center justify-between gap-3 sm:gap-4 rounded-full bg-white px-5 sm:px-6 py-2.5 sm:py-3 ring-1 ring-gold-400/70 shadow-[0_16px_44px_-16px_rgba(15,23,42,0.45),0_0_22px_-4px_rgba(214,162,30,0.45)]"
+			class="nav-pill mx-auto flex max-w-[1600px] items-center justify-between gap-3 sm:gap-4 rounded-sm bg-white px-5 sm:px-7 py-2.5 sm:py-3 ring-1 ring-gold-400/50 shadow-[0_6px_20px_-10px_rgba(15,23,42,0.35)]"
 		>
 			<a href="/" aria-label="RCK — The Ra'anana Community Kollel — Home">
 				<img
@@ -63,7 +63,7 @@ const isContactActive = pathname === "/contact";
 				<a
 					href="/contact"
 					class:list={[
-						"rounded-full border px-4 py-2 text-[17px] font-medium transition-colors whitespace-nowrap",
+						"rounded-sm border px-4 py-2 text-[17px] font-medium transition-colors whitespace-nowrap",
 						isContactActive
 							? "border-gold-500 text-gold-600 bg-gold-50"
 							: "border-navy-200 text-navy-500 hover:bg-navy-50",
@@ -73,7 +73,7 @@ const isContactActive = pathname === "/contact";
 				</a>
 				<a
 					href="/donate"
-					class="group inline-flex items-center gap-1.5 rounded-full bg-gold-500 px-5 py-2 text-[17px] font-semibold text-navy-700 shadow-sm transition-all hover:bg-gold-400 hover:shadow-md whitespace-nowrap"
+					class="group inline-flex items-center gap-1.5 rounded-sm bg-gold-500 px-5 py-2 text-[17px] font-semibold text-navy-700 shadow-sm transition-all hover:bg-gold-400 hover:shadow-md whitespace-nowrap"
 				>
 					<svg viewBox="0 0 24 24" class="h-4 w-4 transition-transform duration-300 group-hover:scale-110" fill="currentColor" aria-hidden="true">
 						<path d="M12 20.3 4.6 13a4.6 4.6 0 0 1 6.5-6.5l.9.9.9-.9A4.6 4.6 0 0 1 19.4 13L12 20.3Z" />
@@ -88,7 +88,7 @@ const isContactActive = pathname === "/contact";
 				aria-controls="mobile-menu"
 				aria-expanded="false"
 				aria-label="Toggle menu"
-				class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full text-navy-600 hover:bg-navy-50 transition-colors"
+				class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-sm text-navy-600 hover:bg-navy-50 transition-colors"
 			>
 				<svg data-icon="open" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
 					<path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
@@ -102,7 +102,7 @@ const isContactActive = pathname === "/contact";
 		<div
 			id="mobile-menu"
 			data-mobile-menu
-			class="md:hidden mx-auto mt-2 max-w-5xl origin-top scale-y-95 opacity-0 pointer-events-none transition-all duration-200 rounded-2xl bg-white/98 shadow-[0_24px_48px_-20px_rgba(15,23,42,0.35)] ring-1 ring-black/5 backdrop-blur"
+			class="md:hidden mx-auto mt-2 max-w-5xl origin-top scale-y-95 opacity-0 pointer-events-none transition-all duration-200 rounded-md bg-white/98 shadow-[0_24px_48px_-20px_rgba(15,23,42,0.35)] ring-1 ring-black/5 backdrop-blur"
 		>
 			<ul class="flex flex-col p-2">
 				{
@@ -111,7 +111,7 @@ const isContactActive = pathname === "/contact";
 							<a
 								href={link.href}
 								class:list={[
-									"block rounded-xl px-4 py-3 text-base font-medium transition-colors",
+									"block rounded-md px-4 py-3 text-base font-medium transition-colors",
 									link.active
 										? "bg-navy-50 text-navy-700"
 										: "text-navy-600 hover:bg-navy-50",
@@ -126,7 +126,7 @@ const isContactActive = pathname === "/contact";
 					<a
 						href="/contact"
 						class:list={[
-							"block rounded-xl px-4 py-3 text-base font-medium transition-colors",
+							"block rounded-md px-4 py-3 text-base font-medium transition-colors",
 							isContactActive ? "bg-navy-50 text-navy-700" : "text-navy-600 hover:bg-navy-50",
 						]}
 					>
@@ -136,7 +136,7 @@ const isContactActive = pathname === "/contact";
 				<li class="p-2">
 					<a
 						href="/donate"
-						class="block w-full rounded-xl bg-gold-500 px-4 py-3 text-center text-base font-semibold text-navy-700 hover:bg-gold-400 transition-colors"
+						class="block w-full rounded-md bg-gold-500 px-4 py-3 text-center text-base font-semibold text-navy-700 hover:bg-gold-400 transition-colors"
 					>
 						Donate
 					</a>
@@ -176,4 +176,39 @@ const isContactActive = pathname === "/contact";
 	document.addEventListener("keydown", (e) => {
 		if (e.key === "Escape") setOpen(false);
 	});
+
+	// Hide-on-scroll-down, reveal-on-scroll-up. The header animates via the
+	// `transition-transform` class in the markup; here we just set the transform.
+	// Always shown near the top of the page and whenever the mobile menu is open.
+	const header = document.querySelector<HTMLElement>("[data-nav-header]");
+	if (header) {
+		let lastY = window.scrollY;
+		let ticking = false;
+		const DELTA = 6; // ignore sub-pixel jitter
+
+		const update = () => {
+			const y = Math.max(0, window.scrollY);
+			const menuOpen = toggle?.getAttribute("aria-expanded") === "true";
+			if (y < 80 || menuOpen) {
+				header.style.transform = "";
+			} else if (y > lastY + DELTA) {
+				header.style.transform = "translateY(-130%)";
+			} else if (y < lastY - DELTA) {
+				header.style.transform = "";
+			}
+			lastY = y;
+			ticking = false;
+		};
+
+		window.addEventListener(
+			"scroll",
+			() => {
+				if (!ticking) {
+					requestAnimationFrame(update);
+					ticking = true;
+				}
+			},
+			{ passive: true },
+		);
+	}
 </script>

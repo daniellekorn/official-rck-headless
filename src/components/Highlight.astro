@@ -1,8 +1,9 @@
 ---
 interface Props {
 	/**
-	 * Highlight color. Defaults to brand gold-500 (#D6A21E).
-	 * Pass an rgba(...) value if you want translucency.
+	 * Highlight color. Defaults to the bright-yellow accent (#f6ed49) — the
+	 * marker color the brand uses for emphasis sweeps. Pass an rgba(...) value
+	 * if you want translucency.
 	 */
 	color?: string;
 	/**
@@ -24,7 +25,7 @@ interface Props {
 }
 
 const {
-	color = "#D6A21E",
+	color = "#f6ed49",
 	height = "0.5em",
 	position = "90%",
 	duration = 2200,

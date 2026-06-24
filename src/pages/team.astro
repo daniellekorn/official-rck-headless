@@ -121,13 +121,13 @@ const hasAny = team.length > 0;
 												type="button"
 												data-team-card
 												aria-expanded="false"
-												class="team-card block w-full text-left rounded-2xl bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_45px_-22px_rgba(15,23,42,0.45)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-500 cursor-pointer"
+												class="team-card block w-full text-left rounded-md bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_45px_-22px_rgba(15,23,42,0.45)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-500 cursor-pointer"
 											>
 												{photoMarkup}
 												{metaMarkup}
 											</button>
 										) : (
-											<div class="team-card-static block w-full rounded-2xl bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)]">
+											<div class="team-card-static block w-full rounded-md bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)]">
 												{photoMarkup}
 												{metaMarkup}
 											</div>
@@ -192,7 +192,7 @@ const hasAny = team.length > 0;
 		display: none;
 	}
 	.bio-toggle-label::after {
-		content: "Read bio →";
+		content: "Read bio";
 	}
 	.team-card[aria-expanded="true"] .bio-toggle-label::after {
 		content: "Hide bio";
