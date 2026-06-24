@@ -12,9 +12,33 @@ interface Props {
 }
 
 const { items, autoplayMs = 3000 } = Astro.props;
+
+// When an `aside` slot is provided (e.g. the Learn page's schedule), the band
+// becomes a two-column layout — aside on the left, carousel on the right — and
+// the cards spread wider to fill the space. Without it, the carousel stays the
+// original full-bleed, centered band (events / youth pages).
+const hasAside = Astro.slots.has("aside");
 ---
 
-<section class="bg-navy-800 py-24 sm:py-28 overflow-hidden" data-coverflow-section>
+<section
+	class:list={[
+		"bg-navy-800 overflow-hidden",
+		hasAside ? "with-aside py-14 sm:py-16" : "py-24 sm:py-28",
+	]}
+	data-coverflow-section
+>
+	<div
+		class:list={[
+			hasAside &&
+				"container-page grid items-center gap-10 lg:gap-12 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]",
+		]}
+	>
+		{hasAside && (
+			<aside class="mx-auto w-full max-w-sm lg:mx-0">
+				<slot name="aside" />
+			</aside>
+		)}
+		<div class:list={[hasAside && "min-w-0 w-full"]}>
 	<div class="coverflow-stage" data-coverflow data-autoplay-ms={autoplayMs}>
 		{items.map((item, i) => (
 			<div
@@ -92,6 +116,8 @@ const { items, autoplayMs = 3000 } = Astro.props;
 			/>
 		))}
 	</div>
+	</div>
+	</div>
 </section>
 
 <style is:global>
@@ -145,7 +171,7 @@ const { items, autoplayMs = 3000 } = Astro.props;
 
 	.coverflow-card.pos-active:hover,
 	.coverflow-card.pos-active.is-zoomed {
-		transform: translateX(0) scale(1.4) rotateY(0deg);
+		transform: translateX(0) scale(1.65) rotateY(0deg);
 		z-index: 20;
 		cursor: zoom-in;
 	}
@@ -203,7 +229,28 @@ const { items, autoplayMs = 3000 } = Astro.props;
 		right: calc(50% - min(120px, 27.5vw) - 3.25rem);
 	}
 
-
+	/* Two-column "with aside" layout (Learn page): bigger cards, pushed further
+	   apart to fill the right column so the band doesn't read as a small thing
+	   floating in whitespace. Scoped so events / youth carousels are untouched. */
+	.with-aside .coverflow-stage {
+		height: clamp(340px, 52vh, 520px);
+	}
+	.with-aside .coverflow-card {
+		width: min(300px, 70vw);
+		margin-left: calc(-0.5 * min(300px, 70vw));
+	}
+	.with-aside .coverflow-card.pos-prev {
+		transform: translateX(-90%) scale(0.8) rotateY(36deg);
+	}
+	.with-aside .coverflow-card.pos-next {
+		transform: translateX(90%) scale(0.8) rotateY(-36deg);
+	}
+	.with-aside .coverflow-arrow-prev {
+		left: calc(50% - min(150px, 35vw) - 3.25rem);
+	}
+	.with-aside .coverflow-arrow-next {
+		right: calc(50% - min(150px, 35vw) - 3.25rem);
+	}
 </style>
 
 <script>

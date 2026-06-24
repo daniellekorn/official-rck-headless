@@ -6,14 +6,12 @@ import PageHeader from "../components/PageHeader.astro";
 import CoverflowCarousel from "../components/CoverflowCarousel.astro";
 import { getFlyers, uniqueSubCategories } from "../lib/flyers";
 
-const selectedSub = Astro.url.searchParams.get("sub") ?? null;
-
 const allLearning = await getFlyers("learning");
 const subCategories = uniqueSubCategories(allLearning);
 
-const gridFlyers = selectedSub
-	? allLearning.filter((f) => f.subCategory === selectedSub)
-	: allLearning;
+// The community learning schedule lives in the Flyers collection as a
+// schedules/daily row (same one shown on /daven). Shown beside the carousel.
+const scheduleFlyer = (await getFlyers("schedules", "daily"))[0] ?? null;
 ---
 
 <Layout
@@ -28,43 +26,75 @@ const gridFlyers = selectedSub
 		titleNavy="With Us"
 	/>
 
-	{allLearning.length > 0 && <CoverflowCarousel items={allLearning} />}
+	{allLearning.length > 0 && (
+		<CoverflowCarousel items={allLearning}>
+			{scheduleFlyer && (
+				<div slot="aside" class="text-center lg:text-left">
+					<p class="eyebrow text-gold-400">Community Learning Schedule</p>
+					<div class="mt-4 overflow-hidden rounded-md bg-navy-900 ring-1 ring-white/10 shadow-[0_30px_64px_-34px_rgba(0,0,0,0.8)]">
+						{scheduleFlyer.imageUrl ? (
+							<a
+								href={scheduleFlyer.imageUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								title="View full size"
+								class="block transition-transform duration-300 ease-out hover:scale-[1.02]"
+							>
+								<img
+									src={scheduleFlyer.imageUrl}
+									alt="Community Learning Schedule"
+									loading="lazy"
+									class="w-full h-auto"
+								/>
+							</a>
+						) : scheduleFlyer.embedUrl ? (
+							<div class="aspect-[3/4]">
+								<iframe
+									src={scheduleFlyer.embedUrl}
+									title="Community Learning Schedule"
+									loading="lazy"
+									allow="fullscreen"
+									class="w-full h-full border-0"
+								/>
+							</div>
+						) : null}
+					</div>
+				</div>
+			)}
+		</CoverflowCarousel>
+	)}
 
 	<section class="py-10 sm:py-14 bg-mist">
 		<div class="container-page">
 			{subCategories.length > 0 && (
-				<div class="flex flex-wrap gap-2 justify-center mb-10">
-					<a
-						href="/learn"
-						class:list={[
-							"px-4 py-1.5 rounded-sm text-sm font-medium transition-colors",
-							!selectedSub
-								? "bg-gold-400 text-navy-900"
-								: "bg-white text-navy-600 ring-1 ring-navy-200 hover:bg-navy-50",
-						]}
+				<div class="mb-10 flex flex-wrap justify-center gap-2" data-filter-bar>
+					<button
+						type="button"
+						data-filter=""
+						class="filter-chip is-active px-4 py-1.5 rounded-sm text-sm font-medium capitalize transition-colors"
 					>
 						All
-					</a>
+					</button>
 					{subCategories.map((sub) => (
-						<a
-							href={`/learn?sub=${encodeURIComponent(sub)}`}
-							class:list={[
-								"px-4 py-1.5 rounded-sm text-sm font-medium capitalize transition-colors",
-								selectedSub === sub
-									? "bg-gold-400 text-navy-900"
-									: "bg-white text-navy-600 ring-1 ring-navy-200 hover:bg-navy-50",
-							]}
+						<button
+							type="button"
+							data-filter={sub}
+							class="filter-chip px-4 py-1.5 rounded-sm text-sm font-medium capitalize transition-colors"
 						>
 							{sub}
-						</a>
+						</button>
 					))}
 				</div>
 			)}
 
-			{gridFlyers.length > 0 ? (
-				<div class="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-					{gridFlyers.map((flyer) => (
-						<div class="rounded-md overflow-hidden bg-white ring-1 ring-navy-100 shadow-sm">
+			{allLearning.length > 0 ? (
+				<div class="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" data-flyer-grid>
+					{allLearning.map((flyer) => (
+						<div
+							data-flyer
+							data-sub={flyer.subCategory ?? ""}
+							class="rounded-md overflow-hidden bg-white ring-1 ring-navy-100 shadow-sm"
+						>
 							<div class="relative aspect-[3/4]">
 								{flyer.imageUrl ? (
 									<img
@@ -105,9 +135,7 @@ const gridFlyers = selectedSub
 				</div>
 			) : (
 				<p class="text-center text-navy-400 py-16">
-					{selectedSub
-						? `No flyers for "${selectedSub}" yet.`
-						: "Learning materials coming soon."}
+					Learning materials coming soon.
 				</p>
 			)}
 		</div>
@@ -115,3 +143,66 @@ const gridFlyers = selectedSub
 
 	<Footer />
 </Layout>
+
+<style>
+	/* Filter chips: inactive = white pill, active = gold. Driven by the
+	   `.is-active` class which the script toggles for multi-select. */
+	.filter-chip {
+		background-color: #fff;
+		color: var(--color-navy-600, #334155);
+		box-shadow: inset 0 0 0 1px var(--color-navy-200, #cbd5e1);
+	}
+	.filter-chip:hover {
+		background-color: var(--color-navy-50, #f8fafc);
+	}
+	.filter-chip.is-active {
+		background-color: var(--color-gold-400, #e0b73a);
+		color: var(--color-navy-900, #0b1220);
+		box-shadow: none;
+	}
+</style>
+
+<script>
+	const bar = document.querySelector<HTMLElement>("[data-filter-bar]");
+	const grid = document.querySelector<HTMLElement>("[data-flyer-grid]");
+
+	if (bar && grid) {
+		const cards = Array.from(grid.querySelectorAll<HTMLElement>("[data-flyer]"));
+		const allBtn = bar.querySelector<HTMLButtonElement>('[data-filter=""]');
+		const subBtns = Array.from(
+			bar.querySelectorAll<HTMLButtonElement>("[data-filter]"),
+		).filter((b) => (b.dataset.filter ?? "") !== "");
+
+		// Active subcategory selections. Empty set = show everything.
+		const active = new Set<string>();
+
+		const apply = () => {
+			cards.forEach((card) => {
+				const sub = card.dataset.sub ?? "";
+				const show = active.size === 0 || active.has(sub);
+				card.classList.toggle("hidden", !show);
+			});
+			allBtn?.classList.toggle("is-active", active.size === 0);
+			subBtns.forEach((b) =>
+				b.classList.toggle("is-active", active.has(b.dataset.filter ?? "")),
+			);
+		};
+
+		subBtns.forEach((btn) => {
+			btn.addEventListener("click", () => {
+				const sub = btn.dataset.filter ?? "";
+				if (active.has(sub)) active.delete(sub);
+				else active.add(sub);
+				apply();
+			});
+		});
+
+		// "All" clears every selection and returns to the full grid.
+		allBtn?.addEventListener("click", () => {
+			active.clear();
+			apply();
+		});
+
+		apply();
+	}
+</script>
