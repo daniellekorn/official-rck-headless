@@ -4,122 +4,71 @@ import { media } from "@wix/sdk";
 
 const COLLECTION_ID = "TeamMembers";
 
-// Canonical role group keys. Add a new key here + extend ROLE_GROUP_ALIASES
-// below to introduce a new group. Groups with zero members don't render —
-// the dormant ones (rabbis, staff, board) exist for editor flexibility, not
-// because they're guaranteed to populate. See design log #008.
-export type RoleGroup =
-	| "founder_director"
-	| "roshei"
-	| "kollel"
-	| "rabbis"
-	| "youth"
-	| "staff"
-	| "board"
-	| "other";
+// Canonical role group keys. The /team page is deliberately just two
+// sections: the people who lead the kollel, and the avreichim who learn in
+// it. Everything an editor types in `roleGroup` routes to one of these two
+// via the alias map below; there are no dormant or catch-all groups. See
+// design log #025 (supersedes the broader taxonomy of #007/#002).
+export type RoleGroup = "leadership" | "avreichim";
 
 export const ROLE_GROUPS: { key: RoleGroup; label: string }[] = [
-	{ key: "founder_director", label: "Founder & Director" },
-	{ key: "roshei", label: "Roshei Kollel" },
-	{ key: "kollel", label: "Kollel Avreichim" },
-	{ key: "rabbis", label: "Rabbis" },
-	// Youth programming leads. Renders as a "Youth Programming" section on
-	// /team like any other group (only when populated). It does NOT drive the
-	// /youth page — that page is built entirely from the separate YouthPrograms
-	// collection (see youth.astro + design log #017). roleGroup affects /team only.
-	{ key: "youth", label: "Youth Programming" },
-	{ key: "staff", label: "Staff" },
-	{ key: "board", label: "Board" },
-	// "other" is the catch-all for values that don't match any alias. It
-	// renders at the bottom so unmatched members never silently disappear.
-	{ key: "other", label: "Team" },
+	{ key: "leadership", label: "Kollel Leadership" },
+	{ key: "avreichim", label: "Our Avreichim" },
 ];
 
 // Map raw (lowercased, trimmed) roleGroup values from the CMS to canonical
-// keys. Extend liberally — the editor can type "Rabbi" or "rabbeim" or
-// "Rabbis" and they all land in the same place. Anything that doesn't match
-// here goes to "other" rather than getting dropped.
+// keys. Extend liberally — the editor can type "Rosh Kollel" or "Director"
+// or "Founder" and they all land in Kollel Leadership. Anything that doesn't
+// match here falls through to `avreichim` (see normalizeRoleGroup): the
+// rank-and-file is the safe default, so a member is never dropped and no
+// third section can ever appear.
 const ROLE_GROUP_ALIASES: Record<string, RoleGroup> = {
-	// Founder & Director — the singular leadership slot. Generic
-	// "leadership" terms route here intentionally; if the org ever needs a
-	// broader leadership bucket, add a separate key.
-	"founder": "founder_director",
-	"founders": "founder_director",
-	"director": "founder_director",
-	"directors": "founder_director",
-	"founder and director": "founder_director",
-	"founder & director": "founder_director",
-	"executive director": "founder_director",
-	"executive": "founder_director",
-	"leadership": "founder_director",
-	"leader": "founder_director",
-	"president": "founder_director",
+	// Kollel Leadership — founder/director, roshei kollel, roshei chaburah,
+	// and titled rabbeim. Generic "leadership" terms route here too.
+	"founder": "leadership",
+	"founders": "leadership",
+	"director": "leadership",
+	"directors": "leadership",
+	"founder and director": "leadership",
+	"founder & director": "leadership",
+	"executive director": "leadership",
+	"executive": "leadership",
+	"leadership": "leadership",
+	"leader": "leadership",
+	"president": "leadership",
+	"rosh kollel": "leadership",
+	"rosh chaburah": "leadership",
+	"rosh chabura": "leadership",
+	"roshei": "leadership",
+	"roshei kollel": "leadership",
+	"roshei chaburah": "leadership",
+	"roshei chaburos": "leadership",
+	"rabbi": "leadership",
+	"rabbis": "leadership",
+	"rabbeim": "leadership",
+	"rabbanim": "leadership",
+	"rav": "leadership",
+	"maggid shiur": "leadership",
 
-	// Roshei Kollel — heads of the kollel and of chaburos within it.
-	"rosh kollel": "roshei",
-	"rosh chaburah": "roshei",
-	"rosh chabura": "roshei",
-	"roshei": "roshei",
-	"roshei kollel": "roshei",
-	"roshei chaburah": "roshei",
-	"roshei chaburos": "roshei",
-
-	// Kollel Avreichim — the rank-and-file kollel members.
-	"kollel": "kollel",
-	"kollel member": "kollel",
-	"kollel members": "kollel",
-	"avreich": "kollel",
-	"avrech": "kollel",
-	"avreichim": "kollel",
-	"avrechim": "kollel",
-	"yungerman": "kollel",
-	"yungerleit": "kollel",
-
-	// Rabbis (dormant by default — populated only if the editor adds rows).
-	"rabbi": "rabbis",
-	"rabbis": "rabbis",
-	"rabbeim": "rabbis",
-	"rabbanim": "rabbis",
-	"rav": "rabbis",
-	"maggid shiur": "rabbis",
-
-	// Youth Programming — leads of the youth chaburos and programs. Editors
-	// normally type "Youth"; the program-name aliases below are a safety net
-	// in case someone types the program itself into roleGroup. See #017.
-	"youth": "youth",
-	"youth programming": "youth",
-	"youth program": "youth",
-	"youth programs": "youth",
-	"teen": "youth",
-	"teens": "youth",
-	"teen learning": "youth",
-	"dor l'dor": "youth",
-	"dor ldor": "youth",
-	"matmidim": "youth",
-	"pirchei": "youth",
-
-	// Staff (dormant).
-	"staff": "staff",
-	"admin": "staff",
-	"administration": "staff",
-	"administrative": "staff",
-	"administrator": "staff",
-	"hanhala": "staff",
-	"office": "staff",
-
-	// Board (dormant).
-	"board": "board",
-	"board member": "board",
-	"board members": "board",
-	"trustee": "board",
-	"trustees": "board",
+	// Our Avreichim — the kollel members. This is also the fallback for any
+	// unrecognized value (see normalizeRoleGroup), so these aliases are only
+	// here for clarity/intent.
+	"avreichim": "avreichim",
+	"avreich": "avreichim",
+	"avrech": "avreichim",
+	"avrechim": "avreichim",
+	"kollel": "avreichim",
+	"kollel member": "avreichim",
+	"kollel members": "avreichim",
+	"yungerman": "avreichim",
+	"yungerleit": "avreichim",
 };
 
 function normalizeRoleGroup(raw: unknown): RoleGroup {
-	if (typeof raw !== "string") return "other";
+	if (typeof raw !== "string") return "avreichim";
 	const key = raw.trim().toLowerCase();
-	if (!key) return "other";
-	return ROLE_GROUP_ALIASES[key] ?? "other";
+	if (!key) return "avreichim";
+	return ROLE_GROUP_ALIASES[key] ?? "avreichim";
 }
 
 export interface TeamMember {
@@ -169,14 +118,8 @@ export async function getTeam(): Promise<TeamMember[]> {
 
 export function groupByRole(members: TeamMember[]): Record<RoleGroup, TeamMember[]> {
 	const groups: Record<RoleGroup, TeamMember[]> = {
-		founder_director: [],
-		roshei: [],
-		kollel: [],
-		rabbis: [],
-		youth: [],
-		staff: [],
-		board: [],
-		other: [],
+		leadership: [],
+		avreichim: [],
 	};
 	for (const m of members) {
 		groups[m.roleGroup].push(m);

@@ -99,8 +99,7 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | whoWeAreTitle | Text | "Who We Are" |
 
 > **Naming note:** these two bands are named by position (Section 1 / Section 2), not by their current content, so the office can repurpose what each is about without the field names lying. Renamed from `uniqueImpactful*`/`torahVision*` — see [design-log/019](design-log/019-generic-split-section-field-names.md). The legacy keys still exist in the CMS during the transition and are deleted after the rename ships; code reads the new keys with a fallback to the legacy ones.
-| whoWeAreHebrew | Text | Hebrew tagline (Pirkei Avot) |
-| whoWeAreBody | Text | Paragraph |
+| whoWeAreHebrew | Text | Hebrew tagline (Pirkei Avot) — the section subtitle |
 | joinUsCard1Title | Text | "Daven with Us" |
 | joinUsCard1Subtitle | Text | "Daily Tefillah & Minyanim" |
 | joinUsCard1Href | Text | "/daven" |
@@ -136,24 +135,18 @@ Drives the slow auto-panning history timeline under "Who We Are" on the homepage
 
 Fields: `firstName`, `lastName`, `hebrewName` (opt), `role`, `roleGroup`, `bio` (Rich Text), `photo` (Image), `email` (opt), `sortOrder` (Number), `featured` (Boolean).
 
-**`roleGroup`** drives which section on /team a member appears in. Case-insensitive and forgiving about exact wording — type whatever feels natural and it usually lands in the right section. Recognized values (any spelling/case works):
+**`roleGroup`** drives which of the **two** sections on /team a member appears in. The page is deliberately just **Kollel Leadership** and **Our Avreichim** — nothing else. The field is case-insensitive and forgiving about exact wording — type whatever feels natural:
 
 | You type… | Lands in section |
 |---|---|
-| `Founder`, `Director`, `Founder and Director`, `Executive Director`, `Leadership`, `President` | **Founder & Director** |
-| `Rosh Kollel`, `Rosh Chaburah`, `Roshei Kollel`, `Roshei Chaburos` | **Roshei Kollel** |
-| `Kollel`, `Avreich`, `Avrech`, `Avreichim`, `Avrechim`, `Yungerman`, `Yungerleit` | **Kollel Avreichim** |
-| `Rabbi`, `Rabbis`, `Rabbeim`, `Rabbanim`, `Rav`, `Maggid Shiur` | **Rabbis** (dormant — only shows if populated) |
-| `Youth`, `Youth Programming`, `Teen`, `Teens`, `Dor L'Dor`, `Matmidim` | **Youth Programming** — shows on /team (the /youth page itself is driven by a separate `YouthPrograms` collection, see below) |
-| `Staff`, `Admin`, `Administration`, `Hanhala`, `Office` | **Staff** (dormant) |
-| `Board`, `Board Member`, `Trustee` | **Board** (dormant) |
-| Anything else | **Team** (catch-all so nothing silently disappears) |
+| `Founder`, `Director`, `Founder and Director`, `Executive Director`, `Leadership`, `President`, `Rosh Kollel`, `Rosh Chaburah`, `Roshei Kollel`, `Roshei Chaburos`, `Rabbi`, `Rav`, `Maggid Shiur` | **Kollel Leadership** |
+| `Avreich`, `Avrech`, `Avreichim`, `Avrechim`, `Kollel`, `Yungerman`, `Yungerleit`, **or anything else / left blank** | **Our Avreichim** |
 
-"Dormant" means the section header doesn't appear on /team unless at least one member is filed there. The taxonomy is biased toward the three active groups (**Founder & Director**, **Roshei Kollel**, **Kollel Avreichim**) but the dormant ones exist for flexibility — fill one and it appears automatically.
+There is no third section and no catch-all: anything the alias map doesn't recognize falls through to **Our Avreichim**, so a member is never dropped. If a leadership member lands in Avreichim, it's because the value isn't in the leadership list above — fix the wording or ask the developer to extend the alias map in `src/lib/team.ts`.
 
-**Youth rabbis — two separate places:** a member with `roleGroup = Youth` shows in a "Youth Programming" section on **/team** (the staff directory). The **/youth page itself is *not* built from `TeamMembers`** — it's built from the `YouthPrograms` collection (see its schema below), where each program names its own contact rabbi. So to put a rabbi's chaburah on the youth page, add a **`YouthPrograms`** row, not a team member. The two are independent: a rabbi can be in both (a `TeamMembers` row for their directory bio *and* the contact on a `YouthPrograms` row). See [design-log/017](design-log/017-events-and-youth-pages.md).
+**Youth rabbis live on the youth page, not here:** there is no longer a "Youth" section on /team. The **/youth page is built from the `YouthPrograms` collection** (see its schema below), where each program names its own contact rabbi. To put a rabbi's chaburah on the youth page, add a **`YouthPrograms`** row, not a team member. A rabbi can still have a `TeamMembers` row for their /team bio (as Leadership or Avreichim) *and* be the contact on a `YouthPrograms` row. See [design-log/017](design-log/017-events-and-youth-pages.md).
 
-If a value lands a member in the wrong section, either fix the spelling or ask the developer to extend the alias map in `src/lib/team.ts`. See design log [#007](design-log/007-team-page-taxonomy-and-hover-reveal.md) for the rationale behind the active vs. dormant split.
+See design log [#025](design-log/025-team-page-two-sections.md) for why the taxonomy was cut to two sections (supersedes [#007](design-log/007-team-page-taxonomy-and-hover-reveal.md)).
 
 #### `YouthPrograms` — one row per youth program
 

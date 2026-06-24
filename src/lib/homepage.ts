@@ -43,7 +43,6 @@ export interface HomepageContent {
 
 	whoWeAreTitle?: string;
 	whoWeAreHebrew?: string;
-	whoWeAreBody?: string;
 
 	joinUsCard1Title?: string;
 	joinUsCard1Subtitle?: string;

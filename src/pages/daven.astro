@@ -47,26 +47,26 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 
 					<!-- Weekday minyanim -->
 					<div>
-						<p class="mb-5 font-sans text-xs font-bold uppercase tracking-[0.22em] text-gold-500">
+						<p class="mb-5 font-sans text-sm font-bold uppercase tracking-[0.22em] text-gold-500">
 							Daily Minyanim
 						</p>
 
 						{!hasWeekday ? (
-							<p class="text-sm text-navy-400">Weekday times coming soon.</p>
+							<p class="text-base text-navy-400">Weekday times coming soon.</p>
 						) : (
 							<div class="divide-y divide-navy-100">
 								{weekday.map(({ service, timeGroups }) => (
-									<div class="flex items-start gap-5 sm:gap-7 py-4 sm:py-5">
-										<p class="w-24 sm:w-28 shrink-0 font-sans text-xs font-black uppercase tracking-[0.18em] text-navy-700 pt-px">
+									<div class="flex items-start gap-5 sm:gap-7 py-5 sm:py-6">
+										<p class="w-28 sm:w-32 shrink-0 font-sans text-base sm:text-lg font-black uppercase tracking-[0.14em] text-navy-700">
 											{service}
 										</p>
-										<div class="min-w-0 flex-1 space-y-1">
+										<div class="min-w-0 flex-1 space-y-1.5">
 											{timeGroups.map(({ daySpec, items }) => (
 												<div class="sm:flex sm:items-baseline sm:gap-4">
-													<p class="font-sans text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-navy-400 sm:w-28 sm:shrink-0">
+													<p class="font-sans text-sm font-semibold uppercase tracking-[0.1em] text-navy-400 sm:w-28 sm:shrink-0">
 														{daySpec}
 													</p>
-													<p class="font-sans text-sm text-navy-600">
+													<p class="font-sans text-base sm:text-lg text-navy-600">
 														{items.map((t) => (t.notes ? `${t.time} (${t.notes})` : t.time)).join(" · ")}
 													</p>
 												</div>
@@ -80,7 +80,7 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 
 					<!-- Shabbat -->
 					<div>
-						<p class="mb-5 font-sans text-xs font-bold uppercase tracking-[0.22em] text-gold-500">
+						<p class="mb-5 font-sans text-sm font-bold uppercase tracking-[0.22em] text-gold-500">
 							Shabbat
 						</p>
 						<div class="flex items-start gap-5">
@@ -90,11 +90,11 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 								>
 							</div>
 							<div>
-								<p class="font-sans text-base font-semibold text-navy-700 leading-snug">
+								<p class="font-sans text-base sm:text-lg font-semibold text-navy-700 leading-snug">
 									Join us at KBA for Shabbat davening.
 								</p>
-								<p class="mt-1.5 font-sans text-sm text-navy-400 leading-relaxed">
-									Tel Chai 8, Ra'anana. Shabbat times coming soon.
+								<p class="mt-1.5 font-sans text-sm sm:text-base text-navy-400 leading-relaxed">
+									Tel Chai 8, Ra'anana.
 								</p>
 							</div>
 						</div>
@@ -107,24 +107,24 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 			<section class="py-16 sm:py-20 bg-mist">
 				<div class="container-page">
 					<div class="mx-auto max-w-sm">
-						<p class="mb-6 font-sans text-xs font-bold uppercase tracking-[0.22em] text-gold-500 text-center">
-							Daily Learning Schedule
+						<p class="mb-6 font-sans text-sm font-bold uppercase tracking-[0.22em] text-gold-500 text-center">
+							Community Learning Schedule
 						</p>
 
-						<div class="rounded-md overflow-hidden shadow-xl ring-1 ring-navy-100">
+						<div class="rounded-md overflow-hidden shadow-xl ring-1 ring-navy-100 transition-transform duration-300 ease-out hover:scale-[1.04] hover:shadow-2xl">
 							{scheduleFlyer.imageUrl ? (
 								<a href={scheduleFlyer.imageUrl} target="_blank" rel="noopener noreferrer" title="Click to view full size">
 									<img
 										src={scheduleFlyer.imageUrl}
-										alt={scheduleFlyer.title ?? "Daily Learning Schedule"}
-										class="w-full h-auto hover:opacity-90 transition-opacity cursor-zoom-in"
+										alt={scheduleFlyer.title ?? "Community Learning Schedule"}
+										class="w-full h-auto cursor-zoom-in"
 									/>
 								</a>
 							) : scheduleFlyer.embedUrl ? (
 								<div class="aspect-[3/4]">
 									<iframe
 										src={scheduleFlyer.embedUrl}
-										title={scheduleFlyer.title ?? "Daily Learning Schedule"}
+										title={scheduleFlyer.title ?? "Community Learning Schedule"}
 										loading="lazy"
 										allow="fullscreen"
 										class="w-full h-full border-0"
@@ -133,12 +133,12 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 							) : null}
 						</div>
 						{scheduleFlyer.imageUrl && (
-							<p class="mt-2 text-center text-xs text-navy-300">
+							<p class="mt-3 text-center text-xs sm:text-sm text-navy-300">
 								Tap to view full size
 							</p>
 						)}
 
-						<p class="mt-6 text-center text-sm text-navy-400 leading-relaxed">
+						<p class="mt-6 text-center text-sm sm:text-base text-navy-400 leading-relaxed">
 							Looking for more?{" "}
 							<a href="/learn" class="text-navy-600 font-medium hover:text-gold-500 transition-colors">
 								Explore our learning opportunities

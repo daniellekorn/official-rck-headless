@@ -11,14 +11,12 @@ interface EntryInput {
 interface Props {
 	title?: string;
 	hebrew?: string;
-	body?: string;
 	entries?: EntryInput[];
 }
 
 const {
 	title = "Who We Are",
 	hebrew = "דע מאין באת ולאן אתה הולך",
-	body = "Rooted in the timeless wisdom of our tradition, we are a community building a future of Torah learning, meaningful prayer, and deep connection — in the heart of Ra'anana.",
 	entries,
 } = Astro.props;
 ---
@@ -40,11 +38,6 @@ const {
 					data-reveal-delay="180"
 				>
 					{hebrew}
-				</p>
-			)}
-			{body && (
-				<p class="mx-auto mt-8 max-w-2xl text-base md:text-lg leading-relaxed text-navy-500" data-reveal="up" data-reveal-delay="260">
-					{body}
 				</p>
 			)}
 		</div>
