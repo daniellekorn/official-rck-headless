@@ -23,7 +23,7 @@ const hasAside = Astro.slots.has("aside");
 <section
 	class:list={[
 		"bg-navy-800 overflow-hidden",
-		hasAside ? "with-aside py-14 sm:py-16" : "py-24 sm:py-28",
+		hasAside ? "with-aside py-14 sm:py-16" : "py-16 sm:py-20",
 	]}
 	data-coverflow-section
 >
@@ -171,7 +171,7 @@ const hasAside = Astro.slots.has("aside");
 
 	.coverflow-card.pos-active:hover,
 	.coverflow-card.pos-active.is-zoomed {
-		transform: translateX(0) scale(1.65) rotateY(0deg);
+		transform: translateX(0) scale(1.35) rotateY(0deg);
 		z-index: 20;
 		cursor: zoom-in;
 	}
@@ -181,13 +181,13 @@ const hasAside = Astro.slots.has("aside");
 	}
 
 	.coverflow-card.pos-prev {
-		transform: translateX(-82%) scale(0.78) rotateY(38deg);
+		transform: translateX(-96%) scale(0.8) rotateY(36deg);
 		opacity: 0.6;
 		z-index: 5;
 	}
 
 	.coverflow-card.pos-next {
-		transform: translateX(82%) scale(0.78) rotateY(-38deg);
+		transform: translateX(96%) scale(0.8) rotateY(-36deg);
 		opacity: 0.6;
 		z-index: 5;
 	}
