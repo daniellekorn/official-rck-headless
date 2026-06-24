@@ -29,10 +29,14 @@ const { variant, entries, secondsPerCard = 7 } = Astro.props;
 const loop = [...entries, ...entries];
 const dur = Math.max(entries.length, 1) * secondsPerCard;
 
+// Cards are sized in viewport widths so that one full set of images is always
+// WIDER than the screen (each card > 100vw / count). That guarantees you never
+// see the same image twice at once — a given image only comes back after the
+// whole set has scrolled through. Holds for ~4–5 images at any screen size.
 const cardCls = {
-	cinematic: "demo-card demo-card--cinematic aspect-[3/4] w-[280px] sm:w-[330px]",
-	wide: "demo-card demo-card--wide aspect-[16/9] w-[440px] sm:w-[560px]",
-	glass: "demo-card demo-card--glass aspect-[4/3] w-[340px] sm:w-[400px]",
+	cinematic: "demo-card demo-card--cinematic aspect-[3/4] w-[66vw] sm:w-[42vw] lg:w-[36vw]",
+	wide: "demo-card demo-card--wide aspect-[16/9] w-[88vw] sm:w-[60vw] lg:w-[48vw]",
+	glass: "demo-card demo-card--glass aspect-[4/3] w-[78vw] sm:w-[50vw] lg:w-[40vw]",
 }[variant];
 ---
 
@@ -215,6 +219,16 @@ const cardCls = {
 	.demo-card__glass .demo-card__title {
 		margin-top: 0.55rem;
 		font-size: 1.15rem;
+	}
+	/* Reserve a uniform two-line caption so every frosted bar is the same height,
+	   regardless of how long each caption is. */
+	.demo-card__glass .demo-card__caption {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		min-height: 2.9em;
 	}
 
 	@media (prefers-reduced-motion: reduce) {
