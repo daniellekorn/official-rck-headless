@@ -11,6 +11,13 @@ const mapSrc = contact?.address
 	? `https://maps.google.com/maps?q=${encodeURIComponent(contact.address)}&output=embed&z=15`
 	: null;
 
+// When arriving from a program's "Contact" button (e.g. the Youth page), the
+// subject is supplied via ?subject= and shown locked so the inquiry stays
+// tied to that program/rabbi. `readonly` (not `disabled`) keeps the value in
+// the form submission so the office still receives it.
+const prefillSubject = Astro.url.searchParams.get("subject")?.trim() ?? "";
+const lockedSubject = prefillSubject.length > 0;
+
 const field =
 	"mt-1.5 w-full rounded-sm border border-navy-200 bg-white px-3.5 py-2.5 text-navy-700 placeholder-navy-300 transition-colors focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-200";
 const label = "block text-sm font-medium text-navy-600";
@@ -140,6 +147,21 @@ const label = "block text-sm font-medium text-navy-600";
 									<label class={label} for="phone">Phone *</label>
 									<input class={field} id="phone" name="phone" type="tel" autocomplete="tel" required />
 									<p class="mt-1 hidden text-sm text-red-600" data-error-for="phone"></p>
+								</div>
+								<div class="sm:col-span-2">
+									<label class={label} for="subject">Subject</label>
+									<input
+										class={lockedSubject ? `${field.replace("bg-white", "bg-navy-50")} cursor-not-allowed text-navy-500` : field}
+										id="subject"
+										name="subject"
+										type="text"
+										autocomplete="off"
+										placeholder="What's this about?"
+										value={prefillSubject || undefined}
+										readonly={lockedSubject || undefined}
+										aria-readonly={lockedSubject || undefined}
+										title={lockedSubject ? "Subject set from the program you're contacting" : undefined}
+									/>
 								</div>
 								<div class="sm:col-span-2">
 									<label class={label} for="message">Message</label>

@@ -8,6 +8,7 @@ interface Payload {
 	lastName?: string;
 	email?: string;
 	phone?: string;
+	subject?: string;
 	message?: string;
 	/** Honeypot — real users never fill this. */
 	company?: string;
@@ -57,6 +58,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	const lastName = data.lastName?.trim() ?? "";
 	const email = data.email?.trim() ?? "";
 	const phone = data.phone?.trim() ?? "";
+	const subject = data.subject?.trim() ?? "";
 	const message = data.message?.trim() ?? "";
 
 	const errors: Record<string, string> = {};
@@ -91,11 +93,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		});
 	}
 
-	const subject = `New website contact from ${firstName} ${lastName}`;
+	const emailSubject = subject
+		? `Website contact: ${subject}`
+		: `New website contact from ${firstName} ${lastName}`;
 	const lines = [
-		`Name:  ${firstName} ${lastName}`,
-		`Email: ${email}`,
-		`Phone: ${phone}`,
+		`Name:    ${firstName} ${lastName}`,
+		`Email:   ${email}`,
+		`Phone:   ${phone}`,
+		`Subject: ${subject || "(none)"}`,
 		"",
 		"Message:",
 		message || "(none)",
@@ -104,6 +109,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 <p><strong>Name:</strong> ${escapeHtml(`${firstName} ${lastName}`)}</p>
 <p><strong>Email:</strong> ${escapeHtml(email)}</p>
 <p><strong>Phone:</strong> ${escapeHtml(phone)}</p>
+<p><strong>Subject:</strong> ${subject ? escapeHtml(subject) : "(none)"}</p>
 <p><strong>Message:</strong><br>${message ? escapeHtml(message).replace(/\n/g, "<br>") : "(none)"}</p>`;
 
 	try {
@@ -117,7 +123,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 				from: fromEmail,
 				to: [toEmail],
 				reply_to: email,
-				subject,
+				subject: emailSubject,
 				text: lines.join("\n"),
 				html,
 			}),

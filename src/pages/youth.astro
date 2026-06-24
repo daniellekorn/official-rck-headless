@@ -37,6 +37,11 @@ const pagerSections = programs.map((p) => ({ id: p.slug, label: p.title }));
 				const flyer = hasFlyer(program);
 				const hasPhotos = program.galleryUrls.length > 0;
 				const hasContact = Boolean(program.contactName || program.contactEmail);
+				// Pre-filled, locked subject for the Contact page so the office knows
+				// which program (and rabbi) the inquiry is about.
+				const inquirySubject = program.contactName
+					? `For ${program.contactName}: Inquiry about ${program.title}`
+					: `Inquiry about ${program.title}`;
 				// Alternate a warm off-white band against white for rhythm.
 				const banded = i % 2 === 1;
 				// Alternate the flyer's side per program for a more stylish rhythm.
@@ -143,7 +148,7 @@ const pagerSections = programs.map((p) => ({ id: p.slug, label: p.title }));
 													</a>
 												)}
 												<a
-													href="/contact"
+													href={`/contact?subject=${encodeURIComponent(inquirySubject)}`}
 													class="inline-flex items-center gap-1.5 rounded-sm bg-gold-500 px-4 py-1.5 text-sm font-semibold text-navy-700 transition-colors hover:bg-gold-400"
 												>
 													Contact
