@@ -8,10 +8,6 @@ import { getFlyers, uniqueSubCategories } from "../lib/flyers";
 
 const allLearning = await getFlyers("learning");
 const subCategories = uniqueSubCategories(allLearning);
-
-// The community learning schedule lives in the Flyers collection as a
-// schedules/daily row (same one shown on /daven). Shown beside the carousel.
-const scheduleFlyer = (await getFlyers("schedules", "daily"))[0] ?? null;
 ---
 
 <Layout
@@ -26,43 +22,7 @@ const scheduleFlyer = (await getFlyers("schedules", "daily"))[0] ?? null;
 		titleNavy="With Us"
 	/>
 
-	{allLearning.length > 0 && (
-		<CoverflowCarousel items={allLearning}>
-			{scheduleFlyer && (
-				<div slot="aside" class="text-center lg:text-left">
-					<p class="eyebrow text-gold-400">Community Learning Schedule</p>
-					<div class="mt-4 overflow-hidden rounded-md bg-navy-900 ring-1 ring-white/10 shadow-[0_30px_64px_-34px_rgba(0,0,0,0.8)]">
-						{scheduleFlyer.imageUrl ? (
-							<a
-								href={scheduleFlyer.imageUrl}
-								target="_blank"
-								rel="noopener noreferrer"
-								title="View full size"
-								class="block transition-transform duration-300 ease-out hover:scale-[1.02]"
-							>
-								<img
-									src={scheduleFlyer.imageUrl}
-									alt="Community Learning Schedule"
-									loading="lazy"
-									class="w-full h-auto"
-								/>
-							</a>
-						) : scheduleFlyer.embedUrl ? (
-							<div class="aspect-[3/4]">
-								<iframe
-									src={scheduleFlyer.embedUrl}
-									title="Community Learning Schedule"
-									loading="lazy"
-									allow="fullscreen"
-									class="w-full h-full border-0"
-								/>
-							</div>
-						) : null}
-					</div>
-				</div>
-			)}
-		</CoverflowCarousel>
-	)}
+	{allLearning.length > 0 && <CoverflowCarousel items={allLearning} />}
 
 	<section class="py-10 sm:py-14 bg-mist">
 		<div class="container-page">
