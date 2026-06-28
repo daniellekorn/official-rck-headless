@@ -1,14 +1,15 @@
 ---
 interface Props {
 	/**
-	 * Highlight color. Defaults to the bright-yellow accent (#f6ed49) — the
-	 * marker color the brand uses for emphasis sweeps. Pass an rgba(...) value
-	 * if you want translucency.
+	 * Highlight color. Defaults to the brand bright-yellow (#f6ed49 — the same
+	 * hex used for headings) at 55% alpha, so the marker reads as a translucent
+	 * wash and the navy words stay legible behind it. Pass any CSS color.
 	 */
 	color?: string;
 	/**
-	 * Bar height as a CSS length. Defaults to "0.5em" — covers roughly the
-	 * lower half of the text, editorial half-highlight style.
+	 * Bar height as a CSS length. Defaults to "0.85em" — a tall marker that
+	 * sits high over the word (covering most of the letters), not a thin
+	 * baseline underline.
 	 */
 	height?: string;
 	/**
@@ -25,8 +26,8 @@ interface Props {
 }
 
 const {
-	color = "#f6ed49",
-	height = "0.5em",
+	color = "rgba(246, 237, 73, 0.55)",
+	height = "0.85em",
 	position = "90%",
 	duration = 2200,
 	immediate = false,
