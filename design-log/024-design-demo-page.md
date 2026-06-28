@@ -1,6 +1,6 @@
 # 024 — `/demo` page: light-ray, header-bg, and timeline options
 
-**Status:** implemented (exploratory — distill once the client picks)
+**Status:** distilled — client picked all three; `/demo` removed
 **Date:** 2026-06-24
 **Author:** claude-session
 **Related:** #015 (history timeline), #016 (bold visual refresh), #021 (visual refresh)
@@ -54,6 +54,16 @@ Page renders at `/demo`; LightRays default unchanged elsewhere.
   fallback, so `WhoWeAre.astro` / `OurHistory` wiring is unchanged. `WhoWeAre`
   now renders the strip **full-bleed** (outside `container-page`) to match the
   demo presentation. The old auto-pan/reverse JS timeline was removed.
-- Light-effect and PageHeader-background options are still pending a pick; `/demo`
-  and `DemoTimeline.astro` stay until those are decided, then both get removed and
-  this entry trimmed. (Commit SHA to be added when committed.)
+- **Light effect → "C · Sunbeams" chosen.** The demo-only `fx-godrays` CSS effect
+  (parallel warm beams streaming diagonally, masked to a soft centered pool) was
+  promoted into `LightRays.astro` as a real `variant="sunbeams"`. The homepage
+  `SplitFeature` (`rays` prop) now renders it instead of the conic `drift` field;
+  `opacity` was bumped 0.24 → 0.4 since diagonal stripes read fainter than the
+  radial field. Honors `prefers-reduced-motion` (holds static) via the existing
+  shared reduced-motion rule.
+- **PageHeader background → "A · Diagonal lines" chosen.** That is already the
+  live `PageHeader.astro` treatment (the 45° hatch), so no code change — the
+  decision is simply "keep it." The client liked sunbeams + diagonal-lines
+  together for cross-page consistency.
+- **`/demo` + `DemoTimeline.astro` removed** now that all three decisions are
+  recorded. (Recoverable from git history if a future demo is needed.)

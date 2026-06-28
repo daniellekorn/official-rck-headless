@@ -24,12 +24,14 @@ interface Props {
 	/**
 	 * Motion style:
 	 * - "drift" (default): slow circular spin + gentle breathe (current homepage look)
+	 * - "sunbeams": parallel warm beams stream diagonally past the element,
+	 *   drifting like sun through a window (the chosen homepage look — see #024)
 	 * - "burst": rays shoot outward and retract, on a loop
 	 * - "burst-static": rays shoot outward once on load, then hold
 	 * - "spiral": counter-rotating layers + zoom — fancy spiral
 	 * - "sweep": a single bright wedge rotates like a lighthouse beam
 	 */
-	variant?: "drift" | "burst" | "burst-static" | "spiral" | "sweep";
+	variant?: "drift" | "sunbeams" | "burst" | "burst-static" | "spiral" | "sweep";
 	/** Extra classes for sizing/placement of the (square) light field. */
 	class?: string;
 }
@@ -173,6 +175,32 @@ const vars = [
 			color-mix(in srgb, var(--rck-rc), transparent 100%) 360deg
 		);
 		animation: rck-rays-drift calc(var(--rck-dur) * 1.5) linear infinite;
+	}
+
+	/* SUNBEAMS — parallel warm beams streaming diagonally past the element,
+	   drifting slowly like sunlight through a window. Replaces the conic beam
+	   field with a striped linear-gradient, masked to a soft centered pool so
+	   it glows behind the element rather than hard-edging. (Chosen #024.) */
+	.rck-rays--sunbeams .rck-rays__spread {
+		animation: none;
+		opacity: var(--rck-opacity);
+	}
+	.rck-rays--sunbeams .rck-rays__beams {
+		inset: -20%;
+		background: repeating-linear-gradient(
+			115deg,
+			transparent 0 20px,
+			color-mix(in srgb, var(--rck-rc), transparent 55%) 20px 27px,
+			transparent 27px 54px
+		);
+		-webkit-mask-image: radial-gradient(65% 65% at 50% 50%, #000 22%, transparent 80%);
+		mask-image: radial-gradient(65% 65% at 50% 50%, #000 22%, transparent 80%);
+		animation: rck-rays-stream calc(var(--rck-dur) * 0.9) ease-in-out infinite alternate;
+		will-change: transform;
+	}
+	@keyframes rck-rays-stream {
+		from { transform: translate(-6%, -6%); }
+		to { transform: translate(6%, 6%); }
 	}
 
 	@media (prefers-reduced-motion: reduce) {
