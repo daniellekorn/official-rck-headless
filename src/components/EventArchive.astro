@@ -1,0 +1,257 @@
+---
+/**
+ * EventArchive — master-detail "past events" browser. A list of event names
+ * (vertical on desktop, horizontal scroll-chips on mobile) sits beside a panel
+ * that shows the chosen event's photo gallery + its flyer (flyer beside the
+ * photos). Clicking a name swaps the panel client-side — no reload. The active
+ * event is reflected in the URL hash so a specific event can be linked/shared.
+ *
+ * Vanilla JS + `is:global` styles with `ea-` prefixed classes, following the
+ * PhotoGallery convention (scoped CSS doesn't reliably match JS-toggled classes
+ * in the Wix build — see #012). See design log #027.
+ */
+import PhotoGallery from "./PhotoGallery.astro";
+import { ricosToPlainText } from "../lib/ricos";
+import { hasFlyer, type PastEvent } from "../lib/past-events";
+
+interface Props {
+	events: PastEvent[];
+	/** Section eyebrow / heading. */
+	eyebrow?: string;
+	title?: string;
+}
+
+const { events, eyebrow = "The Archive", title = "Past Events" } = Astro.props;
+
+const dateFmt = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" });
+function caption(d: PastEvent["eventDate"]): string | undefined {
+	if (!d) return undefined;
+	const date = d instanceof Date ? d : new Date(d);
+	return Number.isNaN(date.getTime()) ? undefined : dateFmt.format(date);
+}
+---
+
+{events.length > 0 && (
+	<section class="py-14 sm:py-20 bg-mist border-t border-navy-100" data-event-archive>
+		<div class="container-page">
+			<div data-reveal="up">
+				<p class="eyebrow text-gold-600">{eyebrow}</p>
+				<h2 class="mt-2 font-display text-3xl sm:text-4xl md:text-[2.75rem] leading-[1.05] font-medium text-navy-600">
+					{title}
+				</h2>
+				<span class="mt-5 block h-[2px] w-14 bg-gold-400" aria-hidden="true"></span>
+			</div>
+
+			<div class="mt-10 grid gap-8 lg:grid-cols-[minmax(0,15rem)_1fr] lg:gap-12">
+				{/* Side list — vertical on desktop, horizontal scroll-chips on mobile */}
+				<nav class="ea-tabs" aria-label="Past events">
+					{events.map((e, i) => (
+						<button
+							type="button"
+							class:list={["ea-tab", i === 0 && "is-active"]}
+							data-ea-tab={e.slug}
+						>
+							<span class="ea-tab-title">{e.title}</span>
+							{caption(e.eventDate) && <span class="ea-tab-date">{caption(e.eventDate)}</span>}
+						</button>
+					))}
+				</nav>
+
+				{/* Panels — all rendered, only the active one shown */}
+				<div class="ea-panels">
+					{events.map((e, i) => {
+						const blurb = e.blurb ? ricosToPlainText(e.blurb) : "";
+						const flyer = hasFlyer(e);
+						const hasPhotos = e.galleryUrls.length > 0;
+						return (
+							<article
+								class:list={["ea-panel", i === 0 && "is-active"]}
+								data-ea-panel={e.slug}
+								aria-hidden={i === 0 ? undefined : "true"}
+							>
+								<div class="mb-6">
+									<h3 class="font-display text-2xl sm:text-3xl font-medium text-navy-700">{e.title}</h3>
+									{caption(e.eventDate) && (
+										<p class="mt-1 text-sm font-medium uppercase tracking-[0.14em] text-gold-600">
+											{caption(e.eventDate)}
+										</p>
+									)}
+									{blurb && (
+										<p class="mt-4 max-w-prose text-base leading-relaxed text-navy-500 whitespace-pre-line">
+											{blurb}
+										</p>
+									)}
+								</div>
+
+								<div
+									class:list={[
+										"grid gap-8 lg:gap-10",
+										flyer && hasPhotos && "lg:grid-cols-[1fr_minmax(0,18rem)] lg:items-start",
+									]}
+								>
+									{hasPhotos && (
+										<div class:list={[flyer && "lg:order-1"]}>
+											<PhotoGallery images={e.galleryUrls} label={e.title} />
+										</div>
+									)}
+
+									{flyer && (
+										<div
+											class:list={[
+												"flex justify-center",
+												hasPhotos && "lg:order-2",
+												!hasPhotos && "mx-auto w-full max-w-sm",
+											]}
+										>
+											<div class="w-full max-w-sm overflow-hidden rounded-md bg-navy-800 ring-1 ring-navy-100 shadow-[0_30px_64px_-34px_rgba(7,23,58,0.55)]">
+												<div class="relative aspect-[3/4]">
+													{e.flyerImageUrl ? (
+														<img src={e.flyerImageUrl} alt={`${e.title} flyer`} loading="lazy" class="absolute inset-0 h-full w-full object-contain" />
+													) : e.flyerEmbedUrl ? (
+														<iframe src={e.flyerEmbedUrl} title={`${e.title} flyer`} loading="lazy" allow="fullscreen" class="absolute inset-0 h-full w-full border-0" />
+													) : e.flyerPdfUrl ? (
+														<iframe src={`https://docs.google.com/viewer?url=${encodeURIComponent(e.flyerPdfUrl)}&embedded=true`} title={`${e.title} flyer`} loading="lazy" class="absolute inset-0 h-full w-full border-0" />
+													) : null}
+												</div>
+											</div>
+										</div>
+									)}
+								</div>
+							</article>
+						);
+					})}
+				</div>
+			</div>
+		</div>
+	</section>
+)}
+
+<style is:global>
+	/* Side list: horizontal scroll-chips on mobile, vertical list on desktop. */
+	.ea-tabs {
+		display: flex;
+		gap: 0.5rem;
+		overflow-x: auto;
+		padding-bottom: 0.5rem;
+		scrollbar-width: thin;
+		-webkit-overflow-scrolling: touch;
+	}
+	@media (min-width: 1024px) {
+		.ea-tabs {
+			flex-direction: column;
+			gap: 0.25rem;
+			overflow-x: visible;
+			padding-bottom: 0;
+			position: sticky;
+			top: 6rem;
+			align-self: start;
+		}
+	}
+
+	.ea-tab {
+		flex: 0 0 auto;
+		display: flex;
+		flex-direction: column;
+		gap: 0.1rem;
+		text-align: left;
+		white-space: nowrap;
+		border-radius: 0.125rem;
+		padding: 0.6rem 0.95rem;
+		background: #fff;
+		box-shadow: inset 0 0 0 1px rgba(36, 60, 99, 0.12);
+		color: #243c63;
+		transition: background 0.18s, box-shadow 0.18s, color 0.18s;
+	}
+	@media (min-width: 1024px) {
+		.ea-tab {
+			white-space: normal;
+			border-left: 3px solid transparent;
+			border-radius: 0 0.125rem 0.125rem 0;
+		}
+	}
+	.ea-tab:hover {
+		background: #f3f6fb;
+	}
+	.ea-tab .ea-tab-title {
+		font-weight: 600;
+		font-size: 0.95rem;
+		line-height: 1.2;
+	}
+	.ea-tab .ea-tab-date {
+		font-size: 0.7rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: #9aa6bd;
+	}
+	.ea-tab.is-active {
+		background: #f6ed49;
+		color: #07173a;
+		box-shadow: inset 0 0 0 1px rgba(214, 162, 30, 0.6);
+	}
+	.ea-tab.is-active .ea-tab-date {
+		color: #6b5a16;
+	}
+	@media (min-width: 1024px) {
+		.ea-tab.is-active {
+			background: #fff;
+			border-left-color: #d6a21e;
+			box-shadow: inset 0 0 0 1px rgba(214, 162, 30, 0.35);
+		}
+	}
+
+	/* Panels: only the active one is shown. */
+	.ea-panel {
+		display: none;
+	}
+	.ea-panel.is-active {
+		display: block;
+		animation: ea-fade 0.35s ease;
+	}
+	@keyframes ea-fade {
+		from { opacity: 0; transform: translateY(6px); }
+		to { opacity: 1; transform: translateY(0); }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.ea-panel.is-active {
+			animation: none;
+		}
+	}
+</style>
+
+<script is:inline>
+	(() => {
+		const root = document.querySelector("[data-event-archive]");
+		if (!root) return;
+		const tabs = Array.from(root.querySelectorAll("[data-ea-tab]"));
+		const panels = Array.from(root.querySelectorAll("[data-ea-panel]"));
+		if (!tabs.length) return;
+
+		const activate = (slug, updateHash) => {
+			let matched = false;
+			tabs.forEach((t) => {
+				const on = t.getAttribute("data-ea-tab") === slug;
+				t.classList.toggle("is-active", on);
+				if (on) matched = true;
+			});
+			panels.forEach((p) => {
+				const on = p.getAttribute("data-ea-panel") === slug;
+				p.classList.toggle("is-active", on);
+				if (on) p.removeAttribute("aria-hidden");
+				else p.setAttribute("aria-hidden", "true");
+			});
+			if (matched && updateHash) {
+				history.replaceState(null, "", `#${slug}`);
+			}
+			return matched;
+		};
+
+		tabs.forEach((t) => {
+			t.addEventListener("click", () => activate(t.getAttribute("data-ea-tab"), true));
+		});
+
+		// Deep-link: open the event named in the URL hash, if any.
+		const fromHash = decodeURIComponent((location.hash || "").replace(/^#/, ""));
+		if (fromHash) activate(fromHash, false);
+	})();
+</script>

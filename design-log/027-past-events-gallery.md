@@ -1,6 +1,6 @@
 # 027 — Past-events interactive gallery (master-detail)
 
-**Status:** proposed — plan for review, no code written yet
+**Status:** implemented (code shipped) — **CMS collection `PastEvents` must still be created in Wix** before any events appear
 **Date:** 2026-06-28
 **Author:** claude-session
 **Related:** #010 (Flyers collection), #017 (events & youth pages), #023 (joinus card photos)
@@ -89,15 +89,14 @@ tag-filter model) than photo galleries. Plan: reuse the component, separate
 collection (`TorahSheets`), its own design-log entry when we build it. Out of
 scope here.
 
-## Open questions (for the client / Danielle)
-1. **Sort**: newest-first by `eventDate`, or fully manual via `sortOrder`?
-   (Plan assumes `sortOrder` first, then `eventDate` desc as fallback.)
-2. **Flyer + photos together**: show the flyer *inside* the gallery as one more
-   slide, or as a separate pinned panel beside the photos? (Plan: separate, so
-   the flyer is always visible while browsing photos.)
-3. **Mobile side-list**: scroll-chips vs. dropdown `<select>`? (Plan leans
-   scroll-chips, matching the existing `?sub=` filter chips on this page.)
-4. Dedicated `/events/past` route now, or inline section first? (Plan: inline.)
+## Open questions — answered (Danielle, 2026-06-28)
+1. **Sort** → **newest-first by `eventDate`**; `sortOrder` is a tiebreaker only
+   (events sharing a date). (Differs from the plan's `sortOrder`-first guess.)
+2. **Flyer + photos** → **flyer beside the photos** (separate panel, always
+   visible while browsing the gallery), not as a slide within it.
+3. **Mobile side-list** → **scroll-chips**, matching the existing `?sub=` filter
+   chips on this page.
+4. **Route** → **inline section on `/events`** (no separate route for now).
 
 ## Implementation plan (once approved)
 1. Create `PastEvents` CMS collection (Wix) with the fields above; document it in
@@ -108,3 +107,34 @@ scope here.
 5. Verify: renders with empty CMS (section hidden), with one event (no side list
    needed / single item), with several (side list + deep-link), and RTL.
 6. Append Implementation Results + commit SHAs; trim this entry once shipped.
+
+## Implementation Results
+- `src/lib/past-events.ts` — `getPastEvents()`, a near-clone of
+  `youth-programs.ts`. Reads the `PastEvents` collection, resolves the `gallery`
+  Media Gallery + flyer media, derives a `slug` from the title, and sorts
+  **newest-first by `eventDate`** with `sortOrder` as the tiebreaker. Fails open
+  to `[]` on any query error (so a missing collection just hides the section).
+- `src/components/EventArchive.astro` — master-detail browser. Vanilla JS swaps
+  the active panel on click (no reload) and reflects it in the URL hash for
+  deep-linking. Side list is vertical + sticky on desktop, horizontal
+  scroll-chips on mobile. Each panel lays the **flyer beside the photo gallery**
+  (reusing `PhotoGallery.astro`); flyer falls back image → embed → pdf. Follows
+  the `is:global` + `ea-`-prefixed-class convention (scoped CSS + JS-toggled
+  classes are unreliable in the Wix build — see #012).
+- `src/pages/events.astro` — renders `<EventArchive>` below the upcoming grid;
+  the component self-hides when there are no events.
+- `CONTRIBUTING.md` — added the `PastEvents` schema + a row in the editing table.
+- **Still required (manual):** create the `PastEvents` collection in Wix with the
+  documented fields and the standard read permissions (see "Permissions on every
+  collection"). Until then the section is hidden (empty-state path).
+- RTL: layout uses logical flex/grid + `lg:order-*`; no hardcoded left/right
+  except the desktop tab's `border-left` accent — revisit if a Hebrew events
+  archive ships.
+
+## Verification
+`astro check` passes (only the pre-existing `astro.config.mjs` `process` error)
+and `astro build` completes (24 routes). With no `PastEvents` collection the
+query fails open and the section is absent, so `/events` is unchanged today; once
+the collection exists and has rows, the archive renders newest-first with the
+flyer beside the photos. Live behavior (panel swap, deep-link, mobile chips)
+to be confirmed on the dev server once the collection is populated.

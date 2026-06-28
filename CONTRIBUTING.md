@@ -27,6 +27,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Join Us cards (3 gold cards) | `HomePage` | `joinUsCard1*` / `joinUsCard2*` / `joinUsCard3*` fields on the single row |
 | Team members | `TeamMembers` | Add a row. Photo, name, role, bio, etc. |
 | Youth programs (on /youth) | `YouthPrograms` | Add a row per program: title, description, contact rabbi, optional photo + flyer. |
+| Past events archive (on /events) | `PastEvents` | Add a row per past event: title, date, photo gallery, optional flyer + blurb. Shows newest first. |
 | Weekday davening times | `DaveningTimes` | Add / edit rows with `dayType = Weekday`. Shabbat is a static "Join us at KBA" section (no CMS rows needed). |
 | Flyers (Canva embeds or PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). For event flyers, set `removeAfter` so they drop off the site on their own. |
 | Footer address, phone, email | `ContactInfo` | Edit the single row. Leave a field empty to hide it from the footer. |
@@ -168,6 +169,32 @@ Drives the **Youth Programming page** (`/youth`). Each row is one program (Dor L
 **To add a rabbi's chaburah to the youth page:** add a `YouthPrograms` row — `title` = the program, `description` = the info, `contactName` + `contactEmail` = the rabbi. That's all that's required; add photos to `gallery` and/or a flyer if you have them. (This is separate from `TeamMembers` — see the note above.)
 
 > The `Flyers` collection still has a `youth` category, but the `/youth` page no longer reads it — youth flyers belong on the `YouthPrograms` row now. Put youth flyers there.
+
+#### `PastEvents` — one row per past event
+
+Drives the **Past Events archive** on `/events` (below the upcoming flyers). Each
+row is one event; the page shows a list of event **names** (newest first) and,
+when you click a name, that event's **photos and flyer** appear beside each
+other. An event needs a `title`; everything else is optional (an event with no
+photos and no flyer still shows as a titled blurb). Same field shape as
+`YouthPrograms`. See design log #027.
+
+| Field | Type | Notes |
+|---|---|---|
+| `title` | Text | Event name — this is the clickable label in the side list. |
+| `eventDate` | Date (opt) | Used to sort newest-first and to caption the panel (e.g. "November 2025"). Leave empty and the event sinks to the bottom. |
+| `gallery` | Media Gallery (opt) | Event photos — add as many as you like. **One** shows as a single image; **more** become a swipeable slideshow (thumbnails on desktop, dots on mobile). |
+| `flyerEmbedUrl` | Text (opt) | Canva "Publish to Web" iframe src URL — live-synced to Canva. |
+| `flyerPdfUrl` | Text (opt) | Direct public PDF URL (for non-Canva flyers). |
+| `flyerImage` | Image (opt) | A static flyer image. Use this *or* one of the URL fields — checked image → embed → pdf. |
+| `blurb` | Rich Text (opt) | A short description shown above the photos. Paragraphs preserved. |
+| `sortOrder` | Number (opt) | Tiebreaker only — orders events that share the same `eventDate` (lower first). |
+| `active` | Boolean | Show/hide without deleting. |
+
+**To add a past event:** add a `PastEvents` row — `title` + `eventDate`, drop the
+photos into `gallery`, and add the flyer (`flyerEmbedUrl` / `flyerPdfUrl` /
+`flyerImage`) if you have one. It appears in the archive automatically, newest
+first.
 
 #### `DaveningTimes`
 
