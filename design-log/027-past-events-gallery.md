@@ -1,6 +1,6 @@
 # 027 — Past-events interactive gallery (master-detail)
 
-**Status:** implemented (code shipped) — **CMS collection `PastEvents` must still be created in Wix** before any events appear
+**Status:** implemented — code shipped + `PastEvents` collection created in Wix and seeded with 2 sample events
 **Date:** 2026-06-28
 **Author:** claude-session
 **Related:** #010 (Flyers collection), #017 (events & youth pages), #023 (joinus card photos)
@@ -124,9 +124,14 @@ scope here.
 - `src/pages/events.astro` — renders `<EventArchive>` below the upcoming grid;
   the component self-hides when there are no events.
 - `CONTRIBUTING.md` — added the `PastEvents` schema + a row in the editing table.
-- **Still required (manual):** create the `PastEvents` collection in Wix with the
-  documented fields and the standard read permissions (see "Permissions on every
-  collection"). Until then the section is hidden (empty-state path).
+- **CMS collection created (Wix MCP).** `PastEvents`, `collectionType: NATIVE`,
+  permissions `read: ANYONE` / `insert|update|remove: ADMIN` — mirrored from
+  `YouthPrograms`. Fields: `title` (TEXT), `eventDate` (DATE), `gallery`
+  (MEDIA_GALLERY), `flyerEmbedUrl`/`flyerPdfUrl` (URL), `flyerImage` (IMAGE),
+  `blurb` (RICH_CONTENT), `sortOrder` (NUMBER), `active` (BOOLEAN). Seeded with
+  **2 sample rows** ("Chanukah Mesibah" Dec 2025, "Lag BaOmer BBQ" May 2025)
+  using existing site media so the archive renders for review — the office can
+  delete these once real events are added.
 - RTL: layout uses logical flex/grid + `lg:order-*`; no hardcoded left/right
   except the desktop tab's `border-left` accent — revisit if a Hebrew events
   archive ships.
