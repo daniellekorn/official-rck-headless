@@ -34,38 +34,6 @@ const gridFlyers = selectedSub
 
 	{allEvents.length > 0 && <CoverflowCarousel items={allEvents} />}
 
-	{/* Discoverable cross-link to the youth page — events split by audience,
-	    so someone who lands here first still finds youth-specific content. */}
-	<section class="py-8 sm:py-10">
-		<div class="container-page">
-			<a
-				href="/youth"
-				class="group relative flex flex-col gap-4 overflow-hidden rounded-md bg-navy-700 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8 ring-1 ring-navy-600 transition-all hover:ring-gold-400/70 hover:shadow-[0_20px_50px_-24px_rgba(214,162,30,0.55)]"
-				data-reveal="up"
-			>
-				<span
-					class="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-sm bg-gold-500/15 blur-2xl transition-opacity group-hover:opacity-100 sm:opacity-70"
-					aria-hidden="true"
-				></span>
-				<div class="relative">
-					<p class="eyebrow text-gold-400">For Kids &amp; Teens</p>
-					<h2 class="mt-2 font-display text-2xl sm:text-3xl font-medium text-white">
-						Looking for Youth Programming?
-					</h2>
-					<p class="mt-2 max-w-xl text-sm sm:text-base leading-relaxed text-white/70">
-						Chaburos, teen learning, and youth events run by our rabbeim live on
-						their own page.
-					</p>
-				</div>
-				<span
-					class="relative inline-flex shrink-0 items-center gap-2 self-start rounded-sm bg-gold-500 px-5 py-2.5 text-sm font-semibold text-navy-700 transition-colors group-hover:bg-gold-400 sm:self-auto"
-				>
-					Explore Youth Programming
-				</span>
-			</a>
-		</div>
-	</section>
-
 	<section class="py-10 sm:py-14 bg-mist">
 		<div class="container-page">
 			{subCategories.length > 0 && (
@@ -150,6 +118,39 @@ const gridFlyers = selectedSub
 	</section>
 
 	<EventArchive events={pastEvents} />
+
+	{/* Discoverable cross-link to the youth page — events split by audience,
+	    so someone who lands here first still finds youth-specific content.
+	    Sits at the foot of the page as a hand-off, after upcoming + past. */}
+	<section class="py-12 sm:py-16">
+		<div class="container-page">
+			<a
+				href="/youth"
+				class="group relative flex flex-col gap-4 overflow-hidden rounded-md bg-navy-700 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8 ring-1 ring-navy-600 transition-all hover:ring-gold-400/70 hover:shadow-[0_20px_50px_-24px_rgba(214,162,30,0.55)]"
+				data-reveal="up"
+			>
+				<span
+					class="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-sm bg-gold-500/15 blur-2xl transition-opacity group-hover:opacity-100 sm:opacity-70"
+					aria-hidden="true"
+				></span>
+				<div class="relative">
+					<p class="eyebrow text-gold-400">For Kids &amp; Teens</p>
+					<h2 class="mt-2 font-display text-2xl sm:text-3xl font-medium text-white">
+						Looking for Youth Programming?
+					</h2>
+					<p class="mt-2 max-w-xl text-sm sm:text-base leading-relaxed text-white/70">
+						Chaburos, teen learning, and youth events run by our rabbeim live on
+						their own page.
+					</p>
+				</div>
+				<span
+					class="relative inline-flex shrink-0 items-center gap-2 self-start rounded-sm bg-gold-500 px-5 py-2.5 text-sm font-semibold text-navy-700 transition-colors group-hover:bg-gold-400 sm:self-auto"
+				>
+					Explore Youth Programming
+				</span>
+			</a>
+		</div>
+	</section>
 
 	<Footer />
 </Layout>
