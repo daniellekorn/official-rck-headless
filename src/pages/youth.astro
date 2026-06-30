@@ -16,10 +16,7 @@ const programs = await getYouthPrograms();
 const pagerSections = programs.map((p) => ({ id: p.slug, label: p.title }));
 ---
 
-<Layout
-	title="Youth Programming — RCK"
-	description="Chaburos, teen learning, and youth programs at RCK — The Ra'anana Community Kollel. Each program with its own info and contact rabbi."
->
+<Layout>
 	<Nav />
 	{programs.length > 1 && <SectionPager sections={pagerSections} />}
 

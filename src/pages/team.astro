@@ -16,7 +16,7 @@ const visibleGroups = ROLE_GROUPS.filter((g) => grouped[g.key].length > 0);
 const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 ---
 
-<Layout title="Meet the Team — RCK" description="The rabbeim, kollel members, and team behind RCK (The Ra'anana Community Kollel).">
+<Layout>
 	<Nav />
 	{visibleGroups.length > 1 && <SectionPager sections={pagerSections} />}
 	<main>

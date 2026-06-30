@@ -3,16 +3,13 @@ import "../styles/global.css";
 import { getThemeSettings, buildThemeStyle } from "../lib/theme";
 
 interface Props {
-	title?: string;
-	description?: string;
 	lang?: "en" | "he";
 }
 
-const {
-	title = "RCK — The Ra'anana Community Kollel",
-	description = "A home for Torah, community and growth in Ra'anana, Israel.",
-	lang = "en",
-} = Astro.props;
+// Title, description, canonical, and social tags are owned by the Wix dashboard
+// (SEO & GEO → SEO Settings) and injected into <head> automatically. Don't add
+// them here, or the page will ship duplicate tags.
+const { lang = "en" } = Astro.props;
 
 const dir = lang === "he" ? "rtl" : "ltr";
 
@@ -26,7 +23,6 @@ const themeStyle = buildThemeStyle(await getThemeSettings());
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="description" content={description} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -35,7 +31,6 @@ const themeStyle = buildThemeStyle(await getThemeSettings());
 			href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=Oswald:wght@500&family=Heebo:wght@400;500;700;800&display=swap"
 		/>
 		<meta name="generator" content={Astro.generator} />
-		<title>{title}</title>
 		{themeStyle && <style is:inline set:html={themeStyle}></style>}
 	</head>
 	<body class="bg-paper text-ink">
