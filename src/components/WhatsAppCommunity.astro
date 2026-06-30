@@ -1,33 +1,33 @@
 ---
 /**
- * WhatsAppCommunity — the closing band of the homepage. The kollel's day-to-day
- * life happens on WhatsApp, so this is a "join the conversation" finale: an
- * editorial header with the primary invite, then a lineup of vertical 9:16 tiles
- * (one per subchat) that each highlight a YouTube Short.
+ * WhatsAppCommunity — the closing band of the homepage. Invites people into the
+ * kollel's WhatsApp community.
  *
- * Layout choices (see design-log):
- *  - Sits on the warm `mist` band so it keeps the page's light/dark alternation
- *    (History above is dark) and stays quiet — no animated rays.
- *  - Shorts are vertical, so the tiles are phone-proportioned. The video stays
- *    pure; chat name + one-liner + "Join chat" sit as a caption beneath each tile.
- *  - WhatsApp green is the only "foreign" colour and is used sparingly (the main
- *    CTA, the live dots, play hover); navy + gold stay dominant.
+ * Layout:
+ *  - Centered header (title + intro line) on top.
+ *  - Left: the list of chat groups (Halacha2Go, Boost2Go, Torah Bytes, …) + the
+ *    main join CTA.
+ *  - Right: 3–4 featured groups as vertical 9:16 video-preview tiles. Each tile
+ *    plays that group's YouTube Short inline (click swaps the poster for the
+ *    embed); name + one-liner + "Join chat" sit beneath it.
+ *  - Light `mist` band, navy/gold type. WhatsApp green is used sparingly (CTA,
+ *    list icons, live dot) so the section reads as RCK, not WhatsApp.
  *
- * Content-driven: every string/link is a prop with a sensible fallback, so the
- * office can fill real subchats + Short IDs later without touching this file.
+ * Content-driven: copy, the chat list, and the featured groups are all props
+ * with fallbacks, so the office fills real names + Short IDs in the CMS later.
  */
 import Highlight from "./Highlight.astro";
 
 interface Short {
-	/** YouTube video / Short id (the part after `/shorts/` or `watch?v=`). */
+	/** YouTube Short / video id (the part after `/shorts/` or `watch?v=`). */
 	videoId?: string;
-	/** Optional custom poster image; falls back to the YouTube thumbnail. */
+	/** Optional custom poster (a flyer); falls back to the YouTube thumbnail. */
 	posterUrl?: string;
-	/** Subchat name, e.g. "Daily Daf". */
+	/** Group name, e.g. "Halacha2Go". */
 	chatName?: string;
-	/** One-line description of the subchat. */
+	/** One-line description of the group. */
 	description?: string;
-	/** wa.me / chat.whatsapp.com invite link for this subchat. */
+	/** chat.whatsapp.com invite link for this group. */
 	joinHref?: string;
 }
 
@@ -40,38 +40,44 @@ interface Props {
 	joinLabel?: string;
 	joinHref?: string;
 	membersNote?: string;
+	/** All chat groups, for the left-hand list. */
+	chats?: string[];
+	/** Featured groups shown as vertical video tiles on the right. */
 	shorts?: Short[];
 }
 
+const fallbackChats = ["Halacha2Go", "Boost2Go", "Torah Bytes", "Daily Daf", "Minyan Times", "Simcha Announcements"];
+
 const fallbackShorts: Short[] = [
-	{ chatName: "Daily Daf", description: "A short take on today's daf, every morning." },
-	{ chatName: "Halacha Hotline", description: "Quick, sourced answers to everyday shaylos." },
-	{ chatName: "Parsha & Mussar", description: "A thought to carry into Shabbos." },
+	{ chatName: "Halacha2Go", description: "Bite-size halacha for daily life." },
+	{ chatName: "Boost2Go", description: "A quick dose of chizuk, on the go." },
+	{ chatName: "Torah Bytes", description: "Short Torah thoughts to your phone." },
 ];
 
 const {
 	eyebrow = "On WhatsApp",
-	titleLead = "The",
+	titleLead = "Join our WhatsApp",
 	titleAccent = "community",
-	titleTrail = "in your pocket",
-	body = "Daily learning, halacha, minyan times and simcha — RCK lives on WhatsApp. Join the main chat, then pick the sub-chats that speak to you.",
-	joinLabel = "Join the main chat",
+	titleTrail = "",
+	body = "One community, many conversations — daily learning, halacha and chizuk, all in your pocket.",
+	joinLabel = "Join the community",
 	joinHref = "#",
 	membersNote = "",
+	chats = fallbackChats,
 	shorts = fallbackShorts,
 } = Astro.props;
 
-const cards = shorts && shorts.length > 0 ? shorts : fallbackShorts;
+const chatList = chats && chats.length > 0 ? chats : fallbackChats;
+const featured = (shorts && shorts.length > 0 ? shorts : fallbackShorts).slice(0, 4);
 
 const posterFor = (s: Short) =>
 	s.posterUrl ?? (s.videoId ? `https://i.ytimg.com/vi/${s.videoId}/hqdefault.jpg` : undefined);
 ---
 
-<section class="relative isolate overflow-hidden bg-mist py-12 md:py-16">
+<section class="relative isolate overflow-hidden bg-mist py-14 md:py-20">
 	<div class="container-page relative">
-		<div class="grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
 		{/* ── Header ───────────────────────────────────────────────────── */}
-		<div class="lg:col-span-5 text-center lg:text-left">
+		<div class="mx-auto max-w-2xl text-center">
 			<p class="eyebrow text-base! sm:text-lg! inline-flex items-center gap-2 text-gold-600" data-reveal="up">
 				<span class="relative flex h-2 w-2">
 					<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#25D366] opacity-60"></span>
@@ -86,118 +92,125 @@ const posterFor = (s: Short) =>
 			>
 				{titleLead}{titleLead && " "}<Highlight>{titleAccent}</Highlight>{titleTrail && ` ${titleTrail}`}
 			</h2>
-			<p class="mx-auto lg:mx-0 mt-4 max-w-xl text-lg leading-relaxed text-navy-500" data-reveal="up" data-reveal-delay="180">
+			<p class="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-navy-500" data-reveal="up" data-reveal-delay="180">
 				{body}
 			</p>
+		</div>
 
-			<div class="mt-6 flex flex-col items-center lg:items-start gap-3" data-reveal="up" data-reveal-delay="240">
-				<a
-					href={joinHref}
-					target="_blank"
-					rel="noopener"
-					class="group inline-flex items-center gap-2.5 rounded-full bg-[#25D366] px-6 py-3 font-sans text-base font-semibold text-white shadow-[0_14px_30px_-14px_rgba(37,211,102,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#1ebe5b] hover:shadow-[0_18px_38px_-16px_rgba(37,211,102,0.8)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1ebe5b]"
-				>
-					<svg viewBox="0 0 24 24" class="h-6 w-6" fill="currentColor" aria-hidden="true">
-						<path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.85-1.46A10 10 0 1 0 12 2Zm0 18.2a8.18 8.18 0 0 1-4.17-1.14l-.3-.18-2.86.86.86-2.78-.2-.32A8.2 8.2 0 1 1 12 20.2Z"/>
-						<path d="M17.5 14.4c-.27-.14-1.6-.79-1.85-.88-.25-.09-.43-.14-.61.14-.18.27-.7.88-.86 1.06-.16.18-.32.2-.59.07-.27-.14-1.14-.42-2.17-1.34-.8-.71-1.34-1.6-1.5-1.87-.16-.27-.02-.42.12-.55.12-.12.27-.32.4-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.14-.61-1.47-.84-2.01-.22-.53-.44-.46-.61-.46l-.52-.01c-.18 0-.48.07-.73.34-.25.27-.95.93-.95 2.27 0 1.34.97 2.63 1.11 2.81.14.18 1.91 2.92 4.63 4.09.65.28 1.15.45 1.54.58.65.2 1.24.18 1.71.11.52-.08 1.6-.65 1.83-1.28.23-.63.23-1.17.16-1.28-.07-.11-.25-.18-.52-.32Z"/>
-					</svg>
-					{joinLabel}
-				</a>
-				{membersNote && <p class="font-sans text-sm text-navy-400">{membersNote}</p>}
+		{/* ── Chat list + video previews ───────────────────────────────── */}
+		<div class="mt-12 grid items-center gap-y-12 lg:grid-cols-12 lg:gap-x-10">
+			{/* LEFT — chat-group list + CTA */}
+			<div class="lg:col-span-4" data-reveal="up" data-reveal-delay="120">
+				<p class="font-sans text-xs font-bold uppercase tracking-[0.2em] text-navy-400">Our chat groups</p>
+				<ul class="mt-4 grid grid-cols-1 gap-x-6 gap-y-2.5 sm:grid-cols-2 lg:grid-cols-1 lg:gap-y-3">
+					{
+						chatList.map((name) => (
+							<li class="flex items-center gap-3">
+								<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#25D366]/12 text-[#1ebe5b]">
+									<svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true">
+										<path d="M4 4h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H9l-4 3.5A.6.6 0 0 1 4 21V5a1 1 0 0 1 0-1Z" />
+									</svg>
+								</span>
+								<span class="font-sans text-base font-medium text-navy-700">{name}</span>
+							</li>
+						))
+					}
+				</ul>
+
+				<div class="mt-7 flex flex-col items-start gap-3">
+					<a
+						href={joinHref}
+						target="_blank"
+						rel="noopener"
+						class="group inline-flex items-center gap-2.5 rounded-full bg-[#25D366] px-6 py-3 font-sans text-base font-semibold text-white shadow-[0_14px_30px_-14px_rgba(37,211,102,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#1ebe5b] hover:shadow-[0_18px_38px_-16px_rgba(37,211,102,0.8)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1ebe5b]"
+					>
+						<svg viewBox="0 0 24 24" class="h-6 w-6" fill="currentColor" aria-hidden="true">
+							<path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.85-1.46A10 10 0 1 0 12 2Zm0 18.2a8.18 8.18 0 0 1-4.17-1.14l-.3-.18-2.86.86.86-2.78-.2-.32A8.2 8.2 0 1 1 12 20.2Z"/>
+							<path d="M17.5 14.4c-.27-.14-1.6-.79-1.85-.88-.25-.09-.43-.14-.61.14-.18.27-.7.88-.86 1.06-.16.18-.32.2-.59.07-.27-.14-1.14-.42-2.17-1.34-.8-.71-1.34-1.6-1.5-1.87-.16-.27-.02-.42.12-.55.12-.12.27-.32.4-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.14-.61-1.47-.84-2.01-.22-.53-.44-.46-.61-.46l-.52-.01c-.18 0-.48.07-.73.34-.25.27-.95.93-.95 2.27 0 1.34.97 2.63 1.11 2.81.14.18 1.91 2.92 4.63 4.09.65.28 1.15.45 1.54.58.65.2 1.24.18 1.71.11.52-.08 1.6-.65 1.83-1.28.23-.63.23-1.17.16-1.28-.07-.11-.25-.18-.52-.32Z"/>
+						</svg>
+						{joinLabel}
+					</a>
+					{membersNote && <p class="font-sans text-sm text-navy-400">{membersNote}</p>}
+				</div>
 			</div>
-		</div>
 
-		{/* ── Subchat lineup ───────────────────────────────────────────── */}
-		<div
-			data-shorts-row
-			class="lg:col-span-7 mt-9 lg:mt-0 flex gap-4 overflow-x-auto snap-x snap-mandatory -mx-6 px-6 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] md:mx-0 md:px-0 md:overflow-visible md:flex-wrap md:justify-center md:pb-0 lg:flex-nowrap lg:justify-between"
-		>
-			{
-				cards.map((s) => {
-					const poster = posterFor(s);
-					return (
-						<figure
-							data-short-card
-							class="group flex w-[12.5rem] shrink-0 snap-start flex-col"
-							style="opacity:0"
-						>
-							{/* 9:16 video tile */}
-							<div
-								data-short-frame
-								class="relative aspect-[9/16] overflow-hidden rounded-xl bg-gradient-to-br from-navy-500 to-navy-700 ring-1 ring-navy-100 shadow-[0_18px_40px_-22px_rgba(16,42,86,0.5)] transition-transform duration-300 group-hover:-translate-y-1.5"
-							>
-								{poster ? (
-									<img
-										src={poster}
-										alt=""
-										aria-hidden="true"
-										loading="lazy"
-										class="absolute inset-0 h-full w-full object-cover"
-									/>
-								) : (
-									/* "coming soon" poster — intentional placeholder until a Short id is added */
-									<div class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
-										<span class="font-display text-2xl font-semibold tracking-[0.08em] text-gold-300/90">RCK</span>
-										<span class="font-sans text-[0.72rem] uppercase tracking-[0.22em] text-navy-100/80">Short coming soon</span>
-									</div>
-								)}
+			{/* RIGHT — vertical video-preview tiles */}
+			<div
+				data-shorts-row
+				class="lg:col-span-8 flex gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory -mx-6 px-6 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] md:mx-0 md:px-0 md:flex-wrap md:justify-center md:pb-0"
+			>
+				{
+					featured.map((s) => {
+						const poster = posterFor(s);
+						return (
+							<figure data-short-card class="group flex w-[12rem] shrink-0 snap-start flex-col" style="opacity:0">
+								{/* 9:16 video tile */}
+								<div
+									data-short-frame
+									class="relative aspect-[9/16] overflow-hidden rounded-xl bg-gradient-to-br from-navy-500 to-navy-700 ring-1 ring-navy-100 shadow-[0_18px_40px_-22px_rgba(16,42,86,0.5)] transition-transform duration-300 group-hover:-translate-y-1.5"
+								>
+									{poster ? (
+										<img src={poster} alt="" aria-hidden="true" loading="lazy" class="absolute inset-0 h-full w-full object-cover" />
+									) : (
+										/* "coming soon" poster — intentional placeholder until a Short id is added */
+										<div class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
+											<span class="font-display text-2xl font-semibold tracking-[0.08em] text-gold-300/90">RCK</span>
+											<span class="font-sans text-[0.72rem] uppercase tracking-[0.22em] text-navy-100/80">Short coming soon</span>
+										</div>
+									)}
 
-								{/* legibility gradient at the foot of the tile (for the tag) */}
-								<span aria-hidden="true" class="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-navy-700/55 to-transparent"></span>
+									{/* legibility gradient at the foot of the tile (for the tag) */}
+									<span aria-hidden="true" class="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-navy-700/55 to-transparent"></span>
 
-								{/* play affordance — only when a video exists */}
-								{s.videoId && (
-									<button
-										type="button"
-										data-short-play
-										data-video-id={s.videoId}
-										aria-label={`Play ${s.chatName ?? "Short"}`}
-										class="absolute inset-0 flex items-center justify-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-[#25D366]"
-									>
-										<span class="flex h-14 w-14 items-center justify-center rounded-full bg-white/95 shadow-[0_10px_30px_-6px_rgba(0,0,0,0.55)] ring-2 ring-transparent transition-all duration-300 group-hover:scale-110 group-hover:ring-[#25D366]">
-											<svg viewBox="0 0 24 24" class="ml-1 h-6 w-6 fill-navy-700" aria-hidden="true">
-												<path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.5-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5Z" />
-											</svg>
+									{/* play affordance — only when a video exists */}
+									{s.videoId && (
+										<button
+											type="button"
+											data-short-play
+											data-video-id={s.videoId}
+											aria-label={`Play ${s.chatName ?? "Short"}`}
+											class="absolute inset-0 flex items-center justify-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-[#25D366]"
+										>
+											<span class="flex h-14 w-14 items-center justify-center rounded-full bg-white/95 shadow-[0_10px_30px_-6px_rgba(0,0,0,0.55)] ring-2 ring-transparent transition-all duration-300 group-hover:scale-110 group-hover:ring-[#25D366]">
+												<svg viewBox="0 0 24 24" class="ml-1 h-6 w-6 fill-navy-700" aria-hidden="true">
+													<path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.5-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5Z" />
+												</svg>
+											</span>
+										</button>
+									)}
+
+									{/* group tag, top-left */}
+									{s.chatName && (
+										<span class="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-navy-700/65 px-3 py-1 backdrop-blur-sm ring-1 ring-white/15">
+											<span class="h-1.5 w-1.5 rounded-full bg-[#25D366]"></span>
+											<span class="font-sans text-xs font-medium text-white">{s.chatName}</span>
 										</span>
-									</button>
-								)}
+									)}
+								</div>
 
-								{/* subchat tag, top-left */}
-								{s.chatName && (
-									<span class="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-navy-700/65 px-3 py-1 backdrop-blur-sm ring-1 ring-white/15">
-										<span class="h-1.5 w-1.5 rounded-full bg-[#25D366]"></span>
-										<span class="font-sans text-xs font-medium text-white">{s.chatName}</span>
-									</span>
-								)}
-							</div>
-
-							{/* caption beneath the tile */}
-							<figcaption class="mt-3.5 px-0.5">
-								{s.chatName && (
-									<h3 class="font-display text-lg font-medium text-navy-700">{s.chatName}</h3>
-								)}
-								{s.description && (
-									<p class="mt-1 text-[0.8rem] leading-snug text-navy-500">{s.description}</p>
-								)}
-								{s.joinHref && (
-									<a
-										href={s.joinHref}
-										target="_blank"
-										rel="noopener"
-										class="group/link mt-2.5 inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-gold-600 transition-colors hover:text-gold-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-500"
-									>
-										Join chat
-										<svg viewBox="0 0 24 24" class="h-4 w-4 transition-transform duration-300 group-hover/link:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-											<path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
-										</svg>
-									</a>
-								)}
-							</figcaption>
-						</figure>
-					);
-				})
-			}
-		</div>
+								{/* caption beneath the tile */}
+								<figcaption class="mt-3.5 px-0.5">
+									{s.chatName && <h3 class="font-display text-lg font-medium text-navy-700">{s.chatName}</h3>}
+									{s.description && <p class="mt-1 text-[0.8rem] leading-snug text-navy-500">{s.description}</p>}
+									{s.joinHref && (
+										<a
+											href={s.joinHref}
+											target="_blank"
+											rel="noopener"
+											class="group/link mt-2.5 inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-gold-600 transition-colors hover:text-gold-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-500"
+										>
+											Join chat
+											<svg viewBox="0 0 24 24" class="h-4 w-4 transition-transform duration-300 group-hover/link:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+												<path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+											</svg>
+										</a>
+									)}
+								</figcaption>
+							</figure>
+						);
+					})
+				}
+			</div>
 		</div>
 	</div>
 
@@ -229,7 +242,7 @@ const posterFor = (s: Short) =>
 		});
 	});
 
-	// Staggered entrance for the lineup.
+	// Staggered entrance for the tiles.
 	const cards = document.querySelectorAll<HTMLElement>("[data-short-card]");
 	const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 	if (cards.length && reduce) {
