@@ -34,7 +34,10 @@ jobs:
         run: npm ci
 
       - name: Type check
-        run: npx astro check
+        # Use the project's pinned astro (via the npm script), not `npx astro`,
+        # which fetches the latest astro major and can require a newer Node than
+        # this job runs on.
+        run: npm run astro -- check
 
       - name: Authenticate to Wix
         env:
