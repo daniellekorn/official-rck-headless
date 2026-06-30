@@ -67,6 +67,38 @@ export interface HomepageContent {
 	joinUsCard3Icon?: string;
 	joinUsCard3Image?: string;
 	joinUsCard3ImageUrl?: string;
+
+	// "On WhatsApp" closing band — header copy + three subchat slots. Flat fields
+	// (capped at 3 subchats) mirroring the Join Us card pattern. See design-log/032.
+	whatsappEyebrow?: string;
+	whatsappTitleLead?: string;
+	whatsappTitleAccent?: string;
+	whatsappTitleTrail?: string;
+	whatsappBody?: string;
+	whatsappJoinLabel?: string;
+	whatsappJoinHref?: string;
+	whatsappMembersNote?: string;
+
+	whatsappShort1ChatName?: string;
+	whatsappShort1Description?: string;
+	whatsappShort1VideoId?: string;
+	whatsappShort1JoinHref?: string;
+	whatsappShort1Image?: string;
+	whatsappShort1ImageUrl?: string;
+
+	whatsappShort2ChatName?: string;
+	whatsappShort2Description?: string;
+	whatsappShort2VideoId?: string;
+	whatsappShort2JoinHref?: string;
+	whatsappShort2Image?: string;
+	whatsappShort2ImageUrl?: string;
+
+	whatsappShort3ChatName?: string;
+	whatsappShort3Description?: string;
+	whatsappShort3VideoId?: string;
+	whatsappShort3JoinHref?: string;
+	whatsappShort3Image?: string;
+	whatsappShort3ImageUrl?: string;
 }
 
 /**
@@ -122,6 +154,9 @@ export async function getHomepage(): Promise<HomepageContent | null> {
 				joinUsCard1ImageUrl: resolveImage(row.joinUsCard1Image, 800, 1000),
 				joinUsCard2ImageUrl: resolveImage(row.joinUsCard2Image, 800, 1000),
 				joinUsCard3ImageUrl: resolveImage(row.joinUsCard3Image, 800, 1000),
+				whatsappShort1ImageUrl: resolveImage(row.whatsappShort1Image, 720, 1280),
+				whatsappShort2ImageUrl: resolveImage(row.whatsappShort2Image, 720, 1280),
+				whatsappShort3ImageUrl: resolveImage(row.whatsappShort3Image, 720, 1280),
 		};
 	} catch (err) {
 		console.error(`[homepage] query failed:`, err);

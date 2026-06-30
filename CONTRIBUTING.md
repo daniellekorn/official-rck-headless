@@ -25,6 +25,8 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Which headline line gets the gold marker in an image+text band | `HomePage` | `imageTextSection1AccentLine` / `imageTextSection2AccentLine` — type `line1` or `line2` |
 | History timeline under "Who We Are" | `OurHistory` | Add / reorder / hide rows. Each row is one milestone: image + year + title + caption |
 | Join Us cards (3 gold cards) | `HomePage` | `joinUsCard1*` / `joinUsCard2*` / `joinUsCard3*` fields on the single row |
+| "On WhatsApp" closing band (heading, body, join button) | `HomePage` | `whatsapp*` header fields on the single row. See [#032](design-log/032-whatsapp-community-section.md). |
+| WhatsApp subchats (the vertical Short tiles) | `HomePage` | `whatsappShort1*` / `whatsappShort2*` / `whatsappShort3*` on the single row. Fill `VideoId` (the YouTube Short ID) to make a tile play; leave a slot empty to hide it. Capped at 3. |
 | Team members | `TeamMembers` | Add a row. Photo, name, role, bio, etc. |
 | Youth programs (on /youth) | `YouthPrograms` | Add a row per program: title, description, contact rabbi, optional photo + flyer. |
 | Past events archive (on /events) | `PastEvents` | Add a row per past event: title, date, photo gallery, optional flyer + blurb. Shows newest first. |
@@ -118,6 +120,23 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | joinUsCard3Href | Text | "/programming" |
 | joinUsCard3Icon | Text | One of: `book`, `reader`, `people`, `minyan` |
 | joinUsCard3Image | Image | Optional photo behind the card (see card 1). |
+| whatsappEyebrow | Text | Small label above the heading. Empty = "On WhatsApp". |
+| whatsappTitleLead | Text | Heading text *before* the highlighted word. Empty = "The". |
+| whatsappTitleAccent | Text | The word that gets the animated gold marker. Empty = "community". |
+| whatsappTitleTrail | Text | Heading text *after* the highlighted word. Empty = "in your pocket". (Lead + Accent + Trail let you highlight any word in the heading.) |
+| whatsappBody | Text | The paragraph under the heading. |
+| whatsappJoinLabel | Text | Green join-button label. Empty = "Join the main chat". |
+| whatsappJoinHref | Text | Green join-button link — the main community invite (e.g. a `chat.whatsapp.com/…` link). |
+| whatsappMembersNote | Text | Optional small trust line under the button (e.g. "Over 400 members"). Empty = hidden. |
+| whatsappShort1ChatName | Text | Subchat 1 name (e.g. "Daily Daf"). |
+| whatsappShort1Description | Text | Subchat 1 one-line description. |
+| whatsappShort1VideoId | Text | Subchat 1 YouTube Short ID (the part after `/shorts/` or `watch?v=`). Empty = "Short coming soon" placeholder. |
+| whatsappShort1JoinHref | Text | Subchat 1 chat invite link. Empty = no "Join chat" link on that tile. |
+| whatsappShort1Image | Image | Optional custom poster. Empty = the YouTube thumbnail (or the placeholder if there's no video). |
+| whatsappShort2* | — | Same five fields as Subchat 1. |
+| whatsappShort3* | — | Same five fields as Subchat 1. |
+
+> A subchat tile is shown when it has a name or a video; empty slots are hidden. Three slots max — a fourth needs code.
 
 #### `OurHistory` — one row per milestone (5–10 typical)
 

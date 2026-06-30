@@ -5,6 +5,7 @@ import Hero from "../components/Hero.astro";
 import SplitFeature from "../components/SplitFeature.astro";
 import JoinUs from "../components/JoinUs.astro";
 import WhoWeAre from "../components/WhoWeAre.astro";
+import WhatsAppCommunity from "../components/WhatsAppCommunity.astro";
 import SectionPager from "../components/SectionPager.astro";
 import Footer from "../components/Footer.astro";
 
@@ -16,6 +17,7 @@ const pagerSections = [
 	{ id: "join", label: "Join Us" },
 	{ id: "vision", label: "Vision" },
 	{ id: "history", label: "History" },
+	{ id: "whatsapp", label: "Community" },
 ];
 
 import { getHomepage, normalizeImageOn, normalizeAccentLine } from "../lib/homepage";
@@ -121,6 +123,24 @@ const imageTextSection2 = {
 				title={homepage?.whoWeAreTitle}
 				hebrew={homepage?.whoWeAreHebrew}
 				entries={history.map((h) => ({ year: h.year, title: h.title, caption: h.caption, imageUrl: h.imageUrl }))}
+			/>
+		</div>
+
+		<div id="whatsapp" data-pager-section data-pager-theme="light" data-section-reveal class="scroll-mt-24">
+			<WhatsAppCommunity
+				eyebrow={homepage?.whatsappEyebrow}
+				titleLead={homepage?.whatsappTitleLead}
+				titleAccent={homepage?.whatsappTitleAccent}
+				titleTrail={homepage?.whatsappTitleTrail}
+				body={homepage?.whatsappBody}
+				joinLabel={homepage?.whatsappJoinLabel}
+				joinHref={homepage?.whatsappJoinHref}
+				membersNote={homepage?.whatsappMembersNote}
+				shorts={[
+					{ chatName: homepage?.whatsappShort1ChatName, description: homepage?.whatsappShort1Description, videoId: homepage?.whatsappShort1VideoId, joinHref: homepage?.whatsappShort1JoinHref, posterUrl: homepage?.whatsappShort1ImageUrl },
+					{ chatName: homepage?.whatsappShort2ChatName, description: homepage?.whatsappShort2Description, videoId: homepage?.whatsappShort2VideoId, joinHref: homepage?.whatsappShort2JoinHref, posterUrl: homepage?.whatsappShort2ImageUrl },
+					{ chatName: homepage?.whatsappShort3ChatName, description: homepage?.whatsappShort3Description, videoId: homepage?.whatsappShort3VideoId, joinHref: homepage?.whatsappShort3JoinHref, posterUrl: homepage?.whatsappShort3ImageUrl },
+				].filter((s) => s.chatName || s.videoId)}
 			/>
 		</div>
 	</main>
