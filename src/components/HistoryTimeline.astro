@@ -28,11 +28,11 @@ interface Props {
 }
 
 const placeholder: InternalEntry[] = [
-	{ year: 2019, title: "The Beginning", caption: "A handful of families and a shared dream of Torah in Ra'anana.", from: "#243c63", to: "#d6a21e" },
-	{ year: 2021, title: "Beis Medrash Opens", caption: "Daily learning finds a permanent home.", from: "#3e4d6b", to: "#ebbf42" },
-	{ year: 2023, title: "A Growing Kehilla", caption: "Minyanim, shiurim, and chavrutas throughout the day.", from: "#102a56", to: "#a47915" },
-	{ year: 2024, title: "Community Events", caption: "Holidays, melaveh malka, and moments together.", from: "#6b7790", to: "#dfb030" },
-	{ year: 2025, title: "Looking Ahead", caption: "Building the next chapter of RCK, together.", from: "#07173a", to: "#f6d66b" },
+	{ year: 2019, title: "The Beginning", caption: "A handful of families and a shared dream of Torah in Ra'anana.", from: "var(--color-navy-500)", to: "var(--color-gold-500)" },
+	{ year: 2021, title: "Beis Medrash Opens", caption: "Daily learning finds a permanent home.", from: "var(--color-navy-400)", to: "var(--color-gold-300)" },
+	{ year: 2023, title: "A Growing Kehilla", caption: "Minyanim, shiurim, and chavrutas throughout the day.", from: "var(--color-navy-600)", to: "var(--color-gold-600)" },
+	{ year: 2024, title: "Community Events", caption: "Holidays, melaveh malka, and moments together.", from: "var(--color-navy-300)", to: "var(--color-gold-400)" },
+	{ year: 2025, title: "Looking Ahead", caption: "Building the next chapter of RCK, together.", from: "var(--color-navy-700)", to: "var(--color-gold-200)" },
 ];
 
 const { secondsPerCard = 7 } = Astro.props;
@@ -61,7 +61,7 @@ const dur = Math.max(entries.length, 1) * secondsPerCard;
 					) : (
 						<div
 							class="history-card__placeholder"
-							style={`background: linear-gradient(135deg, ${entry.from ?? "#243c63"} 0%, ${entry.to ?? "#d6a21e"} 100%);`}
+							style={`background: linear-gradient(135deg, ${entry.from ?? "var(--color-navy-500)"} 0%, ${entry.to ?? "var(--color-gold-500)"} 100%);`}
 							aria-hidden="true"
 						/>
 					)}
@@ -107,8 +107,8 @@ const dur = Math.max(entries.length, 1) * secondsPerCard;
 		margin-right: 1.25rem;
 		overflow: hidden;
 		border-radius: 0.375rem;
-		background: #07173a;
-		box-shadow: 0 28px 60px -34px rgba(7, 23, 58, 0.7);
+		background: var(--color-navy-700);
+		box-shadow: 0 28px 60px -34px rgb(from var(--color-navy-700) r g b / 0.7);
 		border: 1px solid rgba(255, 255, 255, 0.08);
 	}
 	@media (min-width: 640px) {
