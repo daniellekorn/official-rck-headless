@@ -4,9 +4,9 @@ import type { HeroSlide } from "../lib/hero-media";
 interface Props {
 	eyebrow?: string;
 	subtitle?: string;
-	imageUrl?: string;
-	/** Ordered hero background slides. When non-empty, they replace `imageUrl`
-	 *  as a crossfading image/video sequence. See design-log/029. */
+	/** Ordered hero background slides (the single source for the hero background —
+	 *  see design-log/030). One image renders as a static background; more become
+	 *  a crossfading image/video sequence. Empty → the brand gradient placeholder. */
 	slides?: HeroSlide[];
 	primaryCtaLabel?: string;
 	primaryCtaHref?: string;
@@ -19,7 +19,6 @@ interface Props {
 const {
 	eyebrow,
 	subtitle = "A home for Torah, community, and growth in Ra'anana, Israel.",
-	imageUrl,
 	slides = [],
 	primaryCtaLabel = "Our Schedule",
 	primaryCtaHref = "/daven",
@@ -66,17 +65,6 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 			))}
 			<div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/25 to-black/55"></div>
 		</div>
-	) : imageUrl ? (
-		<>
-			<img
-				src={imageUrl}
-				alt=""
-				class="absolute inset-0 -z-10 h-full w-full object-cover"
-				loading="eager"
-				aria-hidden="true"
-			/>
-			<div class="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-black/25 to-black/55" aria-hidden="true"></div>
-		</>
 	) : (
 		<>
 			<div
