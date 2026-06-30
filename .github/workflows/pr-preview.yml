@@ -34,10 +34,12 @@ jobs:
         run: npm ci
 
       - name: Type check
-        # Use the project's pinned astro (via the npm script), not `npx astro`,
-        # which fetches the latest astro major and can require a newer Node than
-        # this job runs on.
-        run: npm run astro -- check
+        # Pin the astro major: bare `npx astro` resolves to the latest major
+        # (6.x), which requires Node >=22.12 while this job runs on Node 20 and
+        # exits before type-checking. `astro@5` matches the project's pinned
+        # version and runs on Node 20. (@astrojs/check + typescript come from
+        # devDependencies.)
+        run: npx astro@5 check
 
       - name: Authenticate to Wix
         env:
