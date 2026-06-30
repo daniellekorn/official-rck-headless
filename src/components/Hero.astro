@@ -1,9 +1,13 @@
 ---
+import type { HeroSlide } from "../lib/hero-media";
 
 interface Props {
 	eyebrow?: string;
 	subtitle?: string;
 	imageUrl?: string;
+	/** Ordered hero background slides. When non-empty, they replace `imageUrl`
+	 *  as a crossfading image/video sequence. See design-log/029. */
+	slides?: HeroSlide[];
 	primaryCtaLabel?: string;
 	primaryCtaHref?: string;
 	secondaryCtaLabel?: string;
@@ -16,15 +20,53 @@ const {
 	eyebrow,
 	subtitle = "A home for Torah, community, and growth in Ra'anana, Israel.",
 	imageUrl,
+	slides = [],
 	primaryCtaLabel = "Our Schedule",
 	primaryCtaHref = "/daven",
 	secondaryCtaLabel = "Our Programs",
 	secondaryCtaHref = "/events",
 } = Astro.props;
+
+const hasSlides = slides.length > 0;
+const singleVideo = slides.length === 1 && slides[0].kind === "video";
 ---
 
 <section class="relative isolate overflow-hidden min-h-screen flex items-end">
-	{imageUrl ? (
+	{hasSlides ? (
+		<div class="absolute inset-0 -z-10" data-hero-slides aria-hidden="true">
+			{slides.map((slide, i) => (
+				<div
+					class="hero-slide absolute inset-0"
+					data-hero-slide
+					data-kind={slide.kind}
+					data-index={i}
+					data-hold={slide.kind === "image" ? String(slide.holdMs ?? 6000) : undefined}
+					style={i === 0 ? "opacity:1" : "opacity:0"}
+				>
+					{slide.kind === "video" ? (
+						<video
+							class="h-full w-full object-cover"
+							src={slide.url}
+							poster={slide.poster}
+							muted
+							playsinline
+							loop={singleVideo}
+							preload={i === 0 ? "auto" : "none"}
+							data-hero-video
+						></video>
+					) : (
+						<img
+							src={slide.url}
+							alt=""
+							class="h-full w-full object-cover"
+							loading={i === 0 ? "eager" : "lazy"}
+						/>
+					)}
+				</div>
+			))}
+			<div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/25 to-black/55"></div>
+		</div>
+	) : imageUrl ? (
 		<>
 			<img
 				src={imageUrl}
@@ -96,3 +138,112 @@ const {
 		</div>
 	</div>
 </section>
+
+<style>
+	.hero-slide {
+		opacity: 0;
+		transition: opacity 1.1s ease;
+		will-change: opacity;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.hero-slide {
+			transition: none;
+		}
+	}
+</style>
+
+<script>
+	// Hero media sequence: crossfade through stacked image/video slides.
+	// Images hold for data-hold ms; videos play once (muted) then fade to the
+	// next; the sequence loops. Honors prefers-reduced-motion (no cycle, no
+	// autoplay — first slide stays put; a video shows its poster). See #029.
+	(() => {
+		const container = document.querySelector<HTMLElement>("[data-hero-slides]");
+		if (!container) return;
+		const slides = Array.from(container.querySelectorAll<HTMLElement>("[data-hero-slide]"));
+		if (slides.length <= 1) {
+			// Single slide: nothing to cycle. A lone video loops on its own (loop
+			// attr set in markup); just start it unless motion is reduced.
+			const lone = slides[0]?.querySelector<HTMLVideoElement>("[data-hero-video]");
+			const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+			if (lone && !reduce) lone.play().catch(() => {});
+			return;
+		}
+
+		const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+		if (reduce) return; // first slide is already visible; leave it static.
+
+		let current = 0;
+		let timer: ReturnType<typeof setTimeout> | undefined;
+
+		const videoOf = (el: HTMLElement) => el.querySelector<HTMLVideoElement>("[data-hero-video]");
+
+		const scheduleAdvance = (el: HTMLElement) => {
+			clearTimeout(timer);
+			const video = videoOf(el);
+			if (el.dataset.kind === "video" && video) {
+				video.preload = "auto";
+				video.currentTime = 0;
+				const onEnded = () => advance();
+				video.addEventListener("ended", onEnded, { once: true });
+				// Safety net: if "ended" never fires, advance after the clip's
+				// duration (+1s), or a 12s default when duration is unknown.
+				const fallbackMs = Number.isFinite(video.duration) && video.duration > 0 ? (video.duration + 1) * 1000 : 12000;
+				timer = setTimeout(() => {
+					video.removeEventListener("ended", onEnded);
+					advance();
+				}, fallbackMs);
+				video.play().catch(() => {});
+			} else {
+				const hold = Number(el.dataset.hold ?? 6000);
+				timer = setTimeout(advance, hold);
+			}
+		};
+
+		const advance = () => {
+			const prev = slides[current];
+			current = (current + 1) % slides.length;
+			const next = slides[current];
+			next.style.opacity = "1";
+			prev.style.opacity = "0";
+			// Stop the outgoing video once the crossfade has finished.
+			const prevVideo = videoOf(prev);
+			if (prevVideo) {
+				window.setTimeout(() => {
+					prevVideo.pause();
+					prevVideo.currentTime = 0;
+				}, 1100);
+			}
+			scheduleAdvance(next);
+		};
+
+		scheduleAdvance(slides[0]);
+
+		// Pause the cycle while the hero is off-screen (saves work/bandwidth),
+		// and resume it on the way back. Skip the observer's initial intersecting
+		// callback so we don't double-schedule the slide we just started.
+		if (typeof IntersectionObserver !== "undefined") {
+			let started = false;
+			let paused = false;
+			const io = new IntersectionObserver(
+				(entries) => {
+					const visible = entries[entries.length - 1].isIntersecting;
+					if (!started) {
+						started = true;
+						return;
+					}
+					if (!visible && !paused) {
+						paused = true;
+						clearTimeout(timer);
+						videoOf(slides[current])?.pause();
+					} else if (visible && paused) {
+						paused = false;
+						scheduleAdvance(slides[current]);
+					}
+				},
+				{ threshold: 0 },
+			);
+			io.observe(container);
+		}
+	})();
+</script>

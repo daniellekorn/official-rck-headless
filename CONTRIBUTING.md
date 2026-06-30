@@ -18,7 +18,8 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Want to change… | Collection | How |
 |---|---|---|
 | Hero subtitle, eyebrow | `HomePage` | Edit the single row, change the relevant field. (The headline — "Welcome to RCK" + "The Ra'anana Community Kollel" — is brand, not content, and lives in code. See [#009](design-log/009-rck-brand-identity.md).) |
-| Hero background image | `HomePage` | `heroImage` field — upload new image |
+| Hero background image | `HomePage` | `heroImage` field — upload new image. Used **only when `HeroMedia` is empty** (the fallback). |
+| Hero background **sequence** (images + silent video that crossfade) | `HeroMedia` | Add a row per slide: an image **or** a video, plus `sortOrder`. When this collection has any active rows, it replaces the single hero image. See [#029](design-log/029-hero-media-sequence.md). |
 | Hero CTA buttons (label or link) | `HomePage` | `heroPrimaryCtaLabel` / `heroPrimaryCtaHref`, same for secondary |
 | Copy in the two image+text bands on the homepage | `HomePage` | The `imageTextSection1*` and `imageTextSection2*` fields (dashboard labels start "Section 1 —" / "Section 2 —") |
 | Which side the photo sits on in an image+text band | `HomePage` | `imageTextSection1ImageOn` / `imageTextSection2ImageOn` — type `left` or `right` |
@@ -224,6 +225,31 @@ One row per service-time variant. The page renders a flat, lean list grouped by 
 | youtubeUrl | Text | Full URL. Leave empty to hide the icon. |
 | twitterUrl | Text | Full URL. Leave empty to hide the icon. |
 | linkedinUrl | Text | Full URL. Leave empty to hide the icon. |
+
+#### `HeroMedia` — one row per hero slide
+
+Drives the **homepage hero background** as an ordered, crossfading sequence of
+images and silent videos. Each row is one slide. If the collection is **empty**,
+the hero falls back to the single `HomePage.heroImage`. As soon as you add an
+active row here, this sequence takes over the hero background. Rows play in
+`sortOrder` order and loop. See [design-log/029](design-log/029-hero-media-sequence.md).
+
+| Field | Type | Notes |
+|---|---|---|
+| `image` | Image (opt) | An image slide. Used when `video` on the same row is empty. |
+| `video` | Video (opt) | A **silent** video slide. If set, it's used instead of `image` on this row. It plays **once** (muted) then crossfades to the next slide. Keep clips short (~15s) — it autoplays on the homepage. |
+| `holdSeconds` | Number (opt) | Image slides only: how many seconds to show before crossfading. Default 6. Ignored for video. |
+| `sortOrder` | Number | Slide order, lower first. |
+| `active` | Boolean | Uncheck to hide a slide without deleting it. |
+
+**To build an image → video → image sequence:** add three rows — row 1 an
+`image` (`sortOrder` 1), row 2 a `video` (`sortOrder` 2), row 3 an `image`
+(`sortOrder` 3). Set them all `active`. The hero will fade image → video (which
+plays silently once) → image, then loop.
+
+> Videos are muted and play inline. On phones/tablets the sequence still runs.
+> Visitors who turn on "reduce motion" see just the first slide (a video shows
+> its thumbnail), with no autoplay — by design.
 
 #### `ThemeSettings` — exactly **one** row, never more
 

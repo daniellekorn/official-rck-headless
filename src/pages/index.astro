@@ -20,10 +20,12 @@ const pagerSections = [
 
 import { getHomepage, normalizeImageOn, normalizeAccentLine } from "../lib/homepage";
 import { getHistory } from "../lib/history";
+import { getHeroMedia } from "../lib/hero-media";
 
-const [homepage, history] = await Promise.all([
+const [homepage, history, heroSlides] = await Promise.all([
 	getHomepage(),
 	getHistory(),
+	getHeroMedia(),
 ]);
 
 // The two stacked "image + text" bands. Named by position, not content
@@ -67,6 +69,7 @@ const imageTextSection2 = {
 				eyebrow={homepage?.heroEyebrow}
 				subtitle={homepage?.heroSubtitle}
 				imageUrl={homepage?.heroImageUrl}
+				slides={heroSlides}
 				primaryCtaLabel={homepage?.heroPrimaryCtaLabel}
 				primaryCtaHref={homepage?.heroPrimaryCtaHref}
 				secondaryCtaLabel={homepage?.heroSecondaryCtaLabel}
