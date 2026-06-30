@@ -78,6 +78,8 @@ export interface HomepageContent {
 	whatsappJoinLabel?: string;
 	whatsappJoinHref?: string;
 	whatsappMembersNote?: string;
+	/** All chat-group names for the left-hand list — one per line or comma-separated. */
+	whatsappChatList?: string;
 
 	whatsappShort1ChatName?: string;
 	whatsappShort1Description?: string;
@@ -99,6 +101,13 @@ export interface HomepageContent {
 	whatsappShort3JoinHref?: string;
 	whatsappShort3Image?: string;
 	whatsappShort3ImageUrl?: string;
+
+	whatsappShort4ChatName?: string;
+	whatsappShort4Description?: string;
+	whatsappShort4VideoId?: string;
+	whatsappShort4JoinHref?: string;
+	whatsappShort4Image?: string;
+	whatsappShort4ImageUrl?: string;
 }
 
 /**
@@ -157,6 +166,7 @@ export async function getHomepage(): Promise<HomepageContent | null> {
 				whatsappShort1ImageUrl: resolveImage(row.whatsappShort1Image, 720, 1280),
 				whatsappShort2ImageUrl: resolveImage(row.whatsappShort2Image, 720, 1280),
 				whatsappShort3ImageUrl: resolveImage(row.whatsappShort3Image, 720, 1280),
+				whatsappShort4ImageUrl: resolveImage(row.whatsappShort4Image, 720, 1280),
 		};
 	} catch (err) {
 		console.error(`[homepage] query failed:`, err);

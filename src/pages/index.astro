@@ -136,10 +136,12 @@ const imageTextSection2 = {
 				joinLabel={homepage?.whatsappJoinLabel}
 				joinHref={homepage?.whatsappJoinHref}
 				membersNote={homepage?.whatsappMembersNote}
+				chats={(homepage?.whatsappChatList ?? "").split(/[\n,]/).map((c) => c.trim()).filter(Boolean)}
 				shorts={[
 					{ chatName: homepage?.whatsappShort1ChatName, description: homepage?.whatsappShort1Description, videoId: homepage?.whatsappShort1VideoId, joinHref: homepage?.whatsappShort1JoinHref, posterUrl: homepage?.whatsappShort1ImageUrl },
 					{ chatName: homepage?.whatsappShort2ChatName, description: homepage?.whatsappShort2Description, videoId: homepage?.whatsappShort2VideoId, joinHref: homepage?.whatsappShort2JoinHref, posterUrl: homepage?.whatsappShort2ImageUrl },
 					{ chatName: homepage?.whatsappShort3ChatName, description: homepage?.whatsappShort3Description, videoId: homepage?.whatsappShort3VideoId, joinHref: homepage?.whatsappShort3JoinHref, posterUrl: homepage?.whatsappShort3ImageUrl },
+					{ chatName: homepage?.whatsappShort4ChatName, description: homepage?.whatsappShort4Description, videoId: homepage?.whatsappShort4VideoId, joinHref: homepage?.whatsappShort4JoinHref, posterUrl: homepage?.whatsappShort4ImageUrl },
 				].filter((s) => s.chatName || s.videoId)}
 			/>
 		</div>
