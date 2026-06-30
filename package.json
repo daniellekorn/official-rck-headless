@@ -32,6 +32,7 @@
     "@astrojs/cloudflare": "^12.5.3",
     "@astrojs/react": "^4.3.0",
     "@types/culori": "^4.0.1",
+    "@types/node": "^26.0.0",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@wix/cli": "^1.1.92",
