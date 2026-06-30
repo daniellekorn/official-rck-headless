@@ -32,6 +32,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Flyers (Canva embeds or PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). For event flyers, set `removeAfter` so they drop off the site on their own. |
 | Footer address, phone, email | `ContactInfo` | Edit the single row. Leave a field empty to hide it from the footer. |
 | Footer social links | `ContactInfo` | Fill in any of `facebookUrl`, `instagramUrl`, `youtubeUrl`, `twitterUrl`, `linkedinUrl`. Empty = icon hidden. |
+| Brand colors (the gold, the navy, the bright accent) | `ThemeSettings` | Edit the single row. Put a hex code (e.g. `#d6a21e`) in `primaryGold` / `primaryNavy` / `accent`. The whole matching scale across the site recolors. Leave a field empty to keep the built-in color. See [#028](design-log/028-cms-editable-theme-colors.md). |
 
 ### Two ways to edit content
 
@@ -55,7 +56,8 @@ Use the same Wix account you've been given site access on.
 
 These are code/design changes:
 
-- Colors, fonts, layout, spacing
+- Fonts, layout, spacing
+- **Fine-grained colors** — individual shades, gradients, or recoloring one component. The *brand anchors* (gold, navy, accent) are editable via the `ThemeSettings` collection above, but the derived shade scale and per-element colors are not.
 - Adding a new section to a page
 - Adding a new page or route
 - Changing how the slideshow behaves (auto-advance speed, transitions)
@@ -222,6 +224,31 @@ One row per service-time variant. The page renders a flat, lean list grouped by 
 | youtubeUrl | Text | Full URL. Leave empty to hide the icon. |
 | twitterUrl | Text | Full URL. Leave empty to hide the icon. |
 | linkedinUrl | Text | Full URL. Leave empty to hide the icon. |
+
+#### `ThemeSettings` — exactly **one** row, never more
+
+Controls the site's brand colors. Each field is a **hex code** typed as text
+(e.g. `#d6a21e`). Leave a field **empty** to keep the built-in color for that
+family. The site derives a full, coherent light→dark scale from each anchor you
+set, so the whole site recolors together while staying legible. See
+[design-log/028](design-log/028-cms-editable-theme-colors.md).
+
+| Field | Type | Notes |
+|---|---|---|
+| primaryGold | Text | Main brand gold. Today's default is `#d6a21e`. Sets the whole gold scale. Empty = keep default. |
+| primaryNavy | Text | Main brand navy. Today's default is `#102a56`. Sets the whole navy scale. Empty = keep default. |
+| accent | Text | Bright highlight color (the highlight-marker wash, active tabs). Today's default is `#f6ed49`. Empty = keep default. |
+
+> **What this does and doesn't do.** It changes the *hue* and *saturation* of a
+> color family while keeping the brand's light/dark structure — so a button
+> never ends up with text you can't read. It is intentionally **not** per-shade
+> control: if you type a dark color it shifts the brand toward that color's hue
+> but stays in the same brightness range. Type a valid hex; if you mistype, the
+> site simply keeps the current color (a bad value can't break the page).
+>
+> **Subtle exception:** a few decorative *glow shadows* (e.g. on the Join Us
+> cards) keep their original gold tint and won't follow a recolor. They're faint
+> and easy to miss; ask the developer if you need them changed too.
 
 #### `Flyers`
 

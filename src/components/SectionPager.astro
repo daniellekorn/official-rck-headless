@@ -50,7 +50,7 @@ const { sections } = Astro.props;
 		--dot: #ffffff;
 	}
 	[data-section-pager][data-theme="light"] {
-		--dot: #243c63;
+		--dot: var(--color-navy-500);
 	}
 
 	.pager-pill {
@@ -74,7 +74,7 @@ const { sections } = Astro.props;
 		height: 1.5rem;
 		width: 0.4rem;
 		opacity: 1;
-		background: #d6a21e; /* gold-500 — reads on both light and dark */
+		background: var(--color-gold-500); /* reads on both light and dark */
 	}
 
 	/* hover label flag to the left of the rail */
@@ -85,7 +85,7 @@ const { sections } = Astro.props;
 		transform: translateY(-50%) translateX(0.25rem);
 		white-space: nowrap;
 		border-radius: 0.125rem;
-		background: #07173a;
+		background: var(--color-navy-700);
 		color: #fff;
 		padding: 0.25rem 0.7rem;
 		font-size: 0.6875rem;
@@ -107,7 +107,7 @@ const { sections } = Astro.props;
 	}
 
 	:focus-visible {
-		outline: 2px solid #d6a21e;
+		outline: 2px solid var(--color-gold-500);
 		outline-offset: 3px;
 		border-radius: 0.125rem;
 	}

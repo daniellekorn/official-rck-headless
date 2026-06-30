@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import { getThemeSettings, buildThemeStyle } from "../lib/theme";
 
 interface Props {
 	title?: string;
@@ -14,6 +15,10 @@ const {
 } = Astro.props;
 
 const dir = lang === "he" ? "rtl" : "ltr";
+
+// Client-editable brand colors (ThemeSettings collection). Returns "" when the
+// row is empty/unset, so the code defaults in global.css stand. See design-log/028.
+const themeStyle = buildThemeStyle(await getThemeSettings());
 ---
 
 <!doctype html>
@@ -31,6 +36,7 @@ const dir = lang === "he" ? "rtl" : "ltr";
 		/>
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+		{themeStyle && <style is:inline set:html={themeStyle}></style>}
 	</head>
 	<body class="bg-paper text-ink">
 		<slot />

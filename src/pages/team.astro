@@ -72,7 +72,7 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 										const photoMarkup = (
 											<div
 												class="card-photo relative aspect-square w-full overflow-hidden bg-navy-50"
-												style={m.photoUrl ? `` : `background: linear-gradient(135deg, #eaedf3 0%, #c8cfdc 50%, #fbeaa8 100%);`}
+												style={m.photoUrl ? `` : `background: linear-gradient(135deg, var(--color-navy-50) 0%, var(--color-navy-100) 50%, var(--color-gold-100) 100%);`}
 											>
 												{m.photoUrl ? (
 													<img

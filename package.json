@@ -22,6 +22,7 @@
     "@wix/sdk": "^1.21.5",
     "@wix/wix-data-items-sdk": "^1.0.520",
     "astro": "^5.8.0",
+    "culori": "^4.0.2",
     "motion": "^12.40.0",
     "swiper": "^12.1.4",
     "tailwindcss": "^4.3.0"
@@ -30,6 +31,8 @@
     "@astrojs/check": "^0.9.9",
     "@astrojs/cloudflare": "^12.5.3",
     "@astrojs/react": "^4.3.0",
+    "@types/culori": "^4.0.1",
+    "@types/node": "^26.0.0",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@wix/cli": "^1.1.92",
