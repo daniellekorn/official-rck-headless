@@ -103,10 +103,19 @@ block the cleanup on 10 manual Canva exports, we:
 - Converted the **Daily Schedule** (the one flyer that had to keep working) from
   its Canva embed to a real image: rendered page 1 of `RCK Community Schedule.pdf`
   to PNG via `pdftoppm` and uploaded it to the Media Manager.
-- Left the other 9 embed-only flyers with no image, so they show the new
+- Left the other embed-only `Flyers` rows with no image, so they show the new
   placeholder until the office uploads page-1 exports. A code-rendered
   placeholder (not an uploaded asset) was chosen so it disappears automatically
   once a real `imageUrl` is set — nothing to clean up later.
+
+**Youth flyer slot (follow-up decision).** Deleting the embed field also blanked
+the two Dor L'Dor programs, which had been embed-only. Because nothing in the
+data distinguishes "awaiting a flyer" from "intentionally text-only" once the
+embed is gone, `/youth` was changed to **always render a flyer slot** for every
+program — image/PDF when present, the "coming soon" placeholder otherwise (the
+`hasFlyer` gate was removed from `youth.astro`). `PastEvents` was deliberately
+left gated: a past event with no flyer isn't "pending" anything, so it shows no
+placeholder.
 
 **Preserved Canva design URLs** (the `embedUrl` values, deleted from the CMS —
 kept here so they're recoverable if anyone needs the original designs):

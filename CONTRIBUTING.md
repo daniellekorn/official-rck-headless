@@ -153,7 +153,7 @@ See design log [#025](design-log/025-team-page-two-sections.md) for why the taxo
 
 #### `YouthPrograms` — one row per youth program
 
-Drives the **Youth Programming page** (`/youth`). Each row is one program (Dor L'Dor, Matmidim Chaburos, Teen Learning, …) and renders as its own section on the page. A program **always** needs a `title`, a `description`, and a contact rabbi; the photo and flyer are **optional** — a program with neither just shows as a centered text block. Rows are ordered by `sortOrder`.
+Drives the **Youth Programming page** (`/youth`). Each row is one program (Dor L'Dor, Matmidim Chaburos, Teen Learning, …) and renders as its own section on the page. A program **always** needs a `title`, a `description`, and a contact rabbi; the photo is optional. **Every program shows a flyer slot** — if you haven't added a `flyerImage` yet, it shows a "Flyer coming soon" placeholder (so upload one, or accept the placeholder until you do). Rows are ordered by `sortOrder`.
 
 | Field | Type | Notes |
 |---|---|---|
