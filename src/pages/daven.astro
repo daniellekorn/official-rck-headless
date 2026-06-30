@@ -110,29 +110,38 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 
 						<div class="relative z-0 origin-center rounded-md overflow-hidden shadow-xl ring-1 ring-navy-100 transition-transform duration-300 ease-out hover:z-20 hover:scale-[1.5] hover:shadow-2xl">
 							{scheduleFlyer.imageUrl ? (
-								<a href={scheduleFlyer.imageUrl} target="_blank" rel="noopener noreferrer" title="Click to view full size">
+								<button
+									type="button"
+									data-lightbox-open
+									data-lightbox-src={scheduleFlyer.imageUrl}
+									data-lightbox-title={scheduleFlyer.title ?? "Community Learning Schedule"}
+									class="block w-full cursor-zoom-in"
+									aria-label="View the Community Learning Schedule full size"
+								>
 									<img
 										src={scheduleFlyer.imageUrl}
 										alt={scheduleFlyer.title ?? "Community Learning Schedule"}
-										class="w-full h-auto cursor-zoom-in"
+										class="w-full h-auto"
 									/>
-								</a>
-							) : scheduleFlyer.embedUrl ? (
-								<div class="aspect-[3/4]">
-									<iframe
-										src={scheduleFlyer.embedUrl}
-										title={scheduleFlyer.title ?? "Community Learning Schedule"}
-										loading="lazy"
-										allow="fullscreen"
-										class="w-full h-full border-0"
-									/>
-								</div>
+								</button>
 							) : null}
 						</div>
 						{scheduleFlyer.imageUrl && (
-							<p class="mt-3 text-center text-xs sm:text-sm text-navy-300">
-								Tap to view full size
-							</p>
+							<div class="mt-3 flex items-center justify-center gap-4 text-xs sm:text-sm text-navy-300">
+								<span>Tap to enlarge</span>
+								<button
+									type="button"
+									data-download
+									data-download-src={scheduleFlyer.imageUrl}
+									data-download-title={scheduleFlyer.title ?? "Community Learning Schedule"}
+									class="inline-flex items-center gap-1.5 font-medium text-navy-600 transition-colors hover:text-gold-500"
+								>
+									<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+										<path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke-linecap="round" stroke-linejoin="round" />
+									</svg>
+									Download
+								</button>
+							</div>
 						)}
 
 						<p class="mt-6 text-center text-sm sm:text-base text-navy-400 leading-relaxed">

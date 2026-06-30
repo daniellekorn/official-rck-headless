@@ -10,7 +10,6 @@ export interface Flyer {
 	title: string;
 	category: FlyerCategory;
 	subCategory?: string;
-	embedUrl?: string;
 	pdfUrl?: string;
 	imageUrl?: string;
 	isActive?: boolean;

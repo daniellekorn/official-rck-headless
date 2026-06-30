@@ -5,6 +5,7 @@ import Footer from "../components/Footer.astro";
 import PageHeader from "../components/PageHeader.astro";
 import PhotoGallery from "../components/PhotoGallery.astro";
 import SectionPager from "../components/SectionPager.astro";
+import Flyer from "../components/Flyer.astro";
 import { getYouthPrograms, hasFlyer } from "../lib/youth-programs";
 import { ricosToPlainText } from "../lib/ricos";
 
@@ -74,31 +75,11 @@ const pagerSections = programs.map((p) => ({ id: p.slug, label: p.title }));
 										data-reveal={flyerLeft ? "left" : "right"}
 									>
 										<div class="w-full max-w-sm overflow-hidden rounded-md bg-navy-800 ring-1 ring-navy-100 shadow-[0_30px_64px_-34px_rgba(7,23,58,0.55)]">
-											<div class="relative aspect-[3/4]">
-												{program.flyerImageUrl ? (
-													<img
-														src={program.flyerImageUrl}
-														alt={`${program.title} flyer`}
-														loading="lazy"
-														class="absolute inset-0 h-full w-full object-contain"
-													/>
-												) : program.flyerEmbedUrl ? (
-													<iframe
-														src={program.flyerEmbedUrl}
-														title={`${program.title} flyer`}
-														loading="lazy"
-														allow="fullscreen"
-														class="absolute inset-0 h-full w-full border-0"
-													/>
-												) : program.flyerPdfUrl ? (
-													<iframe
-														src={`https://docs.google.com/viewer?url=${encodeURIComponent(program.flyerPdfUrl)}&embedded=true`}
-														title={`${program.title} flyer`}
-														loading="lazy"
-														class="absolute inset-0 h-full w-full border-0"
-													/>
-												) : null}
-											</div>
+											<Flyer
+												imageUrl={program.flyerImageUrl}
+												pdfUrl={program.flyerPdfUrl}
+												title={program.title}
+											/>
 										</div>
 									</div>
 								)}

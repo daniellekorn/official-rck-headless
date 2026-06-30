@@ -17,9 +17,8 @@ export interface PastEvent {
 	eventDate?: Date | string; // for newest-first sort + an optional caption
 	blurb?: unknown; // Ricos rich text — extracted to plain text for render
 	galleryUrls: string[]; // resolved event photos; [0] is the featured one
-	flyerEmbedUrl?: string; // Canva "Publish to Web" iframe src
 	flyerPdfUrl?: string; // direct PDF URL
-	flyerImageUrl?: string; // resolved static flyer image
+	flyerImageUrl?: string; // resolved static flyer image (preferred)
 	sortOrder?: number; // manual tiebreaker when two events share a date
 	active?: boolean;
 }
@@ -91,7 +90,7 @@ export async function getPastEvents(): Promise<PastEvent[]> {
 	}
 }
 
-/** True when an event carries any embeddable flyer (Canva, PDF, or image). */
+/** True when an event carries a flyer (image or PDF). */
 export function hasFlyer(e: PastEvent): boolean {
-	return Boolean(e.flyerEmbedUrl || e.flyerPdfUrl || e.flyerImageUrl);
+	return Boolean(e.flyerImageUrl || e.flyerPdfUrl);
 }

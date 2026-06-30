@@ -29,7 +29,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Youth programs (on /youth) | `YouthPrograms` | Add a row per program: title, description, contact rabbi, optional photo + flyer. |
 | Past events archive (on /events) | `PastEvents` | Add a row per past event: title, date, photo gallery, optional flyer + blurb. Shows newest first. |
 | Weekday davening times | `DaveningTimes` | Add / edit rows with `dayType = Weekday`. Shabbat is a static "Join us at KBA" section (no CMS rows needed). |
-| Flyers (Canva embeds or PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). For event flyers, set `removeAfter` so they drop off the site on their own. |
+| Flyers (images / PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). For event flyers, set `removeAfter` so they drop off the site on their own. |
 | Footer address, phone, email | `ContactInfo` | Edit the single row. Leave a field empty to hide it from the footer. |
 | Footer social links | `ContactInfo` | Fill in any of `facebookUrl`, `instagramUrl`, `youtubeUrl`, `twitterUrl`, `linkedinUrl`. Empty = icon hidden. |
 | Brand colors (the gold, the navy, the bright accent) | `ThemeSettings` | Edit the single row. Put a hex code (e.g. `#d6a21e`) in `primaryGold` / `primaryNavy` / `accent`. The whole matching scale across the site recolors. Leave a field empty to keep the built-in color. See [#028](design-log/028-cms-editable-theme-colors.md). |
@@ -160,9 +160,8 @@ Drives the **Youth Programming page** (`/youth`). Each row is one program (Dor L
 | `title` | Text | Program name, e.g. `Dor L'Dor`, `Matmidim Chaburos`, `Teen Learning`. Shown as the big section heading. |
 | `description` | Rich Text | What the program is. Paragraphs are preserved. |
 | `gallery` | Media Gallery (opt) | Photos of the program's kids/teens — add as many as you like. **One** photo shows as a big banner; **more than one** becomes a big swipeable slideshow (with thumbnails on desktop, dots on mobile) below the flyer/description. Leave empty for none. |
-| `flyerEmbedUrl` | Text (opt) | Canva "Publish to Web" iframe src URL — live-synced to Canva. |
-| `flyerPdfUrl` | Text (opt) | Direct public PDF URL (for non-Canva flyers). |
-| `flyerImage` | Image (opt) | A static flyer image. Use this *or* one of the URL fields — they're checked image → embed → pdf. |
+| `flyerImage` | Image (opt) | **Preferred.** A static flyer image (export page 1 of the Canva design as PNG). Gets a click-to-enlarge viewer + Download button. |
+| `flyerPdfUrl` | Text (opt) | Direct public PDF URL — fallback for multi-page documents. Checked after the image. |
 | `contactName` | Text | The contact rabbi's name, e.g. `Rav Avraham Aharon`. |
 | `contactEmail` | Text | The contact rabbi's email — becomes the "Email" link. Leave empty to show only the generic "Contact" button. |
 | `sortOrder` | Number | Order of sections, lower first. |
@@ -186,17 +185,15 @@ photos and no flyer still shows as a titled blurb). Same field shape as
 | `title` | Text | Event name — this is the clickable label in the side list. |
 | `eventDate` | Date (opt) | Used to sort newest-first and to caption the panel (e.g. "November 2025"). Leave empty and the event sinks to the bottom. |
 | `gallery` | Media Gallery (opt) | Event photos — add as many as you like. **One** shows as a single image; **more** become a swipeable slideshow (thumbnails on desktop, dots on mobile). |
-| `flyerEmbedUrl` | Text (opt) | Canva "Publish to Web" iframe src URL — live-synced to Canva. |
-| `flyerPdfUrl` | Text (opt) | Direct public PDF URL (for non-Canva flyers). |
-| `flyerImage` | Image (opt) | A static flyer image. Use this *or* one of the URL fields — checked image → embed → pdf. |
+| `flyerImage` | Image (opt) | **Preferred.** A static flyer image (export page 1 of the Canva design as PNG). Gets a click-to-enlarge viewer + Download button. |
+| `flyerPdfUrl` | Text (opt) | Direct public PDF URL — fallback for multi-page documents. Checked after the image. |
 | `blurb` | Rich Text (opt) | A short description shown above the photos. Paragraphs preserved. |
 | `sortOrder` | Number (opt) | Tiebreaker only — orders events that share the same `eventDate` (lower first). |
 | `active` | Boolean | Show/hide without deleting. |
 
 **To add a past event:** add a `PastEvents` row — `title` + `eventDate`, drop the
-photos into `gallery`, and add the flyer (`flyerEmbedUrl` / `flyerPdfUrl` /
-`flyerImage`) if you have one. It appears in the archive automatically, newest
-first.
+photos into `gallery`, and add the flyer (`flyerImage`, or `flyerPdfUrl`) if you
+have one. It appears in the archive automatically, newest first.
 
 #### `DaveningTimes`
 
@@ -279,22 +276,22 @@ set, so the whole site recolors together while staying legible. See
 
 #### `Flyers`
 
-One row per flyer. Either `embedUrl` or `pdfUrl` must be filled in — a row with neither set will render nothing and should have `isActive = false`.
+One row per flyer. Set **`imageUrl`** (preferred) or **`pdfUrl`** — a row with neither set shows a "Flyer coming soon" placeholder on the site, so it should have `isActive = false` until you add one. When both are set, the image wins (checked **image → pdf → placeholder**).
+
+> Flyers are **images**, not live Canva embeds. The Canva "Publish to Web" embed was removed (design log #031): it showed every page of a multi-page design and couldn't be downloaded. An exported page-1 image shows exactly one page, gets a click-to-enlarge viewer with a hover zoom, and gives visitors a **Download** button.
 
 | Field | Type | Notes |
 |---|---|---|
 | title | Text | Display name shown on site |
 | category | Text | **Must be one of:** `schedules`, `learning`, `youth`, `events` (lowercase, exact). Wrong value = flyer silently hidden. |
-| embedUrl | Text | Canva "Publish to Web" `<iframe>` src URL. Preferred for Canva designs — stays live-synced to Canva. |
-| pdfUrl | Text | Direct public PDF URL. For non-Canva documents. |
+| imageUrl | Text | **Preferred.** A public image URL (export page 1 of the Canva design as PNG). Gets the hover zoom, click-to-enlarge viewer, and Download button. |
+| pdfUrl | Text | Direct public PDF URL — fallback for genuinely multi-page documents. Checked after the image. |
 | isActive | Boolean | Show/hide without deleting. Default: true (checked). |
 | displayOrder | Number | Sort order within the category. Lower = first. |
 | subCategory | Text | Optional. Sub-topic for filtering (e.g. `kashrus`, `shabbos`, `women`). One value per flyer. Leave empty if no sub-filtering needed. |
 | removeAfter | Date | Optional. The last day the flyer should appear. It stays up through that whole day (Israel time) and drops off the site by itself the next morning. **Leave empty for anything evergreen** (a standing schedule, a learning program). Only put a date on things that go stale — mainly event flyers. The row is *not* deleted: to bring a flyer back, just change the date to a future one. |
 
-**Getting a Canva embed URL:** In Canva, open the design → **Share → Publish to web** → copy the URL from the embed code (`src="…"`). Paste only the URL (not the full `<iframe>` tag) into `embedUrl`.
-
-> ⚠️ **Use "Publish to web" — not the "Copy link" button.** The plain *Copy link* (the one in the design's `⋯` menu) gives a *view* link, which usually refuses to display embedded on the site and can ask visitors to log in to Canva. Only the **Publish to web** URL embeds correctly and stays live-synced.
+**Exporting a flyer image from Canva:** open the design → **Share → Download → PNG**, and select **page 1 only**. Upload that PNG into the row's image field (or paste a public image URL). That's the whole step.
 
 **Valid `category` slugs:**
 
@@ -311,33 +308,30 @@ One row per flyer. Either `embedUrl` or `pdfUrl` must be filled in — a row wit
 |---|---|---|
 | `schedules` | `daily` | Featured daily learning schedule on the Daven with Us page, below the minyan times. Only the first active row matching this combination is shown. |
 
-To swap the daily schedule: edit the one row with `category = schedules` and `subCategory = daily`. Update `imageUrl` (for a static image) or `embedUrl` (for a live Canva design). No code change needed.
-
-Canva embeds include a built-in expand/download control — no separate download button is shown on the site.
+To swap the daily schedule: edit the one row with `category = schedules` and `subCategory = daily`. Update `imageUrl` with the new page-1 export. No code change needed.
 
 #### The easy way to add a flyer (chat, no dashboard)
 
-You don't have to hunt through the CMS dashboard. Once the Wix connector is linked to your Claude.ai account (see "Claude.ai + Wix MCP" above), you can just describe the flyer and let Claude fill in the row. Copy the **Publish to web** URL from Canva, then say something like:
+You don't have to hunt through the CMS dashboard. Once the Wix connector is linked to your Claude.ai account (see "Claude.ai + Wix MCP" above), export the page-1 PNG from Canva, attach it, and describe the flyer — Claude uploads the image and fills in the row:
 
-> Add a flyer to my Wix site `<site-id>`: title "Shavuos Night Learning", category `events`, embed URL `https://www.canva.com/design/…/view?embed`. Take it down after June 2, 2026.
+> Add a flyer to my Wix site `<site-id>`: title "Shavuos Night Learning", category `events`, [attach the PNG]. Take it down after June 2, 2026.
 
-Claude creates the row with the right `category` slug and sets `removeAfter` for you. A few more examples:
+Claude uploads the image, creates the row with the right `category` slug, and sets `removeAfter` for you. A few more examples:
 
-> Add this to the `learning` flyers, title "Summer Chaburah Schedule", no end date — it's ongoing. Embed URL: `…`
+> Add this to the `learning` flyers, title "Summer Chaburah Schedule", no end date — it's ongoing. [attach the PNG]
 
 > The Pesach event flyer is over — set its `removeAfter` to yesterday so it drops off. (Or: hide it by setting `isActive` to false.)
 
-The **one** thing only you can do is the Canva step: open the design, Publish to web, copy the URL. Everything after that is a sentence.
+The **one** thing only you can do is the Canva step: open the design, Download page 1 as PNG. Everything after that is a sentence.
 
-#### Why flyers aren't pulled from Canva automatically
+#### Why flyers aren't synced from Canva automatically
 
-A fair question: why can't the site just *watch* a Canva folder and show whatever's in it? We looked into it, and the short version is that automating it would make the site **worse**, not easier:
+A fair question: why can't the site just *watch* a Canva folder and show whatever's in it? Automating it would add a lot of fragile machinery for little gain:
 
-- **The "live" magic comes from one button.** When you *Publish to web* and paste that link, editing the design in Canva updates the site automatically — no re-upload, ever. That live link is only created by that button. Canva's automation tools can't generate it; they can only send the site a flat *picture* of the design. So an "automatic" version would turn your live flyers into frozen snapshots that go out of date the moment you edit them in Canva.
-- **There's no official Canva ↔ Wix connection** — and the few third-party "connectors" (Zapier, Make) are built for the old drag-and-drop Wix editor, not the custom site we run. They wouldn't apply here.
-- **It would add fragile machinery** for very little gain. Adding a flyer is already two clicks in Canva plus one sentence to Claude. A background sync would be a lot of plumbing that quietly breaks and shows stale designs.
+- **There's no official Canva ↔ Wix connection**, and the third-party "connectors" (Zapier, Make) target the old drag-and-drop Wix editor, not the custom headless site we run.
+- **Auto-export needs the Canva Connect API** — an OAuth app with token refresh and async export jobs. That's real plumbing that quietly breaks, for a flyer that changes a few times a year. We looked at it (design log #031) and decided it wasn't worth it yet.
 
-The `removeAfter` date is the part of "automatic" that's actually worth having: you set a take-down date once, and old event flyers disappear on their own. That's the cleanup nobody wants to remember to do — so we automated *that*, and left the publishing as a quick, deliberate step.
+So the deliberate, two-click export stays manual. The `removeAfter` date is the part of "automatic" actually worth having: set a take-down date once and old event flyers disappear on their own — that's the cleanup nobody wants to remember, so we automated *that*.
 
 ### Permissions on every collection
 

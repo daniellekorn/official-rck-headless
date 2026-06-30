@@ -1,5 +1,11 @@
 # 010 — Flyers CMS collection
 
+> **Superseded in part by #031 (2026-06-30):** the Canva "Publish to Web"
+> embed (`embedUrl` / `flyerEmbedUrl`) was removed from the code and the CMS.
+> Flyers are now images (`imageUrl` / `flyerImage`) with a PDF fallback. Ignore
+> the `embedUrl`-first guidance below — it's kept as a record of the original
+> decision and why we later reversed it.
+
 **Status:** accepted
 **Date:** 2026-05-28
 **Author:** claude-session (danielle directing)

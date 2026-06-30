@@ -1,5 +1,9 @@
 # 027 — Past-events interactive gallery (master-detail)
 
+> **Note (#031, 2026-06-30):** the `flyerEmbedUrl` field was removed. Past-event
+> flyers are now `flyerImage` / `flyerPdfUrl` only, rendered via the shared
+> `Flyer` component.
+
 **Status:** implemented — code shipped + `PastEvents` collection created in Wix and seeded with 2 sample events
 **Date:** 2026-06-28
 **Author:** claude-session

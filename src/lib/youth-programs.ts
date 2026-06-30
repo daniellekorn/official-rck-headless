@@ -14,9 +14,8 @@ export interface YouthProgram {
 	slug: string; // anchor id, derived from title (e.g. "dor-ldor")
 	description?: unknown; // Ricos rich text — extracted to plain text for render
 	galleryUrls: string[]; // resolved program photos; [0] is the featured one
-	flyerEmbedUrl?: string; // Canva "Publish to Web" iframe src
 	flyerPdfUrl?: string; // direct PDF URL
-	flyerImageUrl?: string; // resolved static flyer image
+	flyerImageUrl?: string; // resolved static flyer image (preferred)
 	contactName?: string; // contact rabbi, e.g. "Rav Avraham Aharon"
 	contactEmail?: string;
 	sortOrder?: number;
@@ -77,7 +76,7 @@ export async function getYouthPrograms(): Promise<YouthProgram[]> {
 	}
 }
 
-/** True when a program carries any embeddable flyer (Canva, PDF, or image). */
+/** True when a program carries a flyer (image or PDF). */
 export function hasFlyer(p: YouthProgram): boolean {
-	return Boolean(p.flyerEmbedUrl || p.flyerPdfUrl || p.flyerImageUrl);
+	return Boolean(p.flyerImageUrl || p.flyerPdfUrl);
 }

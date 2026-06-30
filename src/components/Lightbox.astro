@@ -1,0 +1,188 @@
+---
+/**
+ * Site-wide flyer viewer. Rendered ONCE in Layout.astro. Any element on the
+ * page opts in via data attributes — no per-page wiring:
+ *
+ *   - [data-lightbox-open] + data-lightbox-src (+ optional -title) → opens the
+ *     full-size overlay on click.
+ *   - [data-download] + data-download-src (+ optional -name) → downloads the
+ *     file. The HTML `download` attr is ignored cross-origin and Wix media is
+ *     cross-origin, so we fetch → blob → save, and fall back to opening the
+ *     image in a new tab when CORS blocks the fetch.
+ *
+ * Native <dialog> gives us focus-trap, Esc-to-close, and ::backdrop for free.
+ * `is:global` + a single delegated listener — see #031.
+ */
+---
+
+<dialog data-lightbox class="lightbox" aria-label="Flyer viewer">
+	<figure class="lightbox-figure">
+		<img data-lightbox-img class="lightbox-img" alt="" />
+		<figcaption data-lightbox-caption class="lightbox-caption"></figcaption>
+	</figure>
+	<div class="lightbox-controls">
+		<button type="button" data-download data-lightbox-dl class="lightbox-btn" aria-label="Download flyer">
+			<svg viewBox="0 0 24 24" class="lightbox-icon" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+				<path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke-linecap="round" stroke-linejoin="round" />
+			</svg>
+		</button>
+		<button type="button" data-lightbox-close class="lightbox-btn" aria-label="Close viewer">
+			<svg viewBox="0 0 24 24" class="lightbox-icon" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+				<path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" stroke-linejoin="round" />
+			</svg>
+		</button>
+	</div>
+</dialog>
+
+<style is:global>
+	.lightbox {
+		width: min(92vw, 760px);
+		max-width: 92vw;
+		max-height: 92vh;
+		margin: auto;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		overflow: visible;
+	}
+	.lightbox::backdrop {
+		background: rgb(from var(--color-navy-700) r g b / 0.82);
+		backdrop-filter: blur(6px);
+	}
+	.lightbox[open] {
+		animation: lightbox-in 0.25s ease;
+	}
+	@keyframes lightbox-in {
+		from { opacity: 0; transform: translateY(8px) scale(0.98); }
+		to   { opacity: 1; transform: translateY(0) scale(1); }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.lightbox[open] { animation: none; }
+	}
+
+	.lightbox-figure {
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.75rem;
+	}
+	.lightbox-img {
+		display: block;
+		max-width: 100%;
+		max-height: 84vh;
+		width: auto;
+		height: auto;
+		border-radius: 0.375rem;
+		background: var(--color-navy-800, #0b1b38);
+		box-shadow: 0 40px 90px -30px rgb(0 0 0 / 0.7);
+	}
+	.lightbox-caption {
+		color: rgb(255 255 255 / 0.85);
+		font-size: 0.8125rem;
+		font-weight: 500;
+		letter-spacing: 0.04em;
+		text-align: center;
+	}
+	.lightbox-caption:empty { display: none; }
+
+	/* Controls sit just above the image, end-aligned (RTL-safe via inset-inline). */
+	.lightbox-controls {
+		position: absolute;
+		top: -3.25rem;
+		inset-inline-end: 0;
+		display: flex;
+		gap: 0.5rem;
+	}
+	.lightbox-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.5rem;
+		height: 2.5rem;
+		border-radius: 0.25rem;
+		color: var(--color-navy-700, #07173a);
+		background: #fff;
+		box-shadow: 0 8px 24px -10px rgb(0 0 0 / 0.5);
+		transition: background 0.18s, color 0.18s, transform 0.18s;
+	}
+	.lightbox-btn:hover {
+		background: var(--color-gold-400, #dfb030);
+	}
+	.lightbox-btn:active { transform: translateY(1px); }
+	.lightbox-icon { width: 1.25rem; height: 1.25rem; }
+</style>
+
+<script>
+	(() => {
+		const dialog = document.querySelector<HTMLDialogElement>("[data-lightbox]");
+		if (!dialog) return;
+		const img = dialog.querySelector<HTMLImageElement>("[data-lightbox-img]")!;
+		const caption = dialog.querySelector<HTMLElement>("[data-lightbox-caption]")!;
+		const dlBtn = dialog.querySelector<HTMLButtonElement>("[data-lightbox-dl]")!;
+		const closeBtn = dialog.querySelector<HTMLButtonElement>("[data-lightbox-close]")!;
+
+		// Pull a clean filename out of a URL (no query string), fall back to title.
+		const fileName = (src: string, title?: string) => {
+			const base = (title || "flyer").trim().replace(/[^\w.-]+/g, "-").replace(/^-+|-+$/g, "");
+			const ext = (src.split("?")[0].match(/\.(png|jpe?g|webp|gif|pdf)$/i)?.[1] || "png").toLowerCase();
+			return base.toLowerCase().endsWith(`.${ext}`) ? base : `${base}.${ext}`;
+		};
+
+		// Cross-origin-safe download: fetch the bytes and save them; if CORS
+		// blocks the fetch, open the asset in a new tab so the user can save it.
+		const download = async (src: string, name: string) => {
+			try {
+				const res = await fetch(src, { mode: "cors" });
+				if (!res.ok) throw new Error(String(res.status));
+				const url = URL.createObjectURL(await res.blob());
+				const a = document.createElement("a");
+				a.href = url;
+				a.download = name;
+				document.body.appendChild(a);
+				a.click();
+				a.remove();
+				URL.revokeObjectURL(url);
+			} catch {
+				window.open(src, "_blank", "noopener");
+			}
+		};
+
+		// Delegated download — works for the lightbox button and any flyer card.
+		document.addEventListener("click", (e) => {
+			const trigger = (e.target as HTMLElement).closest<HTMLElement>("[data-download]");
+			if (!trigger) return;
+			const src = trigger.dataset.downloadSrc || img.src;
+			if (!src) return;
+			e.preventDefault();
+			download(src, trigger.dataset.downloadName || fileName(src, trigger.dataset.downloadTitle));
+		});
+
+		// Delegated open.
+		document.addEventListener("click", (e) => {
+			const trigger = (e.target as HTMLElement).closest<HTMLElement>("[data-lightbox-open]");
+			if (!trigger) return;
+			const src = trigger.dataset.lightboxSrc;
+			if (!src) return;
+			e.preventDefault();
+			const title = trigger.dataset.lightboxTitle || "";
+			img.src = src;
+			img.alt = title ? `${title} — full size` : "Flyer, full size";
+			caption.textContent = title;
+			dlBtn.dataset.downloadSrc = src;
+			dlBtn.dataset.downloadName = fileName(src, title);
+			dialog.showModal();
+		});
+
+		const close = () => dialog.close();
+		closeBtn.addEventListener("click", close);
+		// Click on the backdrop (outside the figure) closes.
+		dialog.addEventListener("click", (e) => {
+			if (e.target === dialog) close();
+		});
+		// Release the (potentially large) image when closed.
+		dialog.addEventListener("close", () => {
+			img.removeAttribute("src");
+		});
+	})();
+</script>

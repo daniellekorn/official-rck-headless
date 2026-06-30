@@ -5,6 +5,7 @@ import Footer from "../components/Footer.astro";
 import PageHeader from "../components/PageHeader.astro";
 import CoverflowCarousel from "../components/CoverflowCarousel.astro";
 import EventArchive from "../components/EventArchive.astro";
+import Flyer from "../components/Flyer.astro";
 import { getFlyers, uniqueSubCategories } from "../lib/flyers";
 import { getPastEvents } from "../lib/past-events";
 
@@ -66,31 +67,11 @@ const gridFlyers = selectedSub
 				<div class="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
 					{gridFlyers.map((flyer) => (
 						<div class="rounded-md overflow-hidden bg-white ring-1 ring-navy-100 shadow-sm">
-							<div class="relative aspect-[3/4]">
-								{flyer.imageUrl ? (
-									<img
-										src={flyer.imageUrl}
-										alt={flyer.title ?? ""}
-										loading="lazy"
-										class="absolute inset-0 w-full h-full object-contain"
-									/>
-								) : flyer.embedUrl ? (
-									<iframe
-										src={flyer.embedUrl}
-										title={flyer.title}
-										loading="lazy"
-										allow="fullscreen"
-										class="absolute inset-0 w-full h-full border-0"
-									/>
-								) : flyer.pdfUrl ? (
-									<iframe
-										src={`https://docs.google.com/viewer?url=${encodeURIComponent(flyer.pdfUrl)}&embedded=true`}
-										title={flyer.title}
-										loading="lazy"
-										class="absolute inset-0 w-full h-full border-0"
-									/>
-								) : null}
-							</div>
+							<Flyer
+								imageUrl={flyer.imageUrl}
+								pdfUrl={flyer.pdfUrl}
+								title={flyer.title}
+							/>
 							{(flyer.title || flyer.subCategory) && (
 								<div class="p-4">
 									{flyer.title && (

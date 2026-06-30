@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import Lightbox from "../components/Lightbox.astro";
 import { getThemeSettings, buildThemeStyle } from "../lib/theme";
 
 interface Props {
@@ -38,6 +39,7 @@ const themeStyle = buildThemeStyle(await getThemeSettings());
 	</head>
 	<body class="bg-paper text-ink">
 		<slot />
+		<Lightbox />
 		<script>
 			// Scroll-reveal: fade + slide elements in as they enter the viewport.
 			// Elements opt in with data-reveal="left|right|up"; data-reveal-delay

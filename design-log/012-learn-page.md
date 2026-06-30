@@ -1,5 +1,9 @@
 # 012 — Learn With Us page + CoverflowCarousel component
 
+> **Note (#031, 2026-06-30):** the `embedUrl` path described below was removed.
+> The `Item` shape and render chain are now `imageUrl → pdfUrl → placeholder`,
+> and the carousel/grid flyers use the shared `Flyer` + `Lightbox` components.
+
 **Status:** implemented
 **Date:** 2026-05-28
 **Author:** claude-session (danielle directing)

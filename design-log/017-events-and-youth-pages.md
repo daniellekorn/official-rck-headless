@@ -1,5 +1,9 @@
 # 017 — Split Programming into Events + Youth pages
 
+> **Note (#031, 2026-06-30):** the `flyerEmbedUrl` field was removed from
+> `YouthPrograms` (and `PastEvents`). Flyers are now `flyerImage` / `flyerPdfUrl`
+> only. Ignore `flyerEmbedUrl` in the field tables below.
+
 **Status:** implemented
 **Date:** 2026-06-04
 **Author:** claude-session (danielle directing)

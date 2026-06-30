@@ -1,0 +1,198 @@
+---
+/**
+ * Flyer media block — the framed `aspect-[3/4]` area only. Callers keep their
+ * own outer frame (bg/ring/shadow) and caption, so each context's layout is
+ * untouched; this just swaps what goes *inside* the frame.
+ *
+ * Image path: a click-to-zoom trigger (opens the shared <Lightbox/>) with a
+ * within-frame hover zoom and hover-revealed Expand + Download buttons. A PDF
+ * (`pdfUrl`) renders in an inline viewer as a fallback. When neither is set, a
+ * branded "coming soon" placeholder keeps the layout intact until the office
+ * uploads an image. See design log #031.
+ */
+interface Props {
+	imageUrl?: string;
+	pdfUrl?: string;
+	title?: string;
+	/** Eager-load the image (above-the-fold flyers). Defaults to lazy. */
+	eager?: boolean;
+}
+
+const { imageUrl, pdfUrl, title, eager = false } = Astro.props;
+const label = title ?? "flyer";
+---
+
+<div class="relative aspect-[3/4] overflow-hidden">
+	{imageUrl ? (
+		<div class="flyer group absolute inset-0">
+			<button
+				type="button"
+				class="flyer-open"
+				data-lightbox-open
+				data-lightbox-src={imageUrl}
+				data-lightbox-title={title}
+				aria-label={`View ${label} full size`}
+			>
+				<img
+					src={imageUrl}
+					alt={`${label} flyer`}
+					loading={eager ? "eager" : "lazy"}
+					class="flyer-img"
+				/>
+				<span class="flyer-veil" aria-hidden="true"></span>
+				<span class="flyer-btn flyer-expand" aria-hidden="true">
+					<svg viewBox="0 0 24 24" class="flyer-icon" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" stroke-linecap="round" stroke-linejoin="round" />
+					</svg>
+				</span>
+			</button>
+
+			<button
+				type="button"
+				class="flyer-btn flyer-download"
+				data-download
+				data-download-src={imageUrl}
+				data-download-title={title}
+				aria-label={`Download ${label}`}
+			>
+				<svg viewBox="0 0 24 24" class="flyer-icon" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
+			</button>
+		</div>
+	) : pdfUrl ? (
+		<iframe
+			src={`https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`}
+			title={`${label} flyer`}
+			loading="lazy"
+			class="absolute inset-0 h-full w-full border-0"
+		/>
+	) : (
+		<div class="flyer-placeholder" role="img" aria-label={`${label} flyer — coming soon`}>
+			<svg viewBox="0 0 24 24" class="flyer-placeholder-icon" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+				<rect x="3" y="3" width="18" height="18" rx="2" />
+				<path d="M3 15l5-5 4 4 3-3 6 6" stroke-linecap="round" stroke-linejoin="round" />
+				<circle cx="8.5" cy="8.5" r="1.5" />
+			</svg>
+			<span class="flyer-placeholder-text">Flyer coming soon</span>
+		</div>
+	)}
+</div>
+
+<style>
+	.flyer-open {
+		position: absolute;
+		inset: 0;
+		display: block;
+		width: 100%;
+		height: 100%;
+		cursor: zoom-in;
+	}
+	.flyer-img {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+		transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	.flyer:hover .flyer-img,
+	.flyer:focus-within .flyer-img {
+		transform: scale(1.06);
+	}
+	.flyer-veil {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(to top, rgb(from var(--color-navy-700) r g b / 0.45), transparent 38%);
+		opacity: 0;
+		transition: opacity 0.3s ease;
+	}
+	.flyer:hover .flyer-veil,
+	.flyer:focus-within .flyer-veil {
+		opacity: 1;
+	}
+
+	/* Expand badge (inside the trigger) + Download button (sibling), both in the
+	   end-aligned top corner (RTL-safe) and revealed on hover/focus. Always
+	   visible on touch devices, which have no hover. */
+	.flyer-expand {
+		position: absolute;
+		top: 0.5rem;
+		inset-inline-end: 0.5rem;
+	}
+	.flyer-download {
+		position: absolute;
+		top: 0.5rem;
+		inset-inline-end: 2.875rem;
+	}
+	.flyer-expand,
+	.flyer-download {
+		opacity: 0;
+		transform: translateY(-0.25rem);
+		transition: opacity 0.25s ease, transform 0.25s ease;
+	}
+	.flyer:hover .flyer-expand,
+	.flyer:hover .flyer-download,
+	.flyer:focus-within .flyer-expand,
+	.flyer:focus-within .flyer-download {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	@media (hover: none) {
+		.flyer-expand,
+		.flyer-download { opacity: 1; transform: none; }
+	}
+	.flyer-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2rem;
+		height: 2rem;
+		border-radius: 0.25rem;
+		color: var(--color-navy-700, #07173a);
+		background: rgb(255 255 255 / 0.92);
+		box-shadow: 0 6px 18px -8px rgb(0 0 0 / 0.6);
+		backdrop-filter: blur(2px);
+		transition: background 0.18s, color 0.18s;
+	}
+	.flyer-btn:hover {
+		background: var(--color-gold-400, #dfb030);
+	}
+	.flyer-icon { width: 1rem; height: 1rem; }
+
+	/* Coming-soon placeholder — keeps the layout populated before an image is
+	   uploaded. Self-contained navy panel so it reads on any frame colour. */
+	.flyer-placeholder {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		padding: 1rem;
+		text-align: center;
+		background: linear-gradient(150deg, var(--color-navy-600, #102a56), var(--color-navy-700, #07173a));
+		color: rgb(255 255 255 / 0.55);
+	}
+	.flyer-placeholder-icon {
+		width: 2.75rem;
+		height: 2.75rem;
+		color: var(--color-gold-400, #dfb030);
+		opacity: 0.85;
+	}
+	.flyer-placeholder-text {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.flyer-img,
+		.flyer-expand,
+		.flyer-download { transition: none; }
+		.flyer:hover .flyer-img,
+		.flyer:focus-within .flyer-img { transform: none; }
+	}
+</style>

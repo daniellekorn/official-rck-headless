@@ -1,5 +1,9 @@
 # 013 — Daven page: featured daily learning schedule
 
+> **Note (#031, 2026-06-30):** the `embedUrl` rendering path was removed. The
+> schedule now renders `imageUrl` only (the schedule PDF was exported to a PNG),
+> opening in the shared lightbox with a download control.
+
 **Status:** implemented
 **Date:** 2026-05-28
 **Author:** claude-session (danielle directing)
