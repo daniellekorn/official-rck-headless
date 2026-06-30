@@ -32,6 +32,9 @@ const themeStyle = buildThemeStyle(await getThemeSettings());
 		/>
 		<meta name="generator" content={Astro.generator} />
 		{themeStyle && <style is:inline set:html={themeStyle}></style>}
+		<!-- Dynamic pages fill this slot with Wix-resolved SEO tags. Static pages
+		     leave it empty and rely on Wix's automatic tag injection. -->
+		<slot name="seo-tags" />
 	</head>
 	<body class="bg-paper text-ink">
 		<slot />
