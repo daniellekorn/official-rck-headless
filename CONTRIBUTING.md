@@ -18,8 +18,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Want to change… | Collection | How |
 |---|---|---|
 | Hero subtitle, eyebrow | `HomePage` | Edit the single row, change the relevant field. (The headline — "Welcome to RCK" + "The Ra'anana Community Kollel" — is brand, not content, and lives in code. See [#009](design-log/009-rck-brand-identity.md).) |
-| Hero background image | `HomePage` | `heroImage` field — upload new image. Used **only when `HeroMedia` is empty** (the fallback). |
-| Hero background **sequence** (images + silent video that crossfade) | `HeroMedia` | Add a row per slide: an image **or** a video, plus `sortOrder`. When this collection has any active rows, it replaces the single hero image. See [#029](design-log/029-hero-media-sequence.md). |
+| Hero background (the big homepage image / video) | `HeroMedia` | **The one place for the hero background.** Add one row with an image for a single static hero, or several rows (images + a silent video) to make them crossfade as a sequence. Ordered by `sortOrder`. See [#029](design-log/029-hero-media-sequence.md), [#030](design-log/030-hero-single-source-of-truth.md). (The old `HomePage.heroImage` field no longer drives the hero — ignore it.) |
 | Hero CTA buttons (label or link) | `HomePage` | `heroPrimaryCtaLabel` / `heroPrimaryCtaHref`, same for secondary |
 | Copy in the two image+text bands on the homepage | `HomePage` | The `imageTextSection1*` and `imageTextSection2*` fields (dashboard labels start "Section 1 —" / "Section 2 —") |
 | Which side the photo sits on in an image+text band | `HomePage` | `imageTextSection1ImageOn` / `imageTextSection2ImageOn` — type `left` or `right` |
@@ -77,7 +76,7 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | heroEyebrow | Text | Optional promo line above the headline (e.g. "Chag Sameach!"). Leave empty for none. |
 | heroTitle | Text | **Unused — kept for legacy.** Headline is hardcoded ("Welcome to RCK" + brand line). See [design-log/009](design-log/009-rck-brand-identity.md). |
 | heroSubtitle | Text | One-line tagline under the brand line |
-| heroImage | Image | Optional — fallback gradient if empty |
+| heroImage | Image | **Unused — legacy.** The hero background now lives in the `HeroMedia` collection (single source of truth). See [design-log/030](design-log/030-hero-single-source-of-truth.md). |
 | heroPrimaryCtaLabel | Text | "Our Schedule" |
 | heroPrimaryCtaHref | Text | "/schedule" (relative path) |
 | heroSecondaryCtaLabel | Text | "Our Programs" |
@@ -228,11 +227,13 @@ One row per service-time variant. The page renders a flat, lean list grouped by 
 
 #### `HeroMedia` — one row per hero slide
 
-Drives the **homepage hero background** as an ordered, crossfading sequence of
-images and silent videos. Each row is one slide. If the collection is **empty**,
-the hero falls back to the single `HomePage.heroImage`. As soon as you add an
-active row here, this sequence takes over the hero background. Rows play in
-`sortOrder` order and loop. See [design-log/029](design-log/029-hero-media-sequence.md).
+**The single source for the homepage hero background.** Each row is one slide.
+**One** active row with an image = a static hero image. **Several** rows = an
+ordered, crossfading sequence of images and silent videos (plays in `sortOrder`
+order and loops). If the collection is **empty**, the hero shows the brand
+gradient placeholder. (`HomePage.heroImage` is legacy and no longer used — see
+[#030](design-log/030-hero-single-source-of-truth.md).) See also
+[design-log/029](design-log/029-hero-media-sequence.md).
 
 | Field | Type | Notes |
 |---|---|---|

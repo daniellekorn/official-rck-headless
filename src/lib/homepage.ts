@@ -8,6 +8,9 @@ export interface HomepageContent {
 	heroEyebrow?: string;
 	heroTitle?: string;
 	heroSubtitle?: string;
+	// Legacy — the hero background now lives in the HeroMedia collection (single
+	// source of truth). heroImage/heroImageUrl are no longer read by the hero.
+	// Kept for back-compat like heroTitle. See design-log/030.
 	heroImage?: string;
 	heroImageUrl?: string;
 	heroPrimaryCtaLabel?: string;

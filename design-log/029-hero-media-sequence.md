@@ -116,6 +116,12 @@ sequence loops. Reduced-motion shows the first slide static with no autoplay.
 
 ## Implementation Results (appended after work ships)
 
+> **Update — the `heroImage` fallback below is superseded by [#030](030-hero-single-source-of-truth.md).**
+> The hero now reads `HeroMedia` **only** (single source of truth);
+> `HomePage.heroImage` is legacy/unused and the current image was migrated into a
+> `HeroMedia` row. The rest of this entry (collection shape, video resolution,
+> crossfade behavior) still stands.
+
 Built and verified; commit pending.
 
 - `src/lib/hero-media.ts` (new) — `HeroSlide`, `getHeroMedia()`; resolves images
