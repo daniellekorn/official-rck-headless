@@ -25,6 +25,18 @@
   of a hardcoded hex, so CMS theme recoloring (#028) reaches it.
 - Davening times render with `tabular-nums`; `h1`/`h2` get `text-wrap: balance`.
 
+Appended after a live-browser review pass (same branch):
+
+- **Flyer frames own their navy backdrop.** `Flyer.astro` paints the same navy
+  gradient behind images as behind its placeholder, so mixed-aspect flyers
+  letterbox onto brand navy everywhere (grids, archive, youth) instead of the
+  caller's card color. Don't put flyers on white.
+- **Empty slots get monograms, not labels.** Team members without a photo show
+  display-face initials; the SplitFeature photo placeholder shows brand
+  pinstripes + an RCK monogram. An empty CMS slot should read as designed.
+- **Grid cards fill their row** (`h-full` on team cards — button grid items
+  don't stretch on their own).
+
 ## Verification
 
 `astro check` and `wix build` pass. Visual deltas are deliberate and small:
