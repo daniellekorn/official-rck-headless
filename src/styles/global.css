@@ -31,6 +31,10 @@
   --color-paper: #ffffff;
   --color-mist: #f7f5f0;       /* warm off-white for section bands */
 
+  /* WhatsApp brand green — only for WhatsApp affordances, never decoration. */
+  --color-whatsapp: #25d366;
+  --color-whatsapp-dark: #1ebe5b;
+
   /* Fonts — Oswald (condensed, medium-weight) for display headings;
      Onest for body and UI; Heebo for Hebrew. Heebo is also the fallback for
      Hebrew characters inside English headings, since Oswald lacks them. */
