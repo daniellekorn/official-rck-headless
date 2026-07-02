@@ -55,22 +55,6 @@ export async function getFlyers(category?: FlyerCategory, subCategory?: string):
 	}
 }
 
-export async function getFlyersByCategory(): Promise<Record<FlyerCategory, Flyer[]>> {
-	const all = await getFlyers();
-	const grouped: Record<FlyerCategory, Flyer[]> = {
-		schedules: [],
-		learning: [],
-		youth: [],
-		events: [],
-	};
-	for (const flyer of all) {
-		if (flyer.category in grouped) {
-			grouped[flyer.category].push(flyer);
-		}
-	}
-	return grouped;
-}
-
 export function uniqueSubCategories(flyers: Flyer[]): string[] {
 	return [...new Set(flyers.map((f) => f.subCategory).filter((s): s is string => Boolean(s)))].sort();
 }

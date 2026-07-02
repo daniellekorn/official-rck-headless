@@ -1,6 +1,6 @@
 import * as items from "@wix/wix-data-items-sdk";
 import { auth } from "@wix/essentials";
-import { media } from "@wix/sdk";
+import { resolveImage, resolveGalleryUrls, type GalleryItem } from "./wix-media";
 import { slugify } from "./slug";
 
 const COLLECTION_ID = "PastEvents";
@@ -23,30 +23,9 @@ export interface PastEvent {
 	active?: boolean;
 }
 
-// A Media Gallery item is documented as a URL string, but the CMS often stores
-// objects ({ src/url/image, type }). Accept either so rendering never breaks.
-type GalleryItem = string | { src?: string; url?: string; image?: string; type?: string };
-
 interface PastEventRow extends Omit<PastEvent, "galleryUrls" | "flyerImageUrl" | "slug"> {
 	gallery?: GalleryItem[];
 	flyerImage?: string;
-}
-
-function resolveImage(wixImageUrl?: string, w = 1200, h = 900): string | undefined {
-	if (!wixImageUrl) return undefined;
-	try {
-		return media.getScaledToFillImageUrl(wixImageUrl, w, h, {});
-	} catch {
-		return undefined;
-	}
-}
-
-// Pull a Wix media URL out of a gallery item (string or object) and skip
-// non-image (e.g. video) entries, which the gallery doesn't render.
-function galleryItemUrl(item: GalleryItem): string | undefined {
-	if (typeof item === "string") return item;
-	if (item.type && item.type !== "image") return undefined;
-	return item.src ?? item.url ?? item.image;
 }
 
 function dateValue(d: PastEvent["eventDate"]): number {
@@ -64,18 +43,15 @@ export async function getPastEvents(): Promise<PastEvent[]> {
 			.limit(100)
 			.find();
 
-		const events = (results as PastEventRow[]).map((row, i) => {
-			const galleryUrls = (row.gallery ?? [])
-				.map(galleryItemUrl)
-				.map((u) => resolveImage(u))
-				.filter((u): u is string => Boolean(u));
-			return {
-				...row,
-				slug: slugify(row.title ?? "") || `event-${i + 1}`,
-				galleryUrls,
-				flyerImageUrl: resolveImage(row.flyerImage, 900, 1200),
-			} as PastEvent;
-		});
+		const events = (results as PastEventRow[]).map(
+			(row, i) =>
+				({
+					...row,
+					slug: slugify(row.title ?? "") || `event-${i + 1}`,
+					galleryUrls: resolveGalleryUrls(row.gallery),
+					flyerImageUrl: resolveImage(row.flyerImage, 900, 1200),
+				}) as PastEvent,
+		);
 
 		// Newest first by event date; `sortOrder` (lower first) breaks ties so
 		// the office can hand-order events that share a date.

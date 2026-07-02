@@ -1,11 +1,17 @@
----
-id: "011"
-title: "Merge JoinUsCards into HomePage; align Homepage naming"
-date: 2026-05-28
-status: shipped
----
+# 033 — Merge JoinUsCards into HomePage; align Homepage naming
 
-## Context
+**Status:** implemented
+**Date:** 2026-05-28
+**Author:** claude-session (danielle directing)
+**Related:** [#001](001-cms-driven-content-architecture.md), [#011](011-contact-info-collection.md), [#018](018-homepage-layout-config-fields.md)
+
+> **Renumbered 2026-07-02:** this entry originally shipped as a second `012`
+> (its frontmatter even claimed `011`, which was already taken). Filed here as
+> 033 per the numbering rule — content unchanged, date kept. Cross-references
+> to "#012 (JoinUs into homepage)" in #016 and #023 now point here; plain
+> "#012" still means [012-learn-page](012-learn-page.md).
+
+## Background
 
 Two issues were cleaned up together because they both touch the `HomePage` collection definition:
 
@@ -23,10 +29,3 @@ Fold into `HomePage`. No `active`/`sortOrder` needed — if a card slot should b
 - Populate the three card slots from the values previously in `JoinUsCards` rows.
 - The old `JoinUsCards` collection can be left in place or deleted — the code no longer queries it.
 - Update the `HomePage` collection display name from "Home Page" to "Homepage" for visual alignment with "Homepage Slides".
-
-## Files changed
-
-- `src/lib/homepage.ts` — renamed `HomePageContent` → `HomepageContent`, `getHomePage` → `getHomepage`; added `joinUsCard{1,2,3}*` fields
-- `src/lib/join-us-cards.ts` — deleted
-- `src/pages/index.astro` — removed `getJoinUsCards` import/call; derives join-us cards from `homepage` fields
-- `CONTRIBUTING.md` — updated content table, `HomePage` schema, removed `JoinUsCards` schema section

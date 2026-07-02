@@ -1,6 +1,6 @@
 # 009 — RCK as primary brand identity
 
-**Status:** proposed
+**Status:** implemented — RCK-first identity shipped; the hero treatment was later simplified by #021 (headline is plain "RCK", no highlight, no "Welcome to" lead-in)
 **Date:** 2026-05-28
 **Author:** claude-session (danielle directing)
 **Related:** #001 (content/code boundary), #006 (Highlight component used in hero)
@@ -102,4 +102,7 @@ The credit line sits between the headline and subtitle. It uses the same gold ac
 
 ## Implementation Results
 
-(To be appended after work ships.)
+Shipped: RCK leads on every surface (nav lockup, page titles, hero) with the
+full name as the credit line. Deviation: the hero headline was later reduced to
+a plain white "RCK" — the gold Highlight sweep and "Welcome to" lead-in
+described above were reverted by the client; see #021.

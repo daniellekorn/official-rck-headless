@@ -3,7 +3,7 @@
 **Status:** accepted
 **Date:** 2026-05-30
 **Author:** claude-session (danielle directing)
-**Related:** #001 (content/code boundary), #002 (homepage sections)
+**Related:** #001 (content/code boundary), #033 (HomePage single-row fields)
 
 ## Background
 

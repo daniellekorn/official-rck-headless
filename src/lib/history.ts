@@ -1,6 +1,6 @@
 import * as items from "@wix/wix-data-items-sdk";
 import { auth } from "@wix/essentials";
-import { media } from "@wix/sdk";
+import { resolveImage } from "./wix-media";
 
 const COLLECTION_ID = "OurHistory";
 
@@ -13,15 +13,6 @@ export interface HistoryEntry {
 	year?: number;
 	sortOrder?: number;
 	active?: boolean;
-}
-
-function resolveImage(wixImageUrl?: string, w = 1200, h = 900): string | undefined {
-	if (!wixImageUrl) return undefined;
-	try {
-		return media.getScaledToFillImageUrl(wixImageUrl, w, h, {});
-	} catch {
-		return undefined;
-	}
 }
 
 export async function getHistory(): Promise<HistoryEntry[]> {

@@ -25,7 +25,7 @@ export interface ServiceGroup {
 	rows: DaveningTime[];
 }
 
-export async function getDaveningTimes(dayType?: DayType): Promise<DaveningTime[]> {
+async function getDaveningTimes(dayType?: DayType): Promise<DaveningTime[]> {
 	try {
 		const elevated = auth.elevate(items.query);
 		let q = elevated(COLLECTION_ID).eq("active", true).ascending("sortOrder").limit(200);

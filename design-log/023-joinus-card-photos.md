@@ -3,7 +3,7 @@
 **Status:** implemented
 **Date:** 2026-06-24
 **Author:** claude-session
-**Related:** #012 (Join Us into homepage), #021 (visual refresh)
+**Related:** #033 (Join Us into homepage), #021 (visual refresh)
 
 ## Background
 The three Join Us cards (Daven / Learn / Our Programs) were solid gold gradient

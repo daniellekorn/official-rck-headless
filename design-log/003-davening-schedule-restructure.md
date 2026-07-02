@@ -1,6 +1,6 @@
 # 003 — Davening schedule: add daySpec field, service-grouped card layout
 
-**Status:** implemented
+**Status:** implemented — card layout + Shabbat column superseded by #008 (flat weekday rows, static Shabbat); the `daySpec` field and CMS shape stand
 **Date:** 2026-05-28
 **Author:** claude-session (danielle directing)
 **Related:** [#001](001-cms-driven-content-architecture.md)
