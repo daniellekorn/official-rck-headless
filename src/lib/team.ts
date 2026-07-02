@@ -1,6 +1,6 @@
 import * as items from "@wix/wix-data-items-sdk";
 import { auth } from "@wix/essentials";
-import { media } from "@wix/sdk";
+import { resolveImage } from "./wix-media";
 
 const COLLECTION_ID = "TeamMembers";
 
@@ -87,15 +87,6 @@ export interface TeamMember {
 	featured?: boolean;
 }
 
-function resolveImage(wixImageUrl?: string, w = 640, h = 640): string | undefined {
-	if (!wixImageUrl) return undefined;
-	try {
-		return media.getScaledToFillImageUrl(wixImageUrl, w, h, {});
-	} catch {
-		return undefined;
-	}
-}
-
 export async function getTeam(): Promise<TeamMember[]> {
 	try {
 		const elevated = auth.elevate(items.query);
@@ -106,7 +97,7 @@ export async function getTeam(): Promise<TeamMember[]> {
 
 		return (results as Array<TeamMember & { roleGroup: unknown }>).map((m) => ({
 			...m,
-			photoUrl: resolveImage(m.photo),
+			photoUrl: resolveImage(m.photo, 640, 640),
 			roleGroupRaw: typeof m.roleGroup === "string" ? m.roleGroup : undefined,
 			roleGroup: normalizeRoleGroup(m.roleGroup),
 		}));

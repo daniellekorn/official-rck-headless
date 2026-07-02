@@ -1,6 +1,6 @@
 import * as items from "@wix/wix-data-items-sdk";
 import { auth } from "@wix/essentials";
-import { media } from "@wix/sdk";
+import { resolveImage } from "./wix-media";
 
 const COLLECTION_ID = "HomePage";
 
@@ -136,15 +136,6 @@ export function normalizeAccentLine(
 	if (v === "line1" || v === "1" || v === "first" || v === "top") return "line1";
 	if (v === "line2" || v === "2" || v === "second" || v === "bottom") return "line2";
 	return fallback;
-}
-
-function resolveImage(wixImageUrl?: string, w = 1600, h = 1000): string | undefined {
-	if (!wixImageUrl) return undefined;
-	try {
-		return media.getScaledToFillImageUrl(wixImageUrl, w, h, {});
-	} catch {
-		return undefined;
-	}
 }
 
 export async function getHomepage(): Promise<HomepageContent | null> {
