@@ -33,7 +33,6 @@ const baseLinks: NavItem[] = [
 		children: [
 			{ label: "Join Us", href: "/#join" },
 			{ label: "Our History", href: "/#history" },
-			{ label: "WhatsApp Community", href: "/#whatsapp" },
 		],
 	},
 	{ label: "Meet the Team", href: "/team", children: teamChildren },
@@ -41,6 +40,8 @@ const baseLinks: NavItem[] = [
 	{ label: "Learn with Us", href: "/learn" },
 	{ label: "Events", href: "/events" },
 	{ label: "Youth", href: "/youth", children: youthChildren },
+	// Top-level on purpose: buried in the Home dropdown, nobody found it.
+	{ label: "Community", href: "/#whatsapp" },
 ];
 
 const navLinks = baseLinks.map((l) => ({
