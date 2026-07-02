@@ -87,7 +87,9 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 	)}
 
 	<div class="container-page pb-20 pt-40 md:pt-48 md:pb-24 w-full">
-		<div class="max-w-3xl">
+		{/* Text shadow keeps the lockup legible over bright video frames the
+		    scrim can't fully predict. */}
+		<div class="max-w-3xl" style="text-shadow: 0 2px 24px rgba(7, 23, 58, 0.45), 0 1px 3px rgba(7, 23, 58, 0.35);">
 			{eyebrow && <p class="eyebrow text-base! sm:text-lg! text-gold-300" data-reveal="up">{eyebrow}</p>}
 			<h1
 				class="mt-4 font-display text-[4.375rem] leading-[1.02] text-white sm:text-[5.25rem] md:text-[6.5625rem] lg:text-[7.875rem] font-medium"

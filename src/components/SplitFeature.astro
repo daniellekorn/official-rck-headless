@@ -53,15 +53,20 @@ const {
 					/>
 				) : (
 					<div
-						class="relative aspect-[4/3] w-full overflow-hidden rounded-md ring-1 ring-navy-100"
-						style="background:
-							linear-gradient(135deg, var(--color-navy-50) 0%, var(--color-navy-100) 50%, var(--color-gold-100) 100%);"
+						class="relative aspect-[4/3] w-full overflow-hidden rounded-md ring-1 ring-navy-100 bg-navy-50"
 						aria-label="Photo placeholder"
 					>
-						<div class="absolute inset-0 flex items-center justify-center">
-							<span class="font-sans text-xs uppercase tracking-[0.22em] text-navy-300">
-								Photo
-							</span>
+						{/* Brand pinstripes + monogram so an empty image slot reads as a
+						    deliberate panel, not a broken image. */}
+						<div
+							class="absolute inset-0 opacity-60"
+							style="background-image: repeating-linear-gradient(45deg, var(--color-navy-100) 0 1px, transparent 1px 14px);"
+							aria-hidden="true"
+						>
+						</div>
+						<div class="absolute inset-0 flex flex-col items-center justify-center gap-3">
+							<span class="font-display text-5xl sm:text-6xl font-medium text-navy-200" aria-hidden="true">RCK</span>
+							<span class="gold-rule-sm opacity-70" aria-hidden="true"></span>
 						</div>
 					</div>
 				)}
