@@ -83,6 +83,25 @@
   padding-inline: 1.5rem;
 }
 
+/* Gold rule under a heading — one system, two weights. `gold-rule` sits under
+   page/band headers (PageHeader, JoinUs, WhoWeAre); `gold-rule-sm` under inner
+   section headings (event archive, youth programs, contact, team groups).
+   Placement (mt-*, mx-auto) stays at the call site. */
+@utility gold-rule {
+  display: block;
+  height: 3px;
+  width: 4rem;
+  border-radius: 0.125rem;
+  background: var(--color-gold-400);
+}
+
+@utility gold-rule-sm {
+  display: block;
+  height: 2px;
+  width: 3.5rem;
+  background: var(--color-gold-400);
+}
+
 /* ── Scroll-reveal ──────────────────────────────────────────────────────────
    Titles slide in from the left, paragraphs/blocks rise from below — the
    pattern the client liked on dallastorah.org. Travel is generous and the
