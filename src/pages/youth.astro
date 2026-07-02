@@ -57,16 +57,26 @@ const pagerSections = programs.map((p) => ({ id: p.slug, label: p.title }));
 								<h2 class="font-display text-3xl sm:text-4xl md:text-[2.75rem] leading-[1.05] font-medium uppercase text-navy-600">
 									{program.title}
 								</h2>
-								<span class="mt-5 block h-[2px] w-14 bg-gold-400" aria-hidden="true"></span>
+								<span class="gold-rule-sm mt-5" aria-hidden="true"></span>
 							</div>
 
 							{/* Flyer + description/contact — two columns, alternating sides.
 							    Every program shows a flyer slot; one without an uploaded
-							    image renders a "coming soon" placeholder (see #031). */}
-							<div class="mt-10 sm:mt-12 grid items-center gap-10 md:gap-14 lg:gap-20 md:grid-cols-2">
+							    image renders a "coming soon" placeholder (see #031).
+							    A program with no description collapses to one centered
+							    column — a lone contact card next to a tall flyer reads
+							    as a half-empty page, not a layout. */}
+							<div
+								class:list={[
+									"mt-10 sm:mt-12",
+									description
+										? "grid items-center gap-10 md:gap-14 lg:gap-20 md:grid-cols-2"
+										: "flex flex-col items-center gap-8",
+								]}
+							>
 								<div
-									class:list={["flex justify-center", flyerLeft ? "md:order-1" : "md:order-2"]}
-									data-reveal={flyerLeft ? "left" : "right"}
+									class:list={["flex w-full justify-center", description && (flyerLeft ? "md:order-1" : "md:order-2")]}
+									data-reveal={description ? (flyerLeft ? "left" : "right") : "up"}
 								>
 									<div class="w-full max-w-sm overflow-hidden rounded-md bg-navy-800 ring-1 ring-navy-100 shadow-[0_30px_64px_-34px_rgba(7,23,58,0.55)]">
 										<Flyer
@@ -78,8 +88,8 @@ const pagerSections = programs.map((p) => ({ id: p.slug, label: p.title }));
 								</div>
 
 								<div
-									class:list={[flyerLeft ? "md:order-2" : "md:order-1"]}
-									data-reveal={flyerLeft ? "right" : "left"}
+									class:list={[description && (flyerLeft ? "md:order-2" : "md:order-1")]}
+									data-reveal={description ? (flyerLeft ? "right" : "left") : "up"}
 								>
 									{description && (
 										<p class="max-w-prose text-base md:text-[1.0625rem] leading-relaxed text-navy-500 whitespace-pre-line">

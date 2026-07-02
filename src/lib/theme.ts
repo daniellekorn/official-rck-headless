@@ -34,10 +34,9 @@ const ORIGINAL_NAVY = {
 		"500": "#243c63",
 		"600": "#102a56",
 		"700": "#07173a",
+		"800": "#0b1b38",
 	},
 };
-
-const ORIGINAL_ACCENT = "#f6ed49";
 
 type Ramp = { primary: string; shades: Record<string, string> };
 
@@ -53,7 +52,7 @@ export interface ThemeSettings {
  * can't parse (typos, named-but-misspelled colors, empty) returns undefined,
  * and the caller keeps the code default — a bad value can never break a render.
  */
-export function normalizeColor(value: string | undefined): string | undefined {
+function normalizeColor(value: string | undefined): string | undefined {
 	const v = value?.trim();
 	if (!v) return undefined;
 	const withHash = /^[0-9a-fA-F]{3,8}$/.test(v) ? `#${v}` : v;
@@ -132,5 +131,3 @@ export function buildThemeStyle(settings: ThemeSettings | null): string {
 	if (!decls.length) return "";
 	return `:root:root{${decls.join(";")}}`;
 }
-
-export { ORIGINAL_GOLD, ORIGINAL_NAVY, ORIGINAL_ACCENT };

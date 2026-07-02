@@ -1,6 +1,6 @@
 # 029 — Hero media sequence (image → silent video → image crossfade)
 
-**Status:** accepted
+**Status:** implemented — the `HomePage.heroImage` fallback superseded by #030 (HeroMedia is the single source of truth; empty → brand gradient)
 **Date:** 2026-06-30
 **Author:** claude-session (danielle directing)
 **Related:** #001 (content/code boundary), #009 (hero lockup is structural), #018 (homepage layout config), #020 (homepage no-store cache)

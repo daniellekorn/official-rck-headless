@@ -1,6 +1,7 @@
 import * as items from "@wix/wix-data-items-sdk";
 import { auth } from "@wix/essentials";
 import { media, VideoResolution } from "@wix/sdk";
+import { resolveImage } from "./wix-media";
 
 const COLLECTION_ID = "HeroMedia";
 
@@ -23,15 +24,6 @@ interface HeroMediaRow {
 	active?: boolean;
 }
 
-function resolveImage(wixImageUrl?: string, w = 1920, h = 1200): string | undefined {
-	if (!wixImageUrl) return undefined;
-	try {
-		return media.getScaledToFillImageUrl(wixImageUrl, w, h, {});
-	} catch {
-		return undefined;
-	}
-}
-
 /**
  * Resolve one CMS row into a HeroSlide. A row is a VIDEO slide when `video` is
  * set (it wins over `image`), otherwise an IMAGE slide. Returns null when the
@@ -42,13 +34,13 @@ function resolveSlide(row: HeroMediaRow): HeroSlide | null {
 		try {
 			const v = media.getVideoUrl(row.video, VideoResolution.MID); // 720p
 			if (v?.url) {
-				return { kind: "video", url: v.url, poster: resolveImage(v.thumbnail) };
+				return { kind: "video", url: v.url, poster: resolveImage(v.thumbnail, 1920, 1200) };
 			}
 		} catch {
 			/* fall through — try image, else drop */
 		}
 	}
-	const imageUrl = resolveImage(row.image);
+	const imageUrl = resolveImage(row.image, 1920, 1200);
 	if (imageUrl) {
 		const hold = typeof row.holdSeconds === "number" && row.holdSeconds > 0 ? row.holdSeconds : DEFAULT_HOLD_SECONDS;
 		return { kind: "image", url: imageUrl, holdMs: hold * 1000 };
@@ -58,8 +50,8 @@ function resolveSlide(row: HeroMediaRow): HeroSlide | null {
 
 /**
  * Active hero slides in display order. Empty array when the collection is
- * absent/empty or the query fails — Hero then falls back to HomePage.heroImage.
- * See design-log/029.
+ * absent/empty or the query fails — Hero then renders its brand gradient
+ * placeholder. See design-log/029 and /030.
  */
 export async function getHeroMedia(): Promise<HeroSlide[]> {
 	try {
@@ -67,6 +59,7 @@ export async function getHeroMedia(): Promise<HeroSlide[]> {
 		const { items: results } = await elevated(COLLECTION_ID)
 			.eq("active", true)
 			.ascending("sortOrder")
+			.limit(100)
 			.find();
 		return (results as HeroMediaRow[])
 			.map(resolveSlide)

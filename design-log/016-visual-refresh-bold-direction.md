@@ -3,7 +3,7 @@
 **Status:** accepted (in progress — pass is staged, see Implementation Results)
 **Date:** 2026-06-04
 **Author:** claude-session (danielle directing)
-**Related:** #004 (brand palette), #005 (typography), #006 (animated highlight), #012 (JoinUs into homepage)
+**Related:** #004 (brand palette), #005 (typography), #006 (animated highlight), #033 (JoinUs into homepage)
 
 ## Background
 

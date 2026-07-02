@@ -60,10 +60,10 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 										<div class="min-w-0 flex-1 space-y-1.5">
 											{timeGroups.map(({ daySpec, items }) => (
 												<div class="sm:flex sm:items-baseline sm:gap-4">
-													<p class="font-sans text-sm font-semibold uppercase tracking-[0.1em] text-navy-400 sm:w-28 sm:shrink-0">
+													<p class="font-sans text-sm font-semibold uppercase tracking-[0.1em] text-navy-400 sm:w-36 sm:shrink-0">
 														{daySpec}
 													</p>
-													<p class="font-sans text-base sm:text-lg text-navy-600">
+													<p class="font-sans text-base sm:text-lg text-navy-600 tabular-nums">
 														{items.map((t) => (t.notes ? `${t.time} (${t.notes})` : t.time)).join(" · ")}
 													</p>
 												</div>
@@ -81,11 +81,12 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 							Shabbat
 						</p>
 						<div class="flex items-start gap-5">
-							<div class="shrink-0 w-20 h-14 rounded-md border-2 border-dashed border-navy-200 flex items-center justify-center">
-								<span class="font-sans text-[0.6rem] font-bold uppercase tracking-wide text-navy-300"
-									>KBA logo</span
-								>
-							</div>
+							<span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-navy-700 text-gold-300 shadow-[0_10px_24px_-12px_rgba(7,23,58,0.7)]">
+								<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+									<path d="M12 21s-8-7.3-8-12a8 8 0 1 1 16 0c0 4.7-8 12-8 12Z" stroke-linecap="round" stroke-linejoin="round" />
+									<circle cx="12" cy="9" r="2.5" />
+								</svg>
+							</span>
 							<div>
 								<p class="font-sans text-base sm:text-lg font-semibold text-navy-700 leading-snug">
 									Join us at KBA for Shabbat davening.

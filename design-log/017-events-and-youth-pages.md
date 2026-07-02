@@ -165,4 +165,4 @@ empty. The youth callout on `/events` links to `/youth`. `/programming`
 308-redirects to `/events`. No in-code link points at `/programming`. `/team`
 shows a "Youth Programming" section once youth rabbis are added there. Editor
 workflow per CONTRIBUTING.md holds.
-</content>
+

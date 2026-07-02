@@ -20,6 +20,7 @@
   --color-navy-500: #243c63;
   --color-navy-600: #102a56;   /* anchor — primary navy */
   --color-navy-700: #07173a;
+  --color-navy-800: #0b1b38;   /* deep band/frame behind flyers, carousel, lightbox */
 
   /* Bright-yellow accent — reserved for sparse highlights (focus rings,
      badges, CTAs-on-dark). Not part of the gold scale; do not substitute
@@ -30,18 +31,16 @@
   --color-paper: #ffffff;
   --color-mist: #f7f5f0;       /* warm off-white for section bands */
 
+  /* WhatsApp brand green — only for WhatsApp affordances, never decoration. */
+  --color-whatsapp: #25d366;
+  --color-whatsapp-dark: #1ebe5b;
+
   /* Fonts — Oswald (condensed, medium-weight) for display headings;
      Onest for body and UI; Heebo for Hebrew. Heebo is also the fallback for
      Hebrew characters inside English headings, since Oswald lacks them. */
   --font-display: "Oswald", "Heebo", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-sans: "Onest", "Heebo", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-hebrew: "Heebo", "Onest", system-ui, sans-serif;
-
-  /* Type scale (display) */
-  --text-display-sm: 2.25rem;
-  --text-display-md: 3rem;
-  --text-display-lg: 3.75rem;
-  --text-display-xl: 4.5rem;
 }
 
 @layer base {
@@ -68,8 +67,26 @@
     font-weight: 500;
   }
 
+  h1, h2 {
+    text-wrap: balance;
+  }
+
   :lang(he), [dir="rtl"] {
     font-family: var(--font-hebrew);
+  }
+
+  /* One focus language site-wide (promoted from SectionPager). Gold-500 reads
+     on both the white pages and the navy bands; components with a bespoke
+     focus-visible utility (e.g. the WhatsApp CTAs) still win on specificity. */
+  :focus-visible {
+    outline: 2px solid var(--color-gold-500);
+    outline-offset: 3px;
+    border-radius: 0.125rem;
+  }
+
+  ::selection {
+    background: var(--color-gold-200);
+    color: var(--color-navy-700);
   }
 }
 
@@ -86,6 +103,25 @@
   max-width: 72rem;
   margin-inline: auto;
   padding-inline: 1.5rem;
+}
+
+/* Gold rule under a heading — one system, two weights. `gold-rule` sits under
+   page/band headers (PageHeader, JoinUs, WhoWeAre); `gold-rule-sm` under inner
+   section headings (event archive, youth programs, contact, team groups).
+   Placement (mt-*, mx-auto) stays at the call site. */
+@utility gold-rule {
+  display: block;
+  height: 3px;
+  width: 4rem;
+  border-radius: 0.125rem;
+  background: var(--color-gold-400);
+}
+
+@utility gold-rule-sm {
+  display: block;
+  height: 2px;
+  width: 3.5rem;
+  background: var(--color-gold-400);
 }
 
 /* ── Scroll-reveal ──────────────────────────────────────────────────────────
