@@ -64,6 +64,9 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 				</div>
 			))}
 			<div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/25 to-black/55"></div>
+			{/* Left scrim under the lockup — video frames are unpredictable and the
+			    bottom gradient alone leaves the text over the brightest area. */}
+			<div class="absolute inset-0 bg-gradient-to-r from-navy-700/75 via-navy-700/30 to-transparent"></div>
 		</div>
 	) : (
 		<>
