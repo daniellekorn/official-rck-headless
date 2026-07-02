@@ -56,14 +56,16 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 							class="scroll-mt-28 py-16 sm:py-20 md:py-24 border-b border-navy-50 last:border-b-0"
 						>
 							<div class="container-page">
-								<div class="text-center mb-10 sm:mb-14">
-									<p class="font-sans text-xs sm:text-sm font-bold uppercase tracking-[0.22em] text-gold-500">
+								<div class="text-center mb-10 sm:mb-14" data-reveal="up">
+									<h2 class="font-display text-3xl sm:text-4xl md:text-[2.75rem] leading-[1.05] font-medium uppercase text-navy-600">
 										{group.label}
-									</p>
-									<span class="gold-rule-sm mx-auto mt-3" aria-hidden="true" />
+									</h2>
+									<span class="gold-rule mx-auto mt-4" aria-hidden="true" />
 								</div>
 
-								<div class="grid gap-6 sm:gap-7 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
+								{/* Flex-wrap instead of grid so a final short row centers
+								    (grid left an orphan card hanging bottom-left). */}
+								<div class="flex flex-wrap justify-center gap-6 sm:gap-7 md:gap-8">
 									{members.map((m) => {
 										const fullName = [m.firstName, m.lastName].filter(Boolean).join(" ");
 										const bioText = m.bio ? ricosToPlainText(m.bio) : "";
@@ -133,7 +135,7 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 											</div>
 										);
 
-										return hasBio ? (
+										const card = hasBio ? (
 											<button
 												type="button"
 												data-team-card
@@ -147,6 +149,12 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 											<div class="team-card-static block h-full w-full rounded-md bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)]">
 												{photoMarkup}
 												{metaMarkup}
+											</div>
+										);
+
+										return (
+											<div class="w-full sm:w-[calc(50%-0.875rem)] md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.334rem)]">
+												{card}
 											</div>
 										);
 									})}
@@ -171,7 +179,13 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 	   touch browsers "stick" :hover state after a tap — without the
 	   gate, tapping to collapse couldn't beat the stuck hover and the
 	   overlay would never close on mobile. */
+	/* The source portraits vary a lot in framing — some tight head-shots, some
+	   waist-up with wide pale margins. A uniform zoom anchored near the face
+	   line crops the loose ones to a similar scale, verified against all 20
+	   current photos (widest hat brims and chins survive). */
 	.card-image {
+		transform: scale(1.3);
+		transform-origin: 50% 20%;
 		transition: filter 400ms ease, transform 500ms ease;
 	}
 	.bio-overlay {
@@ -183,7 +197,7 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 	@media (hover: hover) and (pointer: fine) {
 		.team-card:hover .card-image {
 			filter: grayscale(1);
-			transform: scale(1.04);
+			transform: scale(1.36);
 		}
 		.team-card:hover .bio-overlay {
 			opacity: 1;
@@ -193,7 +207,7 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 
 	.team-card[aria-expanded="true"] .card-image {
 		filter: grayscale(1);
-		transform: scale(1.04);
+		transform: scale(1.36);
 	}
 	.team-card[aria-expanded="true"] .bio-overlay {
 		opacity: 1;
