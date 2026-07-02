@@ -1,13 +1,27 @@
-# Wix Astro Blank Template
+# Ra'anana Community Kollel (RCK)
 
-Our Astro templates are still in development and subject to change.
+The website for RCK — the Ra'anana Community Kollel. Built with [Astro](https://astro.build) on [Wix Headless](https://dev.wix.com/docs/go-headless): page structure and styling live in this repo, while all editable content (schedules, flyers, team members, photos, theme colors) lives in Wix CMS collections so the office can update the site without code changes.
 
-To use a template, follow the [Wix CLI for Headless Quick Start](https://dev.wix.com/docs/go-headless/develop-your-project/wix-managed-headless/get-started/quick-start), and select the desired template during the setup process.
+## Getting started
 
-## Need help?
+```sh
+npm install
+npm run dev      # wix dev — local dev server bound to the Wix site
+npm run build    # wix build
+```
 
-For documentation and support, check out:
+The Wix CLI handles auth and site binding (`wix.config.json`). CLI reference: `node_modules/@wix/cli/agents/instructions.md`.
 
-- [Wix Headless Documentation](https://dev.wix.com/docs/go-headless)
-- [Wix SDK Documentation](https://dev.wix.com/docs/sdk)
-- [Community on Discord](https://discord.gg/n6TBrSnYTp)
+## Where things live
+
+| What | Where |
+|---|---|
+| Editor guide + CMS collection schemas | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
+| Why the code looks the way it does | [`design-log/`](design-log/) — numbered decision records |
+| Agent / process instructions | [`AGENTS.md`](AGENTS.md) |
+| Pages | `src/pages/` (Astro, SSR) |
+| Data access (one module per CMS collection) | `src/lib/` |
+| Components | `src/components/` |
+| Brand tokens (colors, fonts) | `src/styles/global.css` (`@theme`), CMS-overridable via `ThemeSettings` |
+
+The central rule of the codebase: **content belongs in the CMS, structure belongs in code.** Before hardcoding a string, image, or schedule, read `CONTRIBUTING.md` and check the design log — field names break silently if mistyped.

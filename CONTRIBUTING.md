@@ -17,7 +17,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 
 | Want to change… | Collection | How |
 |---|---|---|
-| Hero subtitle, eyebrow | `HomePage` | Edit the single row, change the relevant field. (The headline — "Welcome to RCK" + "The Ra'anana Community Kollel" — is brand, not content, and lives in code. See [#009](design-log/009-rck-brand-identity.md).) |
+| Hero subtitle, eyebrow | `HomePage` | Edit the single row, change the relevant field. (The headline — "RCK" + "The Ra'anana Community Kollel" credit line — is brand, not content, and lives in code. See [#009](design-log/009-rck-brand-identity.md) and [#021](design-log/021-cream-bands-bright-yellow-low-radius.md).) |
 | Hero background (the big homepage image / video) | `HeroMedia` | **The one place for the hero background.** Add one row with an image for a single static hero, or several rows (images + a silent video) to make them crossfade as a sequence. Ordered by `sortOrder`. See [#029](design-log/029-hero-media-sequence.md), [#030](design-log/030-hero-single-source-of-truth.md). (The old `HomePage.heroImage` field no longer drives the hero — ignore it.) |
 | Hero CTA buttons (label or link) | `HomePage` | `heroPrimaryCtaLabel` / `heroPrimaryCtaHref`, same for secondary |
 | Copy in the two image+text bands on the homepage | `HomePage` | The `imageTextSection1*` and `imageTextSection2*` fields (dashboard labels start "Section 1 —" / "Section 2 —") |
@@ -77,13 +77,13 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | Field | Type | Notes |
 |---|---|---|
 | heroEyebrow | Text | Optional promo line above the headline (e.g. "Chag Sameach!"). Leave empty for none. |
-| heroTitle | Text | **Unused — kept for legacy.** Headline is hardcoded ("Welcome to RCK" + brand line). See [design-log/009](design-log/009-rck-brand-identity.md). |
+| heroTitle | Text | **Unused — kept for legacy.** Headline is hardcoded ("RCK" + credit line). See [design-log/009](design-log/009-rck-brand-identity.md). |
 | heroSubtitle | Text | One-line tagline under the brand line |
 | heroImage | Image | **Unused — legacy.** The hero background now lives in the `HeroMedia` collection (single source of truth). See [design-log/030](design-log/030-hero-single-source-of-truth.md). |
 | heroPrimaryCtaLabel | Text | "Our Schedule" |
-| heroPrimaryCtaHref | Text | "/schedule" (relative path) |
+| heroPrimaryCtaHref | Text | "/daven" (relative path) |
 | heroSecondaryCtaLabel | Text | "Our Programs" |
-| heroSecondaryCtaHref | Text | "/programming" |
+| heroSecondaryCtaHref | Text | "/events" |
 | imageTextSection1EyebrowLead | Text | Optional leading eyebrow word, shown navy *before* the gold word (so the row reads navy → gold → navy). Leave empty for none. Section 1 default: empty. |
 | imageTextSection1EyebrowGold | Text | Section 1 (first image+text band). Dashboard label "Section 1 — Eyebrow word (gold)". Default "UNIQUE". |
 | imageTextSection1EyebrowNavy | Text | Default "IMPACTFUL" |
@@ -118,7 +118,7 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | joinUsCard2Image | Image | Optional photo behind the card (see card 1). |
 | joinUsCard3Title | Text | "Our Programs" |
 | joinUsCard3Subtitle | Text | "Connection & Community" |
-| joinUsCard3Href | Text | "/programming" |
+| joinUsCard3Href | Text | "/events" |
 | joinUsCard3Icon | Text | One of: `book`, `reader`, `people`, `minyan` |
 | joinUsCard3Image | Image | Optional photo behind the card (see card 1). |
 | whatsappEyebrow | Text | Small label above the heading. Empty = "On WhatsApp". |
@@ -137,7 +137,7 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | whatsappShort1Image | Image | Optional custom thumbnail (a flyer). Empty = the YouTube thumbnail (or the "RCK" placeholder if there's no video). |
 | whatsappShort2* / 3* / 4* | — | Same five fields as Featured group 1. Up to four. |
 
-> A subchat tile is shown when it has a name or a video; empty slots are hidden. Three slots max — a fourth needs code.
+> A subchat tile is shown when it has a name or a video; empty slots are hidden. Four slots max — a fifth needs code.
 
 #### `OurHistory` — one row per milestone (5–10 typical)
 
