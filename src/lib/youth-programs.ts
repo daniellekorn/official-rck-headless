@@ -75,8 +75,3 @@ export async function getYouthPrograms(): Promise<YouthProgram[]> {
 		return [];
 	}
 }
-
-/** True when a program carries a flyer (image or PDF). */
-export function hasFlyer(p: YouthProgram): boolean {
-	return Boolean(p.flyerImageUrl || p.flyerPdfUrl);
-}

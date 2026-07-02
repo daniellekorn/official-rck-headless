@@ -36,12 +36,6 @@
   --font-display: "Oswald", "Heebo", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-sans: "Onest", "Heebo", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-hebrew: "Heebo", "Onest", system-ui, sans-serif;
-
-  /* Type scale (display) */
-  --text-display-sm: 2.25rem;
-  --text-display-md: 3rem;
-  --text-display-lg: 3.75rem;
-  --text-display-xl: 4.5rem;
 }
 
 @layer base {

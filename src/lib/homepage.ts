@@ -9,10 +9,9 @@ export interface HomepageContent {
 	heroTitle?: string;
 	heroSubtitle?: string;
 	// Legacy — the hero background now lives in the HeroMedia collection (single
-	// source of truth). heroImage/heroImageUrl are no longer read by the hero.
-	// Kept for back-compat like heroTitle. See design-log/030.
+	// source of truth). heroImage is no longer read by the hero; the CMS field
+	// remains but nothing resolves or renders it. See design-log/030.
 	heroImage?: string;
-	heroImageUrl?: string;
 	heroPrimaryCtaLabel?: string;
 	heroPrimaryCtaHref?: string;
 	heroSecondaryCtaLabel?: string;
@@ -157,16 +156,15 @@ export async function getHomepage(): Promise<HomepageContent | null> {
 
 		return {
 			...row,
-			heroImageUrl: resolveImage(row.heroImage, 1920, 1200),
 			imageTextSection1ImageUrl: resolveImage(row.imageTextSection1Image, 1000, 750),
 			imageTextSection2ImageUrl: resolveImage(row.imageTextSection2Image, 1000, 750),
-				joinUsCard1ImageUrl: resolveImage(row.joinUsCard1Image, 800, 1000),
-				joinUsCard2ImageUrl: resolveImage(row.joinUsCard2Image, 800, 1000),
-				joinUsCard3ImageUrl: resolveImage(row.joinUsCard3Image, 800, 1000),
-				whatsappShort1ImageUrl: resolveImage(row.whatsappShort1Image, 720, 1280),
-				whatsappShort2ImageUrl: resolveImage(row.whatsappShort2Image, 720, 1280),
-				whatsappShort3ImageUrl: resolveImage(row.whatsappShort3Image, 720, 1280),
-				whatsappShort4ImageUrl: resolveImage(row.whatsappShort4Image, 720, 1280),
+			joinUsCard1ImageUrl: resolveImage(row.joinUsCard1Image, 800, 1000),
+			joinUsCard2ImageUrl: resolveImage(row.joinUsCard2Image, 800, 1000),
+			joinUsCard3ImageUrl: resolveImage(row.joinUsCard3Image, 800, 1000),
+			whatsappShort1ImageUrl: resolveImage(row.whatsappShort1Image, 720, 1280),
+			whatsappShort2ImageUrl: resolveImage(row.whatsappShort2Image, 720, 1280),
+			whatsappShort3ImageUrl: resolveImage(row.whatsappShort3Image, 720, 1280),
+			whatsappShort4ImageUrl: resolveImage(row.whatsappShort4Image, 720, 1280),
 		};
 	} catch (err) {
 		console.error(`[homepage] query failed:`, err);
