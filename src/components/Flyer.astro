@@ -169,7 +169,8 @@ const label = title ?? "flyer";
 	.flyer-icon { width: 1rem; height: 1rem; }
 
 	/* Coming-soon placeholder — keeps the layout populated before an image is
-	   uploaded. Self-contained navy panel so it reads on any frame colour. */
+	   uploaded. Cream panel: reads like a light flyer against the navy frames
+	   and carousel band (a navy placeholder disappeared into them). */
 	.flyer-placeholder {
 		position: absolute;
 		inset: 0;
@@ -180,14 +181,14 @@ const label = title ?? "flyer";
 		gap: 0.75rem;
 		padding: 1rem;
 		text-align: center;
-		background: linear-gradient(150deg, var(--color-navy-600, #102a56), var(--color-navy-700, #07173a));
-		color: rgb(255 255 255 / 0.55);
+		background: linear-gradient(150deg, var(--color-paper), var(--color-mist) 55%, var(--color-gold-50));
+		color: var(--color-navy-400);
 	}
 	.flyer-placeholder-icon {
 		width: 2.75rem;
 		height: 2.75rem;
-		color: var(--color-gold-400, #dfb030);
-		opacity: 0.85;
+		color: var(--color-gold-500);
+		opacity: 0.9;
 	}
 	.flyer-placeholder-text {
 		font-size: 0.8125rem;

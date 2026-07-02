@@ -5,9 +5,9 @@ import { getTeam, groupByRole, ROLE_GROUPS } from "../lib/team";
 const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
 
 // Submenus expose in-page sections so visitors can jump straight to them from
-// anywhere. Home's are static anchors; Team and Youth are built from the CMS so
-// they always match what's actually on those pages. Links use absolute hrefs
-// (e.g. /youth#dor-ldor) so they work from any page, not just the target page.
+// anywhere. Team and Youth are built from the CMS so they always match what's
+// actually on those pages. Links use absolute hrefs (e.g. /youth#dor-ldor) so
+// they work from any page, not just the target page.
 const [youthPrograms, team] = await Promise.all([getYouthPrograms(), getTeam()]);
 const grouped = groupByRole(team);
 
@@ -27,20 +27,16 @@ interface NavItem {
 }
 
 const baseLinks: NavItem[] = [
-	{
-		label: "Home",
-		href: "/",
-		children: [
-			{ label: "Join Us", href: "/#join" },
-			{ label: "Our History", href: "/#history" },
-			{ label: "WhatsApp Community", href: "/#whatsapp" },
-		],
-	},
+	// Home is a plain link — its sections are one scroll away and the homepage
+	// has the section pager. Community is the exception (top-level): it's a
+	// destination people ask for, and buried in a dropdown nobody found it.
+	{ label: "Home", href: "/" },
 	{ label: "Meet the Team", href: "/team", children: teamChildren },
 	{ label: "Daven with Us", href: "/daven" },
 	{ label: "Learn with Us", href: "/learn" },
 	{ label: "Events", href: "/events" },
 	{ label: "Youth", href: "/youth", children: youthChildren },
+	{ label: "Community", href: "/#whatsapp" },
 ];
 
 const navLinks = baseLinks.map((l) => ({
