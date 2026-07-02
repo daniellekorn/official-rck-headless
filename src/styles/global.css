@@ -63,8 +63,26 @@
     font-weight: 500;
   }
 
+  h1, h2 {
+    text-wrap: balance;
+  }
+
   :lang(he), [dir="rtl"] {
     font-family: var(--font-hebrew);
+  }
+
+  /* One focus language site-wide (promoted from SectionPager). Gold-500 reads
+     on both the white pages and the navy bands; components with a bespoke
+     focus-visible utility (e.g. the WhatsApp CTAs) still win on specificity. */
+  :focus-visible {
+    outline: 2px solid var(--color-gold-500);
+    outline-offset: 3px;
+    border-radius: 0.125rem;
+  }
+
+  ::selection {
+    background: var(--color-gold-200);
+    color: var(--color-navy-700);
   }
 }
 
