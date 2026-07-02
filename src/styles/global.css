@@ -20,6 +20,7 @@
   --color-navy-500: #243c63;
   --color-navy-600: #102a56;   /* anchor — primary navy */
   --color-navy-700: #07173a;
+  --color-navy-800: #0b1b38;   /* deep band/frame behind flyers, carousel, lightbox */
 
   /* Bright-yellow accent — reserved for sparse highlights (focus rings,
      badges, CTAs-on-dark). Not part of the gold scale; do not substitute
