@@ -67,8 +67,8 @@ export interface HomepageContent {
 	joinUsCard3Image?: string;
 	joinUsCard3ImageUrl?: string;
 
-	// "On WhatsApp" closing band — header copy + three subchat slots. Flat fields
-	// (capped at 3 subchats) mirroring the Join Us card pattern. See design-log/032.
+	// "On WhatsApp" closing band — header copy + four featured-group slots.
+	// Flat fields mirroring the Join Us card pattern. See design-log/032.
 	whatsappEyebrow?: string;
 	whatsappTitleLead?: string;
 	whatsappTitleAccent?: string;

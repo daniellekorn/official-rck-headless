@@ -50,8 +50,8 @@ function resolveSlide(row: HeroMediaRow): HeroSlide | null {
 
 /**
  * Active hero slides in display order. Empty array when the collection is
- * absent/empty or the query fails — Hero then falls back to HomePage.heroImage.
- * See design-log/029.
+ * absent/empty or the query fails — Hero then renders its brand gradient
+ * placeholder. See design-log/029 and /030.
  */
 export async function getHeroMedia(): Promise<HeroSlide[]> {
 	try {
@@ -59,6 +59,7 @@ export async function getHeroMedia(): Promise<HeroSlide[]> {
 		const { items: results } = await elevated(COLLECTION_ID)
 			.eq("active", true)
 			.ascending("sortOrder")
+			.limit(100)
 			.find();
 		return (results as HeroMediaRow[])
 			.map(resolveSlide)
