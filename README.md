@@ -17,7 +17,7 @@ The Wix CLI handles auth and site binding (`wix.config.json`). CLI reference: `n
 | What | Where |
 |---|---|
 | Editor guide + CMS collection schemas | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
-| Why the code looks the way it does | [`design-log/`](design-log/) — numbered decision records |
+| Design decisions and their reasoning | [`design-log/`](design-log/) — numbered decision records |
 | Agent / process instructions | [`AGENTS.md`](AGENTS.md) |
 | Pages | `src/pages/` (Astro, SSR) |
 | Data access (one module per CMS collection) | `src/lib/` |
