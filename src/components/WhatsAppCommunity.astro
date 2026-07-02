@@ -80,8 +80,8 @@ const posterFor = (s: Short) =>
 		<div class="mx-auto max-w-2xl text-center">
 			<p class="eyebrow text-base! sm:text-lg! inline-flex items-center gap-2 text-gold-600" data-reveal="up">
 				<span class="relative flex h-2 w-2">
-					<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#25D366] opacity-60"></span>
-					<span class="relative inline-flex h-2 w-2 rounded-full bg-[#25D366]"></span>
+					<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-whatsapp opacity-60"></span>
+					<span class="relative inline-flex h-2 w-2 rounded-full bg-whatsapp"></span>
 				</span>
 				{eyebrow}
 			</p>
@@ -106,7 +106,7 @@ const posterFor = (s: Short) =>
 					{
 						chatList.map((name) => (
 							<li class="flex items-center gap-3">
-								<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#25D366]/12 text-[#1ebe5b]">
+								<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-whatsapp/12 text-whatsapp-dark">
 									<svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true">
 										<path d="M4 4h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H9l-4 3.5A.6.6 0 0 1 4 21V5a1 1 0 0 1 0-1Z" />
 									</svg>
@@ -122,7 +122,7 @@ const posterFor = (s: Short) =>
 						href={joinHref}
 						target="_blank"
 						rel="noopener"
-						class="group inline-flex items-center gap-2.5 rounded-full bg-[#25D366] px-6 py-3 font-sans text-base font-semibold text-white shadow-[0_14px_30px_-14px_rgba(37,211,102,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#1ebe5b] hover:shadow-[0_18px_38px_-16px_rgba(37,211,102,0.8)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1ebe5b]"
+						class="group inline-flex items-center gap-2.5 rounded-full bg-whatsapp px-6 py-3 font-sans text-base font-semibold text-white shadow-[0_14px_30px_-14px_rgba(37,211,102,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-whatsapp-dark hover:shadow-[0_18px_38px_-16px_rgba(37,211,102,0.8)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-whatsapp-dark"
 					>
 						<svg viewBox="0 0 24 24" class="h-6 w-6" fill="currentColor" aria-hidden="true">
 							<path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.85-1.46A10 10 0 1 0 12 2Zm0 18.2a8.18 8.18 0 0 1-4.17-1.14l-.3-.18-2.86.86.86-2.78-.2-.32A8.2 8.2 0 1 1 12 20.2Z"/>
@@ -169,9 +169,9 @@ const posterFor = (s: Short) =>
 											data-short-play
 											data-video-id={s.videoId}
 											aria-label={`Play ${s.chatName ?? "Short"}`}
-											class="absolute inset-0 flex items-center justify-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-[#25D366]"
+											class="absolute inset-0 flex items-center justify-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-whatsapp"
 										>
-											<span class="flex h-14 w-14 items-center justify-center rounded-full bg-white/95 shadow-[0_10px_30px_-6px_rgba(0,0,0,0.55)] ring-2 ring-transparent transition-all duration-300 group-hover:scale-110 group-hover:ring-[#25D366]">
+											<span class="flex h-14 w-14 items-center justify-center rounded-full bg-white/95 shadow-[0_10px_30px_-6px_rgba(0,0,0,0.55)] ring-2 ring-transparent transition-all duration-300 group-hover:scale-110 group-hover:ring-whatsapp">
 												<svg viewBox="0 0 24 24" class="ml-1 h-6 w-6 fill-navy-700" aria-hidden="true">
 													<path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.5-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5Z" />
 												</svg>
@@ -182,7 +182,7 @@ const posterFor = (s: Short) =>
 									{/* group tag, top-left */}
 									{s.chatName && (
 										<span class="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-navy-700/65 px-3 py-1 backdrop-blur-sm ring-1 ring-white/15">
-											<span class="h-1.5 w-1.5 rounded-full bg-[#25D366]"></span>
+											<span class="h-1.5 w-1.5 rounded-full bg-whatsapp"></span>
 											<span class="font-sans text-xs font-medium text-white">{s.chatName}</span>
 										</span>
 									)}

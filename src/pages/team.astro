@@ -60,7 +60,7 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 									<p class="font-sans text-xs sm:text-sm font-bold uppercase tracking-[0.22em] text-gold-500">
 										{group.label}
 									</p>
-									<span class="mx-auto mt-3 block h-[2px] w-12 bg-gold-400" aria-hidden="true" />
+									<span class="gold-rule-sm mx-auto mt-3" aria-hidden="true" />
 								</div>
 
 								<div class="grid gap-6 sm:gap-7 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -68,6 +68,12 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 										const fullName = [m.firstName, m.lastName].filter(Boolean).join(" ");
 										const bioText = m.bio ? ricosToPlainText(m.bio) : "";
 										const hasBio = bioText.length > 0;
+										// Monogram for members without a photo — reads as a deliberate
+										// design element instead of an empty slot.
+										const initials = [m.firstName, m.lastName]
+											.filter(Boolean)
+											.map((n) => n!.trim().charAt(0).toUpperCase())
+											.join("");
 
 										const photoMarkup = (
 											<div
@@ -82,10 +88,11 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 														class="card-image h-full w-full object-cover"
 													/>
 												) : (
-													<div class="absolute inset-0 flex items-center justify-center">
-														<span class="font-sans text-[10px] sm:text-xs uppercase tracking-[0.22em] text-navy-300">
-															Photo
+													<div class="absolute inset-0 flex flex-col items-center justify-center gap-2">
+														<span class="font-display text-6xl sm:text-7xl font-medium text-navy-200" aria-hidden="true">
+															{initials || "RCK"}
 														</span>
+														<span class="gold-rule-sm opacity-60" aria-hidden="true"></span>
 													</div>
 												)}
 												{hasBio && (
@@ -131,13 +138,13 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 												type="button"
 												data-team-card
 												aria-expanded="false"
-												class="team-card block w-full text-left rounded-md bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_45px_-22px_rgba(15,23,42,0.45)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-500 cursor-pointer"
+												class="team-card block h-full w-full text-left rounded-md bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_45px_-22px_rgba(15,23,42,0.45)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-500 cursor-pointer"
 											>
 												{photoMarkup}
 												{metaMarkup}
 											</button>
 										) : (
-											<div class="team-card-static block w-full rounded-md bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)]">
+											<div class="team-card-static block h-full w-full rounded-md bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)]">
 												{photoMarkup}
 												{metaMarkup}
 											</div>
