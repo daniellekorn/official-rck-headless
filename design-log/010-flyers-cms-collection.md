@@ -6,7 +6,7 @@
 > the `embedUrl`-first guidance below — it's kept as a record of the original
 > decision and why we later reversed it.
 
-**Status:** accepted
+**Status:** implemented — embed-first rendering superseded by #031 (see banner above); the collection and its other fields stand
 **Date:** 2026-05-28
 **Author:** claude-session (danielle directing)
 **Related:** #001 (content/code boundary)

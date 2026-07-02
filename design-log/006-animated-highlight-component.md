@@ -1,6 +1,6 @@
 # 006 — Animated highlight component
 
-**Status:** implemented
+**Status:** implemented — default color superseded by #021 (gold-500 → the bright `--color-accent`); component and reveal behavior stand
 **Date:** 2026-05-28
 **Author:** claude-session (danielle directing)
 **Related:** [#004](004-brand-palette-refresh.md), [#005](005-typography-refresh.md)
