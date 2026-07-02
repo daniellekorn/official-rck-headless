@@ -22,7 +22,7 @@ const { imageUrl, pdfUrl, title, eager = false } = Astro.props;
 const label = title ?? "flyer";
 ---
 
-<div class="relative aspect-[3/4] overflow-hidden">
+<div class="flyer-frame relative aspect-[3/4] overflow-hidden">
 	{imageUrl ? (
 		<div class="flyer group absolute inset-0">
 			<button
@@ -80,6 +80,14 @@ const label = title ?? "flyer";
 </div>
 
 <style>
+	/* The frame paints its own navy backdrop so flyers of any aspect ratio
+	   letterbox onto brand navy — the same surface the placeholder, lightbox,
+	   and coverflow already use — instead of whatever the caller's card color
+	   is (stark white in the learn/events grids). */
+	.flyer-frame {
+		background: linear-gradient(150deg, var(--color-navy-600), var(--color-navy-700));
+	}
+
 	.flyer-open {
 		position: absolute;
 		inset: 0;
