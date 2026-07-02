@@ -170,23 +170,23 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 </Layout>
 
 <style>
-	/* Hover/expand (tap on touch) zooms the photo slightly and fades in the
-	   bio overlay. The :hover rules are gated behind @media (hover: hover)
-	   because touch browsers "stick" :hover state after a tap — without the
+	/* Photo color drains to greyscale when the card is hovered (desktop)
+	   or expanded (set by JS on tap/click — works for touch + as a "pin
+	   open" affordance on desktop). Same trigger drives the bio overlay
+	   fade-in below. See design log #008.
+
+	   The :hover rules are gated behind @media (hover: hover) because
+	   touch browsers "stick" :hover state after a tap — without the
 	   gate, tapping to collapse couldn't beat the stuck hover and the
-	   overlay would never close on mobile. See design log #008. */
-	/* The source portraits vary a lot — in framing (tight head-shots next to
-	   waist-up shots; handled by the uniform zoom anchored near the face line)
-	   and in background tone (near-white / warm gray / cool gray studio
-	   backdrops), which no crop can unify. Monochrome is the equalizer: every
-	   portrait renders in the same tonal family, so the grid reads as one
-	   deliberate set. The slight navy-50 wash behind (see .card-photo bg) keeps
-	   the gray from going clinical. */
+	   overlay would never close on mobile. */
+	/* The source portraits vary a lot in framing — some tight head-shots, some
+	   waist-up with wide pale margins. A uniform zoom anchored near the face
+	   line crops the loose ones to a similar scale, verified against all 20
+	   current photos (widest hat brims and chins survive). */
 	.card-image {
 		transform: scale(1.3);
 		transform-origin: 50% 20%;
-		filter: grayscale(1);
-		transition: transform 500ms ease;
+		transition: filter 400ms ease, transform 500ms ease;
 	}
 	.bio-overlay {
 		opacity: 0;
@@ -196,6 +196,7 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 
 	@media (hover: hover) and (pointer: fine) {
 		.team-card:hover .card-image {
+			filter: grayscale(1);
 			transform: scale(1.36);
 		}
 		.team-card:hover .bio-overlay {
@@ -205,6 +206,7 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 	}
 
 	.team-card[aria-expanded="true"] .card-image {
+		filter: grayscale(1);
 		transform: scale(1.36);
 	}
 	.team-card[aria-expanded="true"] .bio-overlay {
