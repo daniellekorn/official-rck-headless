@@ -21,7 +21,7 @@ const hasAside = Astro.slots.has("aside");
 
 <section
 	class:list={[
-		"bg-navy-800 overflow-hidden",
+		"bg-white overflow-hidden",
 		hasAside ? "with-aside py-14 sm:py-16" : "py-16 sm:py-20",
 	]}
 	data-coverflow-section
@@ -139,7 +139,7 @@ const hasAside = Astro.slots.has("aside");
 				aria-label={`Go to slide ${i + 1}`}
 				class:list={[
 					"rounded-sm transition-all duration-300 h-1.5",
-					i === 0 ? "w-6 bg-gold-400" : "w-1.5 bg-white/30 hover:bg-white/60",
+					i === 0 ? "w-6 bg-gold-400" : "w-1.5 bg-navy-200 hover:bg-navy-300",
 				]}
 			/>
 		))}
@@ -175,8 +175,11 @@ const hasAside = Astro.slots.has("aside");
 		height: 100%;
 		border-radius: 0.75rem;
 		overflow: hidden;
-		background: var(--color-navy-800);
-		box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55);
+		/* Light letterbox on the white band (design log #039); the hairline +
+		   navy-tinted shadow keep card edges readable white-on-white. */
+		background: var(--color-paper);
+		border: 1px solid var(--color-navy-100);
+		box-shadow: 0 25px 60px -18px rgba(7, 23, 58, 0.35);
 		position: relative;
 	}
 
@@ -219,8 +222,7 @@ const hasAside = Astro.slots.has("aside");
 	.coverflow-btn:hover { background: var(--color-gold-400, #dfb030); }
 	.coverflow-btn-icon { width: 1rem; height: 1rem; }
 
-	/* Cream panel, matching Flyer.astro's placeholder — navy-on-navy cards
-	   vanished into the navy-800 band. */
+	/* Cream panel, matching Flyer.astro's placeholder. */
 	.coverflow-placeholder {
 		position: absolute;
 		inset: 0;
@@ -250,7 +252,7 @@ const hasAside = Astro.slots.has("aside");
 	.coverflow-label {
 		text-align: center;
 		font-size: 0.75rem;
-		color: rgba(255, 255, 255, 0.6);
+		color: var(--color-navy-400);
 		margin-top: 0.6rem;
 		padding: 0 0.5rem;
 		position: absolute;
@@ -302,8 +304,10 @@ const hasAside = Astro.slots.has("aside");
 		width: 2.75rem;
 		height: 2.75rem;
 		border-radius: 0.125rem;
-		background: rgba(0, 0, 0, 0.4);
-		color: white;
+		background: rgb(255 255 255 / 0.92);
+		color: var(--color-navy-600);
+		border: 1px solid var(--color-navy-100);
+		box-shadow: 0 10px 24px -12px rgba(7, 23, 58, 0.4);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -312,7 +316,7 @@ const hasAside = Astro.slots.has("aside");
 	}
 
 	.coverflow-arrow:hover {
-		background: rgba(0, 0, 0, 0.65);
+		background: var(--color-gold-400);
 	}
 
 	/* Flank the center card rather than the page edges.
@@ -379,7 +383,7 @@ const hasAside = Astro.slots.has("aside");
 				d.classList.toggle("w-6", active);
 				d.classList.toggle("bg-gold-400", active);
 				d.classList.toggle("w-1.5", !active);
-				d.classList.toggle("bg-white/30", !active);
+				d.classList.toggle("bg-navy-200", !active);
 			});
 		};
 

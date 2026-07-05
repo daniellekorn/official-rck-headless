@@ -80,12 +80,11 @@ const label = title ?? "flyer";
 </div>
 
 <style>
-	/* The frame paints its own navy backdrop so flyers of any aspect ratio
-	   letterbox onto brand navy — the same surface the placeholder, lightbox,
-	   and coverflow already use — instead of whatever the caller's card color
-	   is (stark white in the learn/events grids). */
+	/* The frame paints its own light backdrop so flyers of any aspect ratio
+	   letterbox onto the site's cream (design log #039 — the navy backdrop
+	   read as a mistake) instead of whatever the caller's card color is. */
 	.flyer-frame {
-		background: linear-gradient(150deg, var(--color-navy-600), var(--color-navy-700));
+		background: var(--color-mist);
 	}
 
 	.flyer-open {
@@ -169,8 +168,7 @@ const label = title ?? "flyer";
 	.flyer-icon { width: 1rem; height: 1rem; }
 
 	/* Coming-soon placeholder — keeps the layout populated before an image is
-	   uploaded. Cream panel: reads like a light flyer against the navy frames
-	   and carousel band (a navy placeholder disappeared into them). */
+	   uploaded. Cream panel, same family as the frame backdrop. */
 	.flyer-placeholder {
 		position: absolute;
 		inset: 0;
