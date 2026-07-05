@@ -40,3 +40,7 @@ band (blends into the page) → cream (`bg-mist`) flyer grid → footer.
 `wix build` + `astro check` pass; dev server shows the white band with
 readable labels/dots/arrows on `/learn` and `/events`, and cream letterboxes
 in the grids. Lightbox and youth/archive frames unchanged.
+
+## Implementation Results
+
+Shipped in 1d3b161.
