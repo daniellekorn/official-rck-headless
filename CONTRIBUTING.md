@@ -308,7 +308,7 @@ One row per flyer. Set **`imageUrl`** (preferred) or **`pdfUrl`** — a row with
 | pdfUrl | Text | Direct public PDF URL — fallback for genuinely multi-page documents. Checked after the image. |
 | isActive | Boolean | Show/hide without deleting. Default: true (checked). |
 | displayOrder | Number | Sort order within the category. Lower = first. |
-| subCategory | Text | Optional. Sub-topic for filtering (e.g. `kashrus`, `shabbos`, `women`). One value per flyer. Leave empty if no sub-filtering needed. |
+| subCategory | Tags | Optional. Filter tags — add as many per flyer as apply (e.g. `Halacha`, `Men`, `Sunday`, `Night`). The site groups them automatically into **Topic / Audience / Day / Time** rows in the filter panel: weekdays + `Daily`/`Shabbos`/`Motzei-Shabbos` land under Day, `Morning`/`Afternoon`/`Evening`/`Night` under Time, `Men`/`Women`/`Boys`/`Girls`/`Kids`/`Teens`/`Youth`/`Family`/`Community` under Audience, and anything else under Topic. A flyer shows when **any** selected tag matches. Capitalization doesn't matter (`daily` and `Daily` are the same tag), but tags must not contain the `\|` character. Leave empty if no sub-filtering needed. |
 | removeAfter | Date | Optional. The last day the flyer should appear. It stays up through that whole day (Israel time) and drops off the site by itself the next morning. **Leave empty for anything evergreen** (a standing schedule, a learning program). Only put a date on things that go stale — mainly event flyers. The row is *not* deleted: to bring a flyer back, just change the date to a future one. |
 
 **Exporting a flyer image from Canva:** open the design → **Share → Download → PNG**, and select **page 1 only**. Upload that PNG into the row's image field (or paste a public image URL). That's the whole step.
@@ -322,13 +322,13 @@ One row per flyer. Set **`imageUrl`** (preferred) or **`pdfUrl`** — a row with
 | `youth` | Youth Programming |
 | `events` | Events |
 
-**Special reserved `subCategory` values — do not reuse for general filtering:**
+**Special reserved `subCategory` tags — do not reuse for general filtering:**
 
-| category | subCategory | Where it appears |
+| category | subCategory tag | Where it appears |
 |---|---|---|
-| `schedules` | `daily` | Featured daily learning schedule on the Daven with Us page, below the minyan times. Only the first active row matching this combination is shown. |
+| `schedules` | `daily` (any capitalization) | Featured daily learning schedule on the Daven with Us page, below the minyan times. Only the first active row carrying this tag in this category is shown. |
 
-To swap the daily schedule: edit the one row with `category = schedules` and `subCategory = daily`. Update `imageUrl` with the new page-1 export. No code change needed.
+To swap the daily schedule: edit the one row with `category = schedules` and the `daily` tag. Update `imageUrl` with the new page-1 export. No code change needed.
 
 #### The easy way to add a flyer (chat, no dashboard)
 

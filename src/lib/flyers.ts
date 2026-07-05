@@ -9,7 +9,11 @@ export interface Flyer {
 	_id: string;
 	title: string;
 	category: FlyerCategory;
-	subCategory?: string;
+	/**
+	 * Tags field in the CMS — always an array, always lowercase (normalized on read, so
+	 * "Daily" and "daily" in the CMS are one tag). Templates re-capitalize for display.
+	 */
+	subCategory?: string[];
 	pdfUrl?: string;
 	imageUrl?: string;
 	isActive?: boolean;
@@ -45,16 +49,39 @@ export async function getFlyers(category?: FlyerCategory, subCategory?: string):
 		const elevated = auth.elevate(items.query);
 		let q = elevated(COLLECTION_ID).eq("isActive", true).ascending("displayOrder").limit(100);
 		if (category) q = q.eq("category", category);
-		if (subCategory) q = q.eq("subCategory", subCategory);
 		const { items: results } = await q.find();
 		const now = new Date();
-		return (results as Flyer[]).filter((f) => !isExpired(f.removeAfter, now));
+		// The subCategory filter runs in memory (not in the query) so it can be
+		// case-insensitive — the DB's hasSome is not, and office-entered tags mix case.
+		const wanted = subCategory?.toLowerCase();
+		return (results as Flyer[])
+			.filter((f) => !isExpired(f.removeAfter, now))
+			.map((f) => ({ ...f, subCategory: normalizeTags(f.subCategory) }))
+			.filter((f) => !wanted || f.subCategory?.includes(wanted));
 	} catch (err) {
 		console.error(`[flyers] query failed:`, err);
 		return [];
 	}
 }
 
+/**
+ * Tags come back lowercased, trimmed, and deduped, so identity is case-insensitive
+ * everywhere downstream. Rows saved before the field became Tags may hold a plain
+ * string; empty stays undefined so templates can use simple truthiness guards.
+ */
+function normalizeTags(value: unknown): string[] | undefined {
+	const raw = Array.isArray(value) ? value : typeof value === "string" ? [value] : [];
+	const tags = [
+		...new Set(
+			raw
+				.filter((t): t is string => typeof t === "string")
+				.map((t) => t.trim().toLowerCase())
+				.filter(Boolean),
+		),
+	];
+	return tags.length > 0 ? tags : undefined;
+}
+
 export function uniqueSubCategories(flyers: Flyer[]): string[] {
-	return [...new Set(flyers.map((f) => f.subCategory).filter((s): s is string => Boolean(s)))].sort();
+	return [...new Set(flyers.flatMap((f) => f.subCategory ?? []))].sort();
 }

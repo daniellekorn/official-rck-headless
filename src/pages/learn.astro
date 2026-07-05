@@ -6,9 +6,10 @@ import PageHeader from "../components/PageHeader.astro";
 import CoverflowCarousel from "../components/CoverflowCarousel.astro";
 import Flyer from "../components/Flyer.astro";
 import { getFlyers, uniqueSubCategories } from "../lib/flyers";
+import { groupTags } from "../lib/tag-groups";
 
 const allLearning = await getFlyers("learning");
-const subCategories = uniqueSubCategories(allLearning);
+const tagGroups = groupTags(uniqueSubCategories(allLearning));
 ---
 
 <Layout>
@@ -24,24 +25,55 @@ const subCategories = uniqueSubCategories(allLearning);
 
 	<section class="py-10 sm:py-14 bg-mist">
 		<div class="container-page">
-			{subCategories.length > 0 && (
-				<div class="mb-10 flex flex-wrap justify-center gap-2" data-filter-bar>
-					<button
-						type="button"
-						data-filter=""
-						class="filter-chip is-active px-4 py-1.5 rounded-sm text-sm font-medium capitalize transition-colors"
-					>
-						All
-					</button>
-					{subCategories.map((sub) => (
-						<button
-							type="button"
-							data-filter={sub}
-							class="filter-chip px-4 py-1.5 rounded-sm text-sm font-medium capitalize transition-colors"
-						>
-							{sub}
-						</button>
-					))}
+			{tagGroups.length > 0 && (
+				<div
+					class="mb-10 rounded-md bg-white ring-1 ring-navy-100 shadow-sm p-4 sm:p-6"
+					data-filter-bar
+				>
+					<div class="flex items-baseline justify-between gap-4">
+						<p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-navy-400">
+							Filter shiurim
+						</p>
+						<div class="flex items-baseline gap-4">
+							<button
+								type="button"
+								data-clear
+								class="invisible text-xs font-medium text-navy-400 underline underline-offset-2 transition-colors hover:text-navy-600"
+							>
+								Clear all
+							</button>
+							{/* The tag rows are tall on a phone, so they collapse behind this on mobile. */}
+							<button
+								type="button"
+								data-toggle
+								aria-expanded="false"
+								aria-controls="flyer-tag-groups"
+								class="sm:hidden text-xs font-semibold text-navy-600"
+							>
+								Show <span aria-hidden="true">▾</span>
+							</button>
+						</div>
+					</div>
+					<div id="flyer-tag-groups" data-groups class="mt-4 hidden sm:flex flex-col gap-3">
+						{tagGroups.map((group) => (
+							<div class="flex flex-col gap-1.5 sm:flex-row sm:items-baseline sm:gap-4">
+								<span class="w-20 shrink-0 text-[11px] font-medium uppercase tracking-wider text-navy-300">
+									{group.label}
+								</span>
+								<div class="flex flex-wrap gap-1.5">
+									{group.tags.map((tag) => (
+										<button
+											type="button"
+											data-filter={tag}
+											class="filter-chip px-3 py-1 rounded-sm text-[13px] font-medium capitalize transition-colors"
+										>
+											{tag}
+										</button>
+									))}
+								</div>
+							</div>
+						))}
+					</div>
 				</div>
 			)}
 
@@ -50,7 +82,7 @@ const subCategories = uniqueSubCategories(allLearning);
 					{allLearning.map((flyer) => (
 						<div
 							data-flyer
-							data-sub={flyer.subCategory ?? ""}
+							data-sub={(flyer.subCategory ?? []).join("|")}
 							class="rounded-md overflow-hidden bg-white ring-1 ring-navy-100 shadow-sm"
 						>
 							<Flyer
@@ -64,7 +96,13 @@ const subCategories = uniqueSubCategories(allLearning);
 										<p class="font-medium text-navy-700 text-sm">{flyer.title}</p>
 									)}
 									{flyer.subCategory && (
-										<p class="mt-1 text-xs text-gold-600 capitalize">{flyer.subCategory}</p>
+										<div class="mt-2 flex flex-wrap gap-1.5">
+											{flyer.subCategory.map((tag) => (
+												<span class="rounded-sm bg-gold-50 px-2 py-0.5 text-[11px] font-medium text-gold-700 capitalize">
+													{tag}
+												</span>
+											))}
+										</div>
 									)}
 								</div>
 							)}
@@ -106,21 +144,21 @@ const subCategories = uniqueSubCategories(allLearning);
 
 	if (bar && grid) {
 		const cards = Array.from(grid.querySelectorAll<HTMLElement>("[data-flyer]"));
-		const allBtn = bar.querySelector<HTMLButtonElement>('[data-filter=""]');
-		const subBtns = Array.from(
-			bar.querySelectorAll<HTMLButtonElement>("[data-filter]"),
-		).filter((b) => (b.dataset.filter ?? "") !== "");
+		const clearBtn = bar.querySelector<HTMLButtonElement>("[data-clear]");
+		const subBtns = Array.from(bar.querySelectorAll<HTMLButtonElement>("[data-filter]"));
 
-		// Active subcategory selections. Empty set = show everything.
+		// Active tag selections. Empty set = show everything.
 		const active = new Set<string>();
 
 		const apply = () => {
 			cards.forEach((card) => {
-				const sub = card.dataset.sub ?? "";
-				const show = active.size === 0 || active.has(sub);
+				// data-sub is the card's tag list joined with "|" (a flyer can have many tags).
+				const tags = (card.dataset.sub ?? "").split("|").filter(Boolean);
+				const show = active.size === 0 || tags.some((t) => active.has(t));
 				card.classList.toggle("hidden", !show);
 			});
-			allBtn?.classList.toggle("is-active", active.size === 0);
+			// `invisible` (not `hidden`) so the header row keeps its height.
+			clearBtn?.classList.toggle("invisible", active.size === 0);
 			subBtns.forEach((b) =>
 				b.classList.toggle("is-active", active.has(b.dataset.filter ?? "")),
 			);
@@ -135,10 +173,22 @@ const subCategories = uniqueSubCategories(allLearning);
 			});
 		});
 
-		// "All" clears every selection and returns to the full grid.
-		allBtn?.addEventListener("click", () => {
+		clearBtn?.addEventListener("click", () => {
 			active.clear();
 			apply();
+		});
+
+		// Mobile-only disclosure for the tag rows. `hidden sm:flex` means desktop
+		// always shows them; the toggle only matters below the sm breakpoint.
+		const toggleBtn = bar.querySelector<HTMLButtonElement>("[data-toggle]");
+		const groups = bar.querySelector<HTMLElement>("[data-groups]");
+		toggleBtn?.addEventListener("click", () => {
+			const open = groups?.classList.toggle("flex") ?? false;
+			groups?.classList.toggle("hidden", !open);
+			toggleBtn.setAttribute("aria-expanded", String(open));
+			toggleBtn.innerHTML = open
+				? 'Hide <span aria-hidden="true">▴</span>'
+				: 'Show <span aria-hidden="true">▾</span>';
 		});
 
 		apply();
