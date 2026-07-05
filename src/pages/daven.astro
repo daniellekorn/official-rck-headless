@@ -3,13 +3,19 @@ import Layout from "../layouts/Layout.astro";
 import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
 import PageHeader from "../components/PageHeader.astro";
-import { getDaveningGrouped } from "../lib/davening";
+import { getDaveningGrouped, groupByService } from "../lib/davening";
+import { getComputedWeekdaySchedule } from "../lib/zmanim-schedule";
 import { getFlyers } from "../lib/flyers";
 
 const grouped = await getDaveningGrouped();
 
+// Weekday times are computed from zmanim (see design-log #040); CMS weekday
+// rows are appended after them for seasonal extras like Selichos.
+const computed = getComputedWeekdaySchedule();
+const weekdayGroups = groupByService([...computed.rows, ...grouped.Weekday.flatMap((g) => g.rows)]);
+
 // Pre-process weekday groups: collapse same-service rows into time groups by daySpec.
-const weekday = grouped.Weekday.map((group) => {
+const weekday = weekdayGroups.map((group) => {
 	const bySpec = new Map<string, { time: string; notes?: string }[]>();
 	for (const r of group.rows) {
 		const key = r.daySpec ?? "";
@@ -44,9 +50,14 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 
 					<!-- Weekday minyanim -->
 					<div>
-						<p class="mb-5 font-sans text-sm font-bold uppercase tracking-[0.22em] text-gold-500">
-							Daily Minyanim
-						</p>
+						<div class="mb-5 flex items-baseline justify-between gap-4">
+							<p class="font-sans text-sm font-bold uppercase tracking-[0.22em] text-gold-500">
+								Daily Minyanim
+							</p>
+							<p class="font-sans text-xs sm:text-sm text-navy-300">
+								Week of {computed.weekOf}
+							</p>
+						</div>
 
 						{!hasWeekday ? (
 							<p class="text-base text-navy-400">Weekday times coming soon.</p>

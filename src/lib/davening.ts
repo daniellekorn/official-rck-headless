@@ -49,6 +49,23 @@ const serviceRank = (s: string) => {
 };
 
 /**
+ * Group rows by service in the canonical Shacharis → Mincha → Maariv order,
+ * preserving each row's position within its group. Works for both CMS rows
+ * and the computed zmanim rows (anything with a `service`).
+ */
+export function groupByService<T extends { service: string }>(rows: T[]): { service: string; rows: T[] }[] {
+	const byService = new Map<string, T[]>();
+	for (const row of rows) {
+		const arr = byService.get(row.service) ?? [];
+		arr.push(row);
+		byService.set(row.service, arr);
+	}
+	return Array.from(byService.entries())
+		.map(([service, rows]) => ({ service, rows }))
+		.sort((a, b) => serviceRank(a.service) - serviceRank(b.service));
+}
+
+/**
  * Group rows by (dayType, service) and return one ServiceGroup per pairing,
  * sorted in the canonical Shacharis → Mincha → Maariv order. Rows inside
  * each group are kept in their query order (sortOrder ascending).
@@ -58,16 +75,7 @@ export async function getDaveningGrouped(): Promise<Record<DayType, ServiceGroup
 	const grouped: Record<DayType, ServiceGroup[]> = { Weekday: [], Shabbat: [] };
 
 	for (const dayType of ["Weekday", "Shabbat"] as DayType[]) {
-		const rows = all.filter((t) => t.dayType === dayType);
-		const byService = new Map<string, DaveningTime[]>();
-		for (const row of rows) {
-			const arr = byService.get(row.service) ?? [];
-			arr.push(row);
-			byService.set(row.service, arr);
-		}
-		grouped[dayType] = Array.from(byService.entries())
-			.map(([service, rows]) => ({ service, rows }))
-			.sort((a, b) => serviceRank(a.service) - serviceRank(b.service));
+		grouped[dayType] = groupByService(all.filter((t) => t.dayType === dayType));
 	}
 
 	return grouped;
