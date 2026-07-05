@@ -67,3 +67,9 @@ edge minhagim beyond the rules above; the office covers those via CMS rows.
 summer (mincha before candles), deep winter (after candles), and both
 DST-transition Shabbosos ordered correctly; candles/tzeit match hebcal.com's
 Ra'anana feed (geonameid 293807) to the minute. `npx astro check` clean.
+Rendered `/daven` on the dev server confirmed the Friday Night / Shabbos Day
+blocks with the parsha-and-date caption.
+
+## Implementation Results
+
+Shipped in `2a48ddd` (schedule code, page, verify script, CONTRIBUTING).
