@@ -110,6 +110,18 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 							</p>
 						</div>
 
+						<div class="mb-6 flex items-start gap-4">
+							<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-navy-700 text-gold-300 shadow-[0_10px_24px_-12px_rgba(7,23,58,0.7)]">
+								<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+									<path d="M12 21s-8-7.3-8-12a8 8 0 1 1 16 0c0 4.7-8 12-8 12Z" stroke-linecap="round" stroke-linejoin="round" />
+									<circle cx="12" cy="9" r="2.5" />
+								</svg>
+							</span>
+							<p class="font-sans text-sm sm:text-base text-navy-400 leading-relaxed">
+								Shabbos davening is at <span class="font-semibold text-navy-700">KBA</span>, Tel Chai 8, Ra'anana.
+							</p>
+						</div>
+
 						<div class="divide-y divide-navy-100">
 							{shabbosBlocks.map(({ heading, rows }) => (
 								<div class="flex items-start gap-5 sm:gap-7 py-5 sm:py-6">
@@ -132,17 +144,6 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 							))}
 						</div>
 
-						<div class="mt-6 flex items-start gap-4">
-							<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-navy-700 text-gold-300 shadow-[0_10px_24px_-12px_rgba(7,23,58,0.7)]">
-								<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-									<path d="M12 21s-8-7.3-8-12a8 8 0 1 1 16 0c0 4.7-8 12-8 12Z" stroke-linecap="round" stroke-linejoin="round" />
-									<circle cx="12" cy="9" r="2.5" />
-								</svg>
-							</span>
-							<p class="font-sans text-sm sm:text-base text-navy-400 leading-relaxed">
-								Shabbos davening is at <span class="font-semibold text-navy-700">KBA</span>, Tel Chai 8, Ra'anana.
-							</p>
-						</div>
 					</div>
 
 				</div>
