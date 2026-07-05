@@ -1,4 +1,4 @@
-import { GeoLocation, HDate, Zmanim, months } from "@hebcal/core";
+import { GeoLocation, HDate, Locale, Sedra, Zmanim, months } from "@hebcal/core";
 
 /**
  * Computed weekday davening schedule (design-log #040).
@@ -27,6 +27,18 @@ const LATE_MINCHA_BEFORE_SHKIYA = 10; // minutes before shkiya
 const MAARIV_AFTER_SHKIYA = 18; // minutes after shkiya
 const FIXED_MAARIV = 20 * 60; // the 8:00 pm minyan, dropped once shkiya+18 reaches it
 const LATE_MAARIV = 21 * 60 + 30; // 9:30 pm, Sunday & Wednesday only
+
+// ── Shabbos rules (confirmed with the rav, July 2026; see #041). ──
+const CANDLES_BEFORE_SHKIYA = 18; // hebcal's Ra'anana candle-lighting offset
+const EREV_MINCHA_VS_CANDLES = 10; // before candles on summer clock, after on winter clock
+const SHABBOS_MORNING = [
+	{ label: "Midrash Shiur", minutes: 8 * 60 },
+	{ label: "Shacharis", minutes: 8 * 60 + 45 },
+	{ label: "Tefillat Yeladim", minutes: 10 * 60 },
+];
+const BEIS_MEDRASH_BEFORE_MINCHA = 30;
+const SHABBOS_MINCHA_BEFORE_CANDLES = 10; // vs erev Shabbos hadlakas neiros
+const TZEIS_ANGLE = 8.5; // hebcal's tzeit hakochavim: sun 8.5° below horizon
 
 export interface ComputedDaveningRow {
 	service: "Shacharis" | "Mincha" | "Maariv";
@@ -174,4 +186,94 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 	const weekStartISO = `${sunday.y}-${pad(sunday.m)}-${pad(sunday.d)}`;
 
 	return { weekOf, weekStartISO, rows };
+}
+
+// ─────────────────────────── Shabbos ───────────────────────────
+
+export interface ComputedShabbosRow {
+	label: string;
+	time: string;
+	notes?: string;
+}
+
+export interface ComputedShabbosSchedule {
+	/** e.g. "Matos–Masei"; empty when the Shabbos reading is a Yom Tov's. */
+	parsha: string;
+	/** e.g. "July 10–11" (erev Shabbos – Shabbos day). */
+	dateLabel: string;
+	/** ISO date (Jerusalem) of erev Shabbos — for tooling. */
+	erevShabbosISO: string;
+	fridayRows: ComputedShabbosRow[];
+	dayRows: ComputedShabbosRow[];
+}
+
+const offsetFmt = new Intl.DateTimeFormat("en-US", { timeZone: TZ, timeZoneName: "shortOffset" });
+
+/** Israel summer clock (IDT, GMT+3) in effect on this civil day's afternoon. */
+function isSummerClock(c: CivilDate): boolean {
+	const zone = offsetFmt.formatToParts(anchor(c)).find((p) => p.type === "timeZoneName")?.value;
+	return zone === "GMT+3";
+}
+
+/** Minutes since local midnight of an instant, nearest minute (hebcal-style rounding). */
+function minutesOf(instant: Date): number {
+	return Math.round(secondsOfDay(instant) / 60);
+}
+
+/**
+ * Compute the schedule for the upcoming Shabbos (the one closing the same
+ * schedule week as `getComputedWeekdaySchedule` — so the page rolls to the
+ * next Shabbos on Motzei Shabbos, together with the weekday table).
+ */
+export function getComputedShabbosSchedule(now: Date = new Date()): ComputedShabbosSchedule {
+	const friday = addDays(scheduleSunday(civilDateOf(now)), 5);
+	const shabbos = addDays(friday, 1);
+
+	// Hadlakas neiros exactly as hebcal publishes it for Ra'anana: sea-level
+	// shkiya − 18, rounded to the nearest minute (verified vs hebcal.com).
+	const zFri = new Zmanim(LOCATION, anchor(friday), false);
+	const candles = minutesOf(zFri.sunsetOffset(-CANDLES_BEFORE_SHKIYA, true));
+	// Mincha & Kabbalos Shabbos flips with the clock change: 10 min before
+	// hadlakas neiros on the summer clock, 10 after on the winter clock.
+	const erevMincha = candles + (isSummerClock(friday) ? -EREV_MINCHA_VS_CANDLES : EREV_MINCHA_VS_CANDLES);
+
+	// Chronological: mincha precedes candles in summer, follows them in winter.
+	const fridayRows: ComputedShabbosRow[] = [
+		{ minutes: erevMincha, label: "Mincha & Kabbalos Shabbos" },
+		{ minutes: candles, label: "Hadlakas Neiros" },
+	]
+		.sort((a, b) => a.minutes - b.minutes)
+		.map(({ label, minutes }) => ({ label, time: fmtTime(minutes) }));
+
+	const zSat = new Zmanim(LOCATION, anchor(shabbos), false);
+	const mincha = candles - SHABBOS_MINCHA_BEFORE_CANDLES;
+	const maariv = minutesOf(zSat.tzeit(TZEIS_ANGLE));
+
+	const dayRows: ComputedShabbosRow[] = [
+		...SHABBOS_MORNING.map(({ label, minutes }) => ({ label, time: fmtTime(minutes) })),
+		{ label: "Beis Medrash & Shiur", time: fmtTime(mincha - BEIS_MEDRASH_BEFORE_MINCHA) },
+		{ label: "Mincha", time: fmtTime(mincha) },
+		{ label: "Maariv", time: fmtTime(maariv) },
+	];
+
+	const hd = new HDate(anchor(shabbos));
+	const reading = new Sedra(hd.getFullYear(), true).lookup(hd);
+	const parsha = reading.chag
+		? ""
+		: reading.parsha.map((name) => Locale.gettext(name, "ashkenazi")).join("–");
+
+	const dayFmt = new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "long", day: "numeric" });
+	const friLabel = dayFmt.format(anchor(friday));
+	const satLabel = dayFmt.format(anchor(shabbos));
+	const dateLabel =
+		friday.m === shabbos.m ? `${friLabel}–${shabbos.d}` : `${friLabel} – ${satLabel}`;
+
+	const pad = (n: number) => String(n).padStart(2, "0");
+	return {
+		parsha,
+		dateLabel,
+		erevShabbosISO: `${friday.y}-${pad(friday.m)}-${pad(friday.d)}`,
+		fridayRows,
+		dayRows,
+	};
 }

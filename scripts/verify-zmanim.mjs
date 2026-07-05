@@ -7,7 +7,7 @@
 //
 // Requires Node 22.18+ (runs the site's TypeScript directly).
 import { GeoLocation, Zmanim } from "@hebcal/core";
-import { getComputedWeekdaySchedule } from "../src/lib/zmanim-schedule.ts";
+import { getComputedShabbosSchedule, getComputedWeekdaySchedule } from "../src/lib/zmanim-schedule.ts";
 
 const LOCATION = new GeoLocation("Ra'anana", 32.1848, 34.8713, 0, "Asia/Jerusalem");
 const clock = new Intl.DateTimeFormat("en-GB", {
@@ -57,4 +57,19 @@ for (const input of dates) {
 			`     ${dayLabel.format(d).padEnd(12)} mincha gedolah ${clock.format(z.minchaGedola())}   shkiya ${clock.format(z.sunset())}`,
 		);
 	}
+
+	// Shabbos schedule (vs hebcal.com Ra'anana: candles = shkiya − 18, havdalah = tzeit 8.5°).
+	const shabbos = getComputedShabbosSchedule(probe);
+	const parshaLabel = shabbos.parsha ? `Parshas ${shabbos.parsha}` : "(Yom Tov reading)";
+	console.log(`  ── Shabbos ${shabbos.dateLabel} · ${parshaLabel}`);
+	console.log("     Friday Night");
+	for (const row of shabbos.fridayRows) console.log(`       ${row.label.padEnd(28)} ${row.time}`);
+	console.log("     Shabbos Day");
+	for (const row of shabbos.dayRows) console.log(`       ${row.label.padEnd(28)} ${row.time}`);
+	const [fy, fm, fd] = shabbos.erevShabbosISO.split("-").map(Number);
+	const zFri = new Zmanim(LOCATION, new Date(Date.UTC(fy, fm - 1, fd, 12)), false);
+	const zSat = new Zmanim(LOCATION, new Date(Date.UTC(fy, fm - 1, fd + 1, 12)), false);
+	console.log(
+		`     raw: erev shkiya ${clock.format(zFri.sunset())}   candles(−18) ${clock.format(zFri.sunsetOffset(-18, true))}   tzeis 8.5° ${clock.format(zSat.tzeit(8.5))}`,
+	);
 }

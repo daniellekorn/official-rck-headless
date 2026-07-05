@@ -31,7 +31,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Team members | `TeamMembers` | Add a row. Photo, name, role, bio, etc. |
 | Youth programs (on /youth) | `YouthPrograms` | Add a row per program: title, description, contact rabbi, optional photo + flyer. |
 | Past events archive (on /events) | `PastEvents` | Add a row per past event: title, date, photo gallery, optional flyer + blurb. Shows newest first. |
-| Weekday davening times | *(computed)* + `DaveningTimes` | Regular minyanim are calculated from zmanim in code (design-log #040) — don't enter them as rows. Use `DaveningTimes` (`dayType = Weekday`) only for extras like Selichos. Shabbat is a static "Join us at KBA" section (no CMS rows needed). |
+| Davening times (weekday + Shabbos) | *(computed)* + `DaveningTimes` | Regular minyanim **and** the Shabbos schedule are calculated from zmanim in code (design-log #040, #041) — don't enter them as rows. Use `DaveningTimes` only for extras (Selichos, special weeks): `dayType = Weekday` rows appear under the weekday table, `dayType = Shabbat` rows under Shabbos Day. |
 | Flyers (images / PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). For event flyers, set `removeAfter` so they drop off the site on their own. |
 | Footer address, phone, email | `ContactInfo` | Edit the single row. Leave a field empty to hide it from the footer. |
 | Footer social links | `ContactInfo` | Fill in any of `facebookUrl`, `instagramUrl`, `youtubeUrl`, `twitterUrl`, `linkedinUrl`. Empty = icon hidden. |
@@ -217,26 +217,30 @@ have one. It appears in the archive automatically, newest first.
 
 #### `DaveningTimes`
 
-**The regular weekday minyanim are now computed in code, not entered here**
-(see [design-log/040](design-log/040-computed-davening-times.md)). The site
-calculates Shacharis / Mincha / Maariv each week from Ra'anana zmanim using
-the rav's rules (mincha gedolah with a 12:50 floor, shkiya − 10, shkiya + 18,
-the seasonal 6:00 pm and 8:00 pm minyanim, Rosh Chodesh 7:00 & 8:05), fixed
-for each Sun–Thu week the way the flyer is. **Do not re-add those times as
-rows — they would show up twice.** If a computed time ever disagrees with the
-flyer, run `node scripts/verify-zmanim.mjs` and compare with myzmanim, or ask
+**The regular weekday minyanim and the Shabbos schedule are computed in code,
+not entered here** (see [design-log/040](design-log/040-computed-davening-times.md)
+and [design-log/041](design-log/041-computed-shabbos-times.md)). The site
+calculates weekday Shacharis / Mincha / Maariv each week from Ra'anana zmanim
+using the rav's rules (mincha gedolah with a 12:50 floor, shkiya − 10, shkiya
++ 18, the seasonal 6:00 pm and 8:00 pm minyanim, Rosh Chodesh 7:00 & 8:05),
+fixed for each Sun–Thu week the way the flyer is. The Shabbos block (hadlakas
+neiros, Mincha & Kabbalos Shabbos, the fixed morning times, Beis Medrash,
+Mincha, Maariv at tzeis) is likewise computed per week and rolls to the next
+Shabbos on Motzei Shabbos. **Do not re-add any of those times as rows — they
+would show up twice.** If a computed time ever disagrees with the flyer, run
+`node scripts/verify-zmanim.mjs` and compare with myzmanim / hebcal, or ask
 for a rule change in `src/lib/zmanim-schedule.ts`.
 
 This collection is still used for **extras**: seasonal services (e.g.
-Selichos) and special one-off rows. One row per service-time variant; rows
-render *after* the computed times, grouped by service name. **Only `dayType =
-Weekday` rows are shown on the page.** Shabbat davening is a static "Join us
-at KBA" section — no rows needed.
+Selichos) and special one-off rows. One row per service-time variant.
+`dayType = Weekday` rows render *after* the computed weekday times, grouped
+by service name; `dayType = Shabbat` rows render at the end of the computed
+Shabbos Day list.
 
 | Field | Type | Notes |
 |---|---|---|
 | service | Text | `Shacharis`, `Mincha`, `Maariv`, `Selichos` |
-| dayType | Text | Use `Weekday`. (`Shabbat` rows are stored but not currently rendered — Shabbat is hardcoded.) |
+| dayType | Text | `Weekday` or `Shabbat` — controls which section the row appears under. |
 | daySpec | Text (opt) | Days shown next to each service: `Sunday`, `Mon, Thu`, `Sun – Thu`, etc. Leave empty only if day specificity doesn't apply. |
 | time | Text | Display string like `7:00 AM`, `Plag`, `10 min before Shkiya`. Wall-clock text, not a parsed time. |
 | notes | Text (opt) | Extra context only — e.g. `Followed by daf yomi`. **Do not** put day-of-week info here; that belongs in `daySpec`. |
