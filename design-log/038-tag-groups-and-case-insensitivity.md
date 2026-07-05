@@ -63,3 +63,7 @@ a Show/Hide disclosure (49px collapsed) while desktop always shows them
 `npm run build` + `astro check` pass; dev server against live CMS shows
 grouped rows on `/learn` with `daily`/`Daily` collapsed to a single Day chip,
 and the Daven page still resolves its `schedules` + `daily` flyer.
+
+## Implementation Results
+
+Shipped in 8730ce7 (together with #037).

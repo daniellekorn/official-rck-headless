@@ -47,3 +47,7 @@ useful for filtering than one value. Code adapted to the field, not reverted:
 Live CMS queried via the Wix API to confirm every row now stores an array;
 `npm run build` passes; `/learn` and `/events` render individual pills and the
 filter chips list each tag once.
+
+## Implementation Results
+
+Shipped in 8730ce7 (together with #038).
