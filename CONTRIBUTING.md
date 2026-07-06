@@ -35,6 +35,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Flyers (images / PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). For event flyers, set `removeAfter` so they drop off the site on their own. |
 | Footer address, phone, email | `ContactInfo` | Edit the single row. Leave a field empty to hide it from the footer. |
 | Footer social links | `ContactInfo` | Fill in any of `facebookUrl`, `instagramUrl`, `youtubeUrl`, `twitterUrl`, `linkedinUrl`. Empty = icon hidden. |
+| Donate page (intro text, suggested amounts, donation designations) | `DonatePage` | Edit the single row. See schema below — the `apiValid` field is what switches the page from a "Donate Securely" link into the full on-site card form. |
 | Brand colors (the gold, the navy, the bright accent) | `ThemeSettings` | Edit the single row. Put a hex code (e.g. `#d6a21e`) in `primaryGold` / `primaryNavy` / `accent`. The whole matching scale across the site recolors. Leave a field empty to keep the built-in color. See [#028](design-log/028-cms-editable-theme-colors.md). |
 
 ### Two ways to edit content
@@ -259,6 +260,22 @@ Shabbos Day list.
 | youtubeUrl | Text | Full URL. Leave empty to hide the icon. |
 | twitterUrl | Text | Full URL. Leave empty to hide the icon. |
 | linkedinUrl | Text | Full URL. Leave empty to hide the icon. |
+
+#### `DonatePage` — exactly **one** row, never more
+
+Powers `/donate` (design-log [#042](design-log/042-donate-page-nedarim-plus.md)). Payments are processed by **Nedarim Plus** (the same provider as the old site). The page has two modes:
+
+- **`apiValid` empty (current):** the page shows a "Donate Securely" button that opens the Kollel's hosted Nedarim Plus donation page (`hostedPageUrl`). Works today, nothing to configure.
+- **`apiValid` filled:** the page shows the full on-site donation form (amounts, one-time/monthly, designations) with only the card fields inside Nedarim Plus's secure iframe. To turn this on, ask the Nedarim Plus office (מוקד נדרים פלוס) for the mosad's **ApiValid** code for iframe integration and paste it into the field.
+
+| Field | Type | Notes |
+|---|---|---|
+| mosadId | Text | The Kollel's 7-digit Nedarim Plus mosad ID (`7013258`). Don't change unless the Kollel switches Nedarim Plus accounts. |
+| apiValid | Text | Nedarim Plus iframe verification code ("טקסט אימות"). Empty = hosted-page fallback mode (see above). |
+| hostedPageUrl | Text | The Kollel's hosted Nedarim Plus donation page. Used as the fallback button and as the escape hatch if the card iframe fails to load. |
+| introText | Text | The "Why your gift matters" paragraph on the left side of the page. |
+| suggestedAmounts | Text | Comma-separated whole shekel amounts for the preset buttons, e.g. `180, 360, 540, 1800`. Empty = only the free-amount box. |
+| purposes | Text | One designation per line, formatted `Label \| Nedarim Plus category` — the label is what donors see; the category (after the `\|`) must match a category name in the Kollel's Nedarim Plus dashboard so donations land in the right report bucket. A line with no `\|` is used as both. Empty = no designation dropdown. |
 
 #### `HeroMedia` — one row per hero slide
 

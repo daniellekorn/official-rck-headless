@@ -1,0 +1,470 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+import PageHeader from "../components/PageHeader.astro";
+import Footer from "../components/Footer.astro";
+import {
+	getDonateConfig,
+	parsePurposes,
+	parseSuggestedAmounts,
+} from "../lib/donate";
+
+const config = await getDonateConfig();
+
+const amounts = parseSuggestedAmounts(config?.suggestedAmounts);
+const purposes = parsePurposes(config?.purposes);
+const hostedPageUrl = config?.hostedPageUrl?.trim() || null;
+
+// The embedded card form needs both Nedarim Plus credentials. Until the
+// office enters the ApiValid code in the CMS, we fall back to their hosted
+// donation page — same processor, same receipts, zero downtime.
+const formActive = Boolean(config?.mosadId?.trim() && config?.apiValid?.trim());
+
+const field =
+	"mt-1.5 w-full rounded-sm border border-navy-200 bg-white px-3.5 py-2.5 text-navy-700 placeholder-navy-300 transition-colors focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-200";
+const label = "block text-sm font-medium text-navy-600";
+const amountBtn =
+	"rounded-sm border border-navy-200 bg-white px-4 py-3 font-display text-lg font-medium text-navy-600 transition-colors hover:border-gold-500 hover:text-gold-600 data-[selected]:border-gold-500 data-[selected]:bg-gold-500 data-[selected]:text-navy-700";
+const freqBtn =
+	"flex-1 rounded-sm border border-navy-200 bg-white px-4 py-2.5 text-sm font-semibold uppercase tracking-[0.12em] text-navy-500 transition-colors hover:text-gold-600 data-[selected]:border-gold-500 data-[selected]:bg-gold-500 data-[selected]:text-navy-700";
+---
+
+<Layout>
+	<Nav />
+	<main>
+		<PageHeader
+			eyebrow="Partner With Us"
+			titleNavy="Donate"
+			subtitle="Every contribution sustains Torah learning in Ra'anana"
+		/>
+
+		<section class="pt-10 pb-2 text-center">
+			<div class="container-page">
+				<p
+					class="mx-auto max-w-2xl font-display text-2xl sm:text-3xl md:text-[2rem] font-medium leading-snug text-navy-600"
+					data-reveal="up"
+				>
+					The Kollel runs on the community it serves.
+					<span class="mt-2 block text-gold-500">Your gift keeps the Beit Midrash full.</span>
+				</p>
+			</div>
+		</section>
+
+		<section class="py-14 sm:py-20">
+			<div class="container-page">
+				<div class="grid gap-10 md:gap-14 lg:grid-cols-12 items-start">
+					<!-- Why give -->
+					<div class="lg:col-span-5" data-reveal="left">
+						<h2 class="font-display text-2xl md:text-3xl font-medium uppercase text-navy-600">
+							Why Your Gift Matters
+						</h2>
+						<span class="gold-rule-sm mt-4" aria-hidden="true"></span>
+
+						{config?.introText && (
+							<p class="mt-7 max-w-prose text-lg leading-relaxed text-navy-500">{config.introText}</p>
+						)}
+
+						<div class="mt-8 flex flex-col gap-5">
+							<div class="flex items-start gap-4 text-navy-600">
+								<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm bg-gold-100 text-gold-600">
+									<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+										<rect x="4" y="10" width="16" height="10" rx="2" />
+										<path d="M8 10V7a4 4 0 0 1 8 0v3" stroke-linecap="round" />
+									</svg>
+								</span>
+								<span>
+									<span class="block text-xs font-semibold uppercase tracking-widest text-navy-400">Secure</span>
+									<span class="text-base md:text-[1.0625rem] font-medium">Processed by Nedarim Plus — card details never touch our site</span>
+								</span>
+							</div>
+							<div class="flex items-start gap-4 text-navy-600">
+								<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm bg-gold-100 text-gold-600">
+									<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+										<path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z" stroke-linecap="round" stroke-linejoin="round" />
+										<path d="M9.5 9h5M9.5 13h5" stroke-linecap="round" />
+									</svg>
+								</span>
+								<span>
+									<span class="block text-xs font-semibold uppercase tracking-widest text-navy-400">Tax Deductible</span>
+									<span class="text-base md:text-[1.0625rem] font-medium">Official Section 46 receipt sent to your email</span>
+								</span>
+							</div>
+							<div class="flex items-start gap-4 text-navy-600">
+								<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm bg-gold-100 text-gold-600">
+									<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+										<path d="M17 2v6h-6M7 22v-6h6" stroke-linecap="round" stroke-linejoin="round" />
+										<path d="M20.5 8A9 9 0 0 0 5 5.3L3 8M3.5 16A9 9 0 0 0 19 18.7L21 16" stroke-linecap="round" stroke-linejoin="round" />
+									</svg>
+								</span>
+								<span>
+									<span class="block text-xs font-semibold uppercase tracking-widest text-navy-400">Your Way</span>
+									<span class="text-base md:text-[1.0625rem] font-medium">Give once, or set up a monthly standing order</span>
+								</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Donation form / fallback -->
+					<div class="lg:col-span-7" data-reveal="up" data-reveal-delay="120">
+						{formActive ? (
+							<div
+								data-donate-form
+								data-mosad={config?.mosadId?.trim()}
+								data-apivalid={config?.apiValid?.trim()}
+								data-hosted-url={hostedPageUrl}
+								class="rounded-md bg-mist p-6 sm:p-8 ring-1 ring-navy-100"
+							>
+								<div data-donate-fields>
+									<!-- Frequency -->
+									<span class={label}>Donation type</span>
+									<div class="mt-1.5 flex gap-3" role="group" aria-label="Donation type">
+										<button type="button" class={freqBtn} data-freq="once" data-selected>One-Time</button>
+										<button type="button" class={freqBtn} data-freq="monthly">Monthly</button>
+									</div>
+									<p class="mt-2 hidden text-sm text-navy-400" data-monthly-note>
+										Charged monthly until you ask us to stop — cancel any time by contacting the office.
+									</p>
+
+									<!-- Amount -->
+									<div class="mt-6">
+										<span class={label} id="amount-label">Amount (₪)</span>
+										{amounts.length > 0 && (
+											<div class="mt-1.5 grid grid-cols-2 gap-3 sm:grid-cols-4" role="group" aria-labelledby="amount-label">
+												{amounts.map((a) => (
+													<button type="button" class={amountBtn} data-amount={a}>₪{a}</button>
+												))}
+											</div>
+										)}
+										<input
+											class={`${field} mt-3`}
+											data-custom-amount
+											type="number"
+											min="1"
+											step="1"
+											inputmode="numeric"
+											placeholder="Other amount"
+											aria-label="Custom amount in shekels"
+										/>
+										<p class="mt-1 hidden text-sm text-red-600" data-error-for="amount"></p>
+									</div>
+
+									{purposes.length > 0 && (
+										<div class="mt-6">
+											<label class={label} for="purpose">Designation</label>
+											<select class={field} id="purpose" data-purpose>
+												{purposes.map((p, i) => (
+													<option value={p.category} selected={i === 0 || undefined}>{p.label}</option>
+												))}
+											</select>
+										</div>
+									)}
+
+									<!-- Donor details -->
+									<div class="mt-6 grid gap-5 sm:grid-cols-2">
+										<div>
+											<label class={label} for="donorFirstName">First name *</label>
+											<input class={field} id="donorFirstName" type="text" maxlength="50" autocomplete="given-name" required />
+											<p class="mt-1 hidden text-sm text-red-600" data-error-for="donorFirstName"></p>
+										</div>
+										<div>
+											<label class={label} for="donorLastName">Last name *</label>
+											<input class={field} id="donorLastName" type="text" maxlength="50" autocomplete="family-name" required />
+											<p class="mt-1 hidden text-sm text-red-600" data-error-for="donorLastName"></p>
+										</div>
+										<div>
+											<label class={label} for="donorEmail">Email (for your receipt) *</label>
+											<input class={field} id="donorEmail" type="email" maxlength="50" autocomplete="email" required />
+											<p class="mt-1 hidden text-sm text-red-600" data-error-for="donorEmail"></p>
+										</div>
+										<div>
+											<label class={label} for="donorPhone">Phone</label>
+											<input class={field} id="donorPhone" type="tel" maxlength="20" autocomplete="tel" />
+										</div>
+										<div class="sm:col-span-2">
+											<label class={label} for="dedication">Dedication / in honor of</label>
+											<input class={field} id="dedication" type="text" maxlength="300" placeholder="e.g. Refuah shelaimah for..." autocomplete="off" />
+										</div>
+									</div>
+
+									<!-- Card entry (Nedarim Plus secure iframe) -->
+									<div class="mt-6">
+										<span class={label}>Card details</span>
+										<div class="mt-1.5 overflow-hidden rounded-sm border border-navy-200 bg-white">
+											<iframe
+												id="NedarimFrame"
+												title="Secure credit card form (Nedarim Plus)"
+												scrolling="no"
+												class="block w-full"
+												style="height:0;border:0;"
+												src="about:blank"></iframe>
+											<p class="px-3.5 py-6 text-center text-sm text-navy-400" data-frame-wait>
+												Connecting to secure payment server…
+											</p>
+										</div>
+										<p class="mt-2 hidden text-sm text-navy-400" data-frame-fallback>
+											Having trouble loading the card form?
+											{hostedPageUrl && (
+												<a class="font-medium text-gold-600 underline hover:text-gold-500" href={hostedPageUrl} target="_blank" rel="noopener">
+													Donate on our secure Nedarim Plus page instead.
+												</a>
+											)}
+										</p>
+									</div>
+
+									<div class="mt-7 flex flex-col sm:flex-row sm:items-center gap-4">
+										<button
+											type="button"
+											data-pay
+											class="inline-flex items-center justify-center rounded-sm bg-gold-500 px-7 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-navy-700 shadow-sm transition-all hover:bg-gold-400 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+										>
+											<span data-pay-label>Donate Now</span>
+										</button>
+										<p class="text-sm" role="status" aria-live="polite" data-pay-status></p>
+									</div>
+								</div>
+
+								<!-- Success state -->
+								<div class="hidden text-center" data-donate-success>
+									<span class="mx-auto flex h-14 w-14 items-center justify-center rounded-sm bg-gold-100 text-gold-600">
+										<svg viewBox="0 0 24 24" class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2">
+											<path d="m4.5 12.5 5 5 10-11" stroke-linecap="round" stroke-linejoin="round" />
+										</svg>
+									</span>
+									<h3 class="mt-5 font-display text-2xl font-medium uppercase text-navy-600">
+										Thank You!
+									</h3>
+									<p class="mt-3 text-navy-500">
+										Your donation was received. A Section 46 receipt is on its way to your email.
+									</p>
+									<p class="mt-1 text-navy-500">תזכו למצוות!</p>
+								</div>
+							</div>
+						) : (
+							<div class="rounded-md bg-mist p-6 sm:p-8 text-center ring-1 ring-navy-100">
+								<h3 class="font-display text-2xl font-medium uppercase text-navy-600">
+									Donate Online
+								</h3>
+								<p class="mx-auto mt-4 max-w-md text-lg leading-relaxed text-navy-500">
+									Donations are processed securely by Nedarim Plus, with one-time and
+									monthly options and an official Section 46 receipt by email.
+								</p>
+								{hostedPageUrl ? (
+									<a
+										href={hostedPageUrl}
+										target="_blank"
+										rel="noopener"
+										class="mt-7 inline-flex items-center justify-center rounded-sm bg-gold-500 px-7 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-navy-700 shadow-sm transition-all hover:bg-gold-400 hover:shadow-md"
+									>
+										Donate Securely
+									</a>
+								) : (
+									<a
+										href="/contact"
+										class="mt-7 inline-flex items-center justify-center rounded-sm bg-gold-500 px-7 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-navy-700 shadow-sm transition-all hover:bg-gold-400 hover:shadow-md"
+									>
+										Contact Us to Donate
+									</a>
+								)}
+								<p class="mt-4 text-sm text-navy-400">Opens the Kollel's secure donation page.</p>
+							</div>
+						)}
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+	<Footer />
+</Layout>
+
+<script>
+	// Nedarim Plus iframe protocol (matara.pro/nedarimplus/iframe/sample2.html):
+	// only card number / expiry / CVV live inside their PCI iframe; everything
+	// else is our own form, submitted into the iframe via postMessage. Note:
+	// their server ignores postMessage from localhost — test on a deployed URL.
+	const root = document.querySelector<HTMLElement>("[data-donate-form]");
+	if (root) {
+		const IFRAME_SRC = "https://matara.pro/nedarimplus/iframe?language=en";
+		const frame = root.querySelector<HTMLIFrameElement>("#NedarimFrame")!;
+		const frameWait = root.querySelector<HTMLElement>("[data-frame-wait]");
+		const frameFallback = root.querySelector<HTMLElement>("[data-frame-fallback]");
+		const fields = root.querySelector<HTMLElement>("[data-donate-fields]")!;
+		const success = root.querySelector<HTMLElement>("[data-donate-success]")!;
+		const payBtn = root.querySelector<HTMLButtonElement>("[data-pay]")!;
+		const payLabel = root.querySelector<HTMLElement>("[data-pay-label]")!;
+		const payStatus = root.querySelector<HTMLElement>("[data-pay-status]")!;
+		const freqBtns = [...root.querySelectorAll<HTMLButtonElement>("[data-freq]")];
+		const monthlyNote = root.querySelector<HTMLElement>("[data-monthly-note]");
+		const amountBtns = [...root.querySelectorAll<HTMLButtonElement>("[data-amount]")];
+		const customAmount = root.querySelector<HTMLInputElement>("[data-custom-amount]")!;
+		const purposeSelect = root.querySelector<HTMLSelectElement>("[data-purpose]");
+
+		let frequency: "once" | "monthly" = "once";
+		let presetAmount: number | null = null;
+		let frameReady = false;
+
+		const post = (data: unknown) => frame.contentWindow?.postMessage(data, "*");
+
+		const input = (id: string) => root.querySelector<HTMLInputElement>(`#${id}`)!;
+
+		const setError = (key: string, msg: string) => {
+			const el = root.querySelector<HTMLElement>(`[data-error-for="${key}"]`);
+			if (el) {
+				el.textContent = msg;
+				el.classList.remove("hidden");
+			}
+		};
+		const clearErrors = () => {
+			root.querySelectorAll<HTMLElement>("[data-error-for]").forEach((el) => {
+				el.textContent = "";
+				el.classList.add("hidden");
+			});
+			payStatus.textContent = "";
+			payStatus.className = "text-sm";
+		};
+		const setStatus = (msg: string, ok: boolean) => {
+			payStatus.textContent = msg;
+			payStatus.className = `text-sm ${ok ? "text-green-700" : "text-red-600"}`;
+		};
+
+		// --- frequency toggle ---
+		freqBtns.forEach((btn) => {
+			btn.addEventListener("click", () => {
+				frequency = btn.dataset.freq === "monthly" ? "monthly" : "once";
+				freqBtns.forEach((b) => {
+					if (b === btn) b.setAttribute("data-selected", "");
+					else b.removeAttribute("data-selected");
+				});
+				monthlyNote?.classList.toggle("hidden", frequency !== "monthly");
+				payLabel.textContent = frequency === "monthly" ? "Donate Monthly" : "Donate Now";
+			});
+		});
+
+		// --- amount selection ---
+		amountBtns.forEach((btn) => {
+			btn.addEventListener("click", () => {
+				presetAmount = Number(btn.dataset.amount);
+				customAmount.value = "";
+				amountBtns.forEach((b) => {
+					if (b === btn) b.setAttribute("data-selected", "");
+					else b.removeAttribute("data-selected");
+				});
+			});
+		});
+		customAmount.addEventListener("input", () => {
+			presetAmount = null;
+			amountBtns.forEach((b) => b.removeAttribute("data-selected"));
+		});
+
+		const selectedAmount = (): number => {
+			if (presetAmount) return presetAmount;
+			const n = Number.parseInt(customAmount.value, 10);
+			return Number.isFinite(n) && n > 0 ? n : 0;
+		};
+
+		// --- iframe messages ---
+		window.addEventListener("message", (event: MessageEvent) => {
+			let host = "";
+			try {
+				host = new URL(event.origin).hostname;
+			} catch {
+				return;
+			}
+			if (host !== "matara.pro" && !host.endsWith(".matara.pro")) return;
+
+			const { Name, Value } = (event.data ?? {}) as { Name?: string; Value?: any };
+			if (Name === "Height") {
+				frame.style.height = `${Number.parseInt(Value, 10) + 15}px`;
+				frameWait?.classList.add("hidden");
+				frameReady = true;
+			} else if (Name === "TransactionResponse") {
+				if (Value?.Status === "Error") {
+					setStatus(Value?.Message || "The payment could not be processed.", false);
+					payBtn.disabled = false;
+					payLabel.textContent = frequency === "monthly" ? "Donate Monthly" : "Donate Now";
+				} else {
+					fields.classList.add("hidden");
+					success.classList.remove("hidden");
+					success.scrollIntoView({ behavior: "smooth", block: "center" });
+				}
+			}
+		});
+
+		frame.addEventListener("load", () => {
+			if (frame.src !== "about:blank") post({ Name: "GetHeight" });
+		});
+		frame.src = IFRAME_SRC;
+
+		// If the PCI iframe never reports in (blocked network, localhost dev),
+		// surface the hosted-page escape hatch instead of a dead form.
+		setTimeout(() => {
+			if (!frameReady) frameFallback?.classList.remove("hidden");
+		}, 8000);
+
+		// --- submit ---
+		payBtn.addEventListener("click", () => {
+			clearErrors();
+
+			const amount = selectedAmount();
+			const firstName = input("donorFirstName").value.trim();
+			const lastName = input("donorLastName").value.trim();
+			const email = input("donorEmail").value.trim();
+			const phone = input("donorPhone").value.replace(/\D/g, "");
+			const dedication = input("dedication").value.trim();
+
+			let bad = false;
+			if (amount <= 0) {
+				setError("amount", "Please choose or enter an amount.");
+				bad = true;
+			}
+			if (!firstName) {
+				setError("donorFirstName", "Required.");
+				bad = true;
+			}
+			if (!lastName) {
+				setError("donorLastName", "Required.");
+				bad = true;
+			}
+			if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+				setError("donorEmail", "A valid email is needed for your receipt.");
+				bad = true;
+			}
+			if (bad) return;
+			if (!frameReady) {
+				setStatus("Still connecting to the payment server — try again in a moment.", false);
+				return;
+			}
+
+			payBtn.disabled = true;
+			payLabel.textContent = "Processing…";
+			setStatus("", true);
+
+			post({
+				Name: "FinishTransaction2",
+				Value: {
+					Mosad: root.dataset.mosad,
+					ApiValid: root.dataset.apivalid,
+					PaymentType: frequency === "monthly" ? "HK" : "Ragil",
+					Currency: "1", // ILS
+					Zeout: "",
+					FirstName: firstName,
+					LastName: lastName,
+					Street: "",
+					City: "",
+					Phone: phone,
+					Mail: email,
+					Amount: String(amount),
+					// Ragil: number of installments. HK: months to charge — empty = until cancelled.
+					Tashlumim: frequency === "monthly" ? "" : "1",
+					Groupe: purposeSelect?.value ?? "",
+					Comment: dedication,
+					Param1: "",
+					Param2: "",
+					ForceUpdateMatching: "",
+					CallBack: "",
+					CallBackMailError: "",
+					Tokef: "",
+				},
+			});
+		});
+	}
+</script>
