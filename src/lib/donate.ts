@@ -2,6 +2,7 @@ import * as items from "@wix/wix-data-items-sdk";
 import { auth } from "@wix/essentials";
 
 const COLLECTION_ID = "DonatePage";
+const PURPOSES_COLLECTION_ID = "DonatePurposes";
 
 export interface DonateConfig {
 	mosadId?: string;
@@ -9,7 +10,6 @@ export interface DonateConfig {
 	hostedPageUrl?: string;
 	introText?: string;
 	suggestedAmounts?: string;
-	purposes?: string;
 }
 
 export interface DonatePurpose {
@@ -31,28 +31,29 @@ export async function getDonateConfig(): Promise<DonateConfig | null> {
 	}
 }
 
+export async function getDonatePurposes(): Promise<DonatePurpose[]> {
+	try {
+		const elevated = auth.elevate(items.query);
+		const { items: results } = await elevated(PURPOSES_COLLECTION_ID)
+			.ascending("sortOrder")
+			.limit(50)
+			.find();
+		return (results as Array<Record<string, unknown>>)
+			.map((r) => ({
+				label: String(r.label ?? ""),
+				category: String(r.category ?? ""),
+			}))
+			.filter((p) => p.label.length > 0);
+	} catch (err) {
+		console.error(`[donate] purposes query failed:`, err);
+		return [];
+	}
+}
+
 export function parseSuggestedAmounts(raw: string | undefined): number[] {
 	if (!raw) return [];
 	return raw
 		.split(",")
 		.map((s) => Number.parseInt(s.trim(), 10))
 		.filter((n) => Number.isFinite(n) && n > 0);
-}
-
-/** Each line is `Label | Nedarim Plus category`; a line without `|` is both. */
-export function parsePurposes(raw: string | undefined): DonatePurpose[] {
-	if (!raw) return [];
-	return raw
-		.split("\n")
-		.map((line) => line.trim())
-		.filter(Boolean)
-		.map((line) => {
-			const sep = line.indexOf("|");
-			if (sep === -1) return { label: line, category: line };
-			return {
-				label: line.slice(0, sep).trim(),
-				category: line.slice(sep + 1).trim(),
-			};
-		})
-		.filter((p) => p.label.length > 0);
 }
