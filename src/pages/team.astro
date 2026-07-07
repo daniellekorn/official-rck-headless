@@ -79,23 +79,28 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 
 										const photoMarkup = (
 											<div
-												class="card-photo relative aspect-square w-full overflow-hidden bg-navy-50"
-												style={m.photoUrl ? `` : `background: linear-gradient(135deg, var(--color-navy-50) 0%, var(--color-navy-100) 50%, var(--color-gold-100) 100%);`}
+												class="card-photo relative aspect-square w-full overflow-hidden"
+												style="background: linear-gradient(135deg, var(--color-navy-50) 0%, var(--color-navy-100) 50%, var(--color-gold-100) 100%);"
 											>
-												{m.photoUrl ? (
+												{/* Monogram fallback — always in DOM; hidden by default when a photo URL exists.
+												    The img onerror makes it visible again if the CDN returns a broken response. */}
+												<div
+													class="monogram-fallback absolute inset-0 flex flex-col items-center justify-center gap-2"
+													style={m.photoUrl ? "display:none" : ""}
+												>
+													<span class="font-display text-6xl sm:text-7xl font-medium text-navy-200" aria-hidden="true">
+														{initials || "RCK"}
+													</span>
+													<span class="gold-rule-sm opacity-60" aria-hidden="true"></span>
+												</div>
+												{m.photoUrl && (
 													<img
 														src={m.photoUrl}
 														alt={fullName}
 														loading="lazy"
 														class="card-image h-full w-full object-cover"
+														onerror="this.style.display='none';this.closest('.card-photo').querySelector('.monogram-fallback').style.display=''"
 													/>
-												) : (
-													<div class="absolute inset-0 flex flex-col items-center justify-center gap-2">
-														<span class="font-display text-6xl sm:text-7xl font-medium text-navy-200" aria-hidden="true">
-															{initials || "RCK"}
-														</span>
-														<span class="gold-rule-sm opacity-60" aria-hidden="true"></span>
-													</div>
 												)}
 												{hasBio && (
 													<div class="bio-overlay absolute inset-0 flex flex-col bg-gradient-to-b from-navy-700/80 via-navy-700/75 to-navy-700/70 p-5 sm:p-6">
