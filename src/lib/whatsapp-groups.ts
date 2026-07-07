@@ -28,33 +28,42 @@ export interface WhatsappGroup {
 	videoIds?: string[];
 }
 
-const YT_ID = /^[\w-]{10,12}$/;
+/**
+ * Accept either a bare YouTube video ID or any full YouTube URL form
+ * (watch?v=, youtu.be/, /shorts/, /embed/) and return just the video ID.
+ * Returns undefined if the input is empty or unrecognised.
+ * (Moved here from homepage.ts when the shorts left the HomePage row — #044.)
+ */
+export function extractYouTubeId(input: string | undefined): string | undefined {
+	if (!input) return undefined;
+	const s = input.trim();
+	// Already a bare ID (no slashes or protocol)
+	if (/^[A-Za-z0-9_-]{11}$/.test(s)) return s;
+	try {
+		const url = new URL(s);
+		// youtu.be/VIDEO_ID
+		if (url.hostname === "youtu.be") return url.pathname.slice(1).split("?")[0] || undefined;
+		// /shorts/VIDEO_ID or /embed/VIDEO_ID or /v/VIDEO_ID
+		const pathMatch = url.pathname.match(/\/(shorts|embed|v)\/([A-Za-z0-9_-]{11})/);
+		if (pathMatch) return pathMatch[2];
+		// ?v=VIDEO_ID
+		return url.searchParams.get("v") ?? undefined;
+	} catch {
+		return undefined;
+	}
+}
 
 /**
- * Accepts whatever the office pastes — full YouTube URLs (watch?v=, /shorts/,
- * youtu.be, /embed/, /live/) or bare video IDs — one per line or comma-separated,
- * and returns clean video IDs. Unparseable lines are dropped silently rather
- * than breaking the tile.
+ * The office pastes YouTube links one per line (commas work too), in any URL
+ * shape or as bare IDs. Unparseable lines are dropped silently rather than
+ * breaking the tile.
  */
 export function parseYouTubeIds(raw?: string): string[] {
 	if (!raw) return [];
 	return raw
 		.split(/[\n,]/)
-		.map((s) => s.trim())
-		.filter(Boolean)
-		.map((s) => {
-			if (YT_ID.test(s)) return s;
-			try {
-				const u = new URL(s.startsWith("http") ? s : `https://${s}`);
-				if (u.hostname === "youtu.be") return u.pathname.slice(1).split("/")[0] ?? "";
-				const path = u.pathname.match(/\/(?:shorts|embed|live)\/([\w-]{10,12})/);
-				if (path) return path[1];
-				return u.searchParams.get("v") ?? "";
-			} catch {
-				return "";
-			}
-		})
-		.filter((id) => YT_ID.test(id));
+		.map((s) => extractYouTubeId(s))
+		.filter((id): id is string => Boolean(id));
 }
 
 export async function getWhatsappGroups(): Promise<WhatsappGroup[]> {
@@ -68,7 +77,7 @@ export async function getWhatsappGroups(): Promise<WhatsappGroup[]> {
 
 		return (results as WhatsappGroup[]).map((g) => ({
 			...g,
-			imageUrl: resolveImage(g.image),
+			imageUrl: resolveImage(g.image, 720, 1280),
 			videoIds: parseYouTubeIds(g.videoUrls),
 		}));
 	} catch (err) {

@@ -31,6 +31,12 @@ interface Short {
 	joinHref?: string;
 }
 
+interface Chat {
+	name?: string;
+	/** That group's own chat.whatsapp.com invite — clicking the list entry opens it. */
+	joinHref?: string;
+}
+
 interface Props {
 	titleLead?: string;
 	titleAccent?: string;
@@ -39,8 +45,8 @@ interface Props {
 	joinLabel?: string;
 	joinHref?: string;
 	membersNote?: string;
-	/** All chat groups, for the left-hand list. */
-	chats?: string[];
+	/** All chat groups, for the left-hand list. Plain strings render unlinked. */
+	chats?: Array<string | Chat>;
 	/** Featured groups shown as vertical video tiles on the right. */
 	shorts?: Short[];
 }
@@ -67,7 +73,9 @@ const {
 	shorts = fallbackShorts,
 } = Astro.props;
 
-const chatList = chats && chats.length > 0 ? chats : fallbackChats;
+const chatList: Chat[] = (chats && chats.length > 0 ? chats : fallbackChats)
+	.map((c) => (typeof c === "string" ? { name: c } : c))
+	.filter((c) => c.name);
 const featured = (shorts && shorts.length > 0 ? shorts : fallbackShorts).slice(0, 4);
 
 const posterFor = (s: Short) =>
@@ -104,16 +112,40 @@ const posterFor = (s: Short) =>
 				<p class="font-sans text-xs font-bold uppercase tracking-[0.2em] text-navy-400">Our chat groups</p>
 				<ul class="mt-4 grid grid-cols-1 gap-x-6 gap-y-2.5 sm:grid-cols-2 lg:grid-cols-1 lg:gap-y-3">
 					{
-						chatList.map((name) => (
-							<li class="flex items-center gap-3">
-								<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-whatsapp/12 text-whatsapp-dark">
-									<svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true">
-										<path d="M4 4h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H9l-4 3.5A.6.6 0 0 1 4 21V5a1 1 0 0 1 0-1Z" />
-									</svg>
-								</span>
-								<span class="font-sans text-base font-medium text-navy-700">{name}</span>
-							</li>
-						))
+						/* A group with its own invite link is a real link — clicking it opens
+						   that chat. Groups without one render as plain text. */
+						chatList.map((chat) => {
+							const inner = (
+								<>
+									<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-whatsapp/12 text-whatsapp-dark">
+										<svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true">
+											<path d="M4 4h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H9l-4 3.5A.6.6 0 0 1 4 21V5a1 1 0 0 1 0-1Z" />
+										</svg>
+									</span>
+									<span class="font-sans text-base font-medium text-navy-700">{chat.name}</span>
+								</>
+							);
+							return (
+								<li>
+									{chat.joinHref ? (
+										<a
+											href={chat.joinHref}
+											target="_blank"
+											rel="noopener"
+											aria-label={`Join ${chat.name} on WhatsApp`}
+											class="group/chat flex items-center gap-3 transition-transform duration-200 hover:translate-x-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-whatsapp [&_span:last-child]:transition-colors [&_span:last-child]:group-hover/chat:text-whatsapp-dark"
+										>
+											{inner}
+											<svg viewBox="0 0 24 24" class="h-4 w-4 -ml-1 text-whatsapp-dark opacity-0 transition-opacity duration-200 group-hover/chat:opacity-100" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+												<path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+											</svg>
+										</a>
+									) : (
+										<span class="flex items-center gap-3">{inner}</span>
+									)}
+								</li>
+							);
+						})
 					}
 				</ul>
 

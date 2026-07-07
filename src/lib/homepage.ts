@@ -67,9 +67,10 @@ export interface HomepageContent {
 	joinUsCard3Image?: string;
 	joinUsCard3ImageUrl?: string;
 
-	// "On WhatsApp" closing band — header copy + four featured-group slots.
-	// Flat fields mirroring the Join Us card pattern. See design-log/032.
-	whatsappEyebrow?: string;
+	// WhatsApp community band — header copy only. The chat groups and featured
+	// video tiles moved to the `WhatsappGroups` collection (see design-log/044);
+	// the old whatsappEyebrow, whatsappChatList and whatsappShort1–4 flat fields
+	// are retired.
 	whatsappTitleLead?: string;
 	whatsappTitleAccent?: string;
 	whatsappTitleTrail?: string;
@@ -77,36 +78,6 @@ export interface HomepageContent {
 	whatsappJoinLabel?: string;
 	whatsappJoinHref?: string;
 	whatsappMembersNote?: string;
-	/** All chat-group names for the left-hand list — one per line or comma-separated. */
-	whatsappChatList?: string;
-
-	whatsappShort1ChatName?: string;
-	whatsappShort1Description?: string;
-	whatsappShort1VideoId?: string;
-	whatsappShort1JoinHref?: string;
-	whatsappShort1Image?: string;
-	whatsappShort1ImageUrl?: string;
-
-	whatsappShort2ChatName?: string;
-	whatsappShort2Description?: string;
-	whatsappShort2VideoId?: string;
-	whatsappShort2JoinHref?: string;
-	whatsappShort2Image?: string;
-	whatsappShort2ImageUrl?: string;
-
-	whatsappShort3ChatName?: string;
-	whatsappShort3Description?: string;
-	whatsappShort3VideoId?: string;
-	whatsappShort3JoinHref?: string;
-	whatsappShort3Image?: string;
-	whatsappShort3ImageUrl?: string;
-
-	whatsappShort4ChatName?: string;
-	whatsappShort4Description?: string;
-	whatsappShort4VideoId?: string;
-	whatsappShort4JoinHref?: string;
-	whatsappShort4Image?: string;
-	whatsappShort4ImageUrl?: string;
 }
 
 /**
@@ -138,30 +109,6 @@ export function normalizeAccentLine(
 	return fallback;
 }
 
-/**
- * Accept either a bare YouTube video ID or any full YouTube URL form
- * (watch?v=, youtu.be/, /shorts/, /embed/) and return just the video ID.
- * Returns undefined if the input is empty or unrecognised.
- */
-export function extractYouTubeId(input: string | undefined): string | undefined {
-	if (!input) return undefined;
-	const s = input.trim();
-	// Already a bare ID (no slashes or protocol)
-	if (/^[A-Za-z0-9_-]{11}$/.test(s)) return s;
-	try {
-		const url = new URL(s);
-		// youtu.be/VIDEO_ID
-		if (url.hostname === "youtu.be") return url.pathname.slice(1).split("?")[0] || undefined;
-		// /shorts/VIDEO_ID or /embed/VIDEO_ID or /v/VIDEO_ID
-		const pathMatch = url.pathname.match(/\/(shorts|embed|v)\/([A-Za-z0-9_-]{11})/);
-		if (pathMatch) return pathMatch[2];
-		// ?v=VIDEO_ID
-		return url.searchParams.get("v") ?? undefined;
-	} catch {
-		return undefined;
-	}
-}
-
 export async function getHomepage(): Promise<HomepageContent | null> {
 	try {
 		const elevated = auth.elevate(items.query);
@@ -176,15 +123,6 @@ export async function getHomepage(): Promise<HomepageContent | null> {
 			joinUsCard1ImageUrl: resolveImage(row.joinUsCard1Image, 800, 1000),
 			joinUsCard2ImageUrl: resolveImage(row.joinUsCard2Image, 800, 1000),
 			joinUsCard3ImageUrl: resolveImage(row.joinUsCard3Image, 800, 1000),
-			whatsappShort1ImageUrl: resolveImage(row.whatsappShort1Image, 720, 1280),
-			whatsappShort2ImageUrl: resolveImage(row.whatsappShort2Image, 720, 1280),
-			whatsappShort3ImageUrl: resolveImage(row.whatsappShort3Image, 720, 1280),
-			whatsappShort4ImageUrl: resolveImage(row.whatsappShort4Image, 720, 1280),
-			// Normalise: the office can paste a full YouTube URL or a bare video ID.
-			whatsappShort1VideoId: extractYouTubeId(row.whatsappShort1VideoId),
-			whatsappShort2VideoId: extractYouTubeId(row.whatsappShort2VideoId),
-			whatsappShort3VideoId: extractYouTubeId(row.whatsappShort3VideoId),
-			whatsappShort4VideoId: extractYouTubeId(row.whatsappShort4VideoId),
 		};
 	} catch (err) {
 		console.error(`[homepage] query failed:`, err);

@@ -44,12 +44,10 @@ const cards: CardInput[] = Astro.props.cards && Astro.props.cards.length > 0 ? A
 									loading="lazy"
 									class="absolute inset-0 h-full w-full object-cover"
 								/>
-								{/* White fade — the photo dissolves into white toward the bottom,
-								    solid early enough that the navy text sits on white. */}
-								<span
-									aria-hidden="true"
-									class="absolute inset-0 bg-[linear-gradient(to_top,#fff_0%,#fff_34%,rgba(255,255,255,0.72)_52%,rgba(255,255,255,0)_76%)]"
-								></span>
+								{/* Light yellow wash, kept the brand hue but lightened so the
+								    photo reads through — stronger toward the bottom so the
+								    text below stays legible. */}
+								<span aria-hidden="true" class="absolute inset-0 bg-gradient-to-t from-gold-500/60 via-gold-400/15 to-gold-300/5"></span>
 							</>
 						)}
 
@@ -95,15 +93,18 @@ const cards: CardInput[] = Astro.props.cards && Astro.props.cards.length > 0 ? A
 
 						{/* Text pushed to the bottom (mt-auto) so the photo stays visible above it */}
 						<div class="relative mt-auto pt-10">
-							<p class="text-xs uppercase tracking-[0.22em] text-navy-700/70">
+							{/* soft white hue behind the letters so they hold up over the
+							    yellow-washed photo */}
+							<span aria-hidden="true" class="absolute -inset-x-5 -bottom-5 top-6 rounded-md bg-white/55 blur-xl"></span>
+							<p class="relative text-xs uppercase tracking-[0.22em] text-navy-700/70">
 								{card.subtitle}
 							</p>
-							<h3 class="mt-1.5 font-display text-3xl sm:text-[2rem] leading-tight font-medium text-navy-700">
+							<h3 class="relative mt-1.5 font-display text-3xl sm:text-[2rem] leading-tight font-medium text-navy-700">
 								{card.title}
 							</h3>
 
 							{/* navy underline rule that grows on hover */}
-							<span aria-hidden="true" class="mt-5 block h-[2px] w-10 rounded-sm bg-navy-700/40 transition-all duration-300 group-hover:w-20"></span>
+							<span aria-hidden="true" class="relative mt-5 block h-[2px] w-10 rounded-sm bg-navy-700/40 transition-all duration-300 group-hover:w-20"></span>
 						</div>
 					</a>
 					</div>

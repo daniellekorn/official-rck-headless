@@ -23,11 +23,13 @@ const pagerSections = [
 import { getHomepage, normalizeImageOn, normalizeAccentLine } from "../lib/homepage";
 import { getHistory } from "../lib/history";
 import { getHeroMedia } from "../lib/hero-media";
+import { getWhatsappGroups } from "../lib/whatsapp-groups";
 
-const [homepage, history, heroSlides] = await Promise.all([
+const [homepage, history, heroSlides, whatsappGroups] = await Promise.all([
 	getHomepage(),
 	getHistory(),
 	getHeroMedia(),
+	getWhatsappGroups(),
 ]);
 
 // The two stacked "image + text" bands. Named by position, not content
@@ -127,8 +129,9 @@ const imageTextSection2 = {
 		</div>
 
 		<div id="whatsapp" data-pager-section data-pager-theme="light" data-section-reveal class="scroll-mt-24">
+			{/* Groups + tiles come from the WhatsappGroups collection (see #044);
+			    header copy stays on the HomePage row. */}
 			<WhatsAppCommunity
-				eyebrow={homepage?.whatsappEyebrow}
 				titleLead={homepage?.whatsappTitleLead}
 				titleAccent={homepage?.whatsappTitleAccent}
 				titleTrail={homepage?.whatsappTitleTrail}
@@ -136,13 +139,16 @@ const imageTextSection2 = {
 				joinLabel={homepage?.whatsappJoinLabel}
 				joinHref={homepage?.whatsappJoinHref}
 				membersNote={homepage?.whatsappMembersNote}
-				chats={(homepage?.whatsappChatList ?? "").split(/[\n,]/).map((c) => c.trim()).filter(Boolean)}
-				shorts={[
-					{ chatName: homepage?.whatsappShort1ChatName, description: homepage?.whatsappShort1Description, videoId: homepage?.whatsappShort1VideoId, joinHref: homepage?.whatsappShort1JoinHref, posterUrl: homepage?.whatsappShort1ImageUrl },
-					{ chatName: homepage?.whatsappShort2ChatName, description: homepage?.whatsappShort2Description, videoId: homepage?.whatsappShort2VideoId, joinHref: homepage?.whatsappShort2JoinHref, posterUrl: homepage?.whatsappShort2ImageUrl },
-					{ chatName: homepage?.whatsappShort3ChatName, description: homepage?.whatsappShort3Description, videoId: homepage?.whatsappShort3VideoId, joinHref: homepage?.whatsappShort3JoinHref, posterUrl: homepage?.whatsappShort3ImageUrl },
-					{ chatName: homepage?.whatsappShort4ChatName, description: homepage?.whatsappShort4Description, videoId: homepage?.whatsappShort4VideoId, joinHref: homepage?.whatsappShort4JoinHref, posterUrl: homepage?.whatsappShort4ImageUrl },
-				].filter((s) => s.chatName || s.videoId)}
+				chats={whatsappGroups.map((g) => ({ name: g.name, joinHref: g.joinHref }))}
+				shorts={whatsappGroups
+					.filter((g) => g.featured)
+					.map((g) => ({
+						chatName: g.name,
+						description: g.description,
+						videoIds: g.videoIds,
+						joinHref: g.joinHref,
+						posterUrl: g.imageUrl,
+					}))}
 			/>
 		</div>
 	</main>

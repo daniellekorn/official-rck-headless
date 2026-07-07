@@ -26,15 +26,15 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | History timeline under "Who We Are" | `OurHistory` | Add / reorder / hide rows. Each row is one milestone: image + Hebrew accent line + title + caption |
 | Join Us cards (3 gold cards) | `HomePage` | `joinUsCard1*` / `joinUsCard2*` / `joinUsCard3*` fields on the single row |
 | "Join our WhatsApp community" band (heading, body, join button) | `HomePage` | `whatsapp*` header fields on the single row. See [#032](design-log/032-whatsapp-community-section.md). |
-| The list of chat groups (left side) | `HomePage` | `whatsappChatList` — type the group names, one per line (or comma-separated). |
-| Featured groups (the right-side thumbnails that play a video) | `HomePage` | `whatsappShort1*`…`whatsappShort4*` on the single row. Fill `VideoId` (the YouTube Short ID) to make a thumbnail play in the pop-up player; leave a slot empty to hide it. Up to 4. |
+| The list of chat groups (left side) | `WhatsappGroups` | One row per group — the `name` shows in the list. Fill `joinHref` to make that entry clickable (opens that group's invite). Add / reorder (`sortOrder`) / hide (`active`) rows. See [#044](design-log/044-whatsapp-groups-collection.md). |
+| Featured groups (the right-side video tiles) | `WhatsappGroups` | Tick `featured` on a row and paste YouTube links into `Video URLs` (one per line — full URLs are fine). Visitors flip between a group's videos with the ‹ › arrows. First four featured rows show. |
 | Team members | `TeamMembers` | Add a row. Photo, name, role, bio, etc. |
 | Youth programs (on /youth) | `YouthPrograms` | Add a row per program: title, description, contact rabbi, optional photo + flyer. |
 | Past events archive (on /events) | `PastEvents` | Add a row per past event: title, date, photo gallery, optional flyer + blurb. Shows newest first. |
 | Davening times (weekday + Shabbos) | *(computed)* + `DaveningTimes` | Regular minyanim **and** the Shabbos schedule are calculated from zmanim in code (design-log #040, #041) — don't enter them as rows. Use `DaveningTimes` only for extras (Selichos, special weeks): `dayType = Weekday` rows appear under the weekday table, `dayType = Shabbat` rows under Shabbos Day. |
 | Flyers (images / PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). For event flyers, set `removeAfter` so they drop off the site on their own. |
 | Footer address, phone, email | `ContactInfo` | Edit the single row. Leave a field empty to hide it from the footer. |
-| Footer social links | `ContactInfo` | Fill in any of `facebookUrl`, `instagramUrl`, `youtubeUrl`, `twitterUrl`, `linkedinUrl`. Empty = icon hidden. |
+| Footer social links | `ContactInfo` | Fill in any of `facebookUrl`, `instagramUrl`, `youtubeUrl`, `whatsappUrl`, `twitterUrl`, `linkedinUrl`. Empty = icon hidden. (`whatsappUrl` should be the main community invite — same link as `HomePage.whatsappJoinHref`.) |
 | Donate page (intro text, suggested amounts, donation designations) | `DonatePage` | Edit the single row. See schema below — the `apiValid` field is what switches the page from a "Donate Securely" link into the full on-site card form. |
 | Brand colors (the gold, the navy, the bright accent) | `ThemeSettings` | Edit the single row. Put a hex code (e.g. `#d6a21e`) in `primaryGold` / `primaryNavy` / `accent`. The whole matching scale across the site recolors. Leave a field empty to keep the built-in color. See [#028](design-log/028-cms-editable-theme-colors.md). |
 
@@ -122,7 +122,6 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | joinUsCard3Href | Text | "/events" |
 | joinUsCard3Icon | Text | One of: `book`, `reader`, `people`, `minyan` |
 | joinUsCard3Image | Image | Optional photo behind the card (see card 1). |
-| whatsappEyebrow | Text | Small label above the heading. Empty = "On WhatsApp". |
 | whatsappTitleLead | Text | Heading text *before* the highlighted word. Empty = "Join our WhatsApp". |
 | whatsappTitleAccent | Text | The word that gets the animated gold marker. Empty = "community". |
 | whatsappTitleTrail | Text | Heading text *after* the highlighted word. Empty = nothing. (Lead + Accent + Trail let you highlight any word in the heading.) |
@@ -130,13 +129,23 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | whatsappJoinLabel | Text | Green join-button label. Empty = "Join the community". |
 | whatsappJoinHref | Text | Green join-button link — the main community invite (e.g. a `chat.whatsapp.com/…` link). |
 | whatsappMembersNote | Text | Optional small trust line under the button (e.g. "Over 400 members"). Empty = hidden. |
-| whatsappChatList | Text | The chat-group names for the left-hand list — one per line, or comma-separated. Empty = a sample list. |
-| whatsappShort1ChatName | Text | Featured group 1 name (e.g. "Halacha2Go"). |
-| whatsappShort1Description | Text | Featured group 1 one-line description. |
-| whatsappShort1VideoId | Text | Featured group 1 YouTube Short ID (the part after `/shorts/` or `watch?v=`). Fill this to make the thumbnail play in the pop-up player. Empty = a static "RCK" thumbnail. |
-| whatsappShort1JoinHref | Text | Featured group 1 chat invite link. Empty = no join arrow on that card. |
-| whatsappShort1Image | Image | Optional custom thumbnail (a flyer). Empty = the YouTube thumbnail (or the "RCK" placeholder if there's no video). |
-| whatsappShort2* / 3* / 4* | — | Same five fields as Featured group 1. Up to four. |
+
+> The chat-group list and the featured video tiles moved to the **`WhatsappGroups`** collection (below) — the old `whatsappChatList` and `whatsappShort1–4` fields are retired. See [design-log/044](design-log/044-whatsapp-groups-collection.md).
+
+#### `WhatsappGroups` — one row per chat group
+
+Drives the WhatsApp band's left-hand group list *and* the featured video tiles on the right.
+
+| Field | Type | Notes |
+|---|---|---|
+| name | Text | Group name, e.g. "Halacha2Go". Shows in the left-hand list. (Tiles show no title — the videos speak for themselves.) |
+| description | Text | One-liner under a featured group's video tile. |
+| joinHref | URL | That group's `chat.whatsapp.com` invite. Makes the group's entry in the left-hand list clickable, and shows a "Join chat" link under its video tile. |
+| videoUrls | Text | YouTube links, **one per line** — any form works (`watch?v=`, `/shorts/`, `youtu.be`, or a bare video ID). Several lines = visitors flip between them with ‹ › arrows on the tile. |
+| image | Image | Optional custom poster. Empty = the first video's YouTube thumbnail (or an "RCK" placeholder). |
+| featured | Boolean | Tick to show this group as a video tile on the right (first four featured rows appear). Unticked rows only appear in the list. |
+| sortOrder | Number | Display order, lower first — for both the list and the tiles. |
+| active | Boolean | Untick to hide a group everywhere without deleting it. |
 
 > A subchat tile is shown when it has a name or a video; empty slots are hidden. Four slots max — a fifth needs code.
 
