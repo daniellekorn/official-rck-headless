@@ -179,11 +179,12 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 	   touch browsers "stick" :hover state after a tap — without the
 	   gate, tapping to collapse couldn't beat the stuck hover and the
 	   overlay would never close on mobile. */
-	/* Portraits fetched at 640×853 with focalPoint y=0.15 so the CDN anchors
-	   the crop near the face (not the center). object-position 50% 5% keeps
-	   the very top of the CDN image visible with minimal trimming. */
+	/* Portraits fetched at 640×853 (3:4) — the CDN center-fills, leaving
+	   ~100px of vertical overflow in a typical square card. 20% skips ~20px
+	   from the top, which clears the empty studio background above most
+	   faces without cutting into the top of the head. */
 	.card-image {
-		object-position: 50% 5%;
+		object-position: 50% 20%;
 		transition: filter 400ms ease;
 	}
 	.bio-overlay {
