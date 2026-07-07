@@ -184,9 +184,12 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 	   touch browsers "stick" :hover state after a tap — without the
 	   gate, tapping to collapse couldn't beat the stuck hover and the
 	   overlay would never close on mobile. */
-	/* Photos are requested as 640×640 squares — properly-cropped uploads fill
-	   the card exactly. object-fit: cover handles any minor size mismatch. */
+	/* A subtle scale+translate trims ~7% from the top of each photo, hiding
+	   the light studio background that appears on some uploads. scale(1.08)
+	   is imperceptible as a zoom; translateY(-4%) biases the crop upward.
+	   overflow-hidden on .card-photo clips the excess on all four sides. */
 	.card-image {
+		transform: scale(1.08) translateY(-4%);
 		transition: filter 400ms ease;
 	}
 	.bio-overlay {
