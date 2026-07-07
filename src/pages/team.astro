@@ -179,17 +179,14 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 	   touch browsers "stick" :hover state after a tap — without the
 	   gate, tapping to collapse couldn't beat the stuck hover and the
 	   overlay would never close on mobile. */
-	/* Portraits vary in framing — some tight head-shots, some waist-up with
-	   pale margins. object-position pulls the face area into view; scale(1.3)
-	   zooms past remaining white borders at the top and bottom. Moving the
-	   origin to 30% (vs the old 20%) hides slightly more of the top margin
-	   without cutting off chins. Photos with heavy white padding should be
-	   re-uploaded cropped to the face. */
+	/* Portraits are fetched as 640×853 (portrait 3:4) so object-fit: cover
+	   has vertical room to work with. object-position 50% 12% anchors the
+	   view toward the top of the portrait — where the face is — and trims
+	   mostly from the bottom. No scale transform: the CDN image is already
+	   larger than the square container so zooming in was clipping heads. */
 	.card-image {
-		object-position: 50% 20%;
-		transform: scale(1.3);
-		transform-origin: 50% 30%;
-		transition: filter 400ms ease, transform 500ms ease;
+		object-position: 50% 12%;
+		transition: filter 400ms ease;
 	}
 	.bio-overlay {
 		opacity: 0;
@@ -200,8 +197,6 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 	@media (hover: hover) and (pointer: fine) {
 		.team-card:hover .card-image {
 			filter: grayscale(1);
-			transform: scale(1.36);
-			transform-origin: 50% 30%;
 		}
 		.team-card:hover .bio-overlay {
 			opacity: 1;
@@ -211,8 +206,6 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 
 	.team-card[aria-expanded="true"] .card-image {
 		filter: grayscale(1);
-		transform: scale(1.36);
-		transform-origin: 50% 30%;
 	}
 	.team-card[aria-expanded="true"] .bio-overlay {
 		opacity: 1;
