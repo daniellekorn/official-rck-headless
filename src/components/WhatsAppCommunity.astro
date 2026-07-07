@@ -136,15 +136,17 @@ const posterFor = (s: Short) =>
 			</div>
 
 			{/* RIGHT — vertical video-preview tiles */}
+			{/* Mobile: tiles stack vertically (a side-scroller cut the 9:16 tiles off).
+			    md+: the original centered wrap of side-by-side tiles. */}
 			<div
 				data-shorts-row
-				class="lg:col-span-8 flex gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory -mx-6 px-6 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] md:mx-0 md:px-0 md:flex-wrap md:justify-center md:pb-0"
+				class="lg:col-span-8 flex flex-col items-center gap-10 md:flex-row md:flex-wrap md:justify-center md:items-stretch md:gap-5"
 			>
 				{
 					featured.map((s) => {
 						const poster = posterFor(s);
 						return (
-							<figure data-short-card class="group flex w-[12rem] shrink-0 snap-start flex-col" style="opacity:0">
+							<figure data-short-card class="group flex w-[15rem] md:w-[12rem] shrink-0 flex-col" style="opacity:0">
 								{/* 9:16 video tile */}
 								<div
 									data-short-frame
@@ -210,9 +212,6 @@ const posterFor = (s: Short) =>
 	</noscript>
 </section>
 
-<style>
-	[data-shorts-row]::-webkit-scrollbar { display: none; }
-</style>
 
 <script>
 	import { animate, inView, stagger } from "motion";
