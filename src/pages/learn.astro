@@ -153,7 +153,8 @@ const tagGroups = groupTags(uniqueSubCategories(allLearning));
 			cards.forEach((card) => {
 				// data-sub is the card's tag list joined with "|" (a flyer can have many tags).
 				const tags = (card.dataset.sub ?? "").split("|").filter(Boolean);
-				const show = active.size === 0 || tags.some((t) => active.has(t));
+				// AND logic: flyer must match every active filter, not just one.
+				const show = active.size === 0 || [...active].every((t) => tags.includes(t));
 				card.classList.toggle("hidden", !show);
 			});
 			// `invisible` (not `hidden`) so the header row keeps its height.
