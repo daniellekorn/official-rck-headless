@@ -35,7 +35,7 @@ const placeholder: InternalEntry[] = [
 	{ year: 2025, title: "Looking Ahead", caption: "Building the next chapter of RCK, together.", from: "var(--color-navy-700)", to: "var(--color-gold-200)" },
 ];
 
-const { secondsPerCard = 7 } = Astro.props;
+const { secondsPerCard = 12 } = Astro.props;
 const entries: InternalEntry[] =
 	Astro.props.entries && Astro.props.entries.length > 0 ? Astro.props.entries : placeholder;
 
