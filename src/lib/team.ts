@@ -97,7 +97,7 @@ export async function getTeam(): Promise<TeamMember[]> {
 
 		return (results as Array<TeamMember & { roleGroup: unknown }>).map((m) => ({
 			...m,
-			photoUrl: resolveImage(m.photo, 640, 853),
+			photoUrl: resolveImage(m.photo, 640, 640),
 			roleGroupRaw: typeof m.roleGroup === "string" ? m.roleGroup : undefined,
 			roleGroup: normalizeRoleGroup(m.roleGroup),
 		}));
