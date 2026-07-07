@@ -168,26 +168,41 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 
 		let current = 0;
 		let timer: ReturnType<typeof setTimeout> | undefined;
+		let activeVideo: HTMLVideoElement | undefined;
+		let activeEndedListener: (() => void) | undefined;
 
 		const videoOf = (el: HTMLElement) => el.querySelector<HTMLVideoElement>("[data-hero-video]");
 
+		// Remove any stale "ended" listener before attaching a new one. Without
+		// this, scrolling away and back re-calls scheduleAdvance and adds a second
+		// listener — the video then triggers advance() twice and skips a slide.
+		const cleanupActiveVideo = () => {
+			if (activeVideo && activeEndedListener) {
+				activeVideo.removeEventListener("ended", activeEndedListener);
+				activeEndedListener = undefined;
+			}
+		};
+
 		const scheduleAdvance = (el: HTMLElement) => {
 			clearTimeout(timer);
+			cleanupActiveVideo();
 			const video = videoOf(el);
 			if (el.dataset.kind === "video" && video) {
+				activeVideo = video;
 				video.preload = "auto";
 				video.currentTime = 0;
-				const onEnded = () => advance();
-				video.addEventListener("ended", onEnded, { once: true });
+				activeEndedListener = () => advance();
+				video.addEventListener("ended", activeEndedListener, { once: true });
 				// Safety net: if "ended" never fires, advance after the clip's
 				// duration (+1s), or a 12s default when duration is unknown.
 				const fallbackMs = Number.isFinite(video.duration) && video.duration > 0 ? (video.duration + 1) * 1000 : 12000;
 				timer = setTimeout(() => {
-					video.removeEventListener("ended", onEnded);
+					cleanupActiveVideo();
 					advance();
 				}, fallbackMs);
 				video.play().catch(() => {});
 			} else {
+				activeVideo = undefined;
 				const hold = Number(el.dataset.hold ?? 6000);
 				timer = setTimeout(advance, hold);
 			}
