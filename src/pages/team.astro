@@ -145,13 +145,13 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 												type="button"
 												data-team-card
 												aria-expanded="false"
-												class="team-card block h-full w-full text-left rounded-md bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_45px_-22px_rgba(15,23,42,0.45)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-500 cursor-pointer"
+												class="team-card flex flex-col h-full w-full text-left rounded-md bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_45px_-22px_rgba(15,23,42,0.45)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-500 cursor-pointer"
 											>
 												{photoMarkup}
 												{metaMarkup}
 											</button>
 										) : (
-											<div class="team-card-static block h-full w-full rounded-md bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)]">
+											<div class="team-card-static flex flex-col h-full w-full rounded-md bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)]">
 												{photoMarkup}
 												{metaMarkup}
 											</div>
@@ -184,12 +184,7 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 	   touch browsers "stick" :hover state after a tap — without the
 	   gate, tapping to collapse couldn't beat the stuck hover and the
 	   overlay would never close on mobile. */
-	/* A subtle scale+translate trims ~7% from the top of each photo, hiding
-	   the light studio background that appears on some uploads. scale(1.08)
-	   is imperceptible as a zoom; translateY(-4%) biases the crop upward.
-	   overflow-hidden on .card-photo clips the excess on all four sides. */
 	.card-image {
-		transform: scale(1.08) translateY(-4%);
 		transition: filter 400ms ease;
 	}
 	.bio-overlay {
