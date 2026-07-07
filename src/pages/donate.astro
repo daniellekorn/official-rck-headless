@@ -178,6 +178,7 @@ const freqBtn =
 										<div>
 											<label class={label} for="donorPhone">Phone</label>
 											<input class={field} id="donorPhone" type="tel" maxlength="20" autocomplete="tel" />
+											<p class="mt-1 hidden text-sm text-red-600" data-error-for="donorPhone"></p>
 										</div>
 										<div class="sm:col-span-2">
 											<label class={label} for="dedication">Dedication / in honor of</label>
@@ -443,8 +444,14 @@ const freqBtn =
 			const firstName = input("donorFirstName").value.trim();
 			const lastName = input("donorLastName").value.trim();
 			const email = input("donorEmail").value.trim();
-			const phone = input("donorPhone").value.replace(/\D/g, "");
+			const rawPhone = input("donorPhone").value.trim();
+			const phone = rawPhone.replace(/\D/g, "");
 			const dedication = input("dedication").value.trim();
+
+			const nameValid = (s: string) => s.length >= 2 && !/\d/.test(s);
+			const emailValid = (s: string) => /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(s);
+			const phoneValid = (raw: string, digits: string) =>
+				raw === "" || (digits.length >= 7 && /^[+\d][\d\s\-(). +]*$/.test(raw));
 
 			let bad = false;
 			if (amount <= 0) {
@@ -454,13 +461,23 @@ const freqBtn =
 			if (!firstName) {
 				setError("donorFirstName", "Required.");
 				bad = true;
+			} else if (!nameValid(firstName)) {
+				setError("donorFirstName", "Please enter a valid first name (letters only, at least 2 characters).");
+				bad = true;
 			}
 			if (!lastName) {
 				setError("donorLastName", "Required.");
 				bad = true;
+			} else if (!nameValid(lastName)) {
+				setError("donorLastName", "Please enter a valid last name (letters only, at least 2 characters).");
+				bad = true;
 			}
-			if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+			if (!emailValid(email)) {
 				setError("donorEmail", "A valid email is needed for your receipt.");
+				bad = true;
+			}
+			if (!phoneValid(rawPhone, phone)) {
+				setError("donorPhone", "Please enter a valid phone number.");
 				bad = true;
 			}
 			if (bad) return;
