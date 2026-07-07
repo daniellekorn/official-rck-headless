@@ -44,10 +44,12 @@ const cards: CardInput[] = Astro.props.cards && Astro.props.cards.length > 0 ? A
 									loading="lazy"
 									class="absolute inset-0 h-full w-full object-cover"
 								/>
-								{/* Light yellow wash, kept the brand hue but lightened so the
-								    photo reads through — stronger toward the bottom so the
-								    text below stays legible. */}
-								<span aria-hidden="true" class="absolute inset-0 bg-gradient-to-t from-gold-500/60 via-gold-400/15 to-gold-300/5"></span>
+								{/* White fade — the photo dissolves into white toward the bottom,
+								    solid early enough that the navy text sits on white. */}
+								<span
+									aria-hidden="true"
+									class="absolute inset-0 bg-[linear-gradient(to_top,#fff_0%,#fff_34%,rgba(255,255,255,0.72)_52%,rgba(255,255,255,0)_76%)]"
+								></span>
 							</>
 						)}
 

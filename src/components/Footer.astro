@@ -44,11 +44,18 @@ const mapSrc = contact?.address
 		<div class="grid gap-8 md:grid-cols-12 md:gap-10 text-center md:text-left">
 			<!-- Brand: logo + tagline (title with subtitle) -->
 			<div class="md:col-span-5 flex flex-col items-center md:items-start">
-				<img
-					src="/logo-vertical-light.png"
-					alt="RCK — Ra'anana Community Kollel"
-					class="h-24 sm:h-28 w-auto"
-				/>
+				<a
+					href="/"
+					aria-label="RCK — The Ra'anana Community Kollel — Home"
+					data-footer-logo
+					class="shrink-0"
+				>
+					<img
+						src="/logo-vertical-light.png"
+						alt="RCK — Ra'anana Community Kollel"
+						class="h-24 sm:h-28 w-auto"
+					/>
+				</a>
 				<p class="mt-5 max-w-sm font-sans text-lg md:text-xl font-extrabold leading-snug tracking-[-0.015em]">
 					A home for Torah, community, and growth in Ra'anana, Israel.
 				</p>
@@ -239,3 +246,14 @@ const mapSrc = contact?.address
 		</div>
 	</div>
 </footer>
+
+<script>
+	// Already on the homepage: scroll to top instead of a full reload.
+	const logoLink = document.querySelector("[data-footer-logo]");
+	logoLink?.addEventListener("click", (e) => {
+		if (window.location.pathname === "/") {
+			e.preventDefault();
+			window.scrollTo({ top: 0, behavior: "smooth" });
+		}
+	});
+</script>

@@ -10,7 +10,8 @@ export interface HistoryEntry {
 	imageUrl?: string;
 	title?: string;
 	caption?: string;
-	year?: number;
+	/** Hebrew accent line shown in the card's top-right corner (was `year` — see design-log #043). */
+	hebrew?: string;
 	sortOrder?: number;
 	active?: boolean;
 }
@@ -20,7 +21,6 @@ export async function getHistory(): Promise<HistoryEntry[]> {
 		const elevated = auth.elevate(items.query);
 		const { items: results } = await elevated(COLLECTION_ID)
 			.eq("active", true)
-			.ascending("year")
 			.ascending("sortOrder")
 			.limit(50)
 			.find();

@@ -23,7 +23,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Copy in the two image+text bands on the homepage | `HomePage` | The `imageTextSection1*` and `imageTextSection2*` fields (dashboard labels start "Section 1 —" / "Section 2 —") |
 | Which side the photo sits on in an image+text band | `HomePage` | `imageTextSection1ImageOn` / `imageTextSection2ImageOn` — type `left` or `right` |
 | Which headline line gets the gold marker in an image+text band | `HomePage` | `imageTextSection1AccentLine` / `imageTextSection2AccentLine` — type `line1` or `line2` |
-| History timeline under "Who We Are" | `OurHistory` | Add / reorder / hide rows. Each row is one milestone: image + year + title + caption |
+| History timeline under "Who We Are" | `OurHistory` | Add / reorder / hide rows. Each row is one milestone: image + Hebrew accent line + title + caption |
 | Join Us cards (3 gold cards) | `HomePage` | `joinUsCard1*` / `joinUsCard2*` / `joinUsCard3*` fields on the single row |
 | "Join our WhatsApp community" band (heading, body, join button) | `HomePage` | `whatsapp*` header fields on the single row. See [#032](design-log/032-whatsapp-community-section.md). |
 | The list of chat groups (left side) | `HomePage` | `whatsappChatList` — type the group names, one per line (or comma-separated). |
@@ -48,8 +48,8 @@ Connect the Wix connector/MCP to your Claude.ai account once. Then, tell the cha
 
 Examples:
 
-- "Add this image to the 'Who We Are' history timeline of my Wix site <id> with year 2021 and title 'Beis Medrash Opens'" — Claude uploads + creates the row
-- "Add these five milestones to the OurHistory collection on my Wix site <id>, each with a year, title, and caption" — done in one prompt
+- "Add this image to the 'Who We Are' history timeline of my Wix site <id> with title 'Beis Medrash Opens'" — Claude uploads + creates the row
+- "Add these five milestones to the OurHistory collection on my Wix site <id>, each with a title and caption" — done in one prompt
 - "Add a team member to my Wix site <id>: Rabbi Cohen, role 'Maggid Shiur', ..." — done
 
 Connection setup: `https://dev.wix.com/docs/mcp/getting-started`:
@@ -142,18 +142,18 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 
 #### `OurHistory` — one row per milestone (5–10 typical)
 
-Drives the slow auto-panning history timeline under "Who We Are" on the homepage. Rows are ordered by `year` (then `sortOrder` as a tiebreak), so the timeline always reads chronologically.
+Drives the slow auto-panning history timeline under "Who We Are" on the homepage. Rows are ordered by `sortOrder`, lowest first — that is the one and only ordering knob.
 
 | Field | Type | Notes |
 |---|---|---|
-| image | Image | Required. Shown as the milestone photo (cropped to a 4:3 card). |
-| year | Number | The milestone year, e.g. `2021`. Drives chronological order and is shown as the big gold label on the timeline. |
-| title | Text | Milestone heading shown under the photo |
-| caption | Text | One-line description under the title |
-| sortOrder | Number | Tiebreak when two rows share a year. Lower numbers first. |
+| image | Image | Required. Shown as the milestone photo. |
+| hebrew | Text | Optional Hebrew accent line, e.g. `מאין באנו`. Shown in gold in the top-right corner of the card. Leave empty for none. (Renamed from `year` — see [design-log/043](design-log/043-ourhistory-hebrew-field-timeline-nav.md).) |
+| title | Text | Milestone heading shown on the photo |
+| caption | Text | Description under the title |
+| sortOrder | Number | Display order. Lower numbers first. |
 | active | Boolean | Hide a milestone without deleting it |
 
-> Renamed from the old `HomepageSlides` collection (which had no `year`). See [design-log/015](design-log/015-history-timeline.md).
+> Renamed from the old `HomepageSlides` collection. See [design-log/015](design-log/015-history-timeline.md) and [design-log/043](design-log/043-ourhistory-hebrew-field-timeline-nav.md).
 
 #### `TeamMembers`
 
