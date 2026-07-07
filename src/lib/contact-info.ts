@@ -12,6 +12,7 @@ export interface ContactInfo {
 	youtubeUrl?: string;
 	twitterUrl?: string;
 	linkedinUrl?: string;
+	whatsappUrl?: string;
 }
 
 export async function getContactInfo(): Promise<ContactInfo | null> {
