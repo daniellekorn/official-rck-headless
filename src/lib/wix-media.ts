@@ -5,10 +5,16 @@ import { media } from "@wix/sdk";
  * when the value is missing or unparseable — a bad CMS value never breaks a
  * render, the caller just gets no image.
  */
-export function resolveImage(wixImageUrl?: string, w = 1200, h = 900): string | undefined {
+export function resolveImage(
+	wixImageUrl?: string,
+	w = 1200,
+	h = 900,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	options: Record<string, any> = {},
+): string | undefined {
 	if (!wixImageUrl) return undefined;
 	try {
-		return media.getScaledToFillImageUrl(wixImageUrl, w, h, {});
+		return media.getScaledToFillImageUrl(wixImageUrl, w, h, options);
 	} catch {
 		return undefined;
 	}
