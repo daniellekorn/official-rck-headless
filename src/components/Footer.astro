@@ -111,25 +111,62 @@ const mapSrc = contact?.address
 				)}
 			</div>
 
-			<!-- Quick Links -->
+			<!-- Quick Links. On mobile the list is collapsed behind a tap-to-open
+			     disclosure (the 9 links made the footer very tall); md+ shows the
+			     plain list. Two renders of the same list — <details>' open state
+			     can't be forced by CSS at a breakpoint. -->
 			<nav class="md:col-span-3" aria-label="Footer">
-				<h2 class="font-sans text-xs font-bold uppercase tracking-[0.2em] text-gold-300">
-					Quick Links
-				</h2>
-				<ul class="mt-5 space-y-2.5">
-					{
-						quickLinks.map((link) => (
-							<li>
-								<a
-									href={link.href}
-									class="text-sm text-white/75 transition-colors hover:text-gold-300"
-								>
-									{link.label}
-								</a>
-							</li>
-						))
-					}
-				</ul>
+				<details class="group md:hidden">
+					<summary class="flex cursor-pointer list-none items-center justify-center gap-2 [&::-webkit-details-marker]:hidden">
+						<h2 class="font-sans text-xs font-bold uppercase tracking-[0.2em] text-gold-300">
+							Quick Links
+						</h2>
+						<svg
+							viewBox="0 0 24 24"
+							class="h-3.5 w-3.5 text-gold-300 transition-transform duration-200 group-open:rotate-180"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2.2"
+							aria-hidden="true"
+						>
+							<path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+						</svg>
+					</summary>
+					<ul class="mt-5 space-y-2.5">
+						{
+							quickLinks.map((link) => (
+								<li>
+									<a
+										href={link.href}
+										class="text-sm text-white/75 transition-colors hover:text-gold-300"
+									>
+										{link.label}
+									</a>
+								</li>
+							))
+						}
+					</ul>
+				</details>
+
+				<div class="hidden md:block">
+					<h2 class="font-sans text-xs font-bold uppercase tracking-[0.2em] text-gold-300">
+						Quick Links
+					</h2>
+					<ul class="mt-5 space-y-2.5">
+						{
+							quickLinks.map((link) => (
+								<li>
+									<a
+										href={link.href}
+										class="text-sm text-white/75 transition-colors hover:text-gold-300"
+									>
+										{link.label}
+									</a>
+								</li>
+							))
+						}
+					</ul>
+				</div>
 			</nav>
 
 			<!-- Contact: phone → email → address → small map square -->
