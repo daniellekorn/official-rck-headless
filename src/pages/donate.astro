@@ -135,16 +135,25 @@ const freqBtn =
 												))}
 											</div>
 										)}
-										<input
-											class={`${field} mt-3`}
-											data-custom-amount
-											type="text"
-											inputmode="numeric"
-											pattern="[0-9]*"
-											placeholder="Other amount"
-											aria-label="Custom amount in shekels"
-										/>
+										<div class="relative mt-3">
+											<span
+												class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center font-medium text-navy-400"
+												aria-hidden="true">₪</span
+											>
+											<input
+												class="w-full rounded-sm border border-navy-200 bg-white py-2.5 pr-3.5 pl-8 text-navy-700 placeholder-navy-300 transition-colors focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-200"
+												data-custom-amount
+												type="text"
+												inputmode="numeric"
+												pattern="[0-9]*"
+												placeholder="Other amount"
+												aria-label="Custom amount in shekels (NIS)"
+											/>
+										</div>
 										<p class="mt-1 hidden text-sm text-red-600" data-error-for="amount"></p>
+										<p class="mt-2 text-sm text-navy-400">
+											All donations are charged in Israeli shekels (₪&nbsp;NIS).
+										</p>
 									</div>
 
 									{purposes.length > 0 && (
@@ -304,6 +313,14 @@ const freqBtn =
 		let presetAmount: number | null = null;
 		let frameReady = false;
 
+		// The button doubles as the NIS confirmation: it always shows the exact
+		// shekel amount about to be charged ("Donate ₪180 Now").
+		const updatePayLabel = () => {
+			const amount = selectedAmount();
+			const amt = amount > 0 ? ` ₪${amount}` : "";
+			payLabel.textContent = frequency === "monthly" ? `Donate${amt} Monthly` : `Donate${amt} Now`;
+		};
+
 		const post = (data: unknown) => frame.contentWindow?.postMessage(data, "*");
 
 		const input = (id: string) => root.querySelector<HTMLInputElement>(`#${id}`)!;
@@ -369,7 +386,7 @@ const freqBtn =
 					else b.removeAttribute("data-selected");
 				});
 				monthlyNote?.classList.toggle("hidden", frequency !== "monthly");
-				payLabel.textContent = frequency === "monthly" ? "Donate Monthly" : "Donate Now";
+				updatePayLabel();
 			});
 		});
 
@@ -382,6 +399,7 @@ const freqBtn =
 					if (b === btn) b.setAttribute("data-selected", "");
 					else b.removeAttribute("data-selected");
 				});
+				updatePayLabel();
 			});
 		});
 		customAmount.addEventListener("input", () => {
@@ -389,6 +407,7 @@ const freqBtn =
 			if (cleaned !== customAmount.value) customAmount.value = cleaned;
 			presetAmount = null;
 			amountBtns.forEach((b) => b.removeAttribute("data-selected"));
+			updatePayLabel();
 		});
 
 		const selectedAmount = (): number => {
@@ -416,7 +435,7 @@ const freqBtn =
 				if (Value?.Status === "Error") {
 					showNpError(String(Value?.Message ?? ""));
 					payBtn.disabled = false;
-					payLabel.textContent = frequency === "monthly" ? "Donate Monthly" : "Donate Now";
+					updatePayLabel();
 				} else {
 					fields.classList.add("hidden");
 					success.classList.remove("hidden");
