@@ -25,54 +25,70 @@ const tagGroups = groupTags(uniqueSubCategories(allLearning));
 	<section class="py-10 sm:py-14 bg-mist">
 		<div class="container-page">
 			{tagGroups.length > 0 && (
-				<div
-					class="mb-10 rounded-md bg-white ring-1 ring-navy-100 shadow-sm p-4 sm:p-6"
-					data-filter-bar
-				>
-					<div class="flex items-baseline justify-between gap-4">
-						<p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-navy-400">
-							Filter shiurim
-						</p>
-						<div class="flex items-baseline gap-4">
+				<div class="relative z-20 mb-10 flex flex-wrap items-center gap-2 sm:gap-2.5" data-filter-bar>
+					<p class="mr-1 w-full sm:w-auto text-[11px] font-semibold uppercase tracking-[0.14em] text-navy-400">
+						Filter shiurim
+					</p>
+					{tagGroups.map((group) => (
+						<div class="relative" data-dropdown>
 							<button
 								type="button"
-								data-clear
-								class="invisible text-xs font-medium text-navy-400 underline underline-offset-2 transition-colors hover:text-navy-600"
-							>
-								Clear all
-							</button>
-							{/* The tag rows are tall on a phone, so they collapse behind this on mobile. */}
-							<button
-								type="button"
-								data-toggle
+								data-dropdown-toggle
 								aria-expanded="false"
-								aria-controls="flyer-tag-groups"
-								class="sm:hidden text-xs font-semibold text-navy-600"
+								aria-haspopup="true"
+								class="filter-select inline-flex items-center gap-2 rounded-sm px-3.5 py-2 text-sm font-medium text-navy-600 transition-colors"
 							>
-								Show <span aria-hidden="true">▾</span>
+								{group.label}
+								<span class="filter-count" data-count>0</span>
+								<svg
+									class="filter-caret h-3 w-3 transition-transform"
+									viewBox="0 0 12 12"
+									fill="none"
+									aria-hidden="true"
+								>
+									<path
+										d="M2.5 4.5 6 8l3.5-3.5"
+										stroke="currentColor"
+										stroke-width="1.5"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+									/>
+								</svg>
 							</button>
-						</div>
-					</div>
-					<div id="flyer-tag-groups" data-groups class="mt-4 hidden sm:flex flex-col gap-3">
-						{tagGroups.map((group) => (
-							<div class="flex flex-col gap-1.5 sm:flex-row sm:items-baseline sm:gap-4">
-								<span class="w-20 shrink-0 text-[11px] font-medium uppercase tracking-wider text-navy-300">
-									{group.label}
-								</span>
-								<div class="flex flex-wrap gap-1.5">
-									{group.tags.map((tag) => (
-										<button
-											type="button"
-											data-filter={tag}
-											class="filter-chip px-3 py-1 rounded-sm text-[13px] font-medium capitalize transition-colors"
-										>
-											{tag}
-										</button>
-									))}
-								</div>
+							<div
+								data-dropdown-menu
+								class="absolute left-0 top-full z-30 mt-2 hidden max-h-72 min-w-44 overflow-y-auto rounded-md bg-white p-1.5 ring-1 ring-navy-100 shadow-[0_18px_40px_-18px_rgba(7,23,58,0.35)]"
+							>
+								{group.tags.map((tag) => (
+									<button
+										type="button"
+										data-filter={tag}
+										class="filter-option flex w-full items-center gap-2.5 rounded-sm px-2.5 py-1.5 text-left text-sm font-medium capitalize text-navy-600 transition-colors"
+									>
+										<span class="filter-option-box" aria-hidden="true">
+											<svg viewBox="0 0 10 10" fill="none">
+												<path
+													d="M1.5 5.5 4 8l4.5-6"
+													stroke="currentColor"
+													stroke-width="1.8"
+													stroke-linecap="round"
+													stroke-linejoin="round"
+												/>
+											</svg>
+										</span>
+										{tag}
+									</button>
+								))}
 							</div>
-						))}
-					</div>
+						</div>
+					))}
+					<button
+						type="button"
+						data-clear
+						class="hidden text-xs font-medium text-navy-400 underline underline-offset-2 transition-colors hover:text-navy-600"
+					>
+						Clear all
+					</button>
 				</div>
 			)}
 
