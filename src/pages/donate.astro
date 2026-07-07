@@ -189,7 +189,7 @@ const freqBtn =
 									<!-- Card entry (Nedarim Plus secure iframe) -->
 									<div class="mt-6">
 										<span class={label}>Card details</span>
-										<div class="mt-1.5 overflow-hidden rounded-sm border border-navy-200 bg-white">
+										<div class="mt-1.5 overflow-hidden rounded-sm border border-navy-200 bg-white px-3.5 py-2">
 											<iframe
 												id="NedarimFrame"
 												title="Secure credit card form (Nedarim Plus)"
@@ -328,6 +328,38 @@ const freqBtn =
 			payStatus.className = `text-sm ${ok ? "text-green-700" : "text-red-600"}`;
 		};
 
+		// Nedarim Plus returns its error messages in Hebrew even in the English
+		// iframe, and there's no published catalog — keyword-match the common
+		// ones and fall back to a generic English line, keeping their original
+		// text underneath for anyone debugging with their support.
+		const NP_ERROR_HINTS: Array<[RegExp, string]> = [
+			[/תוקף/, "The card's expiration date is missing or invalid."],
+			[/מספר כרטיס|כרטיס לא תקין|כרטיס שגוי/, "The card number is missing or invalid."],
+			[/CVV|ספרות שבגב/i, "The security code (CVV) is missing or invalid."],
+			[/סירוב|נדחה|מסורב|חסום/, "The card was declined — please try a different card, or contact your card company."],
+			[/סכום/, "There's a problem with the donation amount."],
+		];
+		const showNpError = (raw: string) => {
+			payStatus.textContent = "";
+			payStatus.className = "text-sm text-red-600";
+			if (raw && !/[֐-׿]/.test(raw)) {
+				// Already in English (or at least not Hebrew) — show as-is.
+				payStatus.textContent = raw;
+				return;
+			}
+			const hint =
+				NP_ERROR_HINTS.find(([re]) => re.test(raw))?.[1] ??
+				"The payment could not be processed — please check your card details and try again.";
+			payStatus.append(hint);
+			if (raw) {
+				const orig = document.createElement("span");
+				orig.className = "mt-0.5 block text-navy-400";
+				orig.dir = "rtl";
+				orig.textContent = raw;
+				payStatus.append(orig);
+			}
+		};
+
 		// --- frequency toggle ---
 		freqBtns.forEach((btn) => {
 			btn.addEventListener("click", () => {
@@ -380,7 +412,7 @@ const freqBtn =
 				frameReady = true;
 			} else if (Name === "TransactionResponse") {
 				if (Value?.Status === "Error") {
-					setStatus(Value?.Message || "The payment could not be processed.", false);
+					showNpError(String(Value?.Message ?? ""));
 					payBtn.disabled = false;
 					payLabel.textContent = frequency === "monthly" ? "Donate Monthly" : "Donate Now";
 				} else {
