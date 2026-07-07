@@ -138,6 +138,30 @@ export function normalizeAccentLine(
 	return fallback;
 }
 
+/**
+ * Accept either a bare YouTube video ID or any full YouTube URL form
+ * (watch?v=, youtu.be/, /shorts/, /embed/) and return just the video ID.
+ * Returns undefined if the input is empty or unrecognised.
+ */
+export function extractYouTubeId(input: string | undefined): string | undefined {
+	if (!input) return undefined;
+	const s = input.trim();
+	// Already a bare ID (no slashes or protocol)
+	if (/^[A-Za-z0-9_-]{11}$/.test(s)) return s;
+	try {
+		const url = new URL(s);
+		// youtu.be/VIDEO_ID
+		if (url.hostname === "youtu.be") return url.pathname.slice(1).split("?")[0] || undefined;
+		// /shorts/VIDEO_ID or /embed/VIDEO_ID or /v/VIDEO_ID
+		const pathMatch = url.pathname.match(/\/(shorts|embed|v)\/([A-Za-z0-9_-]{11})/);
+		if (pathMatch) return pathMatch[2];
+		// ?v=VIDEO_ID
+		return url.searchParams.get("v") ?? undefined;
+	} catch {
+		return undefined;
+	}
+}
+
 export async function getHomepage(): Promise<HomepageContent | null> {
 	try {
 		const elevated = auth.elevate(items.query);
@@ -156,6 +180,11 @@ export async function getHomepage(): Promise<HomepageContent | null> {
 			whatsappShort2ImageUrl: resolveImage(row.whatsappShort2Image, 720, 1280),
 			whatsappShort3ImageUrl: resolveImage(row.whatsappShort3Image, 720, 1280),
 			whatsappShort4ImageUrl: resolveImage(row.whatsappShort4Image, 720, 1280),
+			// Normalise: the office can paste a full YouTube URL or a bare video ID.
+			whatsappShort1VideoId: extractYouTubeId(row.whatsappShort1VideoId),
+			whatsappShort2VideoId: extractYouTubeId(row.whatsappShort2VideoId),
+			whatsappShort3VideoId: extractYouTubeId(row.whatsappShort3VideoId),
+			whatsappShort4VideoId: extractYouTubeId(row.whatsappShort4VideoId),
 		};
 	} catch (err) {
 		console.error(`[homepage] query failed:`, err);
