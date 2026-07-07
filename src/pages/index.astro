@@ -164,14 +164,26 @@ const imageTextSection2 = {
 	const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 	const wrappers = document.querySelectorAll<HTMLElement>("[data-section-reveal]");
 
+	// A section targeted by an anchor link (e.g. the nav's "Join Us"/"History"/
+	// "Community" links, /#join etc.) must never be offset — nudging it after
+	// the browser has already scrolled there looks like the page jumping back up.
+	const settle = (id: string) => {
+		const el = id && document.getElementById(id);
+		if (el?.hasAttribute("data-section-reveal")) el.style.transform = "translateY(0px)";
+	};
+
 	if (!reduce && wrappers.length) {
 		wrappers.forEach((el) => {
 			el.style.transform = "translateY(56px)";
 			el.style.willChange = "transform";
 		});
+		settle(location.hash.slice(1));
+		window.addEventListener("hashchange", () => settle(location.hash.slice(1)));
+
 		inView(
 			"[data-section-reveal]",
 			(element) => {
+				if (element.style.transform === "translateY(0px)") return;
 				animate(
 					element,
 					{ transform: ["translateY(56px)", "translateY(0px)"] },
