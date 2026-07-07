@@ -36,31 +36,60 @@ const gridFlyers = selectedSub
 	<section class="py-10 sm:py-14 bg-white">
 		<div class="container-page">
 			{subCategories.length > 0 && (
-				<div class="flex flex-wrap gap-2 justify-center mb-10">
-					<a
-						href="/events"
-						class:list={[
-							"px-4 py-1.5 rounded-sm text-sm font-medium transition-colors",
-							!selectedSub
-								? "bg-gold-400 text-navy-900"
-								: "bg-white text-navy-600 ring-1 ring-navy-200 hover:bg-navy-50",
-						]}
-					>
-						All
-					</a>
-					{subCategories.map((sub) => (
-						<a
-							href={`/events?sub=${encodeURIComponent(sub)}`}
-							class:list={[
-								"px-4 py-1.5 rounded-sm text-sm font-medium capitalize transition-colors",
-								selectedSub === sub
-									? "bg-gold-400 text-navy-900"
-									: "bg-white text-navy-600 ring-1 ring-navy-200 hover:bg-navy-50",
-							]}
+				<div class="relative z-20 mb-10 flex justify-center" data-filter-bar>
+					<div class="relative" data-dropdown>
+						<button
+							type="button"
+							data-dropdown-toggle
+							aria-expanded="false"
+							aria-haspopup="true"
+							class="filter-select inline-flex items-center gap-2 rounded-sm px-4 py-2 text-sm font-medium text-navy-600 transition-colors"
 						>
-							{sub}
-						</a>
-					))}
+							<span class="text-navy-400">Category:</span>
+							<span class="capitalize">{selectedSub ?? "All"}</span>
+							<svg
+								class="filter-caret h-3 w-3 transition-transform"
+								viewBox="0 0 12 12"
+								fill="none"
+								aria-hidden="true"
+							>
+								<path
+									d="M2.5 4.5 6 8l3.5-3.5"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								/>
+							</svg>
+						</button>
+						<div
+							data-dropdown-menu
+							class="absolute left-1/2 top-full z-30 mt-2 hidden min-w-44 -translate-x-1/2 overflow-y-auto rounded-md bg-white p-1.5 ring-1 ring-navy-100 shadow-[0_18px_40px_-18px_rgba(7,23,58,0.35)]"
+						>
+							<a
+								href="/events"
+								class:list={[
+									"filter-option flex items-center gap-2.5 rounded-sm px-2.5 py-1.5 text-sm font-medium text-navy-600 transition-colors",
+									!selectedSub && "is-active",
+								]}
+							>
+								<span class="filter-option-dot" aria-hidden="true"></span>
+								All
+							</a>
+							{subCategories.map((sub) => (
+								<a
+									href={`/events?sub=${encodeURIComponent(sub)}`}
+									class:list={[
+										"filter-option flex items-center gap-2.5 rounded-sm px-2.5 py-1.5 text-sm font-medium capitalize text-navy-600 transition-colors",
+										selectedSub === sub && "is-active",
+									]}
+								>
+									<span class="filter-option-dot" aria-hidden="true"></span>
+									{sub}
+								</a>
+							))}
+						</div>
+					</div>
 				</div>
 			)}
 
@@ -73,20 +102,9 @@ const gridFlyers = selectedSub
 								pdfUrl={flyer.pdfUrl}
 								title={flyer.title}
 							/>
-							{(flyer.title || flyer.subCategory) && (
+							{flyer.title && (
 								<div class="p-4">
-									{flyer.title && (
-										<p class="font-medium text-navy-700 text-sm">{flyer.title}</p>
-									)}
-									{flyer.subCategory && (
-										<div class="mt-2 flex flex-wrap gap-1.5">
-											{flyer.subCategory.map((tag) => (
-												<span class="rounded-sm bg-gold-50 px-2 py-0.5 text-[11px] font-medium text-gold-700 capitalize">
-													{tag}
-												</span>
-											))}
-										</div>
-									)}
+									<p class="font-medium text-navy-700 text-sm">{flyer.title}</p>
 								</div>
 							)}
 						</div>
@@ -139,3 +157,72 @@ const gridFlyers = selectedSub
 
 	<Footer />
 </Layout>
+
+<style>
+	/* Dropdown trigger: white pill, gold ring while open. */
+	.filter-select {
+		background-color: #fff;
+		box-shadow: inset 0 0 0 1px var(--color-navy-200, #cbd5e1);
+	}
+	.filter-select:hover {
+		background-color: var(--color-navy-50, #f8fafc);
+	}
+	[data-dropdown].is-open .filter-select {
+		box-shadow: inset 0 0 0 1.5px var(--color-gold-500);
+	}
+	[data-dropdown].is-open .filter-caret {
+		transform: rotate(180deg);
+	}
+
+	/* Dropdown menu options: single-select, so the selected row gets a filled dot. */
+	.filter-option:hover {
+		background-color: var(--color-navy-50, #f8fafc);
+	}
+	.filter-option-dot {
+		display: inline-flex;
+		width: 0.5rem;
+		height: 0.5rem;
+		flex-shrink: 0;
+		border-radius: 9999px;
+		box-shadow: inset 0 0 0 1.5px var(--color-navy-200, #cbd5e1);
+		transition: background-color 0.15s, box-shadow 0.15s;
+	}
+	.filter-option.is-active {
+		color: var(--color-navy-900, #0f172a);
+		font-weight: 600;
+	}
+	.filter-option.is-active .filter-option-dot {
+		background-color: var(--color-gold-400);
+		box-shadow: none;
+	}
+</style>
+
+<script>
+	const bar = document.querySelector<HTMLElement>("[data-filter-bar]");
+	const dropdown = bar?.querySelector<HTMLElement>("[data-dropdown]");
+	const toggle = dropdown?.querySelector<HTMLButtonElement>("[data-dropdown-toggle]");
+	const menu = dropdown?.querySelector<HTMLElement>("[data-dropdown-menu]");
+
+	if (bar && dropdown && toggle && menu) {
+		const close = () => {
+			dropdown.classList.remove("is-open");
+			menu.classList.add("hidden");
+			toggle.setAttribute("aria-expanded", "false");
+		};
+		const open = () => {
+			dropdown.classList.add("is-open");
+			menu.classList.remove("hidden");
+			toggle.setAttribute("aria-expanded", "true");
+		};
+
+		toggle.addEventListener("click", () => {
+			dropdown.classList.contains("is-open") ? close() : open();
+		});
+		document.addEventListener("click", (e) => {
+			if (!(e.target instanceof Node) || !bar.contains(e.target)) close();
+		});
+		document.addEventListener("keydown", (e) => {
+			if (e.key === "Escape") close();
+		});
+	}
+</script>

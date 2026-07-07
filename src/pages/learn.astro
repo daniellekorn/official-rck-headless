@@ -105,20 +105,9 @@ const tagGroups = groupTags(uniqueSubCategories(allLearning));
 								pdfUrl={flyer.pdfUrl}
 								title={flyer.title}
 							/>
-							{(flyer.title || flyer.subCategory) && (
+							{flyer.title && (
 								<div class="p-4">
-									{flyer.title && (
-										<p class="font-medium text-navy-700 text-sm">{flyer.title}</p>
-									)}
-									{flyer.subCategory && (
-										<div class="mt-2 flex flex-wrap gap-1.5">
-											{flyer.subCategory.map((tag) => (
-												<span class="rounded-sm bg-gold-50 px-2 py-0.5 text-[11px] font-medium text-gold-700 capitalize">
-													{tag}
-												</span>
-											))}
-										</div>
-									)}
+									<p class="font-medium text-navy-700 text-sm">{flyer.title}</p>
 								</div>
 							)}
 						</div>
@@ -136,20 +125,61 @@ const tagGroups = groupTags(uniqueSubCategories(allLearning));
 </Layout>
 
 <style>
-	/* Filter chips: inactive = white pill, active = gold. Driven by the
-	   `.is-active` class which the script toggles for multi-select. */
-	.filter-chip {
+	/* Dropdown trigger: white pill, gold ring + tint once it has an active selection. */
+	.filter-select {
 		background-color: #fff;
-		color: var(--color-navy-600, #334155);
 		box-shadow: inset 0 0 0 1px var(--color-navy-200, #cbd5e1);
 	}
-	.filter-chip:hover {
+	.filter-select:hover {
 		background-color: var(--color-navy-50, #f8fafc);
 	}
-	.filter-chip.is-active {
+	[data-dropdown].is-open .filter-select {
+		box-shadow: inset 0 0 0 1.5px var(--color-gold-500);
+	}
+	[data-dropdown].is-open .filter-caret {
+		transform: rotate(180deg);
+	}
+	.filter-count {
+		display: none;
+		align-items: center;
+		justify-content: center;
+		min-width: 1.1rem;
+		height: 1.1rem;
+		padding: 0 0.3rem;
+		border-radius: 9999px;
 		background-color: var(--color-gold-400);
 		color: var(--color-navy-700);
+		font-size: 0.65rem;
+		font-weight: 700;
+	}
+	.filter-count.has-count {
+		display: inline-flex;
+	}
+
+	/* Dropdown menu options: check-box glyph fades in once selected. */
+	.filter-option:hover {
+		background-color: var(--color-navy-50, #f8fafc);
+	}
+	.filter-option-box {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1rem;
+		height: 1rem;
+		flex-shrink: 0;
+		border-radius: 0.2rem;
+		box-shadow: inset 0 0 0 1.5px var(--color-navy-200, #cbd5e1);
+		color: transparent;
+		transition: background-color 0.15s, box-shadow 0.15s, color 0.15s;
+	}
+	.filter-option-box svg {
+		width: 0.6rem;
+		height: 0.6rem;
+	}
+	.filter-option.is-active .filter-option-box {
+		background-color: var(--color-gold-400);
 		box-shadow: none;
+		color: var(--color-navy-700);
 	}
 </style>
 
@@ -160,6 +190,7 @@ const tagGroups = groupTags(uniqueSubCategories(allLearning));
 	if (bar && grid) {
 		const cards = Array.from(grid.querySelectorAll<HTMLElement>("[data-flyer]"));
 		const clearBtn = bar.querySelector<HTMLButtonElement>("[data-clear]");
+		const dropdowns = Array.from(bar.querySelectorAll<HTMLElement>("[data-dropdown]"));
 		const subBtns = Array.from(bar.querySelectorAll<HTMLButtonElement>("[data-filter]"));
 
 		// Active tag selections. Empty set = show everything.
@@ -173,11 +204,20 @@ const tagGroups = groupTags(uniqueSubCategories(allLearning));
 				const show = active.size === 0 || [...active].every((t) => tags.includes(t));
 				card.classList.toggle("hidden", !show);
 			});
-			// `invisible` (not `hidden`) so the header row keeps its height.
-			clearBtn?.classList.toggle("invisible", active.size === 0);
+			clearBtn?.classList.toggle("hidden", active.size === 0);
 			subBtns.forEach((b) =>
 				b.classList.toggle("is-active", active.has(b.dataset.filter ?? "")),
 			);
+			dropdowns.forEach((dd) => {
+				const count = Array.from(dd.querySelectorAll<HTMLButtonElement>("[data-filter]")).filter(
+					(b) => active.has(b.dataset.filter ?? ""),
+				).length;
+				const badge = dd.querySelector<HTMLElement>("[data-count]");
+				if (badge) {
+					badge.textContent = String(count);
+					badge.classList.toggle("has-count", count > 0);
+				}
+			});
 		};
 
 		subBtns.forEach((btn) => {
@@ -194,17 +234,37 @@ const tagGroups = groupTags(uniqueSubCategories(allLearning));
 			apply();
 		});
 
-		// Mobile-only disclosure for the tag rows. `hidden sm:flex` means desktop
-		// always shows them; the toggle only matters below the sm breakpoint.
-		const toggleBtn = bar.querySelector<HTMLButtonElement>("[data-toggle]");
-		const groups = bar.querySelector<HTMLElement>("[data-groups]");
-		toggleBtn?.addEventListener("click", () => {
-			const open = groups?.classList.toggle("flex") ?? false;
-			groups?.classList.toggle("hidden", !open);
-			toggleBtn.setAttribute("aria-expanded", String(open));
-			toggleBtn.innerHTML = open
-				? 'Hide <span aria-hidden="true">▴</span>'
-				: 'Show <span aria-hidden="true">▾</span>';
+		// Dropdowns: one open at a time, closed by outside click or Escape.
+		const closeAll = () => {
+			dropdowns.forEach((dd) => {
+				dd.classList.remove("is-open");
+				dd.querySelector<HTMLElement>("[data-dropdown-menu]")?.classList.add("hidden");
+				dd.querySelector<HTMLButtonElement>("[data-dropdown-toggle]")?.setAttribute(
+					"aria-expanded",
+					"false",
+				);
+			});
+		};
+
+		dropdowns.forEach((dd) => {
+			const toggle = dd.querySelector<HTMLButtonElement>("[data-dropdown-toggle]");
+			const menu = dd.querySelector<HTMLElement>("[data-dropdown-menu]");
+			toggle?.addEventListener("click", () => {
+				const willOpen = !dd.classList.contains("is-open");
+				closeAll();
+				if (willOpen) {
+					dd.classList.add("is-open");
+					menu?.classList.remove("hidden");
+					toggle.setAttribute("aria-expanded", "true");
+				}
+			});
+		});
+
+		document.addEventListener("click", (e) => {
+			if (!(e.target instanceof Node) || !bar.contains(e.target)) closeAll();
+		});
+		document.addEventListener("keydown", (e) => {
+			if (e.key === "Escape") closeAll();
 		});
 
 		apply();
