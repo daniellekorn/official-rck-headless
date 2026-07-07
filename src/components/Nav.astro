@@ -26,17 +26,19 @@ interface NavItem {
 	children?: NavChild[];
 }
 
+const homeChildren: NavChild[] = [
+	{ label: "Join Us", href: "/#join" },
+	{ label: "History", href: "/#history" },
+	{ label: "Community", href: "/#whatsapp" },
+];
+
 const baseLinks: NavItem[] = [
-	// Home is a plain link — its sections are one scroll away and the homepage
-	// has the section pager. Community is the exception (top-level): it's a
-	// destination people ask for, and buried in a dropdown nobody found it.
-	{ label: "Home", href: "/" },
+	{ label: "Home", href: "/", children: homeChildren },
 	{ label: "Meet the Team", href: "/team", children: teamChildren },
 	{ label: "Daven with Us", href: "/daven" },
 	{ label: "Learn with Us", href: "/learn" },
 	{ label: "Events", href: "/events" },
 	{ label: "Youth", href: "/youth", children: youthChildren },
-	{ label: "Community", href: "/#whatsapp" },
 ];
 
 const navLinks = baseLinks.map((l) => ({
@@ -63,7 +65,7 @@ const isContactActive = pathname === "/contact";
 		<nav
 			class="nav-pill mx-auto flex max-w-[1600px] items-center justify-between gap-3 sm:gap-4 rounded-sm bg-white px-5 sm:px-7 py-2.5 sm:py-3 ring-1 ring-gold-400/50 shadow-[0_6px_20px_-10px_rgba(15,23,42,0.35)]"
 		>
-			<a href="/" aria-label="RCK — The Ra'anana Community Kollel — Home">
+			<a href="/" aria-label="RCK — The Ra'anana Community Kollel — Home" class="shrink-0">
 				<img
 					src="/logo-horizontal-dark.png"
 					alt="RCK — Ra'anana Community Kollel"
