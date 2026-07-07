@@ -219,7 +219,7 @@ const freqBtn =
 										>
 											<span data-pay-label>Donate Now</span>
 										</button>
-										<p class="text-sm" role="status" aria-live="polite" data-pay-status></p>
+										<p class="text-sm" role="status" aria-live="polite" dir="auto" data-pay-status></p>
 									</div>
 								</div>
 
@@ -283,7 +283,9 @@ const freqBtn =
 	// their server ignores postMessage from localhost — test on a deployed URL.
 	const root = document.querySelector<HTMLElement>("[data-donate-form]");
 	if (root) {
-		const IFRAME_SRC = "https://matara.pro/nedarimplus/iframe?language=en";
+		// Picture=Hide drops Nedarim Plus's PCI-badge band inside the iframe —
+		// we show our own trust copy, and the badges made the card box tall and airy.
+		const IFRAME_SRC = "https://matara.pro/nedarimplus/iframe?language=en&Picture=Hide";
 		const frame = root.querySelector<HTMLIFrameElement>("#NedarimFrame")!;
 		const frameWait = root.querySelector<HTMLElement>("[data-frame-wait]");
 		const frameFallback = root.querySelector<HTMLElement>("[data-frame-fallback]");
