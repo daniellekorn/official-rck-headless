@@ -1,6 +1,7 @@
 ---
 /**
- * HistoryTimeline — the "Our History" timeline. Widescreen (16:9) panels with an
+ * HistoryTimeline — the "Our History" timeline. Widescreen (16:9) panels — portrait
+ * (3:4) on mobile so long captions fit — with an
  * oversized year, title, and caption overlaid on the photo, scrolling in a
  * continuous slow marquee that pauses on hover. A blurred copy of the same photo
  * fills any letterbox gaps when an image's aspect doesn't match the 16:9 card.
@@ -49,7 +50,7 @@ const dur = Math.max(entries.length, 1) * secondsPerCard;
 		<div class="history-tl__track">
 			{loop.map((entry, i) => (
 				<article
-					class="history-card aspect-[16/9] w-[88vw] sm:w-[60vw] lg:w-[48vw]"
+					class="history-card aspect-[3/4] sm:aspect-[16/9] w-[88vw] sm:w-[60vw] lg:w-[48vw]"
 					aria-hidden={i >= entries.length ? "true" : undefined}
 				>
 					{/* blurred same-image fill behind, so odd ratios look intentional */}
@@ -137,17 +138,19 @@ const dur = Math.max(entries.length, 1) * secondsPerCard;
 		position: absolute;
 		inset: 0;
 	}
+	/* Mobile cards are portrait (3:4) so the full caption fits — the scrim rises
+	   higher and type runs smaller. From sm: up cards are 16:9 with roomier type. */
 	.history-card__scrim {
 		position: absolute;
 		inset: 0;
-		background: linear-gradient(to top, rgba(2, 8, 23, 0.92) 4%, rgba(2, 8, 23, 0.45) 34%, transparent 62%);
+		background: linear-gradient(to top, rgba(2, 8, 23, 0.94) 10%, rgba(2, 8, 23, 0.55) 48%, transparent 78%);
 	}
 
 	.history-card__overlay {
 		position: absolute;
 		inset-inline: 0;
 		bottom: 0;
-		padding: 1.5rem 1.8rem 1.7rem;
+		padding: 1.15rem 1.25rem 1.3rem;
 		color: #fff;
 	}
 	.history-card__year {
@@ -155,7 +158,7 @@ const dur = Math.max(entries.length, 1) * secondsPerCard;
 		font-family: var(--font-display);
 		font-weight: 500;
 		line-height: 0.9;
-		font-size: 3.4rem;
+		font-size: 2.5rem;
 		letter-spacing: -0.01em;
 		color: var(--color-gold-200, #f6d66b);
 	}
@@ -164,15 +167,32 @@ const dur = Math.max(entries.length, 1) * secondsPerCard;
 		font-family: var(--font-sans);
 		font-weight: 700;
 		letter-spacing: -0.01em;
-		font-size: 1.4rem;
+		font-size: 1.2rem;
 		color: #fff;
 	}
 	.history-card__caption {
 		margin-top: 0.3rem;
-		font-size: 0.95rem;
+		font-size: 0.875rem;
 		line-height: 1.45;
 		max-width: 52ch;
 		color: rgba(255, 255, 255, 0.78);
+	}
+	@media (min-width: 640px) {
+		.history-card__scrim {
+			background: linear-gradient(to top, rgba(2, 8, 23, 0.92) 4%, rgba(2, 8, 23, 0.45) 34%, transparent 62%);
+		}
+		.history-card__overlay {
+			padding: 1.5rem 1.8rem 1.7rem;
+		}
+		.history-card__year {
+			font-size: 3.4rem;
+		}
+		.history-card__title {
+			font-size: 1.4rem;
+		}
+		.history-card__caption {
+			font-size: 0.95rem;
+		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
