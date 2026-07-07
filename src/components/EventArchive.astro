@@ -22,7 +22,7 @@ interface Props {
 	title?: string;
 }
 
-const { events, eyebrow = "The Archive", title = "Past Events" } = Astro.props;
+const { events, eyebrow = "", title = "Past Events" } = Astro.props;
 
 const dateFmt = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" });
 function caption(d: PastEvent["eventDate"]): string | undefined {
@@ -36,7 +36,7 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 	<section class="py-14 sm:py-20 bg-mist border-t border-navy-100" data-event-archive>
 		<div class="container-page">
 			<div data-reveal="up">
-				<p class="eyebrow text-gold-600">{eyebrow}</p>
+				{eyebrow && <p class="eyebrow text-gold-600">{eyebrow}</p>}
 				<h2 class="mt-2 font-display text-3xl sm:text-4xl md:text-[2.75rem] leading-[1.05] font-medium text-navy-600">
 					{title}
 				</h2>
