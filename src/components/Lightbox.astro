@@ -231,6 +231,15 @@
 			download(src, trigger.dataset.downloadName || fileName(src, trigger.dataset.downloadTitle));
 		});
 
+		// Warm the browser cache for a URL so a later goTo() swap is instant
+		// instead of waiting on a fresh network fetch.
+		const preloaded = new Set<string>();
+		const preload = (src: string) => {
+			if (preloaded.has(src)) return;
+			preloaded.add(src);
+			new Image().src = src;
+		};
+
 		// Render whichever image `index` points at (gallery mode) — updates
 		// image, alt/caption, counter, and the download button's target.
 		const render = () => {
@@ -253,6 +262,13 @@
 			nextBtn.hidden = !showNav;
 			countEl.hidden = !showNav;
 			if (showNav) countEl.textContent = `${index + 1} / ${n}`;
+
+			// Warm both neighbors so the next/prev click that's most likely to
+			// happen next is already cached.
+			if (gallery && n > 1) {
+				preload(gallery[(index + 1) % n]);
+				preload(gallery[(index - 1 + n) % n]);
+			}
 		};
 
 		const goTo = (i: number) => {

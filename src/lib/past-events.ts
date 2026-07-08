@@ -1,6 +1,6 @@
 import * as items from "@wix/wix-data-items-sdk";
 import { auth } from "@wix/essentials";
-import { resolveImage, resolveGalleryUrls, type GalleryItem } from "./wix-media";
+import { resolveImage, resolveGalleryUrls, resolveGalleryFullUrls, type GalleryItem } from "./wix-media";
 import { slugify } from "./slug";
 
 const COLLECTION_ID = "PastEvents";
@@ -16,14 +16,15 @@ export interface PastEvent {
 	slug: string; // anchor id / deep-link, derived from title (e.g. "chanukah-mesibah")
 	eventDate?: Date | string; // for newest-first sort + an optional caption
 	blurb?: unknown; // Ricos rich text — extracted to plain text for render
-	galleryUrls: string[]; // resolved event photos; [0] is the featured one
+	galleryUrls: string[]; // resolved event photos, cropped to a fixed aspect for the thumbnail grid
+	galleryFullUrls: string[]; // same photos, uncropped — for the lightbox "full size" view
 	flyerPdfUrl?: string; // direct PDF URL
 	flyerImageUrl?: string; // resolved static flyer image (preferred)
 	sortOrder?: number; // manual tiebreaker when two events share a date
 	active?: boolean;
 }
 
-interface PastEventRow extends Omit<PastEvent, "galleryUrls" | "flyerImageUrl" | "slug"> {
+interface PastEventRow extends Omit<PastEvent, "galleryUrls" | "galleryFullUrls" | "flyerImageUrl" | "slug"> {
 	gallery?: GalleryItem[];
 	flyerImage?: string;
 }
@@ -49,6 +50,7 @@ export async function getPastEvents(): Promise<PastEvent[]> {
 					...row,
 					slug: slugify(row.title ?? "") || `event-${i + 1}`,
 					galleryUrls: resolveGalleryUrls(row.gallery),
+					galleryFullUrls: resolveGalleryFullUrls(row.gallery),
 					flyerImageUrl: resolveImage(row.flyerImage, 900, 1200),
 				}) as PastEvent,
 		);

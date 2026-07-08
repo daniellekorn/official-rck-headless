@@ -92,7 +92,7 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 								>
 									{hasPhotos && (
 										<div class:list={[flyer && "lg:order-1"]}>
-											<PhotoGalleryGrid images={e.galleryUrls} label={e.title} />
+											<PhotoGalleryGrid images={e.galleryUrls} fullImages={e.galleryFullUrls} label={e.title} />
 										</div>
 									)}
 

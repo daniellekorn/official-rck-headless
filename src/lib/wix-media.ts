@@ -21,6 +21,27 @@ export function resolveImage(
 }
 
 /**
+ * Like `resolveImage`, but `fit` (not `fill`): scales down to stay within the
+ * box while keeping the photo's native aspect ratio, no cropping. Use this
+ * for "view full size" contexts (e.g. a lightbox) — `resolveImage`'s forced
+ * crop is only right for fixed-aspect thumbnails/grids.
+ */
+export function resolveImageFit(
+	wixImageUrl?: string,
+	w = 1600,
+	h = 1600,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	options: Record<string, any> = {},
+): string | undefined {
+	if (!wixImageUrl) return undefined;
+	try {
+		return media.getScaledToFitImageUrl(wixImageUrl, w, h, options);
+	} catch {
+		return undefined;
+	}
+}
+
+/**
  * Widths (CSS px) we emit variants for in a flyer `srcset`. The browser picks
  * the smallest that satisfies the rendered size × its device-pixel-ratio.
  */
@@ -77,10 +98,18 @@ function galleryItemUrl(item: GalleryItem): string | undefined {
 	return item.src ?? item.url ?? item.image;
 }
 
-/** Resolve a CMS Media Gallery field to displayable image URLs, dropping videos and bad values. */
+/** Resolve a CMS Media Gallery field to displayable (cropped-to-fill) thumbnail URLs, dropping videos and bad values. */
 export function resolveGalleryUrls(gallery: GalleryItem[] | undefined): string[] {
 	return (gallery ?? [])
 		.map(galleryItemUrl)
 		.map((u) => resolveImage(u))
+		.filter((u): u is string => Boolean(u));
+}
+
+/** Same field, uncropped — for a lightbox/"view full size" rendering of the same gallery. */
+export function resolveGalleryFullUrls(gallery: GalleryItem[] | undefined): string[] {
+	return (gallery ?? [])
+		.map(galleryItemUrl)
+		.map((u) => resolveImageFit(u))
 		.filter((u): u is string => Boolean(u));
 }

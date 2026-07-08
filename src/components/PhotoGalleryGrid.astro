@@ -3,15 +3,21 @@
  * PhotoGalleryGrid — a responsive grid of thumbnails for one event's photos.
  * Clicking any thumbnail opens the site-wide Lightbox (see Lightbox.astro) in
  * gallery mode, positioned on the clicked photo, with prev/next scoped to
- * *this* `images` array only.
+ * *this* event's photos only.
+ *
+ * `images` (cropped-to-fill) render the grid thumbnails; `fullImages`
+ * (uncropped, same photos) are what the lightbox opens — a fill-cropped
+ * thumbnail is right for a tidy grid but would clip portrait shots when
+ * blown up full-size. Falls back to `images` if `fullImages` isn't given.
  */
 interface Props {
 	images: string[];
+	fullImages?: string[];
 	label?: string;
 }
 
-const { images, label = "" } = Astro.props;
-const galleryJson = JSON.stringify(images);
+const { images, fullImages, label = "" } = Astro.props;
+const galleryJson = JSON.stringify(fullImages && fullImages.length === images.length ? fullImages : images);
 const alt = (i: number) => (label ? `${label} — photo ${i + 1}` : `Photo ${i + 1}`);
 ---
 
