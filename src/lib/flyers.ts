@@ -96,7 +96,7 @@ const FLYER_ALT_TEXT: Record<string, string> = {
 	"TGIF Shiur & Breakfast":
 		"TGIF Shiur & Breakfast flyer — men's Halacha shiur with breakfast, Friday mornings, Ra'anana",
 	"Beyond the Surface. Penimiyus HaTorah":
-		"Beyond the Surface: Penimiyus HaTorah flyer — men's shiur on Chassidus and Torah's inner dimension, Thursday nights, with Rabbi Yosef Postelnek, Ra'anana",
+		"Beyond the Surface: Penimiyus HaTorah flyer — men's shiur on Chassidus and Torah's inner dimension, Thursday nights, Ra'anana",
 	"Daf Yomi with Rabbi Horwitz":
 		"Daf Yomi with Rabbi Horwitz flyer — Daf Yomi shiur, Sunday–Thursday nights, with RCK founder Rabbi Dovid Horwitz, Ra'anana",
 	"Daf Yomi with Rav Rabi":
