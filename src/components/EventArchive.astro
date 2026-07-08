@@ -44,19 +44,28 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 			</div>
 
 			<div class="mt-10 grid gap-8 lg:grid-cols-[minmax(0,15rem)_1fr] lg:gap-12">
-				{/* Side list — vertical on desktop, horizontal scroll-chips on mobile */}
-				<nav class="ea-tabs" aria-label="Past events">
-					{events.map((e, i) => (
-						<button
-							type="button"
-							class:list={["ea-tab", i === 0 && "is-active"]}
-							data-ea-tab={e.slug}
-						>
-							<span class="ea-tab-title">{e.title}</span>
-							{caption(e.eventDate) && <span class="ea-tab-date">{caption(e.eventDate)}</span>}
-						</button>
-					))}
-				</nav>
+				{/* Side list — vertical on desktop, horizontal scroll-chips on mobile.
+				    Desktop also gets a draggable/scroll-wheel scrubber beside the list —
+				    an alternative to clicking each name. Mobile keeps native swipe. */}
+				<div class="ea-side" data-ea-side>
+					<div class="ea-scrubber" data-ea-scrubber aria-hidden="true">
+						<div class="ea-scrubber-track" data-ea-scrubber-track>
+							<div class="ea-scrubber-thumb" data-ea-scrubber-thumb></div>
+						</div>
+					</div>
+					<nav class="ea-tabs" aria-label="Past events" data-ea-tabs>
+						{events.map((e, i) => (
+							<button
+								type="button"
+								class:list={["ea-tab", i === 0 && "is-active"]}
+								data-ea-tab={e.slug}
+							>
+								<span class="ea-tab-title">{e.title}</span>
+								{caption(e.eventDate) && <span class="ea-tab-date">{caption(e.eventDate)}</span>}
+							</button>
+						))}
+					</nav>
+				</div>
 
 				{/* Panels — all rendered, only the active one shown */}
 				<div class="ea-panels">
@@ -132,6 +141,8 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 		padding-bottom: 0.5rem;
 		scrollbar-width: thin;
 		-webkit-overflow-scrolling: touch;
+		flex: 1;
+		min-width: 0;
 	}
 	@media (min-width: 1024px) {
 		.ea-tabs {
@@ -139,9 +150,60 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 			gap: 0.25rem;
 			overflow-x: visible;
 			padding-bottom: 0;
+		}
+	}
+
+	/* Wraps the scrubber + tab list so both stick together while scrolling
+	   the page; the scrubber itself is desktop-only (mobile keeps native
+	   swipe on the horizontal chip row). */
+	.ea-side {
+		display: flex;
+		gap: 0.5rem;
+		min-width: 0;
+	}
+	@media (min-width: 1024px) {
+		.ea-side {
 			position: sticky;
 			top: 6rem;
 			align-self: start;
+			gap: 0.85rem;
+		}
+	}
+
+	.ea-scrubber {
+		display: none;
+	}
+	@media (min-width: 1024px) {
+		.ea-scrubber {
+			display: block;
+			flex: 0 0 auto;
+			width: 1rem;
+			cursor: pointer;
+			touch-action: none;
+		}
+		.ea-scrubber-track {
+			position: relative;
+			width: 4px;
+			height: 100%;
+			min-height: 8rem;
+			margin: 0 auto;
+			border-radius: 999px;
+			background: rgb(from var(--color-navy-500) r g b / 0.14);
+		}
+		.ea-scrubber-thumb {
+			position: absolute;
+			left: 50%;
+			min-height: 1.75rem;
+			width: 0.85rem;
+			transform: translateX(-50%);
+			border-radius: 999px;
+			background: var(--color-gold-500);
+			box-shadow: 0 3px 10px -3px rgb(0 0 0 / 0.4);
+			transition: top 0.2s ease, height 0.2s ease;
+			cursor: grab;
+		}
+		.ea-scrubber-thumb:active {
+			cursor: grabbing;
 		}
 	}
 
@@ -224,6 +286,22 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 		const panels = Array.from(root.querySelectorAll("[data-ea-panel]"));
 		if (!tabs.length) return;
 
+		const side = root.querySelector("[data-ea-side]");
+		const track = root.querySelector("[data-ea-scrubber-track]");
+		const thumb = root.querySelector("[data-ea-scrubber-thumb]");
+		const n = tabs.length;
+		const isDesktopLayout = () => window.matchMedia("(min-width: 1024px)").matches;
+
+		// Thumb height/position as a % of the track, one "slot" per event —
+		// percentages so it stays correct across resize with no JS involved.
+		const layoutThumb = () => {
+			if (!track || !thumb) return;
+			const idx = Math.max(0, tabs.findIndex((t) => t.classList.contains("is-active")));
+			const pct = 100 / n;
+			thumb.style.height = `${pct}%`;
+			thumb.style.top = `${pct * idx}%`;
+		};
+
 		const activate = (slug, updateHash) => {
 			let matched = false;
 			tabs.forEach((t) => {
@@ -240,6 +318,7 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 			if (matched && updateHash) {
 				history.replaceState(null, "", `#${slug}`);
 			}
+			if (matched) layoutThumb();
 			return matched;
 		};
 
@@ -247,8 +326,70 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 			t.addEventListener("click", () => activate(t.getAttribute("data-ea-tab"), true));
 		});
 
+		// Scrubber: drag the thumb (only via the track itself), or scroll the
+		// wheel/trackpad while hovering the track OR the tab names, to move
+		// through events without clicking each name — an alternative to (not
+		// a replacement for) clicking a tab directly.
+		if (track && thumb && n > 1) {
+			const activateIndex = (idx) => {
+				const clamped = Math.min(n - 1, Math.max(0, idx));
+				const slug = tabs[clamped]?.getAttribute("data-ea-tab");
+				if (slug) activate(slug, true);
+			};
+			const indexFromClientY = (clientY) => {
+				const rect = track.getBoundingClientRect();
+				const ratio = rect.height > 0 ? (clientY - rect.top) / rect.height : 0;
+				return Math.min(n - 1, Math.max(0, Math.floor(Math.min(1, Math.max(0, ratio)) * n)));
+			};
+
+			let dragging = false;
+			const onPointerMove = (e) => {
+				if (dragging) activateIndex(indexFromClientY(e.clientY));
+			};
+			const onPointerUp = () => {
+				dragging = false;
+				document.removeEventListener("pointermove", onPointerMove);
+				document.removeEventListener("pointerup", onPointerUp);
+			};
+			track.addEventListener("pointerdown", (e) => {
+				dragging = true;
+				activateIndex(indexFromClientY(e.clientY));
+				document.addEventListener("pointermove", onPointerMove);
+				document.addEventListener("pointerup", onPointerUp);
+				e.preventDefault();
+			});
+
+			// Wheel/trackpad scroll anywhere over the side list (scrubber OR the
+			// tab names themselves) moves one event per "tick" — no click-drag
+			// needed. Desktop layout only: on mobile this same element is the
+			// horizontal swipe-chip row and should keep native touch scroll.
+			// Trackpads fire many small deltas per gesture, so accumulate to a
+			// threshold and cool down briefly rather than skipping several
+			// events at once.
+			let wheelAccum = 0;
+			let wheelCooling = false;
+			(side ?? track.parentElement)?.addEventListener(
+				"wheel",
+				(e) => {
+					if (!isDesktopLayout()) return;
+					e.preventDefault();
+					if (wheelCooling) return;
+					wheelAccum += e.deltaY;
+					if (Math.abs(wheelAccum) < 40) return;
+					const dir = wheelAccum > 0 ? 1 : -1;
+					wheelAccum = 0;
+					const current = Math.max(0, tabs.findIndex((t) => t.classList.contains("is-active")));
+					activateIndex(current + dir);
+					wheelCooling = true;
+					setTimeout(() => { wheelCooling = false; }, 150);
+				},
+				{ passive: false },
+			);
+		}
+
 		// Deep-link: open the event named in the URL hash, if any.
 		const fromHash = decodeURIComponent((location.hash || "").replace(/^#/, ""));
 		if (fromHash) activate(fromHash, false);
+		layoutThumb();
 	})();
 </script>
