@@ -2,12 +2,21 @@
 
 The website for RCK — the Ra'anana Community Kollel. Built with [Astro](https://astro.build) on [Wix Headless](https://dev.wix.com/docs/go-headless): page structure and styling live in this repo, while all editable content (schedules, flyers, team members, photos, theme colors) lives in Wix CMS collections so the office can update the site without code changes.
 
+## Wix Headless
+
+A standard Wix site bundles the visitor-facing site and the business tools (CMS, dashboard) into one package. Wix Headless splits them apart: the business side — content, events, staff — is managed from the Wix dashboard as usual, while the frontend (this repo) is custom code that reads that data through Wix APIs. Updating a CMS entry in the dashboard updates the live site automatically.
+
+This means the frontend code isn't locked to Wix — any developer can work on it, and it can be hosted anywhere. Only the CMS data itself is Wix-specific.
+
 ## Getting started
 
 ```sh
 npm install
-npm run dev      # wix dev — local dev server bound to the Wix site
-npm run build    # wix build
+wix login         # one-time auth
+wix env pull      # writes .env.local (gitignored)
+npm run dev       # wix dev — local dev server bound to the Wix site
+npm run build     # wix build
+npm run release   # wix build && wix release — ships to production
 ```
 
 The Wix CLI handles auth and site binding (`wix.config.json`). CLI reference: `node_modules/@wix/cli/agents/instructions.md`.
