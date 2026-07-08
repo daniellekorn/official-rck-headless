@@ -17,6 +17,33 @@ const dir = lang === "he" ? "rtl" : "ltr";
 // Client-editable brand colors (ThemeSettings collection). Returns "" when the
 // row is empty/unset, so the code defaults in global.css stand. See design-log/028.
 const themeStyle = buildThemeStyle(await getThemeSettings());
+
+// Sitewide ReligiousOrganization structured data. Wix's dashboard SEO settings
+// already auto-inject a thin LocalBusiness + WebSite JSON-LD block on the
+// homepage — this is intentionally separate and richer (founder, founding
+// date, socials) and renders on every page, so the two coexist rather than
+// one replacing the other.
+const orgJsonLd = {
+	"@context": "https://schema.org",
+	"@type": "ReligiousOrganization",
+	name: "RCK – Ra'anana Community Kollel",
+	alternateName: "Raanana Community Kollel",
+	foundingDate: "1998",
+	founder: "Rabbi Dovid Horwitz",
+	address: {
+		"@type": "PostalAddress",
+		streetAddress: "Ahuza St 198",
+		addressLocality: "Ra'anana",
+		addressCountry: "IL",
+	},
+	telephone: "+972587945168",
+	email: "rckollel@gmail.com",
+	sameAs: [
+		"https://www.facebook.com/raanana.kollel",
+		"https://www.youtube.com/@Rckollel",
+		"https://chat.whatsapp.com/Ls2B6uarLZ8Eekn08aZSfc",
+	],
+};
 ---
 
 <!doctype html>
@@ -32,6 +59,7 @@ const themeStyle = buildThemeStyle(await getThemeSettings());
 			href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=Oswald:wght@500&family=Heebo:wght@400;500;700;800&display=swap"
 		/>
 		<meta name="generator" content={Astro.generator} />
+		<script type="application/ld+json" set:html={JSON.stringify(orgJsonLd)} />
 		{themeStyle && <style is:inline set:html={themeStyle}></style>}
 		<!-- Dynamic pages fill this slot with Wix-resolved SEO tags. Static pages
 		     leave it empty and rely on Wix's automatic tag injection. -->
