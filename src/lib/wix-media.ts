@@ -20,6 +20,51 @@ export function resolveImage(
 	}
 }
 
+/**
+ * Widths (CSS px) we emit variants for in a flyer `srcset`. The browser picks
+ * the smallest that satisfies the rendered size × its device-pixel-ratio.
+ */
+const FLYER_WIDTHS = [400, 600, 800, 1200, 1600];
+
+/**
+ * Scale a *raw* flyer image URL down to a display-sized, format-optimized CDN
+ * variant. The `Flyers` collection stores `imageUrl` as a plain text field — a
+ * public `static.wixstatic.com` URL pasted in by the office (a Canva page-1 PNG
+ * export at print resolution), NOT a Wix Image field. Served raw, each is a
+ * multi-MB PNG shown in a small card: the events grid alone can pull dozens.
+ *
+ * This rewrites the URL to a Wix CDN transform: `fit` (not `fill`, which every
+ * other image uses) preserves each flyer's true aspect ratio since the frames
+ * letterbox with `object-fit: contain`, and `enc_auto` serves WebP/AVIF when
+ * the browser accepts it. It works whether the pasted URL is a bare
+ * `/media/<file>` original or already carries a `/v1/...` transform (we take
+ * the file id and rebuild). Non-wixstatic URLs pass through untouched.
+ *
+ * Only the thumbnail `<img>` should use this — keep the ORIGINAL `imageUrl` for
+ * the lightbox "view full size" and the Download button.
+ */
+export function scaleFlyerImage(url?: string, width = 800): string | undefined {
+	if (!url) return undefined;
+	const m = url.match(/^(https?:\/\/static\.wixstatic\.com\/media\/)([^/]+)/);
+	if (!m) return url;
+	const [, base, file] = m;
+	// Generous portrait height bound; with `fit` the tighter constraint wins, so
+	// for typical portrait flyers width binds and the true ratio is preserved.
+	const height = Math.round(width * 1.6);
+	return `${base}${file}/v1/fit/w_${width},h_${height},q_80,enc_auto/${file}`;
+}
+
+/**
+ * Build a responsive `srcset` for a raw flyer URL, or `undefined` when the URL
+ * can't be transformed (non-wixstatic) so the caller falls back to a plain src.
+ */
+export function flyerSrcset(url?: string): string | undefined {
+	if (!url) return undefined;
+	const probe = scaleFlyerImage(url, FLYER_WIDTHS[0]);
+	if (!probe || probe === url) return undefined;
+	return FLYER_WIDTHS.map((w) => `${scaleFlyerImage(url, w)} ${w}w`).join(", ");
+}
+
 // A Media Gallery item is documented as a URL string, but the CMS often stores
 // objects ({ src/url/image, type }). Accept either so rendering never breaks.
 export type GalleryItem = string | { src?: string; url?: string; image?: string; type?: string };

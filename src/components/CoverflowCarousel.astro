@@ -1,5 +1,6 @@
 ---
 import { flyerAlt } from "../lib/flyers";
+import { scaleFlyerImage, flyerSrcset } from "../lib/wix-media";
 
 interface Item {
 	title?: string;
@@ -56,9 +57,12 @@ const hasAside = Astro.slots.has("aside");
 					{item.imageUrl ? (
 						<div class="coverflow-media">
 							<img
-								src={item.imageUrl}
+								src={scaleFlyerImage(item.imageUrl)}
+								srcset={flyerSrcset(item.imageUrl)}
+								sizes="(min-width: 640px) 300px, 70vw"
 								alt={flyerAlt(item.title, item.title ?? "")}
 								loading={i === 0 ? "eager" : "lazy"}
+								decoding="async"
 								class="coverflow-img"
 							/>
 							<div class="coverflow-actions">

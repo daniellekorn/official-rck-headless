@@ -11,6 +11,7 @@
  * uploads an image. See design log #031.
  */
 import { flyerAlt } from "../lib/flyers";
+import { scaleFlyerImage, flyerSrcset } from "../lib/wix-media";
 
 interface Props {
 	imageUrl?: string;
@@ -23,6 +24,10 @@ interface Props {
 const { imageUrl, pdfUrl, title, eager = false } = Astro.props;
 const label = title ?? "flyer";
 const imgAlt = flyerAlt(title, `${label} flyer`);
+// The <img> serves a scaled, WebP CDN variant; the lightbox/download below keep
+// the original full-size `imageUrl`.
+const thumbSrc = scaleFlyerImage(imageUrl);
+const thumbSrcset = flyerSrcset(imageUrl);
 ---
 
 <div class="flyer-frame relative aspect-[3/4] overflow-hidden">
@@ -37,9 +42,12 @@ const imgAlt = flyerAlt(title, `${label} flyer`);
 				aria-label={`View ${label} full size`}
 			>
 				<img
-					src={imageUrl}
+					src={thumbSrc}
+					srcset={thumbSrcset}
+					sizes="(min-width: 1024px) 22rem, (min-width: 640px) 45vw, 90vw"
 					alt={imgAlt}
 					loading={eager ? "eager" : "lazy"}
+					decoding="async"
 					class="flyer-img"
 				/>
 				<span class="flyer-veil" aria-hidden="true"></span>

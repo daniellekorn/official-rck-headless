@@ -6,6 +6,7 @@ import PageHeader from "../components/PageHeader.astro";
 import { getDaveningGrouped, groupByService } from "../lib/davening";
 import { getComputedShabbosSchedule, getComputedWeekdaySchedule } from "../lib/zmanim-schedule";
 import { getFlyers } from "../lib/flyers";
+import { scaleFlyerImage, flyerSrcset } from "../lib/wix-media";
 
 const grouped = await getDaveningGrouped();
 
@@ -167,8 +168,11 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 									aria-label="View the Community Learning Schedule full size"
 								>
 									<img
-										src={scheduleFlyer.imageUrl}
+										src={scaleFlyerImage(scheduleFlyer.imageUrl)}
+										srcset={flyerSrcset(scheduleFlyer.imageUrl)}
+										sizes="(min-width: 640px) 24rem, 90vw"
 										alt={scheduleFlyer.title ?? "Community Learning Schedule"}
+										decoding="async"
 										class="w-full h-auto"
 									/>
 								</button>
