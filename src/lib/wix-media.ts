@@ -1,6 +1,23 @@
 import { media } from "@wix/sdk";
 
 /**
+ * A raw Wix image field (`wix:image://v1/<file>/<name>#originWidth=W&originHeight=H`)
+ * carries the original upload's pixel dimensions in its URL fragment. Pull
+ * those out as a CSS `aspect-ratio` value (e.g. "2040 / 1148") for contexts
+ * that need to size a frame to match a specific image instead of using a
+ * fixed ratio — e.g. a photo dropped into the `Flyers`-style upload field
+ * that isn't actually a portrait print flyer. Returns undefined when the
+ * fragment is missing/malformed, so the caller's fixed-ratio default stands.
+ */
+export function imageAspectRatio(rawWixImageUrl?: string): string | undefined {
+	if (!rawWixImageUrl) return undefined;
+	const m = rawWixImageUrl.match(/originWidth=(\d+)&originHeight=(\d+)/);
+	if (!m) return undefined;
+	const [, w, h] = m;
+	return Number(w) > 0 && Number(h) > 0 ? `${w} / ${h}` : undefined;
+}
+
+/**
  * Resolve a Wix media URL (wix:image://…) to a scaled CDN URL, or undefined
  * when the value is missing or unparseable — a bad CMS value never breaks a
  * render, the caller just gets no image.

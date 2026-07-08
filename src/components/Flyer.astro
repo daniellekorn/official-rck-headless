@@ -19,9 +19,16 @@ interface Props {
 	title?: string;
 	/** Eager-load the image (above-the-fold flyers). Defaults to lazy. */
 	eager?: boolean;
+	/**
+	 * CSS aspect-ratio value (e.g. "2040 / 1148") to size the frame to a
+	 * specific image instead of the default portrait 3:4. Use when the source
+	 * is an actual photo rather than a portrait print flyer — letterboxing a
+	 * landscape image into a tall 3:4 box leaves large empty bars.
+	 */
+	aspectRatio?: string;
 }
 
-const { imageUrl, pdfUrl, title, eager = false } = Astro.props;
+const { imageUrl, pdfUrl, title, eager = false, aspectRatio } = Astro.props;
 const label = title ?? "flyer";
 const imgAlt = flyerAlt(title, `${label} flyer`);
 // The <img> serves a scaled, WebP CDN variant; the lightbox/download below keep
@@ -30,7 +37,10 @@ const thumbSrc = scaleFlyerImage(imageUrl);
 const thumbSrcset = flyerSrcset(imageUrl);
 ---
 
-<div class="flyer-frame relative aspect-[3/4] overflow-hidden">
+<div
+	class="flyer-frame relative aspect-[3/4] overflow-hidden"
+	style={aspectRatio ? `aspect-ratio: ${aspectRatio};` : undefined}
+>
 	{imageUrl ? (
 		<div class="flyer group absolute inset-0">
 			<button

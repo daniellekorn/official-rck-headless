@@ -1,6 +1,6 @@
 import * as items from "@wix/wix-data-items-sdk";
 import { auth } from "@wix/essentials";
-import { resolveImage, resolveGalleryUrls, type GalleryItem } from "./wix-media";
+import { resolveImage, resolveGalleryUrls, imageAspectRatio, type GalleryItem } from "./wix-media";
 import { slugify } from "./slug";
 
 const COLLECTION_ID = "YouthPrograms";
@@ -16,6 +16,7 @@ export interface YouthProgram {
 	galleryUrls: string[]; // resolved program photos; [0] is the featured one
 	flyerPdfUrl?: string; // direct PDF URL
 	flyerImageUrl?: string; // resolved static flyer image (preferred)
+	flyerAspect?: string; // the uploaded image's own aspect ratio (e.g. "2040 / 1148") — some programs post an actual photo, not a portrait print flyer, so the frame should match it instead of the usual fixed 3:4
 	contactName?: string; // contact rabbi, e.g. "Rav Avraham Aharon"
 	contactEmail?: string;
 	sortOrder?: number;
@@ -23,7 +24,7 @@ export interface YouthProgram {
 }
 
 // Raw shape as stored in the CMS (media fields hold Wix media URLs we resolve).
-interface YouthProgramRow extends Omit<YouthProgram, "galleryUrls" | "flyerImageUrl"> {
+interface YouthProgramRow extends Omit<YouthProgram, "galleryUrls" | "flyerImageUrl" | "flyerAspect"> {
 	gallery?: GalleryItem[];
 	flyerImage?: string;
 }
@@ -42,6 +43,7 @@ export async function getYouthPrograms(): Promise<YouthProgram[]> {
 			slug: slugify(row.title ?? "") || `program-${i + 1}`,
 			galleryUrls: resolveGalleryUrls(row.gallery),
 			flyerImageUrl: resolveImage(row.flyerImage, 900, 1200),
+			flyerAspect: imageAspectRatio(row.flyerImage),
 		}));
 	} catch (err) {
 		console.error(`[youth-programs] query failed:`, err);
