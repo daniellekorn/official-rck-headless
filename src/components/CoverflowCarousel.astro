@@ -1,4 +1,6 @@
 ---
+import { flyerAlt } from "../lib/flyers";
+
 interface Item {
 	title?: string;
 	imageUrl?: string;
@@ -55,7 +57,7 @@ const hasAside = Astro.slots.has("aside");
 						<div class="coverflow-media">
 							<img
 								src={item.imageUrl}
-								alt={item.title ?? ""}
+								alt={flyerAlt(item.title, item.title ?? "")}
 								loading={i === 0 ? "eager" : "lazy"}
 								class="coverflow-img"
 							/>

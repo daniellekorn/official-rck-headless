@@ -10,6 +10,8 @@
  * branded "coming soon" placeholder keeps the layout intact until the office
  * uploads an image. See design log #031.
  */
+import { flyerAlt } from "../lib/flyers";
+
 interface Props {
 	imageUrl?: string;
 	pdfUrl?: string;
@@ -20,6 +22,7 @@ interface Props {
 
 const { imageUrl, pdfUrl, title, eager = false } = Astro.props;
 const label = title ?? "flyer";
+const imgAlt = flyerAlt(title, `${label} flyer`);
 ---
 
 <div class="flyer-frame relative aspect-[3/4] overflow-hidden">
@@ -35,7 +38,7 @@ const label = title ?? "flyer";
 			>
 				<img
 					src={imageUrl}
-					alt={`${label} flyer`}
+					alt={imgAlt}
 					loading={eager ? "eager" : "lazy"}
 					class="flyer-img"
 				/>

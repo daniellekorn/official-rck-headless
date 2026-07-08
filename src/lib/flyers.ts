@@ -85,3 +85,60 @@ function normalizeTags(value: unknown): string[] | undefined {
 export function uniqueSubCategories(flyers: Flyer[]): string[] {
 	return [...new Set(flyers.flatMap((f) => f.subCategory ?? []))].sort();
 }
+
+/**
+ * Descriptive alt text for specific flyers, keyed by their exact CMS title
+ * (including quirks like "." instead of ":" and Hebrew suffixes — these must
+ * match the Flyers collection's title field verbatim). Titles not listed here
+ * fall back to the caller's default.
+ */
+const FLYER_ALT_TEXT: Record<string, string> = {
+	"TGIF Shiur & Breakfast":
+		"TGIF Shiur & Breakfast flyer — men's Halacha shiur with breakfast, Friday mornings, Ra'anana",
+	"Beyond the Surface. Penimiyus HaTorah":
+		"Beyond the Surface: Penimiyus HaTorah flyer — men's shiur on Chassidus and Torah's inner dimension, Thursday nights, with Rabbi Yosef Postelnek, Ra'anana",
+	"Daf Yomi with Rabbi Horwitz":
+		"Daf Yomi with Rabbi Horwitz flyer — Daf Yomi shiur, Sunday–Thursday nights, with RCK founder Rabbi Dovid Horwitz, Ra'anana",
+	"Daf Yomi with Rav Rabi":
+		"Daf Yomi with Rav Rabi flyer — English Daf Yomi shiur, daily mornings, with Rav Aharon Rabi, Ra'anana",
+	"Dor L'Dor for Boys":
+		"Dor L'Dor for Boys flyer — father-son Torah learning night, Motzei Shabbos, Ra'anana",
+	"Dor L'Dor for Girls":
+		"Dor L'Dor for Girls flyer — mother-daughter Torah learning night, Motzei Shabbos, with Mrs. Devora Cornick, Ra'anana",
+	"Foundations. Gemara B'iyun":
+		"Foundations: Gemara B'iyun flyer — in-depth Gemara shiur, Sunday and Tuesday mornings, Ra'anana",
+	"Kitzur Shulchan Aruch Yomi":
+		"Kitzur Shulchan Aruch Yomi flyer — daily halacha shiur, mornings, with Rabbi Yisroel Zaslow, Ra'anana",
+	"Learn & Grow Chaburos for Kids":
+		"Learn & Grow Chaburos for Kids flyer — weekly Torah chaburos for boys grades 1–6, Sun/Mon/Wed afternoons, with Rav Avraham Aharon Mandelbaum, Ra'anana",
+	"Living Inspired for Men":
+		"Living Inspired for Men flyer — men's mussar shiur, Monday nights, with Rabbi Isaac Bernstein, Ra'anana",
+	"Living Inspired for Women":
+		"Living Inspired for Women flyer — women's mussar shiur, Tuesday nights, Ra'anana",
+	"Matmonim":
+		"Matmonim flyer — Gemara, Daf Yomi, and machshava shiur, daily mornings, Ra'anana",
+	"Mishna Yomi":
+		"Mishna Yomi flyer — daily Mishna shiur, mornings, with Rav Itamar Gibli, Ra'anana",
+	"Night Seder Program":
+		"Night Seder Program flyer — men's Halacha and Gemara night seder, Sunday nights, Ra'anana",
+	"Practical Halacha for Women":
+		"Practical Halacha for Women flyer — women's halacha shiur, Monday nights, Ra'anana",
+	"Thursday Night Learning לימוד ליל שישי":
+		"Thursday Night Learning flyer — men's mishmar-style learning covering Daf Yomi, Halacha, Parsha, and Chassidus, Thursday nights, Ra'anana",
+	"Women's Parsha Shiur":
+		"Women's Parsha Shiur flyer — women's Torah portion shiur, Tuesday mornings, Ra'anana",
+	"דף יומי עם רב מרגי":
+		"Daf Yomi shiur flyer — daily morning Daf Yomi, Ra'anana",
+	"הלכות ברכות":
+		"Hilchos Brachos shiur flyer — halacha shiur on the laws of blessings, Tuesday/Wednesday mornings, Ra'anana",
+	"לימוד סדר ערב":
+		"Night seder learning flyer — evening Torah learning, Sunday nights, Ra'anana",
+	"Community Schedule": "RCK's weekly minyan and shiur schedule, Ra'anana",
+	"Daf Yomi Schedule": "RCK's Daf Yomi shiur schedule, Ra'anana",
+};
+
+/** Looks up descriptive alt text for a flyer by its exact title, falling back to `fallback` if unmatched. */
+export function flyerAlt(title: string | undefined, fallback: string): string {
+	if (!title) return fallback;
+	return FLYER_ALT_TEXT[title] ?? fallback;
+}
