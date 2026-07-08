@@ -210,13 +210,18 @@ const mapSrc = contact?.address
 						)}
 
 						{contact?.address && (
-							<address class="flex items-start gap-2.5 not-italic text-white/80">
+							<a
+								href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contact.address)}`}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="flex items-start gap-2.5 text-white/80 transition-colors hover:text-gold-300"
+							>
 								<svg viewBox="0 0 24 24" class="mt-0.5 h-4 w-4 shrink-0 text-gold-400" fill="none" stroke="currentColor" stroke-width="1.8">
 									<path d="M12 21s-8-7.3-8-12a8 8 0 1 1 16 0c0 4.7-8 12-8 12Z" stroke-linecap="round" stroke-linejoin="round" />
 									<circle cx="12" cy="9" r="2.5" />
 								</svg>
 								<span class="text-left">{contact.address}</span>
-							</address>
+							</a>
 						)}
 
 						{mapSrc && (
