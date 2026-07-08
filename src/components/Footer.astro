@@ -74,11 +74,13 @@ const mapSrc = contact?.address
 												? "bg-[#FF0000] text-white hover:bg-[#cc0000]"
 												: s.icon === "whatsapp"
 												? "bg-[#25D366] text-white hover:bg-[#1da851]"
+												: s.icon === "facebook"
+												? "bg-[#1877F2] text-white hover:bg-[#145dbf]"
 												: "bg-white/10 text-white hover:bg-gold-500",
 										]}
 									>
 										{s.icon === "facebook" && (
-											<svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+											<svg viewBox="0 0 24 24" class="h-6 w-6" fill="currentColor">
 												<path d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.7c0-.9.3-1.5 1.6-1.5h1.7V4.3c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.5-4 4.1v2.5H7.7V14h2.6v8h3.2Z" />
 											</svg>
 										)}
