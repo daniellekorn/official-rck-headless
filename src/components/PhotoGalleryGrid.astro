@@ -1,0 +1,66 @@
+---
+/**
+ * PhotoGalleryGrid — a responsive grid of thumbnails for one event's photos.
+ * Clicking any thumbnail opens the site-wide Lightbox (see Lightbox.astro) in
+ * gallery mode, positioned on the clicked photo, with prev/next scoped to
+ * *this* `images` array only.
+ */
+interface Props {
+	images: string[];
+	label?: string;
+}
+
+const { images, label = "" } = Astro.props;
+const galleryJson = JSON.stringify(images);
+const alt = (i: number) => (label ? `${label} — photo ${i + 1}` : `Photo ${i + 1}`);
+---
+
+{images.length > 0 && (
+	<div class="rck-gal-grid">
+		{images.map((src, i) => (
+			<button
+				type="button"
+				data-lightbox-open
+				data-lightbox-gallery={galleryJson}
+				data-lightbox-index={i}
+				data-lightbox-title={label}
+				class="rck-gal-grid-item"
+				aria-label={`Open ${alt(i)} full size`}
+			>
+				<img src={src} alt={alt(i)} loading="lazy" />
+			</button>
+		))}
+	</div>
+)}
+
+<style is:global>
+	.rck-gal-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 0.6rem;
+	}
+	@media (min-width: 640px) {
+		.rck-gal-grid {
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+	.rck-gal-grid-item {
+		position: relative;
+		aspect-ratio: 4 / 3;
+		border-radius: 0.5rem;
+		overflow: hidden;
+		background: var(--color-navy-800);
+		box-shadow: 0 10px 26px -14px rgb(from var(--color-navy-700) r g b / 0.5);
+		transition: transform 0.2s, box-shadow 0.2s;
+	}
+	.rck-gal-grid-item:hover,
+	.rck-gal-grid-item:focus-visible {
+		transform: translateY(-2px);
+		box-shadow: 0 16px 34px -16px rgb(from var(--color-navy-700) r g b / 0.6);
+	}
+	.rck-gal-grid-item img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+</style>

@@ -10,7 +10,7 @@
  * PhotoGallery convention (scoped CSS doesn't reliably match JS-toggled classes
  * in the Wix build — see #012). See design log #027.
  */
-import PhotoGallery from "./PhotoGallery.astro";
+import PhotoGalleryGrid from "./PhotoGalleryGrid.astro";
 import Flyer from "./Flyer.astro";
 import { ricosToPlainText } from "../lib/ricos";
 import { hasFlyer, type PastEvent } from "../lib/past-events";
@@ -92,7 +92,7 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 								>
 									{hasPhotos && (
 										<div class:list={[flyer && "lg:order-1"]}>
-											<PhotoGallery images={e.galleryUrls} label={e.title} />
+											<PhotoGalleryGrid images={e.galleryUrls} label={e.title} />
 										</div>
 									)}
 
