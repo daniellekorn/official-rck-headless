@@ -247,10 +247,31 @@ const pagerSections = visibleGroups.map((g) => ({ id: g.key, label: g.label }));
 </style>
 
 <script>
+	// Bios scroll internally (.bio-scroll) when long. Reset that scroll
+	// position once the bio is actually hidden again — not on every click,
+	// since a hover-capable device can have the bio open via :hover, via the
+	// click-to-pin aria-expanded state, or both at once (see the CSS above).
+	// Only reset when neither is true anymore, so a "pin" click while still
+	// hovering doesn't yank the scroll out from under a visible bio.
 	document.querySelectorAll<HTMLButtonElement>("[data-team-card]").forEach((card) => {
+		const scrollEl = card.querySelector<HTMLElement>(".bio-scroll");
+		let hovering = false;
+
+		const resetScrollIfHidden = () => {
+			const expanded = card.getAttribute("aria-expanded") === "true";
+			if (!hovering && !expanded && scrollEl) scrollEl.scrollTop = 0;
+		};
+
+		card.addEventListener("mouseenter", () => { hovering = true; });
+		card.addEventListener("mouseleave", () => {
+			hovering = false;
+			resetScrollIfHidden();
+		});
+
 		card.addEventListener("click", () => {
 			const expanded = card.getAttribute("aria-expanded") === "true";
 			card.setAttribute("aria-expanded", expanded ? "false" : "true");
+			resetScrollIfHidden();
 		});
 	});
 </script>
