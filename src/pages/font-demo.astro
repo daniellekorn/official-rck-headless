@@ -1,0 +1,278 @@
+---
+// UNLINKED font-comparison demo — not in the nav, not the site Layout.
+// Renders identical RCK content 5× (Current + 4 candidate pairings) so only the
+// TYPE changes between blocks. Fully self-contained: its own <head>, its own
+// palette vars, all candidate fonts loaded here. Delete once a direction is
+// picked (recoverable from git). See design-log/024 for the prior demo pattern.
+
+const options = [
+  {
+    id: "current",
+    tag: "Now",
+    name: "Current",
+    display: "Oswald Medium",
+    body: "Onest",
+    note: "The stack live today — condensed news-display headings over a geometric sans.",
+  },
+  {
+    id: "a",
+    tag: "A",
+    name: "Beit Midrash",
+    display: "Frank Ruhl Libre",
+    body: "Inter",
+    note: "The classic Hebrew literary serif — with full Latin, so English and Hebrew headings share one family. Scholarly, warm, and it fixes the Hebrew-fallback mismatch. My pick.",
+  },
+  {
+    id: "b",
+    tag: "B",
+    name: "Literary",
+    display: "Fraunces",
+    body: "Onest",
+    note: "A warm, high-contrast old-style serif over your existing body font. The smallest change: only the headline face moves.",
+  },
+  {
+    id: "c",
+    tag: "C",
+    name: "Elegant",
+    display: "Cormorant Garamond",
+    body: "Work Sans",
+    note: "High-contrast and graceful — reads luxe and donor-facing. Best reserved for large headings; it turns fragile at small sizes.",
+  },
+  {
+    id: "d",
+    tag: "D",
+    name: "Lapidary",
+    display: "Marcellus",
+    body: "Inter",
+    note: "Inscriptional roman capitals — monumental and institutional, like lettering carved in stone. Quiet gravitas.",
+  },
+];
+---
+
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RCK — Font directions</title>
+    <meta name="robots" content="noindex" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&family=Heebo:wght@400;500;700;800&family=Frank+Ruhl+Libre:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Cormorant+Garamond:wght@500;600;700&family=Work+Sans:wght@400;500;600&family=Marcellus&display=swap"
+    />
+    <style is:global>
+      :root {
+        --navy-600: #102a56;
+        --navy-700: #07173a;
+        --navy-100: #c8cfdc;
+        --gold-200: #f6d66b;
+        --gold-400: #dfb030;
+        --gold-500: #d6a21e;
+        --ink: #1a1a1a;
+        --paper: #ffffff;
+        --mist: #f7f5f0;
+        --sans-ui: "Onest", system-ui, sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; scroll-behavior: smooth; }
+      body { margin: 0; background: var(--mist); color: var(--ink); font-family: var(--sans-ui); }
+
+      /* ── Sticky comparison bar ─────────────────────────────────────── */
+      .bar {
+        position: sticky; top: 0; z-index: 20;
+        display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;
+        padding: 0.7rem 1.25rem;
+        background: rgba(7, 23, 58, 0.94);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid rgba(246, 214, 107, 0.25);
+      }
+      .bar__label {
+        font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
+        color: var(--gold-200); font-weight: 600; margin-right: 0.4rem;
+      }
+      .bar a {
+        font-size: 0.82rem; font-weight: 600; text-decoration: none;
+        color: #fff; padding: 0.32rem 0.7rem; border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.22); transition: all 0.15s;
+      }
+      .bar a:hover, .bar a:focus-visible { background: var(--gold-500); border-color: var(--gold-500); color: var(--navy-700); outline: none; }
+
+      /* ── Per-option label strip ────────────────────────────────────── */
+      .plate { max-width: 72rem; margin: 0 auto; padding: 3.5rem 1.5rem 0; }
+      .plate__row { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+      .plate__tag {
+        font-family: var(--sans-ui); font-weight: 800; font-size: 0.8rem;
+        letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--navy-700); background: var(--gold-200);
+        padding: 0.25rem 0.6rem; border-radius: 0.3rem;
+      }
+      .plate__name { font-family: var(--sans-ui); font-weight: 700; font-size: 1.35rem; color: var(--navy-700); margin: 0; }
+      .plate__stack { font-family: var(--sans-ui); font-size: 0.9rem; color: #6b7790; }
+      .plate__stack b { color: var(--navy-600); font-weight: 600; }
+      .plate__note { max-width: 46rem; margin: 0.75rem 0 0; font-size: 0.95rem; line-height: 1.55; color: #3e4d6b; }
+
+      /* ── The specimen: a navy hero + a content band ────────────────── */
+      .spec { max-width: 72rem; margin: 1rem auto 0; padding: 0 1.5rem 3.5rem;
+        --disp-w: 500; --disp-track: 0; --disp-tf: none; }
+
+      .hero {
+        position: relative; overflow: hidden;
+        background: var(--navy-600); color: #fff;
+        border-radius: 1rem 1rem 0 0;
+        padding: clamp(2.5rem, 6vw, 4.5rem);
+      }
+      /* the site's chosen PageHeader treatment — 45° hairline hatch */
+      .hero::before {
+        content: ""; position: absolute; inset: 0; pointer-events: none;
+        background-image: repeating-linear-gradient(45deg,
+          rgba(255,255,255,0.05) 0 1px, transparent 1px 11px);
+      }
+      .hero > * { position: relative; }
+      .eyebrow {
+        font-family: var(--sans-ui); font-weight: 600; font-size: 0.8rem;
+        letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-200);
+        margin: 0 0 1rem;
+      }
+      .hero h1 {
+        font-family: var(--disp); font-weight: var(--disp-w);
+        letter-spacing: var(--disp-track); text-transform: var(--disp-tf);
+        font-size: clamp(2.1rem, 5.6vw, 4.2rem); line-height: 1.04;
+        margin: 0; max-width: 18ch; text-wrap: balance;
+      }
+      .gold-rule { display: block; height: 3px; width: 4rem; border-radius: 2px; background: var(--gold-400); margin: 1.5rem 0; }
+      .hero p {
+        font-family: var(--body); font-size: clamp(1rem, 1.3vw, 1.15rem);
+        line-height: 1.65; color: var(--navy-100); max-width: 52ch; margin: 0;
+      }
+
+      .band {
+        background: var(--paper); border-radius: 0 0 1rem 1rem;
+        padding: clamp(2.5rem, 6vw, 4rem);
+        border: 1px solid #eee; border-top: none;
+        display: grid; gap: 2.25rem;
+      }
+      .band h2 {
+        font-family: var(--disp); font-weight: var(--disp-w);
+        letter-spacing: var(--disp-track); text-transform: var(--disp-tf);
+        font-size: clamp(1.7rem, 3.4vw, 2.7rem); line-height: 1.1;
+        color: var(--navy-700); margin: 0; max-width: 20ch;
+      }
+      .band .eyebrow { color: var(--gold-600, #a47915); }
+      .band p { font-family: var(--body); font-size: 1.0625rem; line-height: 1.75; color: #333; max-width: 62ch; margin: 0.6rem 0 0; }
+
+      .stats { display: flex; flex-wrap: wrap; gap: 2.5rem; }
+      .stat { display: grid; gap: 0.25rem; }
+      .stat b { font-family: var(--disp); font-weight: var(--disp-w); letter-spacing: var(--disp-track); font-size: clamp(1.8rem, 3vw, 2.4rem); color: var(--navy-600); }
+      .stat span { font-family: var(--sans-ui); font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: #6b7790; font-weight: 600; }
+
+      .hebrew-row { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; padding-top: 0.25rem; border-top: 1px solid #eee; }
+      .hebrew { font-family: var(--heb); font-weight: 700; font-size: clamp(1.4rem, 2.4vw, 2rem); color: var(--navy-700); direction: rtl; }
+      .hebrew-tr { font-family: var(--body); font-style: italic; color: #6b7790; font-size: 0.95rem; }
+
+      .cta {
+        justify-self: start;
+        font-family: var(--sans-ui); font-weight: 600; font-size: 0.95rem;
+        text-decoration: none; color: var(--navy-700);
+        background: var(--gold-500); padding: 0.8rem 1.6rem; border-radius: 0.5rem;
+        transition: background 0.15s;
+      }
+      .cta:hover { background: var(--gold-400); }
+
+      /* ── Per-option type assignments ───────────────────────────────── */
+      .s-current { --disp: "Oswald"; --disp-w: 500; --body: "Onest", sans-serif; --heb: "Heebo", sans-serif; }
+      .s-a { --disp: "Frank Ruhl Libre"; --disp-w: 700; --disp-track: -0.01em; --body: "Inter", sans-serif; --heb: "Frank Ruhl Libre", serif; }
+      .s-b { --disp: "Fraunces"; --disp-w: 500; --disp-track: -0.015em; --body: "Onest", sans-serif; --heb: "Heebo", sans-serif; }
+      .s-c { --disp: "Cormorant Garamond"; --disp-w: 600; --body: "Work Sans", sans-serif; --heb: "Heebo", sans-serif; }
+      .s-d { --disp: "Marcellus"; --disp-w: 400; --disp-track: 0.01em; --body: "Inter", sans-serif; --heb: "Heebo", sans-serif; }
+
+      .divider { max-width: 72rem; margin: 0 auto; height: 1px; background: linear-gradient(90deg, transparent, #d8d2c4, transparent); }
+
+      .intro { max-width: 72rem; margin: 0 auto; padding: 3rem 1.5rem 0.5rem; }
+      .intro h1 { font-family: var(--sans-ui); font-weight: 800; font-size: clamp(1.6rem, 3vw, 2.2rem); color: var(--navy-700); margin: 0 0 0.5rem; }
+      .intro p { font-family: var(--sans-ui); color: #3e4d6b; font-size: 1.02rem; line-height: 1.6; max-width: 54rem; margin: 0; }
+
+      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    </style>
+  </head>
+  <body>
+    <nav class="bar">
+      <span class="bar__label">Jump to</span>
+      {options.map((o) => <a href={`#${o.id}`}>{o.tag} · {o.name}</a>)}
+    </nav>
+
+    <header class="intro">
+      <h1>Font directions for RCK</h1>
+      <p>
+        The same hero and content band, set five ways. First is the current
+        stack; A–D are cleaner, classier pairings. Only the type changes — palette,
+        layout, and copy are identical — so you can judge the fonts on their own.
+        Pick a letter and I'll roll it into the real site.
+      </p>
+    </header>
+
+    {
+      options.map((o) => (
+        <>
+          <section id={o.id} class="plate">
+            <div class="plate__row">
+              <span class="plate__tag">{o.tag}</span>
+              <h2 class="plate__name">{o.name}</h2>
+              <span class="plate__stack">
+                <b>{o.display}</b> headings · <b>{o.body}</b> body
+              </span>
+            </div>
+            <p class="plate__note">{o.note}</p>
+          </section>
+
+          <div class={`spec s-${o.id}`}>
+            <div class="hero">
+              <p class="eyebrow">Ra'anana Community Kollel</p>
+              <h1>A home for serious Torah learning in the heart of Ra'anana.</h1>
+              <span class="gold-rule" />
+              <p>
+                Daily shiurim, one-on-one chavrusa, and a beit midrash open from
+                early morning to late at night — RCK is where the community comes
+                to learn.
+              </p>
+            </div>
+
+            <div class="band">
+              <div>
+                <p class="eyebrow">Who we are</p>
+                <h2>Twenty-five years of daily learning.</h2>
+                <p>
+                  Since 1998, RCK has anchored Torah life in Ra'anana — a place
+                  where a lawyer on his way to work, a retiree, and a yeshiva
+                  graduate sit at the same table over the same page. No dues, no
+                  prerequisites. Just an open door and a chair waiting for you.
+                </p>
+              </div>
+
+              <div class="stats">
+                <div class="stat"><b>1998</b><span>Founded</span></div>
+                <div class="stat"><b>40+</b><span>Weekly shiurim</span></div>
+                <div class="stat"><b>5:45<span style="font-size:1rem"> AM</span></b><span>First seder</span></div>
+              </div>
+
+              <div class="hebrew-row">
+                <span class="hebrew">דע מאין באת ולאן אתה הולך</span>
+                <span class="hebrew-tr">Know where you come from, and where you are going.</span>
+              </div>
+
+              <a class="cta" href="#">Join the learning</a>
+            </div>
+          </div>
+
+          <div class="divider" />
+        </>
+      ))
+    }
+
+    <footer style="max-width:72rem;margin:0 auto;padding:2rem 1.5rem 4rem;color:#6b7790;font-size:0.9rem">
+      Unlinked internal demo · not indexed · delete once a direction is chosen.
+    </footer>
+  </body>
+</html>
