@@ -130,3 +130,36 @@ export function resolveGalleryFullUrls(gallery: GalleryItem[] | undefined): stri
 		.map((u) => resolveImageFit(u))
 		.filter((u): u is string => Boolean(u));
 }
+
+// The video counterpart of a gallery item — same shape, `type: "video"`.
+function galleryItemVideoSrc(item: GalleryItem): string | undefined {
+	if (typeof item === "string") return undefined;
+	return item.type === "video" ? item.src ?? item.url : undefined;
+}
+
+/**
+ * Resolve a Wix video field (`wix:video://…`) to a direct playable URL, plus
+ * an auto-generated poster thumbnail. Undefined when missing/unparseable.
+ */
+export function resolveVideo(wixVideoUrl?: string): { url: string; thumbnail?: string } | undefined {
+	if (!wixVideoUrl) return undefined;
+	try {
+		const v = media.getVideoUrl(wixVideoUrl);
+		return v?.url ? { url: v.url, thumbnail: v.thumbnail } : undefined;
+	} catch {
+		return undefined;
+	}
+}
+
+/**
+ * Resolve a CMS Media Gallery field's video items (dropping photos) to
+ * playable URLs + a poster from the first one — for a field the office
+ * uploads video files into directly, no URL-pasting required.
+ */
+export function resolveGalleryVideos(gallery: GalleryItem[] | undefined): { urls: string[]; poster?: string } {
+	const resolved = (gallery ?? [])
+		.map(galleryItemVideoSrc)
+		.map((u) => resolveVideo(u))
+		.filter((v): v is { url: string; thumbnail?: string } => Boolean(v));
+	return { urls: resolved.map((v) => v.url), poster: resolved.find((v) => v.thumbnail)?.thumbnail };
+}

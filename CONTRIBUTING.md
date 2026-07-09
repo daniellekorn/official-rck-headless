@@ -27,7 +27,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Join Us cards (3 gold cards) | `HomePage` | `joinUsCard1*` / `joinUsCard2*` / `joinUsCard3*` fields on the single row |
 | "Join our WhatsApp community" band (heading, body, join button) | `HomePage` | `whatsapp*` header fields on the single row. See [#032](design-log/032-whatsapp-community-section.md). |
 | The list of chat groups (left side) | `WhatsappGroups` | One row per group — the `name` shows in the list. Fill `joinHref` to make that entry clickable (opens that group's invite). Add / reorder (`sortOrder`) / hide (`active`) rows. See [#044](design-log/044-whatsapp-groups-collection.md). |
-| Featured groups (the right-side video tiles) | `WhatsappGroups` | Tick `featured` on a row and paste YouTube links into `Video URLs` (one per line — full URLs are fine). Visitors flip between a group's videos with the ‹ › arrows. First four featured rows show. |
+| Featured groups (the right-side video tiles) | `WhatsappGroups` | Tick `featured` on a row, then add videos either way (or both): drag video files straight into `Video Uploads`, or paste YouTube links into `Video URLs` (one per line — full URLs are fine). Visitors flip between a group's videos with the ‹ › arrows. First four featured rows show. See [#046](design-log/046-whatsapp-video-uploads.md). |
 | Team members | `TeamMembers` | Add a row. Photo, name, role, bio, etc. |
 | Youth programs (on /youth) | `YouthPrograms` | Add a row per program: title, description, contact rabbi, optional photo + flyer. |
 | Past events archive (on /events) | `PastEvents` | Add a row per past event: title, date, photo gallery, optional flyer + blurb. Shows newest first. |
@@ -141,8 +141,9 @@ Drives the WhatsApp band's left-hand group list *and* the featured video tiles o
 | name | Text | Group name, e.g. "Halacha2Go". Shows in the left-hand list. (Tiles show no title — the videos speak for themselves.) |
 | description | Text | One-liner under a featured group's video tile. |
 | joinHref | URL | That group's `chat.whatsapp.com` invite. Makes the group's entry in the left-hand list clickable, and shows a "Join chat" link under its video tile. |
-| videoUrls | Text | YouTube links, **one per line** — any form works (`watch?v=`, `/shorts/`, `youtu.be`, or a bare video ID). Several lines = visitors flip between them with ‹ › arrows on the tile. |
-| image | Image | Optional custom poster. Empty = the first video's YouTube thumbnail (or an "RCK" placeholder). |
+| videoGallery | Media Gallery | Drag video files in directly (e.g. exported from a phone) — no URL-pasting needed. Combines with `videoUrls` below; visitors flip between *all* of a group's videos (uploads + links) with ‹ › arrows. See [#046](design-log/046-whatsapp-video-uploads.md). |
+| videoUrls | Text | YouTube links, **one per line** — any form works (`watch?v=`, `/shorts/`, `youtu.be`, or a bare video ID). Direct video file links (e.g. copied from Wix's Media Manager) also work here as plain text if you'd rather paste than upload. |
+| image | Image | Optional custom poster. Empty = an uploaded video's auto thumbnail, then a YouTube video's thumbnail, then an "RCK" placeholder. |
 | featured | Boolean | Tick to show this group as a video tile on the right (first four featured rows appear). Unticked rows only appear in the list. |
 | sortOrder | Number | Display order, lower first — for both the list and the tiles. |
 | active | Boolean | Untick to hide a group everywhere without deleting it. |

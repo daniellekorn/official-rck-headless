@@ -8,8 +8,9 @@
  *  - Left: the list of chat groups (Halacha2Go, Boost2Go, Torah Bytes, …) + the
  *    main join CTA.
  *  - Right: featured groups as vertical 9:16 video tiles. Each tile can hold
- *    several YouTube videos — ‹ › arrows flip between them and play inline;
- *    a one-liner + "Join chat" sit beneath. No titles on the tiles.
+ *    several videos (YouTube, or a direct file — e.g. Wix Media uploads) —
+ *    ‹ › arrows flip between them and play inline; a one-liner + "Join chat"
+ *    sit beneath. No titles on the tiles.
  *  - White band, navy/gold type. WhatsApp green is used sparingly (logo, CTA,
  *    list icons) so the section reads as RCK, not WhatsApp.
  *
@@ -19,9 +20,9 @@
  */
 
 interface Short {
-	/** YouTube video ids for this group — visitors can flip between them. */
-	videoIds?: string[];
-	/** Optional custom poster; falls back to the first video's YouTube thumbnail. */
+	/** This group's videos (YouTube or a direct file) — visitors flip between them. */
+	videos?: VideoItem[];
+	/** Optional custom poster; falls back to the first video's YouTube thumbnail (none for a file upload). */
 	posterUrl?: string;
 	/** Group name — used for alt/aria text only; tiles render no title. */
 	chatName?: string;
@@ -52,6 +53,7 @@ interface Props {
 }
 
 import Highlight from "./Highlight.astro";
+import type { VideoItem } from "../lib/whatsapp-groups";
 
 const fallbackChats = ["Halacha2Go", "Boost2Go", "Torah Bytes", "Daily Daf", "Minyan Times", "Simcha Announcements"];
 
@@ -78,8 +80,11 @@ const chatList: Chat[] = (chats && chats.length > 0 ? chats : fallbackChats)
 	.filter((c) => c.name);
 const featured = (shorts && shorts.length > 0 ? shorts : fallbackShorts).slice(0, 4);
 
-const posterFor = (s: Short) =>
-	s.posterUrl ?? (s.videoIds?.[0] ? `https://i.ytimg.com/vi/${s.videoIds[0]}/hqdefault.jpg` : undefined);
+const posterFor = (s: Short) => {
+	if (s.posterUrl) return s.posterUrl;
+	const first = s.videos?.[0];
+	return first?.kind === "youtube" ? `https://i.ytimg.com/vi/${first.id}/hqdefault.jpg` : undefined;
+};
 ---
 
 <section class="relative isolate overflow-hidden bg-white pt-14 pb-20 md:py-20">
@@ -173,7 +178,7 @@ const posterFor = (s: Short) =>
 				{
 					featured.map((s) => {
 						const poster = posterFor(s);
-						const ids = s.videoIds ?? [];
+						const videos = s.videos ?? [];
 						// Editors often lead the description with the group name, e.g.
 						// "Halacha2Go: Fast. Clear. Daily." — highlight just that lead-in
 						// word with the same scroll-triggered yellow marker used elsewhere.
@@ -182,7 +187,7 @@ const posterFor = (s: Short) =>
 						return (
 							<figure
 								data-short-card
-								data-video-ids={JSON.stringify(ids)}
+								data-videos={JSON.stringify(videos)}
 								class="group flex w-[15rem] md:w-[12rem] shrink-0 flex-col"
 								style="opacity:0"
 							>
@@ -193,7 +198,12 @@ const posterFor = (s: Short) =>
 										class="relative aspect-[9/16] overflow-hidden rounded-xl bg-gradient-to-br from-navy-500 to-navy-700 ring-1 ring-navy-100 shadow-[0_18px_40px_-22px_rgba(16,42,86,0.5)] transition-transform duration-300 group-hover:-translate-y-1.5"
 									>
 										{poster ? (
-											<img src={poster} alt={s.chatName ?? ""} aria-hidden="true" loading="lazy" class="absolute inset-0 h-full w-full object-cover" />
+											/* `contain`, not `cover` — the poster is often a flyer-style
+											   graphic, not actually 9:16, so cropping to fill clipped it.
+											   Letterboxes onto the frame's own navy gradient instead. The
+											   video/iframe that replaces this on play is a separate element
+											   (below) and keeps `cover`, since real footage is 9:16. */
+											<img src={poster} alt={s.chatName ?? ""} aria-hidden="true" loading="lazy" class="absolute inset-0 h-full w-full object-contain" />
 										) : (
 											/* "coming soon" poster — intentional placeholder until a video link is added */
 											<div class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
@@ -203,7 +213,7 @@ const posterFor = (s: Short) =>
 										)}
 
 										{/* play affordance — only when at least one video exists */}
-										{ids.length > 0 && (
+										{videos.length > 0 && (
 											<button
 												type="button"
 												data-short-play
@@ -219,8 +229,8 @@ const posterFor = (s: Short) =>
 										)}
 									</div>
 
-									{/* video switcher — sits outside the frame so it survives the iframe swap */}
-									{ids.length > 1 && (
+									{/* video switcher — sits outside the frame so it survives the player swap */}
+									{videos.length > 1 && (
 										<div class="absolute inset-x-2 bottom-2 z-10 flex items-center justify-between">
 											<button
 												type="button"
@@ -236,7 +246,7 @@ const posterFor = (s: Short) =>
 												data-short-count
 												class="rounded-full bg-navy-800/70 px-2.5 py-0.5 font-sans text-[0.72rem] font-semibold tabular-nums text-white backdrop-blur-sm"
 											>
-												1/{ids.length}
+												1/{videos.length}
 											</span>
 											<button
 												type="button"
@@ -296,40 +306,55 @@ const posterFor = (s: Short) =>
 <script>
 	import { animate, inView, stagger } from "motion";
 
-	// Each tile holds a list of video ids. Play swaps the poster for an
-	// autoplaying privacy-mode embed; ‹ › flip through the group's videos and
-	// play the selected one immediately.
+	// Each tile holds a list of videos — YouTube (embed) or a direct file
+	// (e.g. a Wix Media upload; plain <video>). Play swaps the poster for the
+	// right kind of player; ‹ › flip through the group's videos and play the
+	// selected one immediately.
+	type VideoItem = { kind: "youtube"; id: string } | { kind: "file"; src: string };
+
 	document.querySelectorAll<HTMLElement>("[data-short-card]").forEach((card) => {
 		const frame = card.querySelector<HTMLElement>("[data-short-frame]");
-		let ids: string[] = [];
+		let videos: VideoItem[] = [];
 		try {
-			ids = JSON.parse(card.dataset.videoIds ?? "[]");
+			videos = JSON.parse(card.dataset.videos ?? "[]");
 		} catch {
 			/* malformed attr — leave the tile static */
 		}
-		if (!frame || ids.length === 0) return;
+		if (!frame || videos.length === 0) return;
 
 		const counter = card.querySelector<HTMLElement>("[data-short-count]");
 		let index = 0;
 
 		const play = () => {
-			const iframe = document.createElement("iframe");
-			iframe.src = `https://www.youtube-nocookie.com/embed/${ids[index]}?autoplay=1&playsinline=1&rel=0`;
-			iframe.title = "YouTube video";
-			iframe.allow = "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture";
-			iframe.allowFullscreen = true;
-			iframe.className = "absolute inset-0 h-full w-full border-0";
-			frame.replaceChildren(iframe);
-			if (counter) counter.textContent = `${index + 1}/${ids.length}`;
+			const v = videos[index];
+			let player: HTMLIFrameElement | HTMLVideoElement;
+			if (v.kind === "youtube") {
+				const iframe = document.createElement("iframe");
+				iframe.src = `https://www.youtube-nocookie.com/embed/${v.id}?autoplay=1&playsinline=1&rel=0`;
+				iframe.title = "YouTube video";
+				iframe.allow = "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture";
+				iframe.allowFullscreen = true;
+				player = iframe;
+			} else {
+				const video = document.createElement("video");
+				video.src = v.src;
+				video.autoplay = true;
+				video.controls = true;
+				video.playsInline = true;
+				player = video;
+			}
+			player.className = "absolute inset-0 h-full w-full border-0 object-cover";
+			frame.replaceChildren(player);
+			if (counter) counter.textContent = `${index + 1}/${videos.length}`;
 		};
 
 		card.querySelector("[data-short-play]")?.addEventListener("click", play);
 		card.querySelector("[data-short-prev]")?.addEventListener("click", () => {
-			index = (index - 1 + ids.length) % ids.length;
+			index = (index - 1 + videos.length) % videos.length;
 			play();
 		});
 		card.querySelector("[data-short-next]")?.addEventListener("click", () => {
-			index = (index + 1) % ids.length;
+			index = (index + 1) % videos.length;
 			play();
 		});
 	});
