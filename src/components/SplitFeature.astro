@@ -42,7 +42,19 @@ const {
 				"md:grid-cols-2",
 			]}
 		>
-			<div class:list={["relative", imageOn === "right" ? "md:order-2" : "md:order-1"]} data-reveal={imageOn === "right" ? "right" : "left"}>
+			<div
+				class:list={["relative flex items-center self-stretch", imageOn === "right" ? "md:order-2" : "md:order-1"]}
+				data-reveal={imageOn === "right" ? "right" : "left"}
+			>
+				{/* self-stretch (above) makes this wrapper fill the full row height —
+				    not just the image's own aspect-[4/3] box — so LightRays (centered
+				    on the wrapper) is anchored to the section's actual vertical
+				    center. Without it, a shorter image centered by the grid's
+				    items-center against a taller text column pulls the glow's center
+				    off the section's midpoint, and how far it reaches toward the top
+				    ends up depending on how long that column's body text happens to
+				    be. flex items-center here keeps the image itself visually
+				    centered within the now-taller wrapper. */}
 				{rays && <LightRays variant="sunbeams" class="w-[205%] min-w-[600px]" opacity={0.4} duration={11000} />}
 				{imageUrl ? (
 					<img
