@@ -82,7 +82,7 @@ const posterFor = (s: Short) =>
 	s.posterUrl ?? (s.videoIds?.[0] ? `https://i.ytimg.com/vi/${s.videoIds[0]}/hqdefault.jpg` : undefined);
 ---
 
-<section class="relative isolate overflow-hidden bg-white py-14 md:py-20">
+<section class="relative isolate overflow-hidden bg-white pt-14 pb-20 md:py-20">
 	<div class="container-page relative">
 		{/* ── Header ───────────────────────────────────────────────────── */}
 		<div class="mx-auto max-w-2xl text-center">
@@ -253,11 +253,29 @@ const posterFor = (s: Short) =>
 								</div>
 
 								{/* caption beneath the tile — description only, no separate title
-								    (a leading "GroupName:" in the description gets the yellow marker) */}
+								    (a leading "GroupName:" in the description gets the yellow marker).
+								    That lead-in name is also the group's join link, same as the
+								    plain-text list on the left — it wasn't wired up before. */}
 								{s.description && (
 									<figcaption class="mt-3.5 px-0.5 text-center">
 										<p class="text-base leading-snug text-navy-500">
-											{descLead && <Highlight><span class="font-bold">{descLead}</span></Highlight>}
+											{descLead && (
+												<Highlight>
+													{s.joinHref ? (
+														<a
+															href={s.joinHref}
+															target="_blank"
+															rel="noopener"
+															aria-label={`Join ${descLead} on WhatsApp`}
+															class="font-bold underline-offset-2 hover:underline"
+														>
+															{descLead}
+														</a>
+													) : (
+														<span class="font-bold">{descLead}</span>
+													)}
+												</Highlight>
+											)}
 											{descRest}
 										</p>
 									</figcaption>
