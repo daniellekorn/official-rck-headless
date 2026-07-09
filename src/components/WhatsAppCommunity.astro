@@ -104,8 +104,10 @@ const posterFor = (s: Short) => {
 
 		{/* ── Chat list + video previews ───────────────────────────────── */}
 		<div class="mt-12 grid items-center gap-y-12 lg:grid-cols-12 lg:gap-x-10">
-			{/* LEFT — chat-group list + CTA */}
-			<div class="lg:col-span-4" data-reveal="up" data-reveal-delay="120">
+			{/* LEFT — chat-group list + CTA. lg:pl nudges it in from the container's
+			    true left edge so it doesn't look stranded under the centered header
+			    above; the video tiles column is untouched. */}
+			<div class="lg:col-span-4 lg:pl-12" data-reveal="up" data-reveal-delay="120">
 				<p class="font-sans text-xs font-bold uppercase tracking-[0.2em] text-navy-400">Our chat groups</p>
 				<ul class="mt-4 grid grid-cols-1 gap-x-6 gap-y-2.5 sm:grid-cols-2 lg:grid-cols-1 lg:gap-y-3">
 					{
