@@ -324,39 +324,90 @@ const posterFor = (s: Short) => {
 
 		const counter = card.querySelector<HTMLElement>("[data-short-count]");
 		let index = 0;
+		let playing = false;
+		// Set right after a swipe fires goTo(), briefly, so the tap-to-toggle
+		// listener below doesn't also fire from the same gesture's synthetic click.
+		let recentSwipe = false;
+		const markSwipe = () => {
+			recentSwipe = true;
+			setTimeout(() => { recentSwipe = false; }, 400);
+		};
 
 		const play = () => {
 			const v = videos[index];
 			let player: HTMLIFrameElement | HTMLVideoElement;
+			let overlay: HTMLButtonElement | undefined;
+			playing = true;
+
 			if (v.kind === "youtube") {
 				const iframe = document.createElement("iframe");
-				iframe.src = `https://www.youtube-nocookie.com/embed/${v.id}?autoplay=1&playsinline=1&rel=0`;
+				iframe.src = `https://www.youtube-nocookie.com/embed/${v.id}?autoplay=1&playsinline=1&rel=0&enablejsapi=1`;
 				iframe.title = "YouTube video";
 				iframe.allow = "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture";
 				iframe.allowFullscreen = true;
 				player = iframe;
+
+				// A tap inside a cross-origin iframe never bubbles out to us, so a
+				// transparent tap-catcher sits on top and relays play/pause via
+				// YouTube's postMessage API instead.
+				overlay = document.createElement("button");
+				overlay.type = "button";
+				overlay.setAttribute("aria-label", "Play or pause video");
+				overlay.className = "absolute inset-0 h-full w-full cursor-pointer bg-transparent border-0";
+				overlay.addEventListener("click", () => {
+					if (recentSwipe) return;
+					playing = !playing;
+					iframe.contentWindow?.postMessage(
+						JSON.stringify({ event: "command", func: playing ? "playVideo" : "pauseVideo", args: [] }),
+						"https://www.youtube-nocookie.com",
+					);
+				});
 			} else {
 				const video = document.createElement("video");
 				video.src = v.src;
 				video.autoplay = true;
-				video.controls = true;
 				video.playsInline = true;
+				video.addEventListener("click", () => {
+					if (recentSwipe) return;
+					if (video.paused) {
+						video.play();
+						playing = true;
+					} else {
+						video.pause();
+						playing = false;
+					}
+				});
 				player = video;
 			}
-			player.className = "absolute inset-0 h-full w-full border-0 object-cover";
-			frame.replaceChildren(player);
+
+			player.className = "absolute inset-0 h-full w-full border-0 object-cover cursor-pointer";
+			frame.replaceChildren(...(overlay ? [player, overlay] : [player]));
 			if (counter) counter.textContent = `${index + 1}/${videos.length}`;
 		};
 
+		const goTo = (delta: number) => {
+			index = (index + delta + videos.length) % videos.length;
+			play();
+		};
+
 		card.querySelector("[data-short-play]")?.addEventListener("click", play);
-		card.querySelector("[data-short-prev]")?.addEventListener("click", () => {
-			index = (index - 1 + videos.length) % videos.length;
-			play();
-		});
-		card.querySelector("[data-short-next]")?.addEventListener("click", () => {
-			index = (index + 1) % videos.length;
-			play();
-		});
+		card.querySelector("[data-short-prev]")?.addEventListener("click", () => goTo(-1));
+		card.querySelector("[data-short-next]")?.addEventListener("click", () => goTo(1));
+
+		// Swipe to flip between this group's videos (mobile) — same gesture and
+		// 40px threshold already used for PhotoGallery/Lightbox elsewhere on the
+		// site. Listens on the frame itself so it survives poster/player swaps.
+		if (videos.length > 1) {
+			let touchStartX = 0;
+			frame.addEventListener("touchstart", (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+			frame.addEventListener("touchend", (e) => {
+				const dx = e.changedTouches[0].clientX - touchStartX;
+				if (Math.abs(dx) > 40) {
+					markSwipe();
+					goTo(dx < 0 ? 1 : -1);
+				}
+			}, { passive: true });
+		}
 	});
 
 	// Staggered entrance for the tiles.
