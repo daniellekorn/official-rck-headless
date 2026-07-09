@@ -69,7 +69,7 @@ const isContactActive = pathname === "/contact";
 				<img
 					src="/logo-horizontal-dark.png"
 					alt="RCK — Ra'anana Community Kollel"
-					class="h-10 sm:h-11 w-auto"
+					class="h-10 sm:h-11 lg:h-12 w-auto"
 				/>
 			</a>
 
@@ -81,7 +81,7 @@ const isContactActive = pathname === "/contact";
 								href={link.href}
 								aria-current={link.active ? "page" : undefined}
 								class:list={[
-									"inline-flex items-center gap-1 text-[17px] font-medium transition-colors whitespace-nowrap",
+									"inline-flex items-center gap-1 text-[17px] lg:text-[19px] font-medium transition-colors whitespace-nowrap",
 									link.active
 										? "text-navy-600 underline underline-offset-[6px] decoration-2 decoration-gold-500"
 										: "text-navy-500 hover:text-gold-500",
@@ -108,7 +108,7 @@ const isContactActive = pathname === "/contact";
 											<li>
 												<a
 													href={child.href}
-													class="block rounded-sm px-3 py-2 text-[15px] font-medium text-navy-600 transition-colors hover:bg-navy-50 hover:text-gold-600 whitespace-nowrap"
+													class="block rounded-sm px-3 py-2 text-[15px] lg:text-[16px] font-medium text-navy-600 transition-colors hover:bg-navy-50 hover:text-gold-600 whitespace-nowrap"
 												>
 													{child.label}
 												</a>
@@ -126,7 +126,7 @@ const isContactActive = pathname === "/contact";
 				<a
 					href="/contact"
 					class:list={[
-						"rounded-sm border px-4 py-2 text-[17px] font-medium transition-colors whitespace-nowrap",
+						"rounded-sm border px-4 py-2 text-[17px] lg:text-[19px] font-medium transition-colors whitespace-nowrap",
 						isContactActive
 							? "border-gold-500 text-gold-600 bg-gold-50"
 							: "border-navy-200 text-navy-500 hover:bg-navy-50",
@@ -136,7 +136,7 @@ const isContactActive = pathname === "/contact";
 				</a>
 				<a
 					href="/donate"
-					class="group inline-flex items-center gap-1.5 rounded-sm bg-gold-500 px-5 py-2 text-[17px] font-semibold text-navy-700 shadow-sm transition-all hover:bg-gold-400 hover:shadow-md whitespace-nowrap"
+					class="group inline-flex items-center gap-1.5 rounded-sm bg-gold-500 px-5 py-2 text-[17px] lg:text-[19px] font-semibold text-navy-700 shadow-sm transition-all hover:bg-gold-400 hover:shadow-md whitespace-nowrap"
 				>
 					<svg viewBox="0 0 24 24" class="h-4 w-4 transition-transform duration-300 group-hover:scale-110" fill="currentColor" aria-hidden="true">
 						<path d="M12 20.3 4.6 13a4.6 4.6 0 0 1 6.5-6.5l.9.9.9-.9A4.6 4.6 0 0 1 19.4 13L12 20.3Z" />

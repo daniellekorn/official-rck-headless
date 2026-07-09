@@ -52,6 +52,17 @@
     scroll-behavior: smooth;
   }
 
+  /* Desktop reads small on large screens: nudge the root size up so every
+     rem-based size (all body text, spacing) scales proportionally. Mobile and
+     tablet are untouched — they were already dialed in. Kept modest; headings
+     already scale via their own responsive classes. Nav uses fixed px sizes,
+     so it's bumped separately in Nav.astro. */
+  @media (min-width: 1024px) {
+    html {
+      font-size: 17.5px;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
