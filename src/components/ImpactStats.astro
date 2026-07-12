@@ -26,7 +26,7 @@ const visible = stats.filter((s) => s.value && s.label);
 
 {visible.length > 0 && (
 	<section class="bg-navy-700 py-7 sm:py-9 md:py-10" data-stats-band>
-		<div class="container-page">
+		<div class="container-page lg:px-14">
 			<div class="flex flex-nowrap items-stretch justify-between gap-2 sm:gap-6">
 				{visible.map((s, i) => (
 					<div
@@ -36,13 +36,13 @@ const visible = stats.filter((s) => s.value && s.label);
 						]}
 					>
 						<p
-							class="font-display font-bold text-white leading-none text-[clamp(1.05rem,4.6vw,2.75rem)] tabular-nums"
+							class="font-display font-bold text-white leading-none text-[clamp(0.95rem,3.6vw,2.1rem)] tabular-nums"
 							data-stat-number
 							data-stat-value={s.value}
 						>
 							{s.value}
 						</p>
-						<p class="mt-1.5 sm:mt-2.5 font-sans text-[clamp(0.5rem,2.1vw,0.75rem)] font-semibold uppercase tracking-[0.05em] sm:tracking-[0.12em] text-gold-300 leading-tight">
+						<p class="mt-1.5 sm:mt-2.5 font-sans text-[clamp(0.4rem,1.7vw,0.625rem)] font-semibold uppercase tracking-[0.05em] sm:tracking-[0.12em] text-gold-300 leading-tight">
 							{s.label}
 						</p>
 					</div>
@@ -53,15 +53,16 @@ const visible = stats.filter((s) => s.value && s.label);
 )}
 
 <script>
-	// Count-up on scroll-into-view. Each stat's raw value (e.g. "27+", "1,000",
+	// Count-up on scroll-into-view, and again every time a hover-capable
+	// pointer mouses over a number. Each stat's raw value (e.g. "27+", "1,000",
 	// "HUNDREDS") is parsed into an optional prefix, a numeric core, and an
 	// optional suffix; a value with no digits (nothing to count) is left
-	// exactly as authored. Runs once per element, and skips the animation
-	// entirely under reduced-motion (final values are already server-rendered,
-	// so there's nothing extra to do in that case).
+	// exactly as authored and never animates. Skips all of this entirely under
+	// reduced-motion (final values are already server-rendered, so there's
+	// nothing extra to do in that case).
 	const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 	const nodes = document.querySelectorAll<HTMLElement>("[data-stat-number]");
-	if (reduce || !nodes.length || typeof IntersectionObserver === "undefined") {
+	if (reduce || !nodes.length) {
 		// no-op: server-rendered text is already the final value
 	} else {
 		type Parsed = { prefix: string; suffix: string; target: number; grouped: boolean };
@@ -78,9 +79,18 @@ const visible = stats.filter((s) => s.value && s.label);
 		const DURATION = 1500;
 		const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
+		// A hover replay can start mid-animation (or mid-replay) — this tracks
+		// each element's latest "run" so a stale rAF loop bows out instead of
+		// fighting a newer one over textContent.
+		const runIds = new WeakMap<HTMLElement, number>();
+
 		const animateStat = (el: HTMLElement, parsed: Parsed) => {
+			const runId = (runIds.get(el) ?? 0) + 1;
+			runIds.set(el, runId);
+			el.textContent = `${parsed.prefix}0${parsed.suffix}`;
 			const start = performance.now();
 			const step = (now: number) => {
+				if (runIds.get(el) !== runId) return; // superseded by a newer run
 				const t = Math.min(1, (now - start) / DURATION);
 				const current = Math.round(parsed.target * easeOutExpo(t));
 				const formatted = parsed.grouped ? current.toLocaleString("en-US") : String(current);
@@ -90,21 +100,33 @@ const visible = stats.filter((s) => s.value && s.label);
 			requestAnimationFrame(step);
 		};
 
-		const observer = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry, i) => {
-					if (!entry.isIntersecting) return;
-					const el = entry.target as HTMLElement;
-					observer.unobserve(el);
-					const raw = el.dataset.statValue ?? "";
-					const parsed = parse(raw);
-					if (!parsed) return; // e.g. "HUNDREDS" — nothing to count, already showing final text
-					el.textContent = `${parsed.prefix}0${parsed.suffix}`;
-					setTimeout(() => animateStat(el, parsed), i * 90);
+		// Replay on hover — mouse only; touch's synthetic "hover after tap"
+		// would just replay on every tap, which reads as noise, not a feature.
+		if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+			nodes.forEach((el) => {
+				el.addEventListener("mouseenter", () => {
+					const parsed = parse(el.dataset.statValue ?? "");
+					if (parsed) animateStat(el, parsed);
 				});
-			},
-			{ threshold: 0.4 },
-		);
-		nodes.forEach((el) => observer.observe(el));
+			});
+		}
+
+		if (typeof IntersectionObserver !== "undefined") {
+			const observer = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((entry, i) => {
+						if (!entry.isIntersecting) return;
+						const el = entry.target as HTMLElement;
+						observer.unobserve(el);
+						const raw = el.dataset.statValue ?? "";
+						const parsed = parse(raw);
+						if (!parsed) return; // e.g. "HUNDREDS" — nothing to count, already showing final text
+						setTimeout(() => animateStat(el, parsed), i * 90);
+					});
+				},
+				{ threshold: 0.4 },
+			);
+			nodes.forEach((el) => observer.observe(el));
+		}
 	}
 </script>
