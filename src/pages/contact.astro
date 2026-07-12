@@ -4,6 +4,7 @@ import Nav from "../components/Nav.astro";
 import PageHeader from "../components/PageHeader.astro";
 import Footer from "../components/Footer.astro";
 import { getContactInfo } from "../lib/contact-info";
+import { googleMapsUrl, wazeUrl } from "../lib/maps";
 
 const contact = await getContactInfo();
 
@@ -96,7 +97,14 @@ const label = "block text-sm font-medium text-navy-600";
 									</span>
 									<span>
 										<span class="block text-xs font-semibold uppercase tracking-widest text-navy-400">Address</span>
-										<address class="not-italic text-base font-medium leading-snug">{contact.address}</address>
+										<address class="not-italic">
+											<a href={googleMapsUrl(contact.address)} target="_blank" rel="noopener noreferrer" class="text-base font-medium leading-snug hover:text-gold-600 hover:underline">
+												{contact.address}
+											</a>
+											<a href={wazeUrl(contact.address)} target="_blank" rel="noopener noreferrer" class="ml-2 text-xs font-semibold uppercase tracking-wide text-gold-600 hover:text-gold-500 hover:underline">
+												Waze
+											</a>
+										</address>
 									</span>
 								</div>
 							)}

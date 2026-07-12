@@ -5,6 +5,7 @@ import Footer from "../components/Footer.astro";
 import PageHeader from "../components/PageHeader.astro";
 import { getCommunityPage, getCommunityMembers } from "../lib/community";
 import { ricosToPlainText } from "../lib/ricos";
+import { googleMapsUrl, wazeUrl } from "../lib/maps";
 
 const page = await getCommunityPage();
 const members = await getCommunityMembers();
@@ -179,7 +180,20 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 										</a>
 									)}
 									{page?.taharasEnglishRabbiAddress && (
-										<address class="mt-1 not-italic text-sm text-navy-400">{page.taharasEnglishRabbiAddress}</address>
+										<address class="mt-1 flex items-start gap-1.5 not-italic text-sm text-navy-400">
+											<svg viewBox="0 0 24 24" class="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold-500" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+												<path d="M12 21s-8-7.3-8-12a8 8 0 1 1 16 0c0 4.7-8 12-8 12Z" stroke-linecap="round" stroke-linejoin="round" />
+												<circle cx="12" cy="9" r="2" />
+											</svg>
+											<span class="flex flex-wrap items-baseline gap-x-2">
+												<a href={googleMapsUrl(page.taharasEnglishRabbiAddress)} target="_blank" rel="noopener noreferrer" class="hover:text-gold-600 hover:underline">
+													{page.taharasEnglishRabbiAddress}
+												</a>
+												<a href={wazeUrl(page.taharasEnglishRabbiAddress)} target="_blank" rel="noopener noreferrer" class="text-xs font-semibold uppercase tracking-wide text-gold-500 hover:text-gold-600 hover:underline">
+													Waze
+												</a>
+											</span>
+										</address>
 									)}
 								</div>
 								<div>
@@ -195,7 +209,20 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 										</a>
 									)}
 									{page?.taharasHebrewRabbiAddress && (
-										<address class="mt-1 not-italic text-sm text-navy-400">{page.taharasHebrewRabbiAddress}</address>
+										<address class="mt-1 flex items-start gap-1.5 not-italic text-sm text-navy-400">
+											<svg viewBox="0 0 24 24" class="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold-500" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+												<path d="M12 21s-8-7.3-8-12a8 8 0 1 1 16 0c0 4.7-8 12-8 12Z" stroke-linecap="round" stroke-linejoin="round" />
+												<circle cx="12" cy="9" r="2" />
+											</svg>
+											<span class="flex flex-wrap items-baseline gap-x-2">
+												<a href={googleMapsUrl(page.taharasHebrewRabbiAddress)} target="_blank" rel="noopener noreferrer" class="hover:text-gold-600 hover:underline">
+													{page.taharasHebrewRabbiAddress}
+												</a>
+												<a href={wazeUrl(page.taharasHebrewRabbiAddress)} target="_blank" rel="noopener noreferrer" class="text-xs font-semibold uppercase tracking-wide text-gold-500 hover:text-gold-600 hover:underline">
+													Waze
+												</a>
+											</span>
+										</address>
 									)}
 								</div>
 							</div>
