@@ -1,0 +1,532 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import PageHeader from "../components/PageHeader.astro";
+import { getCommunityPage, getCommunityMembers } from "../lib/community";
+import { ricosToPlainText } from "../lib/ricos";
+
+const page = await getCommunityPage();
+const members = await getCommunityMembers();
+const hasMembers = members.length > 0;
+
+const mealsDescription = page?.mealsDescription ? ricosToPlainText(page.mealsDescription) : "";
+
+// Contact page link with a prefilled, locked subject line (contact.astro reads
+// ?subject= and shows it read-only) — used for the inline name links below.
+const contactHref = (subject: string) => `/contact?subject=${encodeURIComponent(subject)}`;
+
+const BEIS_DIN_SERVICES = [
+	"Monetary Disputes",
+	"Arbitration & Mediation",
+	"Halachic Wills",
+	"Shalom Bayis",
+	"Halachic Contracts",
+];
+
+// Accordion chrome shared by all four FAQ topics — native <details>/<summary>
+// so each opens/closes independently with zero JS and keyboard support for
+// free (see design log #047 for why this beats a custom aria-expanded toggle
+// here, unlike the team page's hover+pin card).
+const detailsClass = "group border-b border-navy-100 last:border-b-0 scroll-mt-28";
+const summaryClass =
+	"flex cursor-pointer list-none items-center justify-between gap-4 py-6 text-left [&::-webkit-details-marker]:hidden";
+const questionClass = "font-display text-xl sm:text-2xl font-medium text-navy-600 pr-4";
+const chevronClass = "h-5 w-5 shrink-0 text-gold-500 transition-transform duration-300 group-open:rotate-180";
+const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
+---
+
+<Layout>
+	<Nav />
+	<main>
+		<PageHeader titleNavy="Welcome to Our Community!" />
+
+		<!-- FAQ topics -->
+		<section class="bg-white py-4 sm:py-6">
+			<div class="container-page">
+				<div class="mx-auto max-w-3xl">
+
+					<!-- 1. Meals -->
+					<details id="meals" class={detailsClass}>
+						<summary class={summaryClass}>
+							<span class={questionClass}>New or visiting? Let us set you up with meals</span>
+							<svg viewBox="0 0 24 24" class={chevronClass} fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+								<path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+						</summary>
+						<div class={panelClass}>
+							{page?.mealsFamilyName ? (
+								<div class="flex flex-col gap-6 sm:flex-row sm:items-start">
+									{page.mealsPhotoUrl && (
+										<img
+											src={page.mealsPhotoUrl}
+											alt={page.mealsFamilyName}
+											loading="lazy"
+											class="h-40 w-40 shrink-0 rounded-md object-cover ring-1 ring-navy-100"
+										/>
+									)}
+									<div class="min-w-0">
+										<p class="font-display text-lg font-medium text-navy-600">{page.mealsFamilyName}</p>
+										<div class="mt-1.5 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+											{page.mealsPhone && (
+												<a href={`tel:${page.mealsPhone.replace(/[\s\-]/g, "")}`} class="font-medium text-gold-600 hover:text-gold-500">
+													{page.mealsPhone}
+												</a>
+											)}
+											{page.mealsEmail && (
+												<a href={`mailto:${page.mealsEmail}`} class="font-medium text-gold-600 hover:text-gold-500 break-all">
+													{page.mealsEmail}
+												</a>
+											)}
+										</div>
+										{mealsDescription && <p class="mt-3 whitespace-pre-line">{mealsDescription}</p>}
+									</div>
+								</div>
+							) : (
+								<p>Contact info for meals hosting is coming soon — check back shortly, or reach out via our <a href="/contact" class="font-medium text-gold-600 hover:text-gold-500">contact page</a>.</p>
+							)}
+						</div>
+					</details>
+
+					<!-- 2. Gabbai -->
+					<details id="gabbai" class={detailsClass}>
+						<summary class={summaryClass}>
+							<span class={questionClass}>Yahrtzeit? Special simcha? Contact our gabbai.</span>
+							<svg viewBox="0 0 24 24" class={chevronClass} fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+								<path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+						</summary>
+						<div class={panelClass}>
+							<div class="flex flex-col gap-6 sm:flex-row sm:items-start">
+								{page?.gabbaiPhotoUrl && (
+									<img
+										src={page.gabbaiPhotoUrl}
+										alt={page.gabbaiName ?? "Gabbai"}
+										loading="lazy"
+										class="h-40 w-40 shrink-0 rounded-md object-cover ring-1 ring-navy-100"
+									/>
+								)}
+								<div class="min-w-0">
+									{page?.gabbaiName ? (
+										<p>
+											Contact our gabbai,{" "}
+											<a href={contactHref("Re: Gabbi")} class="font-semibold text-gold-600 hover:text-gold-500">
+												{page.gabbaiName}
+											</a>
+											, regarding yahrtzeits, special simchas, and other gabbai matters.
+											{page.gabbaiWifeName && (
+												<>
+													{" "}His wife,{" "}
+													<a href={contactHref("Re: Tefillat Yeladim")} class="font-semibold text-gold-600 hover:text-gold-500">
+														{page.gabbaiWifeName}
+													</a>
+													, also leads our popular and exciting Tefillat Yeladim!
+												</>
+											)}
+										</p>
+									) : (
+										<p>Gabbai contact info is coming soon — check back shortly, or reach out via our <a href="/contact" class="font-medium text-gold-600 hover:text-gold-500">contact page</a>.</p>
+									)}
+									<div class="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+										{page?.gabbaiPhone && (
+											<a href={`tel:${page.gabbaiPhone.replace(/[\s\-]/g, "")}`} class="font-medium text-gold-600 hover:text-gold-500">
+												{page.gabbaiPhone}
+											</a>
+										)}
+										{page?.gabbaiEmail && (
+											<a href={`mailto:${page.gabbaiEmail}`} class="font-medium text-gold-600 hover:text-gold-500 break-all">
+												{page.gabbaiEmail}
+											</a>
+										)}
+									</div>
+									<a
+										href="/daven#shabbos"
+										class="mt-4 inline-flex items-center gap-1.5 font-sans text-sm font-bold uppercase tracking-[0.14em] text-gold-600 hover:text-gold-500"
+									>
+										View Shabbos Times
+										<svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+											<path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+										</svg>
+									</a>
+								</div>
+							</div>
+						</div>
+					</details>
+
+					<!-- 3. Taharas HaMishpacha -->
+					<details id="taharas" class={detailsClass}>
+						<summary class={summaryClass}>
+							<span class={questionClass}>Taharas HaMishpacha</span>
+							<svg viewBox="0 0 24 24" class={chevronClass} fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+								<path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+						</summary>
+						<div class={panelClass}>
+							<p class="font-sans text-sm font-bold uppercase tracking-[0.18em] text-navy-400">
+								Need to ask or drop off a shaalah? Contact our rabbonim:
+							</p>
+							<div class="mt-5 grid gap-8 sm:grid-cols-2">
+								<div>
+									<p class="font-sans text-xs font-bold uppercase tracking-[0.2em] text-gold-500">English</p>
+									{page?.taharasEnglishRabbiName && (
+										<a href="/team#leadership" class="mt-1.5 inline-block font-display text-lg font-medium text-navy-600 hover:text-gold-600">
+											{page.taharasEnglishRabbiName}
+										</a>
+									)}
+									{page?.taharasEnglishRabbiPhone && (
+										<a href={`tel:${page.taharasEnglishRabbiPhone.replace(/[\s\-]/g, "")}`} class="mt-1 inline-block text-sm font-medium text-gold-600 hover:text-gold-500">
+											{page.taharasEnglishRabbiPhone}
+										</a>
+									)}
+									{page?.taharasEnglishRabbiAddress && (
+										<address class="mt-1 not-italic text-sm text-navy-400">{page.taharasEnglishRabbiAddress}</address>
+									)}
+								</div>
+								<div>
+									<p class="font-sans text-xs font-bold uppercase tracking-[0.2em] text-gold-500">Hebrew</p>
+									{page?.taharasHebrewRabbiName && (
+										<a href="/team#leadership" class="mt-1.5 inline-block font-display text-lg font-medium text-navy-600 hover:text-gold-600">
+											{page.taharasHebrewRabbiName}
+										</a>
+									)}
+									{page?.taharasHebrewRabbiPhone && (
+										<a href={`tel:${page.taharasHebrewRabbiPhone.replace(/[\s\-]/g, "")}`} class="mt-1 inline-block text-sm font-medium text-gold-600 hover:text-gold-500">
+											{page.taharasHebrewRabbiPhone}
+										</a>
+									)}
+									{page?.taharasHebrewRabbiAddress && (
+										<address class="mt-1 not-italic text-sm text-navy-400">{page.taharasHebrewRabbiAddress}</address>
+									)}
+								</div>
+							</div>
+						</div>
+					</details>
+
+					<!-- 4. Beis Din -->
+					<details id="beis-din" class={detailsClass}>
+						<summary class={summaryClass}>
+							<span class={questionClass}>Our Beis Din and Dayanim</span>
+							<svg viewBox="0 0 24 24" class={chevronClass} fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+								<path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+						</summary>
+						<div class={panelClass}>
+							{page?.beisDinContactName ? (
+								<p>
+									At RCK we have a professional and well-trained team of dayanim ready to serve the
+									community with sensitivity, professionalism, and full halachic integrity. Contact{" "}
+									<a href={contactHref("Re: Beis Din")} class="font-semibold text-gold-600 hover:text-gold-500">
+										{page.beisDinContactName}
+									</a>{" "}
+									to schedule an appointment.
+								</p>
+							) : (
+								<p>
+									At RCK we have a professional and well-trained team of dayanim ready to serve the
+									community with sensitivity, professionalism, and full halachic integrity.
+								</p>
+							)}
+
+							<div class="mt-5">
+								<p class="font-sans text-xs font-bold uppercase tracking-[0.2em] text-gold-500">Our Services</p>
+								<ul class="mt-2.5 space-y-1.5">
+									{BEIS_DIN_SERVICES.map((service) => (
+										<li class="flex items-center gap-2">
+											<svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-gold-500" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+												<path d="M5 12.5l4.5 4.5L19 7" stroke-linecap="round" stroke-linejoin="round" />
+											</svg>
+											<span>{service}</span>
+										</li>
+									))}
+								</ul>
+							</div>
+
+							{(page?.beisDinContactPhone || page?.beisDinContactEmail) && (
+								<div class="mt-5 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+									{page.beisDinContactPhone && (
+										<a href={`tel:${page.beisDinContactPhone.replace(/[\s\-]/g, "")}`} class="font-medium text-gold-600 hover:text-gold-500">
+											{page.beisDinContactPhone}
+										</a>
+									)}
+									{page.beisDinContactEmail && (
+										<a href={`mailto:${page.beisDinContactEmail}`} class="font-medium text-gold-600 hover:text-gold-500 break-all">
+											{page.beisDinContactEmail}
+										</a>
+									)}
+								</div>
+							)}
+						</div>
+					</details>
+
+				</div>
+			</div>
+		</section>
+
+		<!-- Meet our members -->
+		<section id="members" class="scroll-mt-24 bg-mist py-16 sm:py-20 md:py-24">
+			<div class="container-page">
+				<div class="text-center mb-10 sm:mb-14" data-reveal="up">
+					<h2 class="font-display text-3xl sm:text-4xl md:text-[2.75rem] leading-[1.05] font-medium text-navy-600">
+						Member Spotlight
+					</h2>
+					<span class="gold-rule mx-auto mt-4" aria-hidden="true" />
+					<p class="mx-auto mt-5 max-w-xl text-base sm:text-lg text-navy-500 leading-relaxed">
+						Meet some of the people who make up our community!
+					</p>
+				</div>
+
+				{!hasMembers && (
+					<div class="text-center">
+						<p class="font-sans text-sm font-bold uppercase tracking-[0.18em] text-gold-500">Coming soon</p>
+						<p class="mx-auto mt-4 max-w-xl text-base text-navy-500 leading-relaxed">
+							Once the office adds families in the Wix CMS dashboard
+							(<code class="rounded bg-white px-1.5 py-0.5 text-sm">CommunityMembers</code> collection),
+							they'll appear here automatically.
+						</p>
+					</div>
+				)}
+
+				{hasMembers && (
+					<div class="relative" data-members-carousel>
+						<div
+							class="members-track flex gap-5 sm:gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory px-1 pb-2"
+							data-members-track
+						>
+						{members.map((m) => {
+							const bioText = m.description ? ricosToPlainText(m.description) : "";
+							const hasBio = bioText.length > 0;
+							const initials = m.familyName
+								.split(/\s+/)
+								.filter(Boolean)
+								.map((w) => w.charAt(0).toUpperCase())
+								.slice(0, 2)
+								.join("");
+
+							const photoMarkup = (
+								<div
+									class="card-photo relative aspect-square w-full overflow-hidden"
+									style="background: linear-gradient(135deg, var(--color-navy-50) 0%, var(--color-navy-100) 50%, var(--color-gold-100) 100%);"
+								>
+									<div
+										class="monogram-fallback absolute inset-0 flex flex-col items-center justify-center gap-2"
+										style={m.photoUrl ? "display:none" : ""}
+									>
+										<span class="font-display text-6xl sm:text-7xl font-medium text-navy-200" aria-hidden="true">
+											{initials || "RCK"}
+										</span>
+										<span class="gold-rule-sm opacity-60" aria-hidden="true"></span>
+									</div>
+									{m.photoUrl && (
+										<img
+											src={m.photoUrl}
+											alt={m.familyName}
+											loading="lazy"
+											class="card-image h-full w-full object-cover"
+											onerror="this.style.display='none';this.closest('.card-photo').querySelector('.monogram-fallback').style.display=''"
+										/>
+									)}
+									{hasBio && (
+										<div class="bio-overlay absolute inset-0 flex flex-col bg-gradient-to-b from-navy-700/80 via-navy-700/75 to-navy-700/70 p-5 sm:p-6">
+											<div class="bio-scroll overflow-y-auto pr-1">
+												<p class="text-[0.9375rem] leading-relaxed text-white whitespace-pre-line">
+													{bioText}
+												</p>
+											</div>
+										</div>
+									)}
+								</div>
+							);
+
+							const metaMarkup = (
+								<div class="p-5 sm:p-6">
+									<h3 class="font-display text-xl sm:text-2xl font-medium text-navy-600 truncate">
+										{m.familyName}
+									</h3>
+									{hasBio && (
+										<span class="bio-toggle-label mt-3 inline-flex items-center gap-1 font-sans text-[11px] font-bold uppercase tracking-[0.22em] text-gold-500" aria-hidden="true"></span>
+									)}
+								</div>
+							);
+
+							const card = hasBio ? (
+								<button
+									type="button"
+									data-community-card
+									aria-expanded="false"
+									class="community-card flex flex-col h-full w-full text-left rounded-md bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_45px_-22px_rgba(15,23,42,0.45)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-500 cursor-pointer"
+								>
+									{photoMarkup}
+									{metaMarkup}
+								</button>
+							) : (
+								<div class="flex flex-col h-full w-full rounded-md bg-white ring-1 ring-navy-100 overflow-hidden shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)]">
+									{photoMarkup}
+									{metaMarkup}
+								</div>
+							);
+
+							return (
+								<div class="w-[240px] sm:w-[270px] md:w-[290px] shrink-0 snap-start">
+									{card}
+								</div>
+							);
+						})}
+						</div>
+
+						<button
+							type="button"
+							data-members-prev
+							aria-label="Previous member"
+							class="absolute left-1 sm:-left-4 top-[38%] -translate-y-1/2 z-10 flex h-11 w-11 items-center justify-center rounded-sm bg-white/95 text-navy-600 ring-1 ring-navy-100 shadow-[0_10px_24px_-12px_rgba(7,23,58,0.4)] transition-colors hover:bg-gold-400 disabled:opacity-0 disabled:pointer-events-none"
+						>
+							<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+						</button>
+						<button
+							type="button"
+							data-members-next
+							aria-label="Next member"
+							class="absolute right-1 sm:-right-4 top-[38%] -translate-y-1/2 z-10 flex h-11 w-11 items-center justify-center rounded-sm bg-white/95 text-navy-600 ring-1 ring-navy-100 shadow-[0_10px_24px_-12px_rgba(7,23,58,0.4)] transition-colors hover:bg-gold-400 disabled:opacity-0 disabled:pointer-events-none"
+						>
+							<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+						</button>
+					</div>
+				)}
+			</div>
+		</section>
+	</main>
+	<Footer />
+</Layout>
+
+<style>
+	/* Same hover/tap-reveal mechanics as the team page's card (see design log
+	   #007/#008), just relabeled "Read about us!" for this context. Kept as a
+	   local copy rather than a shared component since the two cards diverge in
+	   surrounding markup (role/eyebrow line here vs. there). */
+	/* Member Spotlight is a native horizontal-scroll carousel, not a custom
+	   swipe handler — overflow-x + scroll-snap already gives trackpad/mouse-wheel
+	   scrolling and touch swipe for free. The arrow buttons below just nudge
+	   scrollLeft by one card; the scrollbar itself is hidden for a cleaner look
+	   since it's not the primary way anyone will actually scroll it. */
+	.members-track {
+		scrollbar-width: none;
+	}
+	.members-track::-webkit-scrollbar {
+		display: none;
+	}
+
+	.card-image {
+		transition: filter 400ms ease;
+	}
+	.bio-overlay {
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 300ms ease;
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		.community-card:hover .card-image {
+			filter: grayscale(1);
+		}
+		.community-card:hover .bio-overlay {
+			opacity: 1;
+			pointer-events: auto;
+		}
+	}
+
+	.community-card[aria-expanded="true"] .card-image {
+		filter: grayscale(1);
+	}
+	.community-card[aria-expanded="true"] .bio-overlay {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	.bio-toggle-label {
+		display: none;
+	}
+	.bio-toggle-label::after {
+		content: "Read about us!";
+	}
+	.community-card[aria-expanded="true"] .bio-toggle-label::after {
+		content: "Hide";
+	}
+	@media (hover: none), (pointer: coarse) {
+		.bio-toggle-label {
+			display: inline-flex;
+		}
+	}
+
+	.bio-scroll {
+		scrollbar-width: thin;
+		scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+	}
+	.bio-scroll::-webkit-scrollbar {
+		width: 6px;
+	}
+	.bio-scroll::-webkit-scrollbar-thumb {
+		background-color: rgba(255, 255, 255, 0.35);
+		border-radius: 3px;
+	}
+</style>
+
+<script>
+	// Identical toggle logic to team.astro's card (see design log #007) —
+	// hover reveals on desktop, tap-to-pin on touch, scroll resets when hidden.
+	document.querySelectorAll<HTMLButtonElement>("[data-community-card]").forEach((card) => {
+		const scrollEl = card.querySelector<HTMLElement>(".bio-scroll");
+		let hovering = false;
+
+		const resetScrollIfHidden = () => {
+			const expanded = card.getAttribute("aria-expanded") === "true";
+			if (!hovering && !expanded && scrollEl) scrollEl.scrollTop = 0;
+		};
+
+		card.addEventListener("mouseenter", () => { hovering = true; });
+		card.addEventListener("mouseleave", () => {
+			hovering = false;
+			resetScrollIfHidden();
+		});
+
+		card.addEventListener("click", () => {
+			const expanded = card.getAttribute("aria-expanded") === "true";
+			card.setAttribute("aria-expanded", expanded ? "false" : "true");
+			resetScrollIfHidden();
+		});
+	});
+
+	// Member Spotlight carousel: arrow buttons nudge native scroll by one card's
+	// width. Trackpad/mouse-wheel scrolling and touch swipe already work with no
+	// JS at all (plain overflow-x + scroll-snap) — this just adds a click target
+	// for people who'd rather press a button than scroll/swipe.
+	document.querySelectorAll<HTMLElement>("[data-members-carousel]").forEach((carousel) => {
+		const track = carousel.querySelector<HTMLElement>("[data-members-track]");
+		const prevBtn = carousel.querySelector<HTMLButtonElement>("[data-members-prev]");
+		const nextBtn = carousel.querySelector<HTMLButtonElement>("[data-members-next]");
+		if (!track) return;
+
+		const scrollByCard = (dir: 1 | -1) => {
+			const card = track.firstElementChild as HTMLElement | null;
+			const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+			const delta = card ? card.getBoundingClientRect().width + gap : track.clientWidth * 0.8;
+			track.scrollBy({ left: dir * delta, behavior: "smooth" });
+		};
+
+		prevBtn?.addEventListener("click", () => scrollByCard(-1));
+		nextBtn?.addEventListener("click", () => scrollByCard(1));
+
+		// Disable (fade out) an arrow once scrolled all the way to that edge.
+		const EDGE_SLACK = 4;
+		const updateEdges = () => {
+			if (prevBtn) prevBtn.disabled = track.scrollLeft <= EDGE_SLACK;
+			if (nextBtn) {
+				nextBtn.disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - EDGE_SLACK;
+			}
+		};
+		track.addEventListener("scroll", updateEdges, { passive: true });
+		updateEdges();
+	});
+</script>

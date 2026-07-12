@@ -20,6 +20,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Hero subtitle, eyebrow | `HomePage` | Edit the single row, change the relevant field. (The headline — "RCK" + "The Ra'anana Community Kollel" credit line — is brand, not content, and lives in code. See [#009](design-log/009-rck-brand-identity.md) and [#021](design-log/021-cream-bands-bright-yellow-low-radius.md).) |
 | Hero background (the big homepage image / video) | `HeroMedia` | **The one place for the hero background.** Add one row with an image for a single static hero, or several rows (images + a silent video) to make them crossfade as a sequence. Ordered by `sortOrder`. See [#029](design-log/029-hero-media-sequence.md), [#030](design-log/030-hero-single-source-of-truth.md). (The old `HomePage.heroImage` field no longer drives the hero — ignore it.) |
 | Hero CTA buttons (label or link) | `HomePage` | `heroPrimaryCtaLabel` / `heroPrimaryCtaHref`, same for secondary |
+| Impact stats band (the 5 count-up numbers just below the hero) | `HomePage` | `statNumber1`–`statNumber5` / `statLabel1`–`statLabel5`. See schema below and [#051](design-log/051-impact-stats-band.md). |
 | Copy in the two image+text bands on the homepage | `HomePage` | The `imageTextSection1*` and `imageTextSection2*` fields (dashboard labels start "Section 1 —" / "Section 2 —") |
 | Which side the photo sits on in an image+text band | `HomePage` | `imageTextSection1ImageOn` / `imageTextSection2ImageOn` — type `left` or `right` |
 | Which headline line gets the gold marker in an image+text band | `HomePage` | `imageTextSection1AccentLine` / `imageTextSection2AccentLine` — type `line1` or `line2` |
@@ -29,6 +30,8 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | The list of chat groups (left side) | `WhatsappGroups` | One row per group — the `name` shows in the list. Fill `joinHref` to make that entry clickable (opens that group's invite). Add / reorder (`sortOrder`) / hide (`active`) rows. See [#044](design-log/044-whatsapp-groups-collection.md). |
 | Featured groups (the right-side video tiles) | `WhatsappGroups` | Tick `featured` on a row, then add videos either way (or both): drag video files straight into `Video Uploads`, or paste YouTube links into `Video URLs` (one per line — full URLs are fine). Visitors flip between a group's videos with the ‹ › arrows. First four featured rows show. See [#046](design-log/046-whatsapp-video-uploads.md). |
 | Team members | `TeamMembers` | Add a row. Photo, name, role, bio, etc. |
+| Community FAQ (meals, gabbai, taharas hamishpacha, beis din) | `CommunityPage` | Edit the single row — one group of fields per topic. See schema below. |
+| Community members ("Meet some of the members" section on /community) | `CommunityMembers` | Add a row per family: photo, name, description. Same hover/tap-to-reveal card as the team page. |
 | Youth programs (on /youth) | `YouthPrograms` | Add a row per program: title, description, contact rabbi, optional photo + flyer. |
 | Past events archive (on /events) | `PastEvents` | Add a row per past event: title, date, photo gallery, optional flyer + blurb. Shows newest first. |
 | Davening times (weekday + Shabbos) | *(computed)* + `DaveningTimes` | Regular minyanim **and** the Shabbos schedule are calculated from zmanim in code (design-log #040, #041) — don't enter them as rows. Use `DaveningTimes` only for extras (Selichos, special weeks): `dayType = Weekday` rows appear under the weekday table, `dayType = Shabbat` rows under Shabbos Day. |
@@ -85,6 +88,11 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | heroPrimaryCtaHref | Text | "/daven" (relative path) |
 | heroSecondaryCtaLabel | Text | "Our Programs" |
 | heroSecondaryCtaHref | Text | "/events" |
+| statNumber1 / statLabel1 | Text | First of five stats in the thin dark-navy band between the hero and the first section — e.g. "27+" / "Years of Devotion". A number-like value ("27+", "1,000") counts up from zero when scrolled into view; a word with no digits ("HUNDREDS") just displays as typed. See [design-log/051](design-log/051-impact-stats-band.md). |
+| statNumber2 / statLabel2 | Text | e.g. "100+" / "Shiurim Weekly" |
+| statNumber3 / statLabel3 | Text | e.g. "1,000" / "Hours of Torah Weekly" |
+| statNumber4 / statLabel4 | Text | e.g. "HUNDREDS" / "Of Families Connected" |
+| statNumber5 / statLabel5 | Text | e.g. "THOUSANDS" / "Of Lives Impacted" |
 | imageTextSection1EyebrowLead | Text | Optional leading eyebrow word, shown navy *before* the gold word (so the row reads navy → gold → navy). Leave empty for none. Section 1 default: empty. |
 | imageTextSection1EyebrowGold | Text | Section 1 (first image+text band). Dashboard label "Section 1 — Eyebrow word (gold)". Default "UNIQUE". |
 | imageTextSection1EyebrowNavy | Text | Default "IMPACTFUL" |
@@ -182,6 +190,47 @@ There is no third section and no catch-all: anything the alias map doesn't recog
 
 See design log [#025](design-log/025-team-page-two-sections.md) for why the taxonomy was cut to two sections (supersedes [#007](design-log/007-team-page-taxonomy-and-hover-reveal.md)).
 
+#### `CommunityPage` — exactly **one** row, never more
+
+Drives the FAQ topics on `/community`. The four questions themselves, and the sentence each name/link sits inside, are fixed page copy (not editable here) — this collection only holds the names/contact details spliced into those fixed sentences. See design log [#047](design-log/047-community-page.md), [#049](design-log/049-community-content-refinements.md).
+
+| Field | Type | Notes |
+|---|---|---|
+| mealsFamilyName | Text | Name of the family who coordinates meal hosting. Leave empty and the topic shows a "coming soon" note instead. |
+| mealsPhone | Text | Their phone — becomes a tap-to-call link. |
+| mealsEmail | Text | Their email — becomes a tap-to-email link. |
+| mealsPhoto | Image | Photo of the family. |
+| mealsDescription | Rich Text | Who they are / how they help. |
+| gabbaiName | Text | The gabbai's name. Feeds directly into the fixed sentence "Contact our gabbai, **{name}**, regarding yahrtzeits, special simchas, and other gabbai matters." — his name links to the contact page with the subject pre-set to "Re: Gabbi". |
+| gabbaiWifeName | Text | His wife's name. Feeds the fixed sentence "His wife, **{name}**, also leads our popular and exciting Tefillat Yeladim!" — her name links to the contact page with subject "Re: Tefillat Yeladim". Leave empty to drop that sentence entirely. |
+| gabbaiPhone | Text | |
+| gabbaiEmail | Text | |
+| gabbaiPhoto | Image | |
+| taharasEnglishRabbiName | Text | The English-speaking rav for taharas hamishpacha shaalos. If he already has a `TeamMembers` row, his name here links to `/team#leadership` — keep the names in sync. |
+| taharasEnglishRabbiPhone | Text | |
+| taharasEnglishRabbiAddress | Text | |
+| taharasHebrewRabbiName | Text | The Hebrew-speaking rav. Same linking behavior as above. |
+| taharasHebrewRabbiPhone | Text | |
+| taharasHebrewRabbiAddress | Text | |
+| beisDinContactName | Text | Who to contact to open a case / schedule an appointment. Feeds the fixed sentence "...Contact **{name}** to schedule an appointment." — their name links to the contact page with subject "Re: Beis Din". The "Our Services" checklist below it (Monetary Disputes, Arbitration & Mediation, Halachic Wills, Shalom Bayis, Halachic Contracts) is fixed page copy, not a field. |
+| beisDinContactPhone | Text | |
+| beisDinContactEmail | Text | |
+
+> `gabbaiDescription`, `beisDinDescription`, and the `moving*` fields (`movingDescription`, `movingContactName`, `movingContactPhone`, `movingContactEmail`, `movingPhoto`) from the original design have been removed — the "Looking to move here?" topic was dropped entirely, and the gabbai/Beis Din paragraphs became fixed sentence templates with just a name spliced in (see [#049](design-log/049-community-content-refinements.md)).
+
+#### `CommunityMembers` — one row per family
+
+Drives the "Meet some of the members who make up our community!" section on `/community` — the same hover-to-reveal (desktop) / tap-to-reveal (mobile, labeled "Read about us!") card as `/team`. See design log [#047](design-log/047-community-page.md).
+
+| Field | Type | Notes |
+|---|---|---|
+| familyName | Text | e.g. "The Cohen Family". Shown under the photo. |
+| hebrewName | Text (opt) | Shown in gold under the family name. |
+| description | Rich Text | Who they are, what they do, how they can help families who are moving here — shown in the hover/tap overlay. |
+| photo | Image (opt) | Empty shows an initials monogram, same fallback as `TeamMembers`. |
+| sortOrder | Number | Display order, lower first. |
+| active | Boolean | Untick to hide a family without deleting the row. |
+
 #### `YouthPrograms` — one row per youth program
 
 Drives the **Youth Programming page** (`/youth`). Each row is one program (Dor L'Dor, Matmidim Chaburos, Teen Learning, …) and renders as its own section on the page. A program **always** needs a `title`, a `description`, and a contact rabbi; the photo is optional. **Every program shows a flyer slot** — if you haven't added a `flyerImage` yet, it shows a "Flyer coming soon" placeholder (so upload one, or accept the placeholder until you do). Rows are ordered by `sortOrder`.
@@ -206,16 +255,19 @@ Drives the **Youth Programming page** (`/youth`). Each row is one program (Dor L
 
 Drives the **Past Events archive** on `/events` (below the upcoming flyers). Each
 row is one event; the page shows a list of event **names** (newest first) and,
-when you click a name, that event's **photos and flyer** appear beside each
-other. An event needs a `title`; everything else is optional (an event with no
-photos and no flyer still shows as a titled blurb). Same field shape as
-`YouthPrograms`. See design log #027.
+when you click a name, that event's **photos, video(s), and flyer** appear
+beside each other. Clicking any photo or video thumbnail opens the full-size
+viewer — photos and videos are one continuous "swipe through" sequence there,
+videos always last. An event needs a `title`; everything else is optional (an
+event with no photos, videos, and no flyer still shows as a titled blurb).
+Same field shape as `YouthPrograms`. See design log #027, [#050](design-log/050-past-events-video-and-scrubber.md).
 
 | Field | Type | Notes |
 |---|---|---|
 | `title` | Text | Event name — this is the clickable label in the side list. |
 | `eventDate` | Date (opt) | Used to sort newest-first and to caption the panel (e.g. "November 2025"). Leave empty and the event sinks to the bottom. |
 | `gallery` | Media Gallery (opt) | Event photos — add as many as you like. **One** shows as a single image; **more** become a swipeable slideshow (thumbnails on desktop, dots on mobile). |
+| `videoUrls` | Text (opt) | Video links, **one per line** — any YouTube URL form (`watch?v=`, `youtu.be/`, `/shorts/`, or a bare video ID) works. Shown as extra thumbnails (with a play-button overlay) after the photos; clicking one opens it right in the same full-size viewer the photos use. Same field convention as `WhatsappGroups.videoUrls`. |
 | `flyerImage` | Image (opt) | **Preferred.** A static flyer image (export page 1 of the Canva design as PNG). Gets a click-to-enlarge viewer + Download button. |
 | `flyerPdfUrl` | Text (opt) | Direct public PDF URL — fallback for multi-page documents. Checked after the image. |
 | `blurb` | Rich Text (opt) | A short description shown above the photos. Paragraphs preserved. |
@@ -223,8 +275,9 @@ photos and no flyer still shows as a titled blurb). Same field shape as
 | `active` | Boolean | Show/hide without deleting. |
 
 **To add a past event:** add a `PastEvents` row — `title` + `eventDate`, drop the
-photos into `gallery`, and add the flyer (`flyerImage`, or `flyerPdfUrl`) if you
-have one. It appears in the archive automatically, newest first.
+photos into `gallery`, paste any video links into `videoUrls`, and add the flyer
+(`flyerImage`, or `flyerPdfUrl`) if you have one. It appears in the archive
+automatically, newest first.
 
 #### `DaveningTimes`
 

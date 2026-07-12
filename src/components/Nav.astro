@@ -29,7 +29,17 @@ interface NavItem {
 const homeChildren: NavChild[] = [
 	{ label: "Join Us", href: "/#join" },
 	{ label: "History", href: "/#history" },
-	{ label: "Community", href: "/#whatsapp" },
+	{ label: "WhatsApp Groups", href: "/#whatsapp" },
+];
+
+// Static anchors into /community's fixed FAQ topics + members section — not
+// CMS-driven since the topics are fixed page structure (see design log #047, #049).
+const communityChildren: NavChild[] = [
+	{ label: "Meals & Hosting", href: "/community#meals" },
+	{ label: "Yahrtzeit & Simcha", href: "/community#gabbai" },
+	{ label: "Taharas HaMishpacha", href: "/community#taharas" },
+	{ label: "Beis Din", href: "/community#beis-din" },
+	{ label: "Meet Our Members", href: "/community#members" },
 ];
 
 const baseLinks: NavItem[] = [
@@ -37,6 +47,7 @@ const baseLinks: NavItem[] = [
 	{ label: "Meet the Team", href: "/team", children: teamChildren },
 	{ label: "Daven with Us", href: "/daven" },
 	{ label: "Learn with Us", href: "/learn" },
+	{ label: "Community", href: "/community", children: communityChildren },
 	{ label: "Events", href: "/events" },
 	{ label: "Youth", href: "/youth", children: youthChildren },
 ];
@@ -73,7 +84,7 @@ const isContactActive = pathname === "/contact";
 				/>
 			</a>
 
-			<ul class="hidden items-center gap-4 lg:gap-6 md:flex">
+			<ul class="hidden items-center gap-4 2xl:gap-6 xl:flex" data-nav-list>
 				{
 					navLinks.map((link) => (
 						<li class:list={["relative", link.children && "group"]}>
@@ -81,7 +92,7 @@ const isContactActive = pathname === "/contact";
 								href={link.href}
 								aria-current={link.active ? "page" : undefined}
 								class:list={[
-									"inline-flex items-center gap-1 text-[17px] lg:text-[19px] font-medium transition-colors whitespace-nowrap",
+									"inline-flex items-center gap-1 text-[17px] 2xl:text-[19px] font-medium transition-colors whitespace-nowrap",
 									link.active
 										? "text-navy-600 underline underline-offset-[6px] decoration-2 decoration-gold-500"
 										: "text-navy-500 hover:text-gold-500",
@@ -122,11 +133,11 @@ const isContactActive = pathname === "/contact";
 				}
 			</ul>
 
-			<div class="hidden md:flex items-center gap-2 shrink-0">
+			<div class="hidden xl:flex items-center gap-2 shrink-0" data-nav-cta>
 				<a
 					href="/contact"
 					class:list={[
-						"rounded-sm border px-4 py-2 text-[17px] lg:text-[19px] font-medium transition-colors whitespace-nowrap",
+						"rounded-sm border px-4 py-2 text-[17px] 2xl:text-[19px] font-medium transition-colors whitespace-nowrap",
 						isContactActive
 							? "border-gold-500 text-gold-600 bg-gold-50"
 							: "border-navy-200 text-navy-500 hover:bg-navy-50",
@@ -136,7 +147,7 @@ const isContactActive = pathname === "/contact";
 				</a>
 				<a
 					href="/donate"
-					class="group inline-flex items-center gap-1.5 rounded-sm bg-gold-500 px-5 py-2 text-[17px] lg:text-[19px] font-semibold text-navy-700 shadow-sm transition-all hover:bg-gold-400 hover:shadow-md whitespace-nowrap"
+					class="group inline-flex items-center gap-1.5 rounded-sm bg-gold-500 px-5 py-2 text-[17px] 2xl:text-[19px] font-semibold text-navy-700 shadow-sm transition-all hover:bg-gold-400 hover:shadow-md whitespace-nowrap"
 				>
 					<svg viewBox="0 0 24 24" class="h-4 w-4 transition-transform duration-300 group-hover:scale-110" fill="currentColor" aria-hidden="true">
 						<path d="M12 20.3 4.6 13a4.6 4.6 0 0 1 6.5-6.5l.9.9.9-.9A4.6 4.6 0 0 1 19.4 13L12 20.3Z" />
@@ -151,7 +162,7 @@ const isContactActive = pathname === "/contact";
 				aria-controls="mobile-menu"
 				aria-expanded="false"
 				aria-label="Toggle menu"
-				class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-sm text-navy-600 hover:bg-navy-50 transition-colors"
+				class="xl:hidden inline-flex h-10 w-10 items-center justify-center rounded-sm text-navy-600 hover:bg-navy-50 transition-colors"
 			>
 				<svg data-icon="open" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
 					<path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
@@ -165,7 +176,7 @@ const isContactActive = pathname === "/contact";
 		<div
 			id="mobile-menu"
 			data-mobile-menu
-			class="md:hidden mx-auto mt-2 max-w-5xl origin-top scale-y-95 opacity-0 pointer-events-none transition-all duration-200 rounded-md bg-white/98 shadow-[0_24px_48px_-20px_rgba(15,23,42,0.35)] ring-1 ring-black/5 backdrop-blur"
+			class="xl:hidden mx-auto mt-2 max-w-5xl origin-top scale-y-95 opacity-0 pointer-events-none transition-all duration-200 rounded-md bg-white/98 shadow-[0_24px_48px_-20px_rgba(15,23,42,0.35)] ring-1 ring-black/5 backdrop-blur"
 		>
 			<ul class="flex flex-col p-2">
 				{
@@ -327,3 +338,95 @@ const isContactActive = pathname === "/contact";
 		);
 	}
 </script>
+
+<script>
+	// Progressive "priority nav": below the `xl` breakpoint (1280px — matches the
+	// `xl:flex`/`xl:hidden` classes above), Tailwind's own CSS already collapses
+	// everything into the hamburger — that's the safe, zero-JS default and what
+	// renders on first paint, so there's never a flash of an overflowing bar.
+	// This script then progressively re-reveals as many nav items as actually
+	// fit, folding the lowest-priority ones (from the end of the list — Youth,
+	// Events, Community, … ) back into the hamburger one at a time as the
+	// window narrows. Every item stays reachable via the hamburger drawer
+	// regardless of whether it's also shown inline. See design log #048.
+	const XL_BREAKPOINT = 1280;
+
+	const navPill = document.querySelector<HTMLElement>(".nav-pill");
+	const navList = document.querySelector<HTMLUListElement>("[data-nav-list]");
+	const navCta = document.querySelector<HTMLElement>("[data-nav-cta]");
+	const navToggle = document.querySelector<HTMLButtonElement>("[data-mobile-toggle]");
+
+	if (navPill && navList && navCta) {
+		const items = Array.from(navList.children) as HTMLLIElement[];
+
+		// Does the whole nav-pill row currently overflow its own box? Reading
+		// scrollWidth vs clientWidth on the row itself accounts for the logo,
+		// every visible nav item, the CTA buttons, and the hamburger button (when
+		// present) in one comparison — no manual width/gap arithmetic needed.
+		const overflowing = () => navPill.scrollWidth > navPill.clientWidth + 1; // +1: rounding slack
+
+		const layout = () => {
+			if (window.innerWidth >= XL_BREAKPOINT) {
+				// Full width: let the CSS `xl:` classes render cleanly, no overrides.
+				navList.style.removeProperty("display");
+				navCta.style.removeProperty("display");
+				items.forEach((li) => li.style.removeProperty("display"));
+				navToggle?.style.removeProperty("display");
+				return;
+			}
+
+			// Force everything visible so we can measure the row's true content
+			// width, then fold items from the end until it fits (or nothing's left).
+			navList.style.display = "flex";
+			navCta.style.display = "flex";
+			items.forEach((li) => li.style.removeProperty("display"));
+
+			for (let i = items.length - 1; i >= 0 && overflowing(); i--) {
+				items[i].style.display = "none";
+			}
+
+			// Last resort: even Home + Contact + Donate alone don't fit. Drop the
+			// CTA buttons too rather than let them clip off the edge of the pill.
+			if (overflowing()) navCta.style.display = "none";
+
+			const ctaHidden = navCta.style.display === "none";
+			const anyItemHidden = items.some((li) => li.style.display === "none");
+			const allItemsHidden = items.every((li) => li.style.display === "none");
+
+			// Nothing ended up visible inline — fall back to the plain CSS default
+			// (hidden below `xl`) so there's no stray empty flex row taking space.
+			if (allItemsHidden && ctaHidden) {
+				navList.style.removeProperty("display");
+				navCta.style.removeProperty("display");
+			}
+
+			// The hamburger only needs to exist to hold whatever didn't fit inline.
+			// If nothing got folded (a perfect fit below `xl`), hide it — a full
+			// inline menu sitting next to a redundant hamburger would look broken.
+			const nothingFolded = !anyItemHidden && !ctaHidden;
+			if (nothingFolded) {
+				navToggle?.style.setProperty("display", "none");
+			} else {
+				navToggle?.style.removeProperty("display");
+			}
+		};
+
+		layout();
+
+		let resizeTicking = false;
+		window.addEventListener(
+			"resize",
+			() => {
+				if (!resizeTicking) {
+					requestAnimationFrame(() => {
+						layout();
+						resizeTicking = false;
+					});
+					resizeTicking = true;
+				}
+			},
+			{ passive: true },
+		);
+	}
+</script>
+
