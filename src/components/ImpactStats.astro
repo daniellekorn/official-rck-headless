@@ -1,0 +1,110 @@
+---
+/**
+ * ImpactStats — thin dark-navy band between the Hero and the first content
+ * section, showing a row of headline numbers (years running, shiurim/week,
+ * etc.) that count up from zero once scrolled into view. Always a single
+ * row, never stacked — sizes shrink fluidly on narrow screens instead of
+ * wrapping. See design log #051.
+ *
+ * A stat's `value` is free text (e.g. "27+", "1,000", "HUNDREDS") — the
+ * client script parses out a leading/trailing non-numeric prefix/suffix and
+ * a numeric core to animate; a value with no digits at all (e.g. "HUNDREDS")
+ * just fades in as-is, since there's nothing to count.
+ */
+interface Stat {
+	value?: string;
+	label?: string;
+}
+
+interface Props {
+	stats: Stat[];
+}
+
+const { stats } = Astro.props;
+const visible = stats.filter((s) => s.value && s.label);
+---
+
+{visible.length > 0 && (
+	<section class="bg-navy-700 py-7 sm:py-9 md:py-10" data-stats-band>
+		<div class="container-page">
+			<div class="flex flex-nowrap items-stretch justify-between gap-2 sm:gap-6">
+				{visible.map((s, i) => (
+					<div
+						class:list={[
+							"min-w-0 flex-1 text-center",
+							i > 0 && "border-navy-500/60 border-l pl-2 sm:pl-6",
+						]}
+					>
+						<p
+							class="font-display font-bold text-white leading-none text-[clamp(1.05rem,4.6vw,2.75rem)] tabular-nums"
+							data-stat-number
+							data-stat-value={s.value}
+						>
+							{s.value}
+						</p>
+						<p class="mt-1.5 sm:mt-2.5 font-sans text-[clamp(0.5rem,2.1vw,0.75rem)] font-semibold uppercase tracking-[0.05em] sm:tracking-[0.12em] text-gold-300 leading-tight">
+							{s.label}
+						</p>
+					</div>
+				))}
+			</div>
+		</div>
+	</section>
+)}
+
+<script>
+	// Count-up on scroll-into-view. Each stat's raw value (e.g. "27+", "1,000",
+	// "HUNDREDS") is parsed into an optional prefix, a numeric core, and an
+	// optional suffix; a value with no digits (nothing to count) is left
+	// exactly as authored. Runs once per element, and skips the animation
+	// entirely under reduced-motion (final values are already server-rendered,
+	// so there's nothing extra to do in that case).
+	const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	const nodes = document.querySelectorAll<HTMLElement>("[data-stat-number]");
+	if (reduce || !nodes.length || typeof IntersectionObserver === "undefined") {
+		// no-op: server-rendered text is already the final value
+	} else {
+		type Parsed = { prefix: string; suffix: string; target: number; grouped: boolean };
+
+		const parse = (raw: string): Parsed | null => {
+			const m = raw.match(/^(\D*)([\d,]+)(\D*)$/);
+			if (!m) return null;
+			const [, prefix, numStr, suffix] = m;
+			const target = parseInt(numStr.replace(/,/g, ""), 10);
+			if (Number.isNaN(target)) return null;
+			return { prefix, suffix, target, grouped: numStr.includes(",") };
+		};
+
+		const DURATION = 1500;
+		const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+
+		const animateStat = (el: HTMLElement, parsed: Parsed) => {
+			const start = performance.now();
+			const step = (now: number) => {
+				const t = Math.min(1, (now - start) / DURATION);
+				const current = Math.round(parsed.target * easeOutExpo(t));
+				const formatted = parsed.grouped ? current.toLocaleString("en-US") : String(current);
+				el.textContent = `${parsed.prefix}${formatted}${parsed.suffix}`;
+				if (t < 1) requestAnimationFrame(step);
+			};
+			requestAnimationFrame(step);
+		};
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry, i) => {
+					if (!entry.isIntersecting) return;
+					const el = entry.target as HTMLElement;
+					observer.unobserve(el);
+					const raw = el.dataset.statValue ?? "";
+					const parsed = parse(raw);
+					if (!parsed) return; // e.g. "HUNDREDS" — nothing to count, already showing final text
+					el.textContent = `${parsed.prefix}0${parsed.suffix}`;
+					setTimeout(() => animateStat(el, parsed), i * 90);
+				});
+			},
+			{ threshold: 0.4 },
+		);
+		nodes.forEach((el) => observer.observe(el));
+	}
+</script>

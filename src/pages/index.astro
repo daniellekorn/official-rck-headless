@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import Nav from "../components/Nav.astro";
 import Hero from "../components/Hero.astro";
+import ImpactStats from "../components/ImpactStats.astro";
 import SplitFeature from "../components/SplitFeature.astro";
 import JoinUs from "../components/JoinUs.astro";
 import WhoWeAre from "../components/WhoWeAre.astro";
@@ -49,6 +50,17 @@ const imageTextSection1 = {
 	accentLine: normalizeAccentLine(homepage?.imageTextSection1AccentLine, "line2"),
 };
 
+// Impact stats band, between the hero and the first content section. Defaults
+// match what Danielle asked for so the page renders identically before the
+// CMS row is populated — see design-log/051.
+const impactStats = [
+	{ value: homepage?.statNumber1 ?? "27+", label: homepage?.statLabel1 ?? "Years of Devotion" },
+	{ value: homepage?.statNumber2 ?? "100+", label: homepage?.statLabel2 ?? "Shiurim Weekly" },
+	{ value: homepage?.statNumber3 ?? "1,000", label: homepage?.statLabel3 ?? "Hours of Torah Weekly" },
+	{ value: homepage?.statNumber4 ?? "HUNDREDS", label: homepage?.statLabel4 ?? "Of Families Connected" },
+	{ value: homepage?.statNumber5 ?? "THOUSANDS", label: homepage?.statLabel5 ?? "Of Lives Impacted" },
+];
+
 const imageTextSection2 = {
 	eyebrowLead: homepage?.imageTextSection2EyebrowLead ?? "VIBRANT",
 	eyebrowGold: homepage?.imageTextSection2EyebrowGold ?? "TORAH",
@@ -79,6 +91,8 @@ const imageTextSection2 = {
 				secondaryCtaHref={homepage?.heroSecondaryCtaHref}
 			/>
 		</div>
+
+		<ImpactStats stats={impactStats} />
 
 		<div id="about" data-pager-section data-pager-theme="light" data-section-reveal class="scroll-mt-24">
 			<SplitFeature

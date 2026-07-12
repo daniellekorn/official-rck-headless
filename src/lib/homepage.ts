@@ -17,6 +17,22 @@ export interface HomepageContent {
 	heroSecondaryCtaLabel?: string;
 	heroSecondaryCtaHref?: string;
 
+	// Impact stats band, between the hero and the first content section (see
+	// design-log/051). Five number+label pairs, in display order. A value can
+	// be a real countable number ("27+", "1,000" — animates counting up from
+	// zero on scroll) or plain text with no digits ("HUNDREDS" — shown as-is,
+	// nothing to count).
+	statNumber1?: string;
+	statLabel1?: string;
+	statNumber2?: string;
+	statLabel2?: string;
+	statNumber3?: string;
+	statLabel3?: string;
+	statNumber4?: string;
+	statLabel4?: string;
+	statNumber5?: string;
+	statLabel5?: string;
+
 	// The two stacked "image + text" bands on the homepage. Named by position
 	// (Section 1 = first, Section 2 = second), NOT by their current content, so
 	// the office can repurpose what each band is about without the field names
