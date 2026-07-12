@@ -1,29 +1,38 @@
 ---
 /**
- * PhotoGalleryGrid — a responsive grid of thumbnails for one event's photos.
- * Clicking any thumbnail opens the site-wide Lightbox (see Lightbox.astro) in
- * gallery mode, positioned on the clicked photo, with prev/next scoped to
- * *this* event's photos only.
+ * PhotoGalleryGrid — a responsive grid of thumbnails for one event's photos
+ * and (optionally) videos. Clicking any thumbnail opens the site-wide
+ * Lightbox (see Lightbox.astro) in gallery mode, positioned on the clicked
+ * item, with prev/next scoped to *this* event's items only — photos and
+ * videos share one continuous "swipe through" sequence (see design log #050).
  *
- * `images` (cropped-to-fill) render the grid thumbnails; `fullImages`
- * (uncropped, same photos) are what the lightbox opens — a fill-cropped
- * thumbnail is right for a tidy grid but would clip portrait shots when
- * blown up full-size. Falls back to `images` if `fullImages` isn't given.
+ * A video thumbnail shows the YouTube thumbnail image with a play-button
+ * overlay; clicking it opens the same lightbox, which embeds the actual
+ * player. Photos still use their cropped-to-fill thumbnail; the lightbox
+ * itself gets each photo's uncropped `fullSrc` so a portrait shot isn't
+ * clipped when blown up full-size.
  */
+import type { GalleryMediaItem } from "../lib/wix-media";
+
 interface Props {
-	images: string[];
-	fullImages?: string[];
+	items: GalleryMediaItem[];
 	label?: string;
 }
 
-const { images, fullImages, label = "" } = Astro.props;
-const galleryJson = JSON.stringify(fullImages && fullImages.length === images.length ? fullImages : images);
+const { items, label = "" } = Astro.props;
+
+// What the Lightbox reads: a plain URL string for a photo, matching its
+// existing gallery-mode contract, or a `{ type: "youtube", videoId }` slide.
+const galleryJson = JSON.stringify(
+	items.map((it) => (it.type === "image" ? it.fullSrc : { type: "youtube", videoId: it.videoId })),
+);
+
 const alt = (i: number) => (label ? `${label} — photo ${i + 1}` : `Photo ${i + 1}`);
 ---
 
-{images.length > 0 && (
+{items.length > 0 && (
 	<div class="rck-gal-grid">
-		{images.map((src, i) => (
+		{items.map((it, i) => (
 			<button
 				type="button"
 				data-lightbox-open
@@ -31,9 +40,24 @@ const alt = (i: number) => (label ? `${label} — photo ${i + 1}` : `Photo ${i +
 				data-lightbox-index={i}
 				data-lightbox-title={label}
 				class="rck-gal-grid-item"
-				aria-label={`Open ${alt(i)} full size`}
+				aria-label={it.type === "image" ? `Open ${alt(i)} full size` : `Play ${label ? `${label} video` : "video"}`}
 			>
-				<img src={src} alt={alt(i)} loading="lazy" />
+				{it.type === "image" ? (
+					<img src={it.src} alt={alt(i)} loading="lazy" />
+				) : (
+					<>
+						<img
+							src={`https://img.youtube.com/vi/${it.videoId}/hqdefault.jpg`}
+							alt={label ? `${label} — video` : "Video"}
+							loading="lazy"
+						/>
+						<span class="rck-gal-play" aria-hidden="true">
+							<svg viewBox="0 0 24 24" class="rck-gal-play-icon" fill="currentColor">
+								<path d="M8 5v14l11-7L8 5Z" />
+							</svg>
+						</span>
+					</>
+				)}
 			</button>
 		))}
 	</div>
@@ -68,5 +92,27 @@ const alt = (i: number) => (label ? `${label} — photo ${i + 1}` : `Photo ${i +
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+	}
+
+	/* Play-button overlay on a video thumbnail — centered gold disc, same
+	   hover lift as the card itself gives enough affordance without a label. */
+	.rck-gal-play {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: rgb(from var(--color-navy-700) r g b / 0.25);
+		transition: background 0.2s;
+	}
+	.rck-gal-grid-item:hover .rck-gal-play,
+	.rck-gal-grid-item:focus-visible .rck-gal-play {
+		background: rgb(from var(--color-navy-700) r g b / 0.35);
+	}
+	.rck-gal-play-icon {
+		width: 3rem;
+		height: 3rem;
+		color: #fff;
+		filter: drop-shadow(0 4px 10px rgb(0 0 0 / 0.45));
 	}
 </style>

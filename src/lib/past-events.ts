@@ -1,6 +1,13 @@
 import * as items from "@wix/wix-data-items-sdk";
 import { auth } from "@wix/essentials";
-import { resolveImage, resolveGalleryUrls, resolveGalleryFullUrls, type GalleryItem } from "./wix-media";
+import {
+	resolveImage,
+	resolveGalleryUrls,
+	resolveGalleryFullUrls,
+	parseVideos,
+	type GalleryItem,
+	type VideoItem,
+} from "./wix-media";
 import { slugify } from "./slug";
 
 const COLLECTION_ID = "PastEvents";
@@ -18,13 +25,21 @@ export interface PastEvent {
 	blurb?: unknown; // Ricos rich text — extracted to plain text for render
 	galleryUrls: string[]; // resolved event photos, cropped to a fixed aspect for the thumbnail grid
 	galleryFullUrls: string[]; // same photos, uncropped — for the lightbox "full size" view
+	/**
+	 * Video links, one per line (commas work too) — YouTube in any URL shape,
+	 * or a direct video file URL. Parsed into `videos`; shown as extra slides
+	 * in the same photo-to-photo lightbox gallery, after the photos. See
+	 * design log #050.
+	 */
+	videoUrls?: string;
+	videos: VideoItem[]; // parsed from videoUrls
 	flyerPdfUrl?: string; // direct PDF URL
 	flyerImageUrl?: string; // resolved static flyer image (preferred)
 	sortOrder?: number; // manual tiebreaker when two events share a date
 	active?: boolean;
 }
 
-interface PastEventRow extends Omit<PastEvent, "galleryUrls" | "galleryFullUrls" | "flyerImageUrl" | "slug"> {
+interface PastEventRow extends Omit<PastEvent, "galleryUrls" | "galleryFullUrls" | "videos" | "flyerImageUrl" | "slug"> {
 	gallery?: GalleryItem[];
 	flyerImage?: string;
 }
@@ -51,6 +66,7 @@ export async function getPastEvents(): Promise<PastEvent[]> {
 					slug: slugify(row.title ?? "") || `event-${i + 1}`,
 					galleryUrls: resolveGalleryUrls(row.gallery),
 					galleryFullUrls: resolveGalleryFullUrls(row.gallery),
+					videos: parseVideos(row.videoUrls),
 					flyerImageUrl: resolveImage(row.flyerImage, 900, 1200),
 				}) as PastEvent,
 		);

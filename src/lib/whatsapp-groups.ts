@@ -1,6 +1,18 @@
 import * as items from "@wix/wix-data-items-sdk";
 import { auth } from "@wix/essentials";
-import { resolveImage, resolveGalleryVideos, type GalleryItem } from "./wix-media";
+import {
+	resolveImage,
+	resolveGalleryVideos,
+	parseVideos,
+	type GalleryItem,
+	type VideoItem,
+} from "./wix-media";
+
+// Re-exported for existing importers (e.g. WhatsAppCommunity.astro) — the
+// actual implementations moved to wix-media.ts so PastEvents' video field
+// could share them without duplicating this parsing logic. See design log #050.
+export { extractYouTubeId, parseVideos } from "./wix-media";
+export type { VideoItem } from "./wix-media";
 
 const COLLECTION_ID = "WhatsappGroups";
 
@@ -29,58 +41,6 @@ export interface WhatsappGroup {
 	active?: boolean;
 	/** Parsed from `videoUrls` on read. */
 	videos?: VideoItem[];
-}
-
-/** A featured tile's video is either a YouTube embed or a directly-hosted file (e.g. Wix Media). */
-export type VideoItem = { kind: "youtube"; id: string } | { kind: "file"; src: string };
-
-/**
- * Accept either a bare YouTube video ID or any full YouTube URL form
- * (watch?v=, youtu.be/, /shorts/, /embed/) and return just the video ID.
- * Returns undefined if the input is empty or unrecognised.
- * (Moved here from homepage.ts when the shorts left the HomePage row — #044.)
- */
-export function extractYouTubeId(input: string | undefined): string | undefined {
-	if (!input) return undefined;
-	const s = input.trim();
-	// Already a bare ID (no slashes or protocol)
-	if (/^[A-Za-z0-9_-]{11}$/.test(s)) return s;
-	try {
-		const url = new URL(s);
-		// youtu.be/VIDEO_ID
-		if (url.hostname === "youtu.be") return url.pathname.slice(1).split("?")[0] || undefined;
-		// /shorts/VIDEO_ID or /embed/VIDEO_ID or /v/VIDEO_ID
-		const pathMatch = url.pathname.match(/\/(shorts|embed|v)\/([A-Za-z0-9_-]{11})/);
-		if (pathMatch) return pathMatch[2];
-		// ?v=VIDEO_ID
-		return url.searchParams.get("v") ?? undefined;
-	} catch {
-		return undefined;
-	}
-}
-
-/**
- * The office pastes video links one per line (commas work too) — YouTube in
- * any URL shape or as a bare ID, or a direct video file URL (e.g. pasted
- * from Wix's Media Manager). Each line resolves to whichever kind it is;
- * anything that's neither is dropped silently rather than breaking the tile.
- */
-export function parseVideos(raw?: string): VideoItem[] {
-	if (!raw) return [];
-	return raw
-		.split(/[\n,]/)
-		.map((s) => s.trim())
-		.filter(Boolean)
-		.map((s): VideoItem | undefined => {
-			const ytId = extractYouTubeId(s);
-			if (ytId) return { kind: "youtube", id: ytId };
-			// A direct video file — Wix Media uploads, or any other host, as
-			// long as it looks like an actual video URL (not e.g. a malformed
-			// or non-video link, which would otherwise render a broken player).
-			const isVideoFile = /\.(mp4|mov|webm|m4v)(\?|$)/i.test(s) || /video\.wixstatic\.com/i.test(s);
-			return isVideoFile ? { kind: "file", src: s } : undefined;
-		})
-		.filter((v): v is VideoItem => Boolean(v));
 }
 
 export async function getWhatsappGroups(): Promise<WhatsappGroup[]> {

@@ -14,6 +14,7 @@ import PhotoGalleryGrid from "./PhotoGalleryGrid.astro";
 import Flyer from "./Flyer.astro";
 import { ricosToPlainText } from "../lib/ricos";
 import { hasFlyer, type PastEvent } from "../lib/past-events";
+import type { GalleryMediaItem } from "../lib/wix-media";
 
 interface Props {
 	events: PastEvent[];
@@ -29,6 +30,22 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 	if (!d) return undefined;
 	const date = d instanceof Date ? d : new Date(d);
 	return Number.isNaN(date.getTime()) ? undefined : dateFmt.format(date);
+}
+
+// Videos first, then photos — one continuous swipe-through sequence in the
+// lightbox (design log #050). Direct video files from `videoUrls` aren't
+// shown here yet — no event has needed one, and the lightbox only knows how
+// to embed YouTube slides so far.
+function mediaItems(e: PastEvent): GalleryMediaItem[] {
+	const photos: GalleryMediaItem[] = e.galleryUrls.map((src, i) => ({
+		type: "image",
+		src,
+		fullSrc: e.galleryFullUrls[i] ?? src,
+	}));
+	const videos: GalleryMediaItem[] = e.videos
+		.filter((v): v is Extract<typeof v, { kind: "youtube" }> => v.kind === "youtube")
+		.map((v) => ({ type: "youtube", videoId: v.id }));
+	return [...videos, ...photos];
 }
 ---
 
@@ -72,7 +89,8 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 					{events.map((e, i) => {
 						const blurb = e.blurb ? ricosToPlainText(e.blurb) : "";
 						const flyer = hasFlyer(e);
-						const hasPhotos = e.galleryUrls.length > 0;
+						const media = mediaItems(e);
+						const hasMedia = media.length > 0;
 						return (
 							<article
 								class:list={["ea-panel", i === 0 && "is-active"]}
@@ -96,12 +114,12 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 								<div
 									class:list={[
 										"grid gap-8 lg:gap-10",
-										flyer && hasPhotos && "lg:grid-cols-[1fr_minmax(0,18rem)] lg:items-start",
+										flyer && hasMedia && "lg:grid-cols-[1fr_minmax(0,18rem)] lg:items-start",
 									]}
 								>
-									{hasPhotos && (
+									{hasMedia && (
 										<div class:list={[flyer && "lg:order-1"]}>
-											<PhotoGalleryGrid images={e.galleryUrls} fullImages={e.galleryFullUrls} label={e.title} />
+											<PhotoGalleryGrid items={media} label={e.title} />
 										</div>
 									)}
 
@@ -109,8 +127,8 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 										<div
 											class:list={[
 												"flex justify-center",
-												hasPhotos && "lg:order-2",
-												!hasPhotos && "mx-auto w-full max-w-sm",
+												hasMedia && "lg:order-2",
+												!hasMedia && "mx-auto w-full max-w-sm",
 											]}
 										>
 											<div class="w-full max-w-sm overflow-hidden rounded-md bg-navy-800 ring-1 ring-navy-100 shadow-[0_30px_64px_-34px_rgba(7,23,58,0.55)]">
@@ -170,40 +188,55 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 		}
 	}
 
+	/* Slim, modern scrollbar-style scrubber — same gold thumb / drag+wheel
+	   mechanic as before (design log #027), just a cleaner line rather than a
+	   bulky lane. The whole `.ea-scrubber` box is the drag hit-area (see the
+	   script below), not just the thin visual track, so it's forgiving to
+	   grab without needing to look chunky to be easy to use. */
 	.ea-scrubber {
 		display: none;
 	}
 	@media (min-width: 1024px) {
 		.ea-scrubber {
-			display: block;
+			display: flex;
+			justify-content: center;
 			flex: 0 0 auto;
-			width: 1rem;
+			width: 0.75rem;
 			cursor: pointer;
 			touch-action: none;
 		}
 		.ea-scrubber-track {
 			position: relative;
-			width: 4px;
+			width: 3px;
 			height: 100%;
 			min-height: 8rem;
-			margin: 0 auto;
 			border-radius: 999px;
-			background: rgb(from var(--color-navy-500) r g b / 0.14);
+			background: rgb(from var(--color-navy-500) r g b / 0.12);
+			transition: background 0.18s ease;
+		}
+		.ea-scrubber:hover .ea-scrubber-track {
+			background: rgb(from var(--color-navy-500) r g b / 0.2);
 		}
 		.ea-scrubber-thumb {
 			position: absolute;
 			left: 50%;
-			min-height: 1.75rem;
-			width: 0.85rem;
-			transform: translateX(-50%);
+			min-height: 1.5rem;
+			width: 0.375rem;
+			transform: translateX(-50%) scale(1);
 			border-radius: 999px;
 			background: var(--color-gold-500);
-			box-shadow: 0 3px 10px -3px rgb(0 0 0 / 0.4);
-			transition: top 0.2s ease, height 0.2s ease;
+			box-shadow: 0 2px 6px -1px rgb(from var(--color-gold-600) r g b / 0.5);
+			transition: top 0.22s cubic-bezier(0.22, 1, 0.36, 1), height 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+				transform 0.15s ease, background 0.15s ease;
 			cursor: grab;
+		}
+		.ea-scrubber:hover .ea-scrubber-thumb {
+			transform: translateX(-50%) scale(1.15);
+			background: var(--color-gold-400);
 		}
 		.ea-scrubber-thumb:active {
 			cursor: grabbing;
+			transform: translateX(-50%) scale(1.15);
 		}
 	}
 
@@ -287,6 +320,7 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 		if (!tabs.length) return;
 
 		const side = root.querySelector("[data-ea-side]");
+		const scrubber = root.querySelector("[data-ea-scrubber]");
 		const track = root.querySelector("[data-ea-scrubber-track]");
 		const thumb = root.querySelector("[data-ea-scrubber-thumb]");
 		const n = tabs.length;
@@ -326,11 +360,12 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 			t.addEventListener("click", () => activate(t.getAttribute("data-ea-tab"), true));
 		});
 
-		// Scrubber: drag the thumb (only via the track itself), or scroll the
-		// wheel/trackpad while hovering the track OR the tab names, to move
+		// Scrubber: drag anywhere in the lane (not just the thin visual track —
+		// a 3px line is a hard target to hit precisely), or scroll the
+		// wheel/trackpad while hovering the lane OR the tab names, to move
 		// through events without clicking each name — an alternative to (not
 		// a replacement for) clicking a tab directly.
-		if (track && thumb && n > 1) {
+		if (scrubber && track && thumb && n > 1) {
 			const activateIndex = (idx) => {
 				const clamped = Math.min(n - 1, Math.max(0, idx));
 				const slug = tabs[clamped]?.getAttribute("data-ea-tab");
@@ -351,7 +386,7 @@ function caption(d: PastEvent["eventDate"]): string | undefined {
 				document.removeEventListener("pointermove", onPointerMove);
 				document.removeEventListener("pointerup", onPointerUp);
 			};
-			track.addEventListener("pointerdown", (e) => {
+			scrubber.addEventListener("pointerdown", (e) => {
 				dragging = true;
 				activateIndex(indexFromClientY(e.clientY));
 				document.addEventListener("pointermove", onPointerMove);

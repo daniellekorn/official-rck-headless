@@ -5,16 +5,20 @@
  *
  *   - [data-lightbox-open] + data-lightbox-src (+ optional -title) → opens the
  *     full-size overlay on click, single-image mode (flyers).
- *   - [data-lightbox-open] + data-lightbox-gallery (JSON array of URLs for
- *     *just that gallery*) + data-lightbox-index (which one was clicked) →
- *     opens in gallery mode: prev/next buttons, ←/→ keys, swipe, and it loops
- *     at both ends. Each trigger carries its own gallery's URLs, so multiple
+ *   - [data-lightbox-open] + data-lightbox-gallery (JSON array for *just that
+ *     gallery*) + data-lightbox-index (which one was clicked) → opens in
+ *     gallery mode: prev/next buttons, ←/→ keys, swipe, and it loops at both
+ *     ends. Each trigger carries its own gallery's items, so multiple
  *     independent galleries on one page (e.g. one per Past Event) never
- *     cross-navigate into each other.
+ *     cross-navigate into each other. Each gallery item is either a plain
+ *     image URL string, or `{ type: "youtube", videoId }` for a YouTube slide
+ *     mixed in among the photos (see design log #050) — the slide swaps
+ *     between the <img> and a YouTube <iframe> depending on which it is.
  *   - [data-download] + data-download-src (+ optional -name) → downloads the
  *     file. The HTML `download` attr is ignored cross-origin and Wix media is
  *     cross-origin, so we fetch → blob → save, and fall back to opening the
- *     image in a new tab when CORS blocks the fetch.
+ *     image in a new tab when CORS blocks the fetch. Hidden entirely on a
+ *     video slide — there's nothing to download.
  *
  * Native <dialog> gives us focus-trap, Esc-to-close, and ::backdrop for free.
  * `is:global` + a single delegated listener — see #031.
@@ -24,6 +28,14 @@
 <dialog data-lightbox class="lightbox" aria-label="Image viewer">
 	<figure class="lightbox-figure">
 		<img data-lightbox-img class="lightbox-img" alt="" />
+		<iframe
+			data-lightbox-video
+			class="lightbox-video"
+			title="Video"
+			hidden
+			allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; web-share"
+			allowfullscreen
+		></iframe>
 		<figcaption data-lightbox-caption class="lightbox-caption"></figcaption>
 	</figure>
 
@@ -92,6 +104,22 @@
 		max-height: 84vh;
 		width: auto;
 		height: auto;
+		border-radius: 0.375rem;
+		background: var(--color-navy-800);
+		box-shadow: 0 40px 90px -30px rgb(0 0 0 / 0.7);
+	}
+
+	/* A YouTube slide mixed into a photo gallery — fixed 16:9 box (no natural
+	   intrinsic size like a photo has). Fills the same width the dialog caps
+	   photos to, but its max-width backs off on short/wide viewports so a
+	   16:9 box never taller than 84vh (matching the image's own cap). */
+	.lightbox-video {
+		display: block;
+		width: 100%;
+		max-width: calc(84vh * 16 / 9);
+		aspect-ratio: 16 / 9;
+		max-height: 84vh;
+		border: 0;
 		border-radius: 0.375rem;
 		background: var(--color-navy-800);
 		box-shadow: 0 40px 90px -30px rgb(0 0 0 / 0.7);
@@ -182,6 +210,7 @@
 		const dialog = document.querySelector<HTMLDialogElement>("[data-lightbox]");
 		if (!dialog) return;
 		const img = dialog.querySelector<HTMLImageElement>("[data-lightbox-img]")!;
+		const video = dialog.querySelector<HTMLIFrameElement>("[data-lightbox-video]")!;
 		const caption = dialog.querySelector<HTMLElement>("[data-lightbox-caption]")!;
 		const dlBtn = dialog.querySelector<HTMLButtonElement>("[data-lightbox-dl]")!;
 		const closeBtn = dialog.querySelector<HTMLButtonElement>("[data-lightbox-close]")!;
@@ -189,9 +218,13 @@
 		const nextBtn = dialog.querySelector<HTMLButtonElement>("[data-lightbox-next]")!;
 		const countEl = dialog.querySelector<HTMLElement>("[data-lightbox-count]")!;
 
+		// A gallery item is a plain image URL, or a YouTube slide mixed in
+		// among the photos (see design log #050).
+		type GalleryItem = string | { type: "youtube"; videoId: string };
+
 		// Gallery mode: prev/next cycle through just this array (one event's
 		// photos, never another's). Empty/null = single-image (flyer) mode.
-		let gallery: string[] | null = null;
+		let gallery: GalleryItem[] | null = null;
 		let index = 0;
 		let galleryTitle = "";
 
@@ -240,22 +273,40 @@
 			new Image().src = src;
 		};
 
-		// Render whichever image `index` points at (gallery mode) — updates
-		// image, alt/caption, counter, and the download button's target.
+		// Render whichever slide `index` points at (gallery mode) — updates the
+		// image or video, alt/caption, counter, and the download button's
+		// target. A slide is either a photo URL string or a YouTube video.
 		const render = () => {
-			const src = gallery ? gallery[index] : img.dataset.singleSrc || "";
-			if (!src) return;
+			const item: GalleryItem = gallery ? gallery[index] : img.dataset.singleSrc || "";
+			if (!item) return;
+			const isVideo = typeof item === "object";
 			const n = gallery?.length ?? 1;
 			const label = galleryTitle
 				? n > 1
-					? `${galleryTitle} — photo ${index + 1} of ${n}`
+					? `${galleryTitle} — ${isVideo ? "video" : "photo"} ${index + 1} of ${n}`
 					: `${galleryTitle} — full size`
 				: "Image, full size";
-			img.src = src;
-			img.alt = label;
+
+			if (isVideo) {
+				img.hidden = true;
+				img.removeAttribute("src");
+				video.hidden = false;
+				video.src = `https://www.youtube-nocookie.com/embed/${item.videoId}?rel=0`;
+			} else {
+				video.hidden = true;
+				video.src = ""; // stop playback if a video was previously showing
+				img.hidden = false;
+				img.src = item;
+				img.alt = label;
+			}
 			caption.textContent = n > 1 ? `${galleryTitle} — ${index + 1} / ${n}` : galleryTitle;
-			dlBtn.dataset.downloadSrc = src;
-			dlBtn.dataset.downloadName = fileName(src, galleryTitle);
+
+			// Nothing to download from a YouTube embed.
+			dlBtn.hidden = isVideo;
+			if (!isVideo) {
+				dlBtn.dataset.downloadSrc = item;
+				dlBtn.dataset.downloadName = fileName(item, galleryTitle);
+			}
 
 			const showNav = n > 1;
 			prevBtn.hidden = !showNav;
@@ -263,11 +314,14 @@
 			countEl.hidden = !showNav;
 			if (showNav) countEl.textContent = `${index + 1} / ${n}`;
 
-			// Warm both neighbors so the next/prev click that's most likely to
-			// happen next is already cached.
+			// Warm both neighboring photos so the next/prev click that's most
+			// likely to happen next is already cached. Videos have nothing
+			// worth preloading.
 			if (gallery && n > 1) {
-				preload(gallery[(index + 1) % n]);
-				preload(gallery[(index - 1 + n) % n]);
+				const next = gallery[(index + 1) % n];
+				const prev = gallery[(index - 1 + n) % n];
+				if (typeof next === "string") preload(next);
+				if (typeof prev === "string") preload(prev);
 			}
 		};
 
@@ -287,7 +341,7 @@
 			galleryTitle = trigger.dataset.lightboxTitle || "";
 
 			if (trigger.dataset.lightboxGallery) {
-				let parsed: string[] = [];
+				let parsed: GalleryItem[] = [];
 				try {
 					parsed = JSON.parse(trigger.dataset.lightboxGallery);
 				} catch {
@@ -336,10 +390,13 @@
 		dialog.addEventListener("click", (e) => {
 			if (e.target === dialog) close();
 		});
-		// Release the (potentially large) image + gallery state when closed.
+		// Release the (potentially large) image + gallery state when closed, and
+		// stop any playing video — an iframe keeps playing audio in the
+		// background otherwise, even once the dialog is visually gone.
 		dialog.addEventListener("close", () => {
 			img.removeAttribute("src");
 			delete img.dataset.singleSrc;
+			video.src = "";
 			gallery = null;
 		});
 	})();
