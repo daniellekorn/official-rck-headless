@@ -2,9 +2,14 @@
 /**
  * ImpactStats — thin dark-navy band between the Hero and the first content
  * section, showing a row of headline numbers (years running, shiurim/week,
- * etc.) that count up from zero once scrolled into view. Always a single
- * row, never stacked — sizes shrink fluidly on narrow screens instead of
- * wrapping. See design log #051.
+ * etc.) that count up from zero once scrolled into view. A single row at
+ * `sm:` and up; on narrow phones, five columns squeezed into one line read
+ * as cramped, so mobile renders as two centered rows instead (first 3, then
+ * the remainder). Each row's items split *that row's* width evenly (rather
+ * than every item assuming a fixed 1/3 width) — a first attempt gave every
+ * item the same fixed width regardless of which row it landed in, which
+ * made the longer word-values ("HUNDREDS"/"THOUSANDS") overflow their column
+ * and overlap on the 2-item row. See design log #051.
  *
  * A stat's `value` is free text (e.g. "27+", "1,000", "HUNDREDS") — the
  * client script parses out a leading/trailing non-numeric prefix/suffix and
@@ -22,29 +27,50 @@ interface Props {
 
 const { stats } = Astro.props;
 const visible = stats.filter((s) => s.value && s.label);
+
+// Mobile-only split: first row holds up to 3, the rest wrap to a second,
+// narrower (and thus roomier per-item) row. Unused at `sm:` and up, where
+// everything renders in the single full row instead.
+const firstRow = visible.slice(0, 3);
+const secondRow = visible.slice(3);
+
+const numberClasses =
+	"font-display font-bold text-white leading-none text-[clamp(1.35rem,7.5vw,2rem)] sm:text-[clamp(0.95rem,3.6vw,2.1rem)] tabular-nums";
+const labelClasses =
+	"mt-1.5 sm:mt-2.5 font-sans text-[clamp(0.55rem,2.6vw,0.75rem)] sm:text-[clamp(0.4rem,1.7vw,0.625rem)] font-semibold uppercase tracking-[0.05em] sm:tracking-[0.12em] text-gold-300 leading-tight";
 ---
 
 {visible.length > 0 && (
 	<section class="bg-navy-700 py-7 sm:py-9 md:py-10" data-stats-band>
 		<div class="container-page lg:px-14">
-			<div class="flex flex-nowrap items-stretch justify-between gap-2 sm:gap-6">
-				{visible.map((s, i) => (
-					<div
-						class:list={[
-							"min-w-0 flex-1 text-center",
-							i > 0 && "pl-2 sm:pl-6",
-						]}
-					>
-						<p
-							class="font-display font-bold text-white leading-none text-[clamp(0.95rem,3.6vw,2.1rem)] tabular-nums"
-							data-stat-number
-							data-stat-value={s.value}
-						>
-							{s.value}
-						</p>
-						<p class="mt-1.5 sm:mt-2.5 font-sans text-[clamp(0.4rem,1.7vw,0.625rem)] font-semibold uppercase tracking-[0.05em] sm:tracking-[0.12em] text-gold-300 leading-tight">
-							{s.label}
-						</p>
+			{/* Mobile: two centered rows. */}
+			<div class="sm:hidden">
+				<div class="flex items-stretch justify-center gap-x-3">
+					{firstRow.map((s) => (
+						<div class="min-w-0 flex-1 text-center">
+							<p class={numberClasses} data-stat-number data-stat-value={s.value}>{s.value}</p>
+							<p class={labelClasses}>{s.label}</p>
+						</div>
+					))}
+				</div>
+				{secondRow.length > 0 && (
+					<div class="mx-auto mt-6 flex max-w-[85%] items-stretch justify-center gap-x-3">
+						{secondRow.map((s) => (
+							<div class="min-w-0 flex-1 text-center">
+								<p class={numberClasses} data-stat-number data-stat-value={s.value}>{s.value}</p>
+								<p class={labelClasses}>{s.label}</p>
+							</div>
+						))}
+					</div>
+				)}
+			</div>
+
+			{/* `sm:` and up: everything in one row. */}
+			<div class="hidden sm:flex flex-nowrap items-stretch justify-between gap-6">
+				{visible.map((s) => (
+					<div class="min-w-0 flex-1 text-center">
+						<p class={numberClasses} data-stat-number data-stat-value={s.value}>{s.value}</p>
+						<p class={labelClasses}>{s.label}</p>
 					</div>
 				))}
 			</div>
