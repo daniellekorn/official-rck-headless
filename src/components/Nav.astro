@@ -146,18 +146,30 @@ const isContactActive = pathname === "/contact";
 				</a>
 			</div>
 
+			<a
+				href="/donate"
+				data-mobile-donate
+				aria-label="Donate"
+				class="hidden shrink-0 items-center gap-1.5 rounded-sm bg-gold-500 px-3 py-2 text-sm font-semibold text-navy-700 shadow-sm transition-all hover:bg-gold-400 whitespace-nowrap"
+			>
+				<svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true">
+					<path d="M12 20.3 4.6 13a4.6 4.6 0 0 1 6.5-6.5l.9.9.9-.9A4.6 4.6 0 0 1 19.4 13L12 20.3Z" />
+				</svg>
+				Donate
+			</a>
+
 			<button
 				type="button"
 				data-mobile-toggle
 				aria-controls="mobile-menu"
 				aria-expanded="false"
 				aria-label="Toggle menu"
-				class="xl:hidden inline-flex h-10 w-10 items-center justify-center rounded-sm text-navy-600 hover:bg-navy-50 transition-colors"
+				class="xl:hidden inline-flex h-11 w-11 items-center justify-center rounded-sm text-navy-600 hover:bg-navy-50 transition-colors"
 			>
-				<svg data-icon="open" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+				<svg data-icon="open" viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8">
 					<path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
 				</svg>
-				<svg data-icon="close" viewBox="0 0 24 24" class="hidden h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+				<svg data-icon="close" viewBox="0 0 24 24" class="hidden h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8">
 					<path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
 				</svg>
 			</button>
@@ -345,6 +357,7 @@ const isContactActive = pathname === "/contact";
 	const navList = document.querySelector<HTMLUListElement>("[data-nav-list]");
 	const navCta = document.querySelector<HTMLElement>("[data-nav-cta]");
 	const navToggle = document.querySelector<HTMLButtonElement>("[data-mobile-toggle]");
+	const mobileDonate = document.querySelector<HTMLElement>("[data-mobile-donate]");
 
 	if (navPill && navList && navCta) {
 		const items = Array.from(navList.children) as HTMLLIElement[];
@@ -362,6 +375,7 @@ const isContactActive = pathname === "/contact";
 				navCta.style.removeProperty("display");
 				items.forEach((li) => li.style.removeProperty("display"));
 				navToggle?.style.removeProperty("display");
+				mobileDonate?.style.removeProperty("display");
 				return;
 			}
 
@@ -382,6 +396,10 @@ const isContactActive = pathname === "/contact";
 			const ctaHidden = navCta.style.display === "none";
 			const anyItemHidden = items.some((li) => li.style.display === "none");
 			const allItemsHidden = items.every((li) => li.style.display === "none");
+
+			// The compact heart+Donate button is a stand-in for the full CTA row
+			// when that row didn't fit — show exactly one or the other, never both.
+			if (mobileDonate) mobileDonate.style.display = ctaHidden ? "flex" : "none";
 
 			// Nothing ended up visible inline — fall back to the plain CSS default
 			// (hidden below `xl`) so there's no stray empty flex row taking space.
