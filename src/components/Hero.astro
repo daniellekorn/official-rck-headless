@@ -140,7 +140,7 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 <style>
 	.hero-slide {
 		opacity: 0;
-		transition: opacity 2.2s cubic-bezier(0.45, 0, 0.2, 1);
+		transition: opacity 3.2s cubic-bezier(0.45, 0, 0.2, 1);
 		will-change: opacity;
 	}
 	@media (prefers-reduced-motion: reduce) {
@@ -172,12 +172,11 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 		if (reduce) return; // first slide is already visible; leave it static.
 
 		// Kept in sync with the .hero-slide CSS transition duration above.
-		const FADE_MS = 2200;
+		const FADE_MS = 3200;
 
 		let current = 0;
 		let timer: ReturnType<typeof setTimeout> | undefined;
-		let activeVideo: HTMLVideoElement | undefined;
-		let activeEndedListener: (() => void) | undefined;
+		let activeVideoCleanup: (() => void) | undefined;
 
 		const videoOf = (el: HTMLElement) => el.querySelector<HTMLVideoElement>("[data-hero-video]");
 
@@ -193,14 +192,12 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 			}
 		};
 
-		// Remove any stale "ended" listener before attaching a new one. Without
-		// this, scrolling away and back re-calls scheduleAdvance and adds a second
-		// listener — the video then triggers advance() twice and skips a slide.
+		// Remove any stale listeners before attaching new ones. Without this,
+		// scrolling away and back re-calls scheduleAdvance and adds duplicate
+		// listeners — the video then triggers advance() twice and skips a slide.
 		const cleanupActiveVideo = () => {
-			if (activeVideo && activeEndedListener) {
-				activeVideo.removeEventListener("ended", activeEndedListener);
-				activeEndedListener = undefined;
-			}
+			activeVideoCleanup?.();
+			activeVideoCleanup = undefined;
 		};
 
 		const scheduleAdvance = (el: HTMLElement) => {
@@ -209,21 +206,50 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 			preloadNext(Number(el.dataset.index ?? current));
 			const video = videoOf(el);
 			if (el.dataset.kind === "video" && video) {
-				activeVideo = video;
 				video.preload = "auto";
 				video.currentTime = 0;
-				activeEndedListener = () => advance();
-				video.addEventListener("ended", activeEndedListener, { once: true });
-				// Safety net: if "ended" never fires, advance after the clip's
-				// duration (+1s), or a 12s default when duration is unknown.
+
+				// True crossfade, not "play to the end, then fade": start the
+				// opacity transition while the outgoing video still has FADE_MS
+				// left to play, so both videos are visibly overlapping/blending
+				// instead of the fade only beginning once the clip has fully
+				// stopped (which read as a pause before the switch).
+				let fired = false;
+				const fadeStart = () => {
+					if (fired) return;
+					fired = true;
+					advance();
+				};
+				const onTimeUpdate = () => {
+					const dur = video.duration;
+					if (!Number.isFinite(dur) || dur <= 0) return;
+					// Cap the overlap at half the clip's own length. Without this, a
+					// clip shorter than FADE_MS clamps straight to 0 — its very first
+					// timeupdate tick satisfies the threshold and the fade starts
+					// almost the instant the video appears, reading as a rushed cut
+					// rather than a fade. Longer clips are unaffected (still the full
+					// FADE_MS overlap).
+					const overlapSec = Math.min(FADE_MS / 1000, dur / 2);
+					if (video.currentTime >= dur - overlapSec) fadeStart();
+				};
+				video.addEventListener("timeupdate", onTimeUpdate);
+				// Safety net for clips whose duration never resolves (or is shorter
+				// than FADE_MS): "ended" still guarantees a fade eventually fires.
+				video.addEventListener("ended", fadeStart, { once: true });
+				activeVideoCleanup = () => {
+					video.removeEventListener("timeupdate", onTimeUpdate);
+					video.removeEventListener("ended", fadeStart);
+				};
+
+				// Belt-and-suspenders: if neither event fires (e.g. autoplay was
+				// blocked), advance after the clip's duration, or 12s when unknown.
 				const fallbackMs = Number.isFinite(video.duration) && video.duration > 0 ? (video.duration + 1) * 1000 : 12000;
 				timer = setTimeout(() => {
 					cleanupActiveVideo();
-					advance();
+					fadeStart();
 				}, fallbackMs);
 				video.play().catch(() => {});
 			} else {
-				activeVideo = undefined;
 				const hold = Number(el.dataset.hold ?? 6000);
 				timer = setTimeout(advance, hold);
 			}
