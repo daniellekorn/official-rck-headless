@@ -4,7 +4,7 @@ import Nav from "../components/Nav.astro";
 import PageHeader from "../components/PageHeader.astro";
 import Footer from "../components/Footer.astro";
 import { getContactInfo } from "../lib/contact-info";
-import { googleMapsUrl, wazeUrl } from "../lib/maps";
+import { googleMapsUrl } from "../lib/maps";
 
 const contact = await getContactInfo();
 
@@ -100,17 +100,6 @@ const label = "block text-sm font-medium text-navy-600";
 										<address class="not-italic">
 											<a href={googleMapsUrl(contact.address)} target="_blank" rel="noopener noreferrer" class="text-base font-medium leading-snug hover:text-gold-600 hover:underline">
 												{contact.address}
-											</a>
-											<a href={wazeUrl(contact.address)} target="_blank" rel="noopener noreferrer" aria-label="Open in Waze" class="ml-2 inline-flex align-middle transition-transform hover:scale-110">
-												<svg viewBox="0 0 48 48" class="h-4 w-4" aria-hidden="true">
-													<rect x="2" y="2" width="44" height="44" rx="12" fill="#33CCFF" />
-													<circle cx="24" cy="21" r="12" fill="#fff" />
-													<circle cx="20" cy="19" r="1.6" fill="#1a1a1a" />
-													<circle cx="28" cy="19" r="1.6" fill="#1a1a1a" />
-													<path d="M19 23c1.2 1.8 3 2.8 5 2.8s3.8-1 5-2.8" stroke="#1a1a1a" stroke-width="1.6" stroke-linecap="round" fill="none" />
-													<circle cx="18" cy="31" r="2.2" fill="#1a1a1a" />
-													<circle cx="27" cy="31" r="2.2" fill="#1a1a1a" />
-												</svg>
 											</a>
 										</address>
 									</span>
