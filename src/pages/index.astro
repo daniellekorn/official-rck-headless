@@ -180,7 +180,7 @@ const imageTextSection2 = {
 	// "Community" links, /#join etc.) must never be offset — nudging it after
 	// the browser has already scrolled there looks like the page jumping back up.
 	const settle = (id: string) => {
-		const el = id && document.getElementById(id);
+		const el = id ? document.getElementById(id) : null;
 		if (el?.hasAttribute("data-section-reveal")) el.style.transform = "translateY(0px)";
 	};
 

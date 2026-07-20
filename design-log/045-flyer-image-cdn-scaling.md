@@ -28,8 +28,9 @@ than migrate the field to a Wix Image type or re-export smaller PNGs by hand.
   crops to a box; flyers must keep their true aspect since the frames letterbox
   with `object-fit: contain`), and `enc_auto` so the CDN serves AVIF/WebP by
   `Accept`. Emits a 400–1600w `srcset` + `sizes`.
-- Only the thumbnail `<img>` is scaled; the lightbox "view full size" and the
-  Download button keep the **original** `imageUrl`.
+- The thumbnail `<img>` is scaled; the Download button keeps the **original**
+  `imageUrl`. The lightbox "view full size" originally also kept the raw
+  original too, but that caused a real bug on mobile — see Update below.
 - Non-wixstatic URLs pass through untouched; the helper is idempotent on URLs
   that already carry a `/v1/…` transform (it re-extracts the file id).
 
@@ -55,3 +56,20 @@ stored) to **~12.5 KB** AVIF at `w_800` on a browser sending a modern `Accept`
 header — ~93% smaller per flyer, more for heavier portrait flyers. Pages still
 render with an empty field (helper returns `undefined` → existing placeholder)
 and with non-wixstatic URLs (passthrough). Editor workflow unchanged.
+
+## Update (2026-07-17): the lightbox needed the same treatment
+
+Report: tapping a flyer on mobile to enlarge it showed a blacked-out image.
+Cause: the lightbox's `data-lightbox-src` was intentionally left pointed at the
+raw original `imageUrl` (per the original design above), and some stored
+originals are far larger than the "observed `w_2500` PNG" this doc assumed —
+one measured at **2828×4000px / 20.9 MB**. On a mobile connection that's slow
+enough to load that the lightbox `<img>` sits on its dark placeholder
+background for a long time, reading as "blacked out."
+
+Fix: added `flyerLightboxSrc()` in `wix-media.ts` — the same `scaleFlyerImage`
+transform at `w_1600` (vs. the thumbnail's ≤800) — and pointed
+`data-lightbox-src` at it in `Flyer.astro`, `CoverflowCarousel.astro`, and
+daven's schedule flyer. That same 20.9 MB PNG now serves as a ~180 KB AVIF.
+The Download button is untouched — it still gets the true original, since
+print-quality is the point of downloading.

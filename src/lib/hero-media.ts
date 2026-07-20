@@ -32,7 +32,17 @@ interface HeroMediaRow {
 function resolveSlide(row: HeroMediaRow): HeroSlide | null {
 	if (row.video) {
 		try {
-			const v = media.getVideoUrl(row.video, VideoResolution.MID); // 720p
+			// `getVideoUrl` just builds a predictable CDN URL for the requested
+			// resolution — it never checks which renditions actually exist. Wix
+			// only transcodes up to the source clip's own resolution, so a video
+			// uploaded below 720p (common for phone clips) 403s at MID/HIGH even
+			// though it plays fine at LOW. One office-uploaded hero clip hit this
+			// exactly — the whole hero froze on that slide since its video never
+			// loaded. LOW (480p) is safely below what Wix generates for virtually
+			// any successful upload; the hero's gradient scrim over the video
+			// (for text legibility) also makes the resolution difference hard to
+			// notice in practice.
+			const v = media.getVideoUrl(row.video, VideoResolution.LOW); // 480p
 			if (v?.url) {
 				return { kind: "video", url: v.url, poster: resolveImage(v.thumbnail, 1920, 1200) };
 			}

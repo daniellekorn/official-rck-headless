@@ -6,7 +6,7 @@ import PageHeader from "../components/PageHeader.astro";
 import { getDaveningGrouped, groupByService } from "../lib/davening";
 import { getComputedShabbosSchedule, getComputedWeekdaySchedule } from "../lib/zmanim-schedule";
 import { getFlyers } from "../lib/flyers";
-import { scaleFlyerImage, flyerSrcset } from "../lib/wix-media";
+import { scaleFlyerImage, flyerSrcset, flyerLightboxSrc } from "../lib/wix-media";
 
 const grouped = await getDaveningGrouped();
 
@@ -163,7 +163,7 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 								<button
 									type="button"
 									data-lightbox-open
-									data-lightbox-src={scheduleFlyer.imageUrl}
+									data-lightbox-src={flyerLightboxSrc(scheduleFlyer.imageUrl)}
 									data-lightbox-title={scheduleFlyer.title ?? "Community Learning Schedule"}
 									class="block w-full cursor-zoom-in"
 									aria-label="View the Community Learning Schedule full size"

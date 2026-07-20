@@ -1,6 +1,6 @@
 ---
 import { flyerAlt } from "../lib/flyers";
-import { scaleFlyerImage, flyerSrcset } from "../lib/wix-media";
+import { scaleFlyerImage, flyerSrcset, flyerLightboxSrc } from "../lib/wix-media";
 
 interface Item {
 	title?: string;
@@ -70,7 +70,7 @@ const hasAside = Astro.slots.has("aside");
 									type="button"
 									class="coverflow-btn"
 									data-lightbox-open
-									data-lightbox-src={item.imageUrl}
+									data-lightbox-src={flyerLightboxSrc(item.imageUrl)}
 									data-lightbox-title={item.title}
 									aria-label={`View ${item.title ?? "flyer"} full size`}
 								>

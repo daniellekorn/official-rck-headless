@@ -207,7 +207,15 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 			const video = videoOf(el);
 			if (el.dataset.kind === "video" && video) {
 				video.preload = "auto";
-				video.currentTime = 0;
+				// Guard the seek: a video that hasn't loaded metadata yet (readyState
+				// HAVE_NOTHING) is already at currentTime 0, and setting it explicitly
+				// before then throws InvalidStateError on some WebKit builds — with no
+				// try/catch around this block, that exception skips every line after
+				// it, including video.play() below. Slide 0 is the one that hits this:
+				// its scheduleAdvance() call runs synchronously on page load, before
+				// there's been time for even one network round trip; later slides are
+				// already warmed by preloadNext() by the time they become active.
+				if (video.readyState > 0) video.currentTime = 0;
 
 				// True crossfade, not "play to the end, then fade": start the
 				// opacity transition while the outgoing video still has FADE_MS
@@ -236,9 +244,17 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 				// Safety net for clips whose duration never resolves (or is shorter
 				// than FADE_MS): "ended" still guarantees a fade eventually fires.
 				video.addEventListener("ended", fadeStart, { once: true });
+				// A video that can't load at all (bad/expired CDN URL, unsupported
+				// rendition — this is exactly what happened when a hero clip was
+				// requested at a resolution Wix never transcoded it to) would
+				// otherwise just sit on its poster until the 12s fallback below.
+				// Skip it immediately instead of stalling the whole cycle on a
+				// slide that will never play.
+				video.addEventListener("error", fadeStart, { once: true });
 				activeVideoCleanup = () => {
 					video.removeEventListener("timeupdate", onTimeUpdate);
 					video.removeEventListener("ended", fadeStart);
+					video.removeEventListener("error", fadeStart);
 				};
 
 				// Belt-and-suspenders: if neither event fires (e.g. autoplay was

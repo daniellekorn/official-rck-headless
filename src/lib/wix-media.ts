@@ -143,8 +143,9 @@ const FLYER_WIDTHS = [400, 600, 800, 1200, 1600];
  * `/media/<file>` original or already carries a `/v1/...` transform (we take
  * the file id and rebuild). Non-wixstatic URLs pass through untouched.
  *
- * Only the thumbnail `<img>` should use this — keep the ORIGINAL `imageUrl` for
- * the lightbox "view full size" and the Download button.
+ * The thumbnail `<img>` uses this directly; the lightbox "view full size" uses
+ * `flyerLightboxSrc` (same transform, larger width) below. Only the Download
+ * button keeps the ORIGINAL `imageUrl`.
  */
 export function scaleFlyerImage(url?: string, width = 800): string | undefined {
 	if (!url) return undefined;
@@ -166,6 +167,18 @@ export function flyerSrcset(url?: string): string | undefined {
 	const probe = scaleFlyerImage(url, FLYER_WIDTHS[0]);
 	if (!probe || probe === url) return undefined;
 	return FLYER_WIDTHS.map((w) => `${scaleFlyerImage(url, w)} ${w}w`).join(", ");
+}
+
+/**
+ * Full-view width for the lightbox — much larger than the thumbnail widths
+ * above, but still far short of the raw original. The stored `imageUrl` is a
+ * Canva print-resolution export (observed up to ~20MB); handing that straight
+ * to an `<img>` is slow enough on mobile networks/memory that the lightbox
+ * reads as a blacked-out image while it loads (or fails to). The Download
+ * button still gets the true original for print quality.
+ */
+export function flyerLightboxSrc(url?: string): string | undefined {
+	return scaleFlyerImage(url, 1600);
 }
 
 // A Media Gallery item is documented as a URL string, but the CMS often stores
