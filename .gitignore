@@ -31,3 +31,4 @@ pnpm-debug.log*
 .playwright-mcp/
 homepage-full.png
 homepage-*.png
+.env.local.bak
