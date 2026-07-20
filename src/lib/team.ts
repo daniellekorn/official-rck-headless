@@ -1,5 +1,4 @@
-import * as items from "@wix/wix-data-items-sdk";
-import { auth } from "@wix/essentials";
+import { items, auth } from "./wix-cms-admin";
 import { resolveImage } from "./wix-media";
 
 const COLLECTION_ID = "TeamMembers";
