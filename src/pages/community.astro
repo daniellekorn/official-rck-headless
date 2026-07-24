@@ -448,7 +448,7 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 							type="button"
 							data-members-prev
 							aria-label="Previous member"
-							class="absolute left-1 sm:-left-4 top-[38%] -translate-y-1/2 z-10 flex h-11 w-11 items-center justify-center rounded-sm bg-white/95 text-navy-600 ring-1 ring-navy-100 shadow-[0_10px_24px_-12px_rgba(7,23,58,0.4)] transition-colors hover:bg-gold-400 disabled:opacity-0 disabled:pointer-events-none"
+							class="absolute left-1 sm:-left-4 top-[38%] -translate-y-1/2 z-10 flex h-11 w-11 items-center justify-center rounded-sm bg-white/95 text-navy-600 ring-1 ring-navy-100 shadow-[0_10px_24px_-12px_rgba(7,23,58,0.4)] transition-colors hover:bg-gold-400"
 						>
 							<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
 								<path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
@@ -458,7 +458,7 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 							type="button"
 							data-members-next
 							aria-label="Next member"
-							class="absolute right-1 sm:-right-4 top-[38%] -translate-y-1/2 z-10 flex h-11 w-11 items-center justify-center rounded-sm bg-white/95 text-navy-600 ring-1 ring-navy-100 shadow-[0_10px_24px_-12px_rgba(7,23,58,0.4)] transition-colors hover:bg-gold-400 disabled:opacity-0 disabled:pointer-events-none"
+							class="absolute right-1 sm:-right-4 top-[38%] -translate-y-1/2 z-10 flex h-11 w-11 items-center justify-center rounded-sm bg-white/95 text-navy-600 ring-1 ring-navy-100 shadow-[0_10px_24px_-12px_rgba(7,23,58,0.4)] transition-colors hover:bg-gold-400"
 						>
 							<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
 								<path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
@@ -545,6 +545,78 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 </style>
 
 <script>
+	// Member Spotlight carousel: infinite loop. Clone the full card set (video
+	// tile + family cards) once before and once after the real cards, so
+	// there's always more (visually identical) content to scroll into in
+	// either direction. Once scroll drifts a full "real set" width past
+	// either edge, jump back by that width with no animation — since the
+	// clone is pixel-identical to the real card at that position, the jump
+	// is invisible. This runs before the community-card/video-spotlight
+	// listener setup below so their querySelectorAll calls pick up the
+	// clones too and wire them up identically to the originals.
+	document.querySelectorAll<HTMLElement>("[data-members-carousel]").forEach((carousel) => {
+		const track = carousel.querySelector<HTMLElement>("[data-members-track]");
+		if (!track) return;
+
+		const originals = Array.from(track.children) as HTMLElement[];
+		if (originals.length === 0) return;
+
+		const cloneSet = () =>
+			originals.map((el) => {
+				const clone = el.cloneNode(true) as HTMLElement;
+				clone.setAttribute("aria-hidden", "true");
+				clone.setAttribute("inert", "");
+				return clone;
+			});
+		track.prepend(...cloneSet());
+		track.append(...cloneSet());
+
+		const firstReal = originals[0];
+		const firstAfterClone = track.children[track.children.length - originals.length] as HTMLElement;
+		const realWidth = firstAfterClone.getBoundingClientRect().left - firstReal.getBoundingClientRect().left;
+		const startOffset = firstReal.getBoundingClientRect().left - track.getBoundingClientRect().left + track.scrollLeft;
+
+		// The track has `scroll-smooth` (scroll-behavior: smooth) for the arrow
+		// buttons' scrollBy(). A plain `track.scrollLeft = x` assignment inherits
+		// that same smooth behavior per the CSSOM View spec, so the initial jump
+		// to the real cards must use scrollTo({ behavior: "instant" }) to
+		// override it.
+		track.scrollTo({ left: startOffset, behavior: "instant" });
+
+		// Only re-anchor once scrolling has fully settled — never mid-gesture.
+		// Correcting while the track is still moving fights whatever's driving
+		// it (native scroll/swipe momentum, or the arrow buttons' own smooth
+		// scrollBy), which cancels/undoes that motion and shows up as stutter or
+		// arrow clicks that seem to do nothing.
+		//
+		// Debounced on `scroll` rather than keyed off `scrollend`: after a wheel/
+		// trackpad gesture ends, CSS scroll-snap still animates the track the
+		// rest of the way to the nearest snap point, and that settle animation
+		// keeps firing `scroll` events of its own — but in some browsers
+		// `scrollend` fires before that settle finishes, so checking there reads
+		// a not-yet-final position (needing a second scroll to catch up — the
+		// "extra push"). A debounce that resets on every `scroll` tick instead
+		// waits out that settle regardless of `scrollend` timing.
+		//
+		// EDGE_SLACK: startOffset/realWidth come from getBoundingClientRect
+		// (sub-pixel floats), but the settled position is the browser's own
+		// rounded pixel value — which can land a fraction of a px short of the
+		// exact threshold. Without slack, that first crossing silently fails.
+		const EDGE_SLACK = 4;
+		const SETTLE_DELAY = 120;
+		let settleTimer: ReturnType<typeof setTimeout> | undefined;
+		track.addEventListener("scroll", () => {
+			clearTimeout(settleTimer);
+			settleTimer = setTimeout(() => {
+				if (track.scrollLeft >= startOffset + realWidth - EDGE_SLACK) {
+					track.scrollTo({ left: track.scrollLeft - realWidth, behavior: "instant" });
+				} else if (track.scrollLeft <= startOffset - EDGE_SLACK) {
+					track.scrollTo({ left: track.scrollLeft + realWidth, behavior: "instant" });
+				}
+			}, SETTLE_DELAY);
+		}, { passive: true });
+	});
+
 	// Identical toggle logic to team.astro's card (see design log #007) —
 	// hover reveals on desktop, tap-to-pin on touch, scroll resets when hidden.
 	document.querySelectorAll<HTMLButtonElement>("[data-community-card]").forEach((card) => {
@@ -598,7 +670,8 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 	// Member Spotlight carousel: arrow buttons nudge native scroll by one card's
 	// width. Trackpad/mouse-wheel scrolling and touch swipe already work with no
 	// JS at all (plain overflow-x + scroll-snap) — this just adds a click target
-	// for people who'd rather press a button than scroll/swipe.
+	// for people who'd rather press a button than scroll/swipe. Arrows are never
+	// disabled — the carousel above loops infinitely in both directions.
 	document.querySelectorAll<HTMLElement>("[data-members-carousel]").forEach((carousel) => {
 		const track = carousel.querySelector<HTMLElement>("[data-members-track]");
 		const prevBtn = carousel.querySelector<HTMLButtonElement>("[data-members-prev]");
@@ -614,16 +687,5 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 
 		prevBtn?.addEventListener("click", () => scrollByCard(-1));
 		nextBtn?.addEventListener("click", () => scrollByCard(1));
-
-		// Disable (fade out) an arrow once scrolled all the way to that edge.
-		const EDGE_SLACK = 4;
-		const updateEdges = () => {
-			if (prevBtn) prevBtn.disabled = track.scrollLeft <= EDGE_SLACK;
-			if (nextBtn) {
-				nextBtn.disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - EDGE_SLACK;
-			}
-		};
-		track.addEventListener("scroll", updateEdges, { passive: true });
-		updateEdges();
 	});
 </script>
