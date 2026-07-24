@@ -179,6 +179,12 @@ const loop = [...entries, ...entries];
 		width: 100%;
 		height: 100%;
 		object-fit: contain;
+		/* Mobile cards are portrait (3:4) holding a typically-landscape photo, so
+		   `contain` letterboxes it — pin the image to the top instead of the
+		   default center so the letterbox gap (blurred fill) lands at the
+		   bottom, where the caption overlay already sits, instead of the photo
+		   itself being covered. */
+		object-position: 50% 0%;
 	}
 	.history-card__placeholder {
 		position: absolute;
@@ -235,6 +241,9 @@ const loop = [...entries, ...entries];
 		color: rgba(255, 255, 255, 0.78);
 	}
 	@media (min-width: 640px) {
+		.history-card__img {
+			object-position: 50% 50%;
+		}
 		.history-card__scrim {
 			background: linear-gradient(to top, rgba(2, 8, 23, 0.92) 4%, rgba(2, 8, 23, 0.45) 34%, transparent 62%);
 		}
