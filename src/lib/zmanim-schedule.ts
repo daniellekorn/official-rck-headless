@@ -26,7 +26,6 @@ const FIXED_MINCHA_CUTOFF = 18 * 60 + 10; // ...runs only while late mincha is a
 const LATE_MINCHA_BEFORE_SHKIYA = 10; // minutes before shkiya
 const MAARIV_AFTER_SHKIYA = 18; // minutes after shkiya
 const FIXED_MAARIV = 20 * 60; // the 8:00 pm minyan, dropped once shkiya+18 reaches it
-const LATE_MAARIV = 21 * 60 + 30; // 9:30 pm, Sunday & Wednesday only
 
 // ── Shabbos rules (confirmed with the rav, July 2026; see #041). ──
 const CANDLES_BEFORE_SHKIYA = 18; // hebcal's Ra'anana candle-lighting offset
@@ -179,7 +178,6 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 
 	rows.push({ service: "Maariv", daySpec: "Sun – Thu", time: fmtTime(shkiyaMaariv) });
 	if (shkiyaMaariv < FIXED_MAARIV) rows.push({ service: "Maariv", daySpec: "Sun – Thu", time: fmtTime(FIXED_MAARIV) });
-	rows.push({ service: "Maariv", daySpec: "Sun & Wed", time: fmtTime(LATE_MAARIV) });
 
 	const weekOf = new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "long", day: "numeric" }).format(anchor(sunday));
 	const pad = (n: number) => String(n).padStart(2, "0");

@@ -12,7 +12,7 @@ export type RoleGroup = "leadership" | "avreichim";
 
 export const ROLE_GROUPS: { key: RoleGroup; label: string }[] = [
 	{ key: "leadership", label: "Kollel Leadership" },
-	{ key: "avreichim", label: "Our Avreichim" },
+	{ key: "avreichim", label: "Our Rabbonim" },
 ];
 
 // Map raw (lowercased, trimmed) roleGroup values from the CMS to canonical

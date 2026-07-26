@@ -88,8 +88,13 @@ const label = "block text-sm font-medium text-navy-600";
 							)}
 
 							{contact?.address && (
-								<div class="flex items-start gap-4 text-navy-600">
-									<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm bg-gold-100 text-gold-600">
+								<a
+									href={googleMapsUrl(contact.address)}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="group flex items-start gap-4 text-navy-600 transition-colors hover:text-gold-600"
+								>
+									<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm bg-gold-100 text-gold-600 transition-colors group-hover:bg-gold-500 group-hover:text-white">
 										<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
 											<path d="M12 21s-8-7.3-8-12a8 8 0 1 1 16 0c0 4.7-8 12-8 12Z" stroke-linecap="round" stroke-linejoin="round" />
 											<circle cx="12" cy="9" r="2.5" />
@@ -98,12 +103,10 @@ const label = "block text-sm font-medium text-navy-600";
 									<span>
 										<span class="block text-xs font-semibold uppercase tracking-widest text-navy-400">Address</span>
 										<address class="not-italic">
-											<a href={googleMapsUrl(contact.address)} target="_blank" rel="noopener noreferrer" class="text-base font-medium leading-snug hover:text-gold-600 hover:underline">
-												{contact.address}
-											</a>
+											<span class="text-base font-medium leading-snug">{contact.address}</span>
 										</address>
 									</span>
-								</div>
+								</a>
 							)}
 
 							{mapSrc && (

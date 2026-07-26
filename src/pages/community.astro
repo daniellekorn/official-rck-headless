@@ -110,7 +110,7 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 								<div class="min-w-0">
 									{page?.gabbaiName ? (
 										<p>
-											Contact our gabbai,{" "}
+											For Shabbos, contact our gabbai,{" "}
 											<a href={contactHref("Re: Gabbi")} class="font-semibold text-gold-600 hover:text-gold-500">
 												{page.gabbaiName}
 											</a>
@@ -313,6 +313,56 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 							class="members-track flex gap-5 sm:gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory px-1 pb-2"
 							data-members-track
 						>
+						{/* Fixed video spotlight — always first, styled distinctly (navy +
+						    play button) from the CMS-driven family cards below, and sized
+						    slightly larger since it anchors the carousel. Not CMS-driven:
+						    it's a one-off video, not a repeating family entry. Play button
+						    swaps the thumbnail for an inline autoplaying embed; the separate
+						    corner button opens the same video full-size in the site lightbox. */}
+						<div class="w-[260px] sm:w-[300px] md:w-[320px] shrink-0 snap-start">
+							<div class="video-spotlight-card flex flex-col h-full w-full rounded-md overflow-hidden ring-1 ring-navy-100 shadow-[0_12px_30px_-20px_rgba(15,23,42,0.25)] bg-navy-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_45px_-22px_rgba(15,23,42,0.45)]">
+								<div class="group relative aspect-square w-full overflow-hidden" data-video-spotlight data-video-id="TUAYUbxZCHY">
+									<img
+										data-video-spotlight-thumb
+										src="https://img.youtube.com/vi/TUAYUbxZCHY/hqdefault.jpg"
+										alt="RCK Community Voices – What the RCK Means to Us"
+										loading="lazy"
+										class="h-full w-full object-cover opacity-75 transition-opacity duration-300 group-hover:opacity-55"
+									/>
+									<div data-video-spotlight-scrim class="absolute inset-0 bg-navy-700/30" aria-hidden="true"></div>
+									<button
+										type="button"
+										data-video-spotlight-play
+										aria-label="Play video"
+										class="absolute inset-0 flex items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-500"
+									>
+										<span class="flex h-14 w-14 items-center justify-center rounded-full bg-gold-500 text-navy-700 shadow-lg transition-transform duration-300 group-hover:scale-110">
+											<svg viewBox="0 0 24 24" class="h-6 w-6 translate-x-0.5" fill="currentColor" aria-hidden="true">
+												<path d="M8 5v14l11-7z" />
+											</svg>
+										</span>
+									</button>
+									<button
+										type="button"
+										data-lightbox-open
+										data-lightbox-gallery={JSON.stringify([{ type: "youtube", videoId: "TUAYUbxZCHY" }])}
+										data-lightbox-index="0"
+										data-lightbox-title="RCK Community Voices – What the RCK Means to Us"
+										aria-label="Enlarge video"
+										class="absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-sm bg-navy-700/70 text-white backdrop-blur-sm transition-colors hover:bg-navy-700/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-500"
+									>
+										<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+											<path d="M9 3H3v6M15 3h6v6M3 15v6h6M21 15v6h-6" stroke-linecap="round" stroke-linejoin="round" />
+										</svg>
+									</button>
+								</div>
+								<div class="p-5 sm:p-6">
+									<h3 class="font-display text-lg sm:text-xl font-medium text-white leading-snug">
+										RCK Community Voices – What the RCK Means to Us
+									</h3>
+								</div>
+							</div>
+						</div>
 						{members.map((m) => {
 							const bioText = m.description ? ricosToPlainText(m.description) : "";
 							const hasBio = bioText.length > 0;
@@ -398,7 +448,7 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 							type="button"
 							data-members-prev
 							aria-label="Previous member"
-							class="absolute left-1 sm:-left-4 top-[38%] -translate-y-1/2 z-10 flex h-11 w-11 items-center justify-center rounded-sm bg-white/95 text-navy-600 ring-1 ring-navy-100 shadow-[0_10px_24px_-12px_rgba(7,23,58,0.4)] transition-colors hover:bg-gold-400 disabled:opacity-0 disabled:pointer-events-none"
+							class="absolute left-1 sm:-left-4 top-[38%] -translate-y-1/2 z-10 flex h-11 w-11 items-center justify-center rounded-sm bg-white/95 text-navy-600 ring-1 ring-navy-100 shadow-[0_10px_24px_-12px_rgba(7,23,58,0.4)] transition-colors hover:bg-gold-400"
 						>
 							<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
 								<path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
@@ -408,7 +458,7 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 							type="button"
 							data-members-next
 							aria-label="Next member"
-							class="absolute right-1 sm:-right-4 top-[38%] -translate-y-1/2 z-10 flex h-11 w-11 items-center justify-center rounded-sm bg-white/95 text-navy-600 ring-1 ring-navy-100 shadow-[0_10px_24px_-12px_rgba(7,23,58,0.4)] transition-colors hover:bg-gold-400 disabled:opacity-0 disabled:pointer-events-none"
+							class="absolute right-1 sm:-right-4 top-[38%] -translate-y-1/2 z-10 flex h-11 w-11 items-center justify-center rounded-sm bg-white/95 text-navy-600 ring-1 ring-navy-100 shadow-[0_10px_24px_-12px_rgba(7,23,58,0.4)] transition-colors hover:bg-gold-400"
 						>
 							<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
 								<path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
@@ -495,6 +545,78 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 </style>
 
 <script>
+	// Member Spotlight carousel: infinite loop. Clone the full card set (video
+	// tile + family cards) once before and once after the real cards, so
+	// there's always more (visually identical) content to scroll into in
+	// either direction. Once scroll drifts a full "real set" width past
+	// either edge, jump back by that width with no animation — since the
+	// clone is pixel-identical to the real card at that position, the jump
+	// is invisible. This runs before the community-card/video-spotlight
+	// listener setup below so their querySelectorAll calls pick up the
+	// clones too and wire them up identically to the originals.
+	document.querySelectorAll<HTMLElement>("[data-members-carousel]").forEach((carousel) => {
+		const track = carousel.querySelector<HTMLElement>("[data-members-track]");
+		if (!track) return;
+
+		const originals = Array.from(track.children) as HTMLElement[];
+		if (originals.length === 0) return;
+
+		const cloneSet = () =>
+			originals.map((el) => {
+				const clone = el.cloneNode(true) as HTMLElement;
+				clone.setAttribute("aria-hidden", "true");
+				clone.setAttribute("inert", "");
+				return clone;
+			});
+		track.prepend(...cloneSet());
+		track.append(...cloneSet());
+
+		const firstReal = originals[0];
+		const firstAfterClone = track.children[track.children.length - originals.length] as HTMLElement;
+		const realWidth = firstAfterClone.getBoundingClientRect().left - firstReal.getBoundingClientRect().left;
+		const startOffset = firstReal.getBoundingClientRect().left - track.getBoundingClientRect().left + track.scrollLeft;
+
+		// The track has `scroll-smooth` (scroll-behavior: smooth) for the arrow
+		// buttons' scrollBy(). A plain `track.scrollLeft = x` assignment inherits
+		// that same smooth behavior per the CSSOM View spec, so the initial jump
+		// to the real cards must use scrollTo({ behavior: "instant" }) to
+		// override it.
+		track.scrollTo({ left: startOffset, behavior: "instant" });
+
+		// Only re-anchor once scrolling has fully settled — never mid-gesture.
+		// Correcting while the track is still moving fights whatever's driving
+		// it (native scroll/swipe momentum, or the arrow buttons' own smooth
+		// scrollBy), which cancels/undoes that motion and shows up as stutter or
+		// arrow clicks that seem to do nothing.
+		//
+		// Debounced on `scroll` rather than keyed off `scrollend`: after a wheel/
+		// trackpad gesture ends, CSS scroll-snap still animates the track the
+		// rest of the way to the nearest snap point, and that settle animation
+		// keeps firing `scroll` events of its own — but in some browsers
+		// `scrollend` fires before that settle finishes, so checking there reads
+		// a not-yet-final position (needing a second scroll to catch up — the
+		// "extra push"). A debounce that resets on every `scroll` tick instead
+		// waits out that settle regardless of `scrollend` timing.
+		//
+		// EDGE_SLACK: startOffset/realWidth come from getBoundingClientRect
+		// (sub-pixel floats), but the settled position is the browser's own
+		// rounded pixel value — which can land a fraction of a px short of the
+		// exact threshold. Without slack, that first crossing silently fails.
+		const EDGE_SLACK = 4;
+		const SETTLE_DELAY = 120;
+		let settleTimer: ReturnType<typeof setTimeout> | undefined;
+		track.addEventListener("scroll", () => {
+			clearTimeout(settleTimer);
+			settleTimer = setTimeout(() => {
+				if (track.scrollLeft >= startOffset + realWidth - EDGE_SLACK) {
+					track.scrollTo({ left: track.scrollLeft - realWidth, behavior: "instant" });
+				} else if (track.scrollLeft <= startOffset - EDGE_SLACK) {
+					track.scrollTo({ left: track.scrollLeft + realWidth, behavior: "instant" });
+				}
+			}, SETTLE_DELAY);
+		}, { passive: true });
+	});
+
 	// Identical toggle logic to team.astro's card (see design log #007) —
 	// hover reveals on desktop, tap-to-pin on touch, scroll resets when hidden.
 	document.querySelectorAll<HTMLButtonElement>("[data-community-card]").forEach((card) => {
@@ -519,10 +641,37 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 		});
 	});
 
+	// Video spotlight tile: the play button swaps the thumbnail for an inline
+	// autoplaying embed in place, rather than jumping to YouTube or opening the
+	// lightbox. The separate corner button (data-lightbox-open, wired by
+	// Lightbox.astro's own delegated listener) still opens the same video
+	// full-size for anyone who wants that instead.
+	document.querySelectorAll<HTMLElement>("[data-video-spotlight]").forEach((tile) => {
+		const playBtn = tile.querySelector<HTMLButtonElement>("[data-video-spotlight-play]");
+		const thumb = tile.querySelector<HTMLImageElement>("[data-video-spotlight-thumb]");
+		const scrim = tile.querySelector<HTMLElement>("[data-video-spotlight-scrim]");
+		const videoId = tile.dataset.videoId;
+		if (!playBtn || !thumb || !scrim || !videoId) return;
+
+		playBtn.addEventListener("click", () => {
+			const iframe = document.createElement("iframe");
+			iframe.className = "absolute inset-0 h-full w-full";
+			iframe.style.border = "0";
+			iframe.title = "RCK Community Voices – What the RCK Means to Us";
+			iframe.allow = "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share";
+			iframe.allowFullscreen = true;
+			iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&rel=0`;
+			thumb.replaceWith(iframe);
+			scrim.remove();
+			playBtn.remove();
+		}, { once: true });
+	});
+
 	// Member Spotlight carousel: arrow buttons nudge native scroll by one card's
 	// width. Trackpad/mouse-wheel scrolling and touch swipe already work with no
 	// JS at all (plain overflow-x + scroll-snap) — this just adds a click target
-	// for people who'd rather press a button than scroll/swipe.
+	// for people who'd rather press a button than scroll/swipe. Arrows are never
+	// disabled — the carousel above loops infinitely in both directions.
 	document.querySelectorAll<HTMLElement>("[data-members-carousel]").forEach((carousel) => {
 		const track = carousel.querySelector<HTMLElement>("[data-members-track]");
 		const prevBtn = carousel.querySelector<HTMLButtonElement>("[data-members-prev]");
@@ -538,16 +687,5 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 
 		prevBtn?.addEventListener("click", () => scrollByCard(-1));
 		nextBtn?.addEventListener("click", () => scrollByCard(1));
-
-		// Disable (fade out) an arrow once scrolled all the way to that edge.
-		const EDGE_SLACK = 4;
-		const updateEdges = () => {
-			if (prevBtn) prevBtn.disabled = track.scrollLeft <= EDGE_SLACK;
-			if (nextBtn) {
-				nextBtn.disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - EDGE_SLACK;
-			}
-		};
-		track.addEventListener("scroll", updateEdges, { passive: true });
-		updateEdges();
 	});
 </script>
