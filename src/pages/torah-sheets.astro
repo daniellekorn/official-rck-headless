@@ -1,0 +1,315 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import PageHeader from "../components/PageHeader.astro";
+import TorahSheetsSidebar from "../components/TorahSheetsSidebar.astro";
+import {
+	getTorahSheets,
+	groupParshaBytes,
+	groupDorLDor,
+	groupSourceSheets,
+	type TorahSheet,
+} from "../lib/torah-sheets";
+import { slugify } from "../lib/slug";
+
+const sheets = await getTorahSheets();
+
+const dateFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
+const formatDate = (iso?: string) => (iso ? dateFmt.format(new Date(iso)) : undefined);
+
+// Each sheet's sidebar-filter key is whichever level actually applies to its
+// series (subcategory for Parsha Bytes/Dor L'Dor, topic for Source Sheets).
+const filterKey = (s: TorahSheet) => slugify(s.subcategory || s.topic || "");
+
+const tabs = [
+	{
+		key: "parsha-bytes",
+		label: "Parsha Bytes",
+		kind: "nested" as const,
+		superGroups: groupParshaBytes(sheets),
+		sheets: sheets.filter((s) => s.series === "Parsha Bytes"),
+	},
+	{
+		key: "dor-ldor",
+		label: "Dor L'Dor",
+		kind: "nested" as const,
+		superGroups: groupDorLDor(sheets),
+		sheets: sheets.filter((s) => s.series === "Dor L'Dor"),
+	},
+	{
+		key: "source-sheets",
+		label: "Source Sheets",
+		kind: "flat" as const,
+		groups: groupSourceSheets(sheets),
+		sheets: sheets.filter((s) => s.series === "Source Sheets"),
+	},
+];
+---
+
+<Layout>
+	<Nav />
+	<main>
+		<PageHeader
+			titleNavy="Torah Sheets"
+			subtitle="Parsha Bytes, Dor L'Dor, and Source Sheets — browse and download RCK's Torah sheets."
+		/>
+
+		<section class="py-10 sm:py-14">
+			<div class="container-page">
+				<div class="flex flex-wrap justify-center gap-2 sm:gap-3" data-sheets-tabs role="tablist">
+					{tabs.map((tab, i) => (
+						<button
+							type="button"
+							role="tab"
+							data-sheets-tab={tab.key}
+							class:list={["sheets-tab", { "is-active": i === 0 }]}
+						>
+							{tab.label}
+						</button>
+					))}
+				</div>
+
+				{tabs.map((tab, i) => (
+					<div data-tab-panel={tab.key} class:list={["mt-8 sm:mt-10", { hidden: i !== 0 }]}>
+						{tab.sheets.length === 0 ? (
+							<p class="py-16 text-center text-navy-400">
+								{tab.label} sheets are coming soon.
+							</p>
+						) : (
+							<div class="grid gap-8 lg:grid-cols-12">
+								<div class="lg:col-span-3">
+									<details class="sidebar-mobile lg:hidden rounded-md bg-mist p-4">
+										<summary class="cursor-pointer font-sans text-sm font-bold uppercase tracking-[0.14em] text-navy-600">
+											Filter {tab.label}
+										</summary>
+										<div class="mt-3" data-sidebar>
+											{tab.kind === "nested" ? (
+												<TorahSheetsSidebar kind="nested" superGroups={tab.superGroups} />
+											) : (
+												<TorahSheetsSidebar kind="flat" groups={tab.groups} />
+											)}
+										</div>
+									</details>
+
+									<aside class="hidden lg:block rounded-md bg-mist p-4" data-sidebar>
+										{tab.kind === "nested" ? (
+											<TorahSheetsSidebar kind="nested" superGroups={tab.superGroups} />
+										) : (
+											<TorahSheetsSidebar kind="flat" groups={tab.groups} />
+										)}
+									</aside>
+								</div>
+
+								<div class="lg:col-span-9">
+									<div class="flex flex-col gap-3" data-sheet-list>
+										{tab.sheets.map((sheet) => (
+											<div class="sheet-card" data-sheet data-filter={filterKey(sheet)}>
+												<div class="flex flex-wrap items-center justify-between gap-3">
+													<div class="min-w-0">
+														<p class="font-display text-lg font-medium text-navy-600">{sheet.title}</p>
+														{formatDate(sheet.date) && (
+															<p class="mt-0.5 text-sm text-navy-400">{formatDate(sheet.date)}</p>
+														)}
+													</div>
+													<div class="flex shrink-0 flex-wrap items-center gap-2">
+														{sheet.sourceType === "pdf" && sheet.pdfUrl && (
+															<a
+																href={sheet.pdfUrl}
+																target="_blank"
+																rel="noopener noreferrer"
+																class="sheet-action"
+															>
+																View / Download PDF
+															</a>
+														)}
+														{sheet.sourceType === "canva" && sheet.canvaEmbedUrl && (
+															<button type="button" data-canva-toggle class="sheet-action">
+																View Sheet
+															</button>
+														)}
+														{sheet.sourceType === "canva" && sheet.canvaPdfUrl && (
+															<a
+																href={sheet.canvaPdfUrl}
+																target="_blank"
+																rel="noopener noreferrer"
+																class="sheet-action-secondary"
+															>
+																Download PDF
+															</a>
+														)}
+													</div>
+												</div>
+												{sheet.sourceType === "canva" && sheet.canvaEmbedUrl && (
+													<div class="sheet-embed hidden mt-4" data-canva-embed data-canva-src={sheet.canvaEmbedUrl}>
+														<iframe
+															data-canva-iframe
+															loading="lazy"
+															title={sheet.title}
+															class="aspect-[4/3] sm:aspect-video w-full rounded-md border-0"
+														></iframe>
+													</div>
+												)}
+											</div>
+										))}
+									</div>
+									<p class="hidden py-16 text-center text-navy-400" data-no-results>
+										No sheets match that filter.
+									</p>
+								</div>
+							</div>
+						)}
+					</div>
+				))}
+			</div>
+		</section>
+	</main>
+	<Footer />
+</Layout>
+
+<style>
+	.sheets-tab {
+		border-radius: 9999px;
+		padding: 0.625rem 1.5rem;
+		font-family: var(--font-sans);
+		font-weight: 600;
+		font-size: 0.9375rem;
+		color: var(--color-navy-500);
+		background: #fff;
+		box-shadow: inset 0 0 0 1px var(--color-navy-200);
+		transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+	}
+	.sheets-tab:hover {
+		background: var(--color-navy-50);
+	}
+	.sheets-tab.is-active {
+		box-shadow: inset 0 0 0 1.5px var(--color-gold-500);
+		background: var(--color-gold-100);
+		color: var(--color-navy-700);
+	}
+
+	.sheet-card {
+		border-radius: 0.375rem;
+		background: #fff;
+		box-shadow: inset 0 0 0 1px var(--color-navy-100);
+		padding: 1rem 1.25rem;
+	}
+
+	.sheet-action {
+		display: inline-flex;
+		align-items: center;
+		border-radius: 0.25rem;
+		padding: 0.4rem 0.9rem;
+		font-size: 0.8125rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--color-navy-700);
+		background: var(--color-gold-400);
+		transition: background-color 0.15s;
+	}
+	.sheet-action:hover {
+		background: var(--color-gold-500);
+	}
+	.sheet-action-secondary {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--color-navy-500);
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+	.sheet-action-secondary:hover {
+		color: var(--color-navy-700);
+	}
+
+	.sheet-embed iframe {
+		background: var(--color-mist);
+	}
+</style>
+
+<script>
+	// Three independent concerns, same vanilla data-attribute + delegated-script
+	// pattern as learn.astro's filter bar and team.astro's card toggles — no new
+	// client-side approach introduced.
+
+	// 1. Tabs: one visible panel at a time, deep-linkable via #parsha-bytes etc.
+	const tabButtons = document.querySelectorAll<HTMLButtonElement>("[data-sheets-tab]");
+	const panels = document.querySelectorAll<HTMLElement>("[data-tab-panel]");
+
+	const activateTab = (key: string) => {
+		let matched = false;
+		tabButtons.forEach((btn) => {
+			const isMatch = btn.dataset.sheetsTab === key;
+			btn.classList.toggle("is-active", isMatch);
+			btn.setAttribute("aria-selected", String(isMatch));
+			if (isMatch) matched = true;
+		});
+		panels.forEach((panel) => {
+			panel.classList.toggle("hidden", panel.dataset.tabPanel !== key);
+		});
+		return matched;
+	};
+
+	tabButtons.forEach((btn) => {
+		btn.addEventListener("click", () => {
+			const key = btn.dataset.sheetsTab ?? "";
+			activateTab(key);
+			history.replaceState(null, "", `#${key}`);
+		});
+	});
+
+	const initialKey = location.hash.slice(1);
+	if (!initialKey || !activateTab(initialKey)) {
+		const first = tabButtons[0]?.dataset.sheetsTab;
+		if (first) activateTab(first);
+	}
+
+	// 2. Sidebar filtering: single active filter per panel (these are hierarchical
+	// categories, not independent tags, so no multi-select AND logic needed).
+	// Sidebar content is rendered twice per panel (mobile <details> + desktop
+	// aside — a <details> can't be forced open at a breakpoint via CSS alone),
+	// so filter buttons are matched by their shared data-filter value across
+	// both copies rather than by which one was actually clicked.
+	panels.forEach((panel) => {
+		const cards = Array.from(panel.querySelectorAll<HTMLElement>("[data-sheet]"));
+		const filterBtns = Array.from(panel.querySelectorAll<HTMLButtonElement>("[data-filter]"));
+		const resetBtns = Array.from(panel.querySelectorAll<HTMLButtonElement>("[data-filter-reset]"));
+		const noResults = panel.querySelector<HTMLElement>("[data-no-results]");
+
+		const apply = (active: string | null) => {
+			let visible = 0;
+			cards.forEach((card) => {
+				const show = !active || card.dataset.filter === active;
+				card.classList.toggle("hidden", !show);
+				if (show) visible += 1;
+			});
+			noResults?.classList.toggle("hidden", visible > 0);
+			filterBtns.forEach((b) => b.classList.toggle("is-active", active !== null && b.dataset.filter === active));
+			resetBtns.forEach((b) => b.classList.toggle("is-active", active === null));
+		};
+
+		filterBtns.forEach((btn) => {
+			btn.addEventListener("click", () => apply(btn.dataset.filter ?? null));
+		});
+		resetBtns.forEach((btn) => {
+			btn.addEventListener("click", () => apply(null));
+		});
+
+		apply(null);
+	});
+
+	// 3. Canva "View Sheet" toggle: lazy-sets the iframe src on first open so a
+	// tab full of Canva sheets doesn't load every embed up front.
+	document.querySelectorAll<HTMLButtonElement>("[data-canva-toggle]").forEach((btn) => {
+		const embed = btn.closest("[data-sheet]")?.querySelector<HTMLElement>("[data-canva-embed]");
+		const iframe = embed?.querySelector<HTMLIFrameElement>("[data-canva-iframe]");
+		if (!embed || !iframe) return;
+
+		btn.addEventListener("click", () => {
+			const opening = embed.classList.contains("hidden");
+			if (opening && !iframe.src) iframe.src = embed.dataset.canvaSrc ?? "";
+			embed.classList.toggle("hidden", !opening);
+			btn.textContent = opening ? "Hide Sheet" : "View Sheet";
+		});
+	});
+</script>

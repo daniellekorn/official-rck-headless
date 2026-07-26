@@ -1,0 +1,188 @@
+import { items, auth } from "./wix-cms-admin";
+import { resolveDocument } from "./wix-media";
+import { slugify } from "./slug";
+
+const COLLECTION_ID = "TorahSheets";
+
+export type Series = "Parsha Bytes" | "Dor L'Dor" | "Source Sheets";
+export type SourceType = "pdf" | "canva";
+
+export interface TorahSheet {
+	_id: string;
+	title: string;
+	series: Series;
+	category?: string;
+	subcategory?: string;
+	topic?: string;
+	date?: string;
+	sourceType: SourceType;
+	canvaEmbedUrl?: string;
+	pdfUrl?: string;
+	pdfFilename?: string;
+	canvaPdfUrl?: string;
+	canvaPdfFilename?: string;
+}
+
+export interface SheetGroup {
+	key: string;
+	label: string;
+	sheets: TorahSheet[];
+}
+
+export interface SheetSuperGroup {
+	key: string;
+	label: string;
+	groups: SheetGroup[];
+}
+
+// Raw (lowercased, trimmed) CMS `series` values → canonical Series. A sheet
+// whose series doesn't match anything here is dropped (same "wrong value =
+// hidden" rule as Flyers.category — see CONTRIBUTING.md) since there's no
+// safe default tab to fall back to across three genuinely different sidebars.
+const SERIES_ALIASES: Record<string, Series> = {
+	"parsha bytes": "Parsha Bytes",
+	"dor l'dor": "Dor L'Dor",
+	"dor ldor": "Dor L'Dor",
+	"source sheets": "Source Sheets",
+};
+
+function normalizeSeries(raw: unknown): Series | undefined {
+	if (typeof raw !== "string") return undefined;
+	return SERIES_ALIASES[raw.trim().toLowerCase()];
+}
+
+function normalizeSourceType(raw: unknown): SourceType {
+	return typeof raw === "string" && raw.trim().toLowerCase() === "canva" ? "canva" : "pdf";
+}
+
+function toDateString(raw: unknown): string | undefined {
+	if (!raw) return undefined;
+	const d = raw instanceof Date ? raw : new Date(raw as string);
+	return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
+}
+
+export async function getTorahSheets(): Promise<TorahSheet[]> {
+	try {
+		const elevated = auth.elevate(items.query);
+		const { items: results } = await elevated(COLLECTION_ID).descending("date").limit(500).find();
+
+		return (results as Record<string, unknown>[])
+			.map((row): TorahSheet | undefined => {
+				const series = normalizeSeries(row.series);
+				if (!series) return undefined;
+				const pdf = resolveDocument(row.pdfFile as string | undefined);
+				const canvaPdf = resolveDocument(row.canvaPdfBackup as string | undefined);
+				return {
+					_id: row._id as string,
+					title: (row.title as string) ?? "Untitled",
+					series,
+					category: (row.category as string | undefined)?.trim(),
+					subcategory: (row.subcategory as string | undefined)?.trim(),
+					topic: (row.topic as string | undefined)?.trim(),
+					date: toDateString(row.date),
+					sourceType: normalizeSourceType(row.sourceType),
+					canvaEmbedUrl: (row.canvaEmbedUrl as string | undefined)?.trim() || undefined,
+					pdfUrl: pdf?.url,
+					pdfFilename: pdf?.filename,
+					canvaPdfUrl: canvaPdf?.url,
+					canvaPdfFilename: canvaPdf?.filename,
+				};
+			})
+			.filter((s): s is TorahSheet => Boolean(s));
+	} catch (err) {
+		console.error(`[torah-sheets] query failed:`, err);
+		return [];
+	}
+}
+
+// ── Closed vocabularies (never change — see tag-groups.ts precedent) ──
+
+const SEFER_PARSHIOS: Record<string, string[]> = {
+	Bereishis: ["Bereishis", "Noach", "Lech Lecha", "Vayeira", "Chayei Sarah", "Toldos", "Vayeitzei", "Vayishlach", "Vayeishev", "Mikeitz", "Vayigash", "Vayechi"],
+	Shemos: ["Shemos", "Vaeira", "Bo", "Beshalach", "Yisro", "Mishpatim", "Terumah", "Tetzaveh", "Ki Sisa", "Vayakhel", "Pekudei"],
+	Vayikra: ["Vayikra", "Tzav", "Shmini", "Tazria", "Metzora", "Achrei Mos", "Kedoshim", "Emor", "Behar", "Bechukosai"],
+	Bamidbar: ["Bamidbar", "Naso", "Behaaloscha", "Shlach", "Korach", "Chukas", "Balak", "Pinchas", "Matos", "Masei"],
+	Devarim: ["Devarim", "Vaeschanan", "Eikev", "Re'eh", "Shoftim", "Ki Seitzei", "Ki Savo", "Nitzavim", "Vayeilech", "Haazinu", "Vezos Habracha"],
+};
+
+const CHAGIM_LABEL = "Chagim & Special Days";
+const PIRKEI_AVOS_LABEL = "Pirkei Avos";
+const PIRKEI_AVOS_PERAKIM = ["Perek Aleph", "Perek Beis", "Perek Gimmel", "Perek Daled", "Perek Hei", "Perek Vav"];
+const OTHER_LABEL = "Other";
+
+/** Case/whitespace-insensitive match against a closed vocabulary list, preserving the list's canonical casing. */
+function matchVocabulary(value: string | undefined, vocabulary: string[]): string | undefined {
+	if (!value) return undefined;
+	const needle = value.trim().toLowerCase();
+	return vocabulary.find((v) => v.toLowerCase() === needle);
+}
+
+function bySubcategory(sheets: TorahSheet[], vocabulary: string[]): SheetGroup[] {
+	return vocabulary
+		.map((name) => ({
+			key: slugify(name),
+			label: name,
+			sheets: sheets.filter((s) => matchVocabulary(s.subcategory, vocabulary) === name),
+		}))
+		.filter((g) => g.sheets.length > 0);
+}
+
+/** Sheets whose subcategory didn't match the given vocabulary — bucketed under "Other" rather than dropped. */
+function otherGroup(sheets: TorahSheet[], vocabulary: string[]): SheetGroup | undefined {
+	const leftover = sheets.filter((s) => !matchVocabulary(s.subcategory, vocabulary));
+	return leftover.length > 0 ? { key: "other", label: OTHER_LABEL, sheets: leftover } : undefined;
+}
+
+/** Shared by Parsha Bytes and Dor L'Dor: one super-group per Sefer with populated parshios, plus Chagim & Special Days. */
+function groupBySeferAndChagim(sheets: TorahSheet[]): SheetSuperGroup[] {
+	const bySefer = Object.entries(SEFER_PARSHIOS).map(([sefer, parshios]): SheetSuperGroup => {
+		const inSefer = sheets.filter((s) => s.category?.toLowerCase() === sefer.toLowerCase());
+		const groups = bySubcategory(inSefer, parshios);
+		const other = otherGroup(inSefer, parshios);
+		return { key: slugify(sefer), label: sefer, groups: other ? [...groups, other] : groups };
+	});
+
+	const chagim = sheets.filter((s) => s.category?.toLowerCase() === CHAGIM_LABEL.toLowerCase());
+	const chagimGroups: SheetGroup[] = [...new Set(chagim.map((s) => s.subcategory).filter((v): v is string => Boolean(v)))]
+		.sort((a, b) => a.localeCompare(b))
+		.map((name) => ({ key: slugify(name), label: name, sheets: chagim.filter((s) => s.subcategory === name) }));
+
+	const superGroups = [...bySefer];
+	if (chagimGroups.length > 0) superGroups.push({ key: slugify(CHAGIM_LABEL), label: CHAGIM_LABEL, groups: chagimGroups });
+
+	return superGroups.filter((g) => g.groups.length > 0);
+}
+
+export function groupParshaBytes(sheets: TorahSheet[]): SheetSuperGroup[] {
+	return groupBySeferAndChagim(sheets.filter((s) => s.series === "Parsha Bytes"));
+}
+
+export function groupDorLDor(sheets: TorahSheet[]): SheetSuperGroup[] {
+	const dorLDor = sheets.filter((s) => s.series === "Dor L'Dor");
+	const superGroups = groupBySeferAndChagim(dorLDor);
+
+	const pirkeiAvos = dorLDor.filter((s) => s.category?.toLowerCase() === PIRKEI_AVOS_LABEL.toLowerCase());
+	const perakimGroups = bySubcategory(pirkeiAvos, PIRKEI_AVOS_PERAKIM);
+	const other = otherGroup(pirkeiAvos, PIRKEI_AVOS_PERAKIM);
+	const pirkeiAvosGroups = other ? [...perakimGroups, other] : perakimGroups;
+	if (pirkeiAvosGroups.length > 0) {
+		superGroups.push({ key: slugify(PIRKEI_AVOS_LABEL), label: PIRKEI_AVOS_LABEL, groups: pirkeiAvosGroups });
+	}
+
+	return superGroups;
+}
+
+/** Source Sheets: flat groups by open-ended topic (sorted alphabetically), same "Other" bucket for untagged rows. */
+export function groupSourceSheets(sheets: TorahSheet[]): SheetGroup[] {
+	const sourceSheets = sheets.filter((s) => s.series === "Source Sheets");
+	const topics = [...new Set(sourceSheets.map((s) => s.topic).filter((v): v is string => Boolean(v)))].sort((a, b) =>
+		a.localeCompare(b),
+	);
+	const groups = topics.map((topic) => ({
+		key: slugify(topic),
+		label: topic,
+		sheets: sourceSheets.filter((s) => s.topic === topic),
+	}));
+	const untagged = sourceSheets.filter((s) => !s.topic);
+	return untagged.length > 0 ? [...groups, { key: "other", label: OTHER_LABEL, sheets: untagged }] : groups;
+}

@@ -36,6 +36,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Past events archive (on /events) | `PastEvents` | Add a row per past event: title, date, photo gallery, optional flyer + blurb. Shows newest first. |
 | Davening times (weekday + Shabbos) | *(computed)* + `DaveningTimes` | Regular minyanim **and** the Shabbos schedule are calculated from zmanim in code (design-log #040, #041) — don't enter them as rows. Use `DaveningTimes` only for extras (Selichos, special weeks): `dayType = Weekday` rows appear under the weekday table, `dayType = Shabbat` rows under Shabbos Day. |
 | Flyers (images / PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). For event flyers, set `removeAfter` so they drop off the site on their own. |
+| Torah Sheets (Parsha Bytes, Dor L'Dor, Source Sheets) | `TorahSheets` | Add a row per sheet: title, series, category/subcategory (or topic for Source Sheets), date, and either a PDF file or a Canva embed link. See schema below and [#053](design-log/053-torah-sheets-page.md). |
 | Footer address, phone, email | `ContactInfo` | Edit the single row. Leave a field empty to hide it from the footer. |
 | Footer social links | `ContactInfo` | Fill in any of `facebookUrl`, `instagramUrl`, `youtubeUrl`, `whatsappUrl`, `twitterUrl`, `linkedinUrl`. Empty = icon hidden. (`whatsappUrl` should be the main community invite — same link as `HomePage.whatsappJoinHref`.) |
 | Donate page (intro text, suggested amounts, donation designations) | `DonatePage` | Edit the single row. See schema below — the `apiValid` field is what switches the page from a "Donate Securely" link into the full on-site card form. |
@@ -450,6 +451,27 @@ A fair question: why can't the site just *watch* a Canva folder and show whateve
 - **Auto-export needs the Canva Connect API** — an OAuth app with token refresh and async export jobs. That's real plumbing that quietly breaks, for a flyer that changes a few times a year. We looked at it (design log #031) and decided it wasn't worth it yet.
 
 So the deliberate, two-click export stays manual. The `removeAfter` date is the part of "automatic" actually worth having: set a take-down date once and old event flyers disappear on their own — that's the cleanup nobody wants to remember, so we automated *that*.
+
+#### `TorahSheets` — one row per sheet
+
+Powers the `/torah-sheets` hub page (Parsha Bytes / Dor L'Dor / Source Sheets). See [design-log/053](design-log/053-torah-sheets-page.md).
+
+| Field | Type | Notes |
+|---|---|---|
+| title | Text | Display name shown on the card |
+| series | Text | **Must be one of** (exact): `Parsha Bytes`, `Dor L'Dor`, `Source Sheets`. Wrong value = sheet silently hidden from every tab. |
+| category | Text | For Parsha Bytes/Dor L'Dor only — the Sefer, or `Chagim & Special Days`; Dor L'Dor also accepts `Pirkei Avos`. One of (exact): `Bereishis`, `Shemos`, `Vayikra`, `Bamidbar`, `Devarim`, `Chagim & Special Days`, `Pirkei Avos` (Dor L'Dor only). Leave empty for Source Sheets. |
+| subcategory | Text | The specific parsha (e.g. `Shemos`), chag/special day (e.g. `Chanukah`), or Pirkei Avos perek (e.g. `Perek Aleph`). Case-insensitive match against the fixed parsha/perek list — an unrecognized value still shows, just bucketed under "Other" in the sidebar instead of a specific group. Chag/special-day names are open-ended (anything you type becomes its own sidebar entry). |
+| topic | Text | Source Sheets only — any label (e.g. `Halacha`, `Hashkafa`, `Mussar`). Open-ended: the sidebar groups by whatever values actually appear. |
+| date | Date | Sort key (newest first) and the date shown on the card |
+| sourceType | Text | **Must be one of** (exact, lowercase): `pdf` or `canva`. Anything else is treated as `pdf`. |
+| pdfFile | Document | Used when `sourceType = pdf`. Upload the PDF directly. |
+| canvaEmbedUrl | Text | Used when `sourceType = canva` — the Canva **"Share → Embed"** link (looks like `https://www.canva.com/design/.../view?embed`). Renders as a live, always-current embed. |
+| canvaPdfBackup | Document | Optional, Canva sheets only. A PDF exported from the same Canva design (**Share → Download → PDF**) — adds a "Download PDF" button next to the live embed. |
+
+**Switching an existing sheet from PDF to a live Canva embed** (e.g. once you start updating a sheet after it's posted): change `sourceType` to `canva`, paste the embed link into `canvaEmbedUrl`, and optionally upload a `canvaPdfBackup`. No dev work needed — the page renders whichever `sourceType` each row has.
+
+> Why Canva embeds are back for this collection specifically, after being removed everywhere else (design-log #031): a Torah source sheet is *meant* to show every page, unlike a flyer where showing extra pages was the bug. See design-log #053 for the full reasoning.
 
 ### Permissions on every collection
 

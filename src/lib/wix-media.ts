@@ -230,6 +230,20 @@ export function resolveVideo(wixVideoUrl?: string): { url: string; thumbnail?: s
 }
 
 /**
+ * Resolve a Wix Document field (`wix:document://…`, e.g. an uploaded PDF) to a
+ * real downloadable URL + original filename. Undefined when missing/unparseable.
+ */
+export function resolveDocument(wixDocumentUrl?: string): { url: string; filename?: string } | undefined {
+	if (!wixDocumentUrl) return undefined;
+	try {
+		const doc = media.getDocumentUrl(wixDocumentUrl);
+		return doc?.url ? { url: doc.url, filename: doc.filename } : undefined;
+	} catch {
+		return undefined;
+	}
+}
+
+/**
  * Resolve a CMS Media Gallery field's video items (dropping photos) to
  * playable URLs + a poster from the first one — for a field the office
  * uploads video files into directly, no URL-pasting required.
