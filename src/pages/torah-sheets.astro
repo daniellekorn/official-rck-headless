@@ -339,6 +339,15 @@ const tabs = [
 	.see-more-btn:hover {
 		background: var(--color-navy-100);
 	}
+	/* Explicit two-class override: Tailwind's own .hidden{display:none} and
+	   this component's .see-more-btn{display:block} have equal specificity,
+	   so whichever rule the bundler happens to emit last in the compiled
+	   stylesheet wins — which was sometimes .see-more-btn, leaving the button
+	   visible even after JS added .hidden. Bumping the specificity here makes
+	   it deterministic regardless of source order. */
+	.see-more-btn.hidden {
+		display: none;
+	}
 </style>
 
 <script>
