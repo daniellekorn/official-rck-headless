@@ -404,7 +404,7 @@ const tabs = [
 		// Pagination only earns its keep on a genuinely long list — a handful of
 		// sheets in a filter/category shouldn't get a "See more" button just
 		// because it's technically more than half of itself.
-		const PAGINATE_THRESHOLD = 8;
+		const PAGINATE_THRESHOLD = 20;
 		const paginate = cards.length > PAGINATE_THRESHOLD;
 		const initialCount = paginate ? Math.ceil(cards.length / 2) : cards.length;
 		let expanded = false;
