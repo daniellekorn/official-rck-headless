@@ -29,6 +29,7 @@ interface Props {
 }
 
 const { kind, superGroups = [], groups = [], publications, activePublication } = Astro.props;
+const activeLabel = publications.find((p) => p.key === activePublication)?.label ?? "";
 ---
 
 <div class="mb-4 pb-4 border-b border-navy-100">
@@ -46,10 +47,12 @@ const { kind, superGroups = [], groups = [], publications, activePublication } =
 	</div>
 </div>
 
+<p class="sidebar-section-label">Filter {activeLabel}</p>
+
 <button
 	type="button"
 	data-filter-reset
-	class="sidebar-filter-btn w-full text-left font-semibold text-navy-600"
+	class="sidebar-filter-btn mt-2 w-full text-left font-semibold text-navy-600"
 >
 	All Sheets
 </button>

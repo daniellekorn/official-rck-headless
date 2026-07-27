@@ -6,6 +6,7 @@ import PageHeader from "../components/PageHeader.astro";
 import TorahSheetsSidebar from "../components/TorahSheetsSidebar.astro";
 import {
 	getTorahSheets,
+	groupAllSheets,
 	groupTorahBytes,
 	groupDorLDor,
 	groupSourceSheets,
@@ -34,6 +35,15 @@ const mostRecentId = (kind: "nested" | "flat", tabSheets: TorahSheet[]): string 
 };
 
 const tabs = [
+	{
+		key: "all",
+		label: "All Publications",
+		kind: "nested" as const,
+		superGroups: groupAllSheets(sheets),
+		// Already sorted most-recent-first across every series — see
+		// compareParshaOrder in torah-sheets.ts, applied once to the full list.
+		sheets,
+	},
 	{
 		key: "torah-bytes",
 		label: "Torah Bytes",
@@ -74,7 +84,7 @@ const tabs = [
 							<div class="lg:col-span-3">
 								<details class="lg:hidden">
 									<summary class="cursor-pointer font-sans text-sm font-bold uppercase tracking-[0.14em] text-navy-600">
-										Filter {tab.label}
+										Filter &amp; Browse
 									</summary>
 									<div class="mt-3 pb-6 border-b border-navy-100" data-sidebar>
 										{tab.kind === "nested" ? (

@@ -229,6 +229,34 @@ export function groupDorLDor(sheets: TorahSheet[]): SheetSuperGroup[] {
 	return superGroups;
 }
 
+/**
+ * "All Publications": every sheet from every series in one browsable tree.
+ * Sefer/Chagim buckets merge Torah Bytes and Dor L'Dor sheets under the same
+ * parsha (so e.g. "Noach" shows both series' sheets together — the reading-
+ * order vocabulary doesn't care which series a sheet belongs to), Pirkei
+ * Avos folds in Dor L'Dor's perek sheets the same way groupDorLDor does, and
+ * Source Sheets' topics get their own trailing super-group since they don't
+ * fit the parsha-cycle structure at all.
+ */
+export function groupAllSheets(sheets: TorahSheet[]): SheetSuperGroup[] {
+	const superGroups = groupBySeferAndChagim(sheets);
+
+	const pirkeiAvos = sheets.filter((s) => s.category?.toLowerCase() === PIRKEI_AVOS_LABEL.toLowerCase());
+	const perakimGroups = bySubcategory(pirkeiAvos, PIRKEI_AVOS_PERAKIM);
+	const otherPerakim = otherGroup(pirkeiAvos, PIRKEI_AVOS_PERAKIM);
+	const pirkeiAvosGroups = otherPerakim ? [...perakimGroups, otherPerakim] : perakimGroups;
+	if (pirkeiAvosGroups.length > 0) {
+		superGroups.push({ key: slugify(PIRKEI_AVOS_LABEL), label: PIRKEI_AVOS_LABEL, groups: pirkeiAvosGroups });
+	}
+
+	const sourceSheetGroups = groupSourceSheets(sheets);
+	if (sourceSheetGroups.length > 0) {
+		superGroups.push({ key: "source-sheets", label: "Source Sheets", groups: sourceSheetGroups });
+	}
+
+	return superGroups;
+}
+
 /** Source Sheets: flat groups by open-ended topic (sorted alphabetically), same "Other" bucket for untagged rows. */
 export function groupSourceSheets(sheets: TorahSheet[]): SheetGroup[] {
 	const sourceSheets = sheets.filter((s) => s.series === "Source Sheets");
