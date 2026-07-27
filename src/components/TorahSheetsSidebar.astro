@@ -7,7 +7,7 @@
  * reasoning as Footer.astro's mobile Quick Links list). Filtering itself is
  * plain data-attribute + script, same pattern as learn.astro's filter bar.
  *
- * "nested" (Parsha Bytes / Dor L'Dor): Sefer/Chagim/Pirkei Avos as collapsible
+ * "nested" (Torah Bytes / Dor L'Dor ParshaLink): Sefer/Chagim/Pirkei Avos as collapsible
  * groups, individual parshios/perakim/chagim as the actual filter buttons.
  * "flat" (Source Sheets): topics as filter buttons, no grouping.
  */
@@ -33,8 +33,13 @@ const { kind, superGroups = [], groups = [] } = Astro.props;
 {kind === "nested" ? (
 	<div class="mt-2 space-y-1">
 		{superGroups.map((sg) => (
-			<details class="sidebar-group" open>
-				<summary class="sidebar-group-label">{sg.label}</summary>
+			<details class="sidebar-group">
+				<summary class="sidebar-group-label">
+					{sg.label}
+					<svg viewBox="0 0 12 12" class="sidebar-group-chevron" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+						<path d="M2.5 4.5 6 8l3.5-3.5" stroke-linecap="round" stroke-linejoin="round" />
+					</svg>
+				</summary>
 				<div class="mt-1 space-y-0.5 pl-3">
 					{sg.groups.map((g) => (
 						<button
@@ -100,6 +105,9 @@ const { kind, superGroups = [], groups = [] } = Astro.props;
 		margin-top: 0.5rem;
 	}
 	.sidebar-group-label {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
 		cursor: pointer;
 		list-style: none;
 		font-size: 0.8125rem;
@@ -110,5 +118,14 @@ const { kind, superGroups = [], groups = [] } = Astro.props;
 	}
 	.sidebar-group-label::-webkit-details-marker {
 		display: none;
+	}
+	.sidebar-group-chevron {
+		width: 0.7rem;
+		height: 0.7rem;
+		flex-shrink: 0;
+		transition: transform 0.2s ease;
+	}
+	.sidebar-group[open] .sidebar-group-chevron {
+		transform: rotate(180deg);
 	}
 </style>

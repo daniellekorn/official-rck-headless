@@ -6,7 +6,7 @@ import PageHeader from "../components/PageHeader.astro";
 import TorahSheetsSidebar from "../components/TorahSheetsSidebar.astro";
 import {
 	getTorahSheets,
-	groupParshaBytes,
+	groupTorahBytes,
 	groupDorLDor,
 	groupSourceSheets,
 	type TorahSheet,
@@ -15,24 +15,30 @@ import { slugify } from "../lib/slug";
 
 const sheets = await getTorahSheets();
 
-const dateFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
-const formatDate = (iso?: string) => (iso ? dateFmt.format(new Date(iso)) : undefined);
-
 // Each sheet's sidebar-filter key is whichever level actually applies to its
-// series (subcategory for Parsha Bytes/Dor L'Dor, topic for Source Sheets).
+// series (subcategory for Torah Bytes/Dor L'Dor, topic for Source Sheets).
 const filterKey = (s: TorahSheet) => slugify(s.subcategory || s.topic || "");
+
+// The single most-recently-added sheet per tab gets a bigger thumbnail (not
+// pinned to the top — it stays in its normal parsha-order position, just
+// sized up) so a fresh upload is noticeably easier to spot while browsing.
+const mostRecentId = (tabSheets: TorahSheet[]): string | undefined =>
+	tabSheets.reduce<TorahSheet | undefined>(
+		(latest, s) => (!latest || (s.createdDate ?? "") > (latest.createdDate ?? "") ? s : latest),
+		undefined,
+	)?._id;
 
 const tabs = [
 	{
-		key: "parsha-bytes",
-		label: "Parsha Bytes",
+		key: "torah-bytes",
+		label: "Torah Bytes",
 		kind: "nested" as const,
-		superGroups: groupParshaBytes(sheets),
-		sheets: sheets.filter((s) => s.series === "Parsha Bytes"),
+		superGroups: groupTorahBytes(sheets),
+		sheets: sheets.filter((s) => s.series === "Torah Bytes"),
 	},
 	{
 		key: "dor-ldor",
-		label: "Dor L'Dor",
+		label: "Dor L'Dor ParshaLink",
 		kind: "nested" as const,
 		superGroups: groupDorLDor(sheets),
 		sheets: sheets.filter((s) => s.series === "Dor L'Dor"),
@@ -44,7 +50,7 @@ const tabs = [
 		groups: groupSourceSheets(sheets),
 		sheets: sheets.filter((s) => s.series === "Source Sheets"),
 	},
-];
+].map((tab) => ({ ...tab, featuredId: mostRecentId(tab.sheets) }));
 ---
 
 <Layout>
@@ -52,7 +58,7 @@ const tabs = [
 	<main>
 		<PageHeader
 			titleNavy="Torah Sheets"
-			subtitle="Parsha Bytes, Dor L'Dor, and Source Sheets — browse and download RCK's Torah sheets."
+			subtitle="Torah Bytes, Dor L'Dor ParshaLink, and Source Sheets — browse and download RCK's Torah sheets."
 		/>
 
 		<section class="py-10 sm:py-14">
@@ -79,11 +85,11 @@ const tabs = [
 						) : (
 							<div class="grid gap-8 lg:grid-cols-12">
 								<div class="lg:col-span-3">
-									<details class="sidebar-mobile lg:hidden rounded-md bg-mist p-4">
+									<details class="lg:hidden">
 										<summary class="cursor-pointer font-sans text-sm font-bold uppercase tracking-[0.14em] text-navy-600">
 											Filter {tab.label}
 										</summary>
-										<div class="mt-3" data-sidebar>
+										<div class="mt-3 pb-6 border-b border-navy-100" data-sidebar>
 											{tab.kind === "nested" ? (
 												<TorahSheetsSidebar kind="nested" superGroups={tab.superGroups} />
 											) : (
@@ -92,7 +98,7 @@ const tabs = [
 										</div>
 									</details>
 
-									<aside class="hidden lg:block rounded-md bg-mist p-4" data-sidebar>
+									<aside class="hidden lg:block lg:border-e lg:border-navy-100 lg:pe-6" data-sidebar>
 										{tab.kind === "nested" ? (
 											<TorahSheetsSidebar kind="nested" superGroups={tab.superGroups} />
 										) : (
@@ -102,56 +108,96 @@ const tabs = [
 								</div>
 
 								<div class="lg:col-span-9">
-									<div class="flex flex-col gap-3" data-sheet-list>
-										{tab.sheets.map((sheet) => (
-											<div class="sheet-card" data-sheet data-filter={filterKey(sheet)}>
-												<div class="flex flex-wrap items-center justify-between gap-3">
-													<div class="min-w-0">
-														<p class="font-display text-lg font-medium text-navy-600">{sheet.title}</p>
-														{formatDate(sheet.date) && (
-															<p class="mt-0.5 text-sm text-navy-400">{formatDate(sheet.date)}</p>
-														)}
-													</div>
-													<div class="flex shrink-0 flex-wrap items-center gap-2">
-														{sheet.sourceType === "pdf" && sheet.pdfUrl && (
+									<div class="flex flex-col" data-sheet-list>
+										{tab.sheets.map((sheet) => {
+											const isFeatured = sheet._id === tab.featuredId;
+											const label = [sheet.title, sheet.year].filter(Boolean).join(", ");
+											return (
+												<div
+													class:list={["sheet-row", { "sheet-row--featured": isFeatured }]}
+													data-sheet
+													data-filter={filterKey(sheet)}
+												>
+													<div class="sheet-row-main">
+														{sheet.sourceType === "pdf" && sheet.pdfThumbnailUrl ? (
+															<button
+																type="button"
+																data-lightbox-open
+																data-lightbox-src={sheet.pdfThumbnailLargeUrl}
+																data-lightbox-title={label}
+																aria-label={`View ${label} larger`}
+																class="sheet-thumb"
+															>
+																<img src={sheet.pdfThumbnailUrl} alt="" loading="lazy" />
+																<span class="sheet-thumb-hint" aria-hidden="true">View Larger</span>
+															</button>
+														) : sheet.sourceType === "pdf" ? (
 															<a
 																href={sheet.pdfUrl}
 																target="_blank"
 																rel="noopener noreferrer"
-																class="sheet-action"
+																class="sheet-thumb sheet-thumb--placeholder"
+																aria-label={`View ${label} PDF`}
 															>
-																View / Download PDF
+																<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+																	<path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" />
+																	<path d="M14 2v6h6" />
+																</svg>
 															</a>
-														)}
-														{sheet.sourceType === "canva" && sheet.canvaEmbedUrl && (
-															<button type="button" data-canva-toggle class="sheet-action">
-																View Sheet
+														) : (
+															<button
+																type="button"
+																data-canva-toggle
+																class="sheet-thumb sheet-thumb--placeholder"
+																aria-label={`View ${label}`}
+															>
+																<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+																	<rect x="3" y="4" width="18" height="14" rx="1.5" />
+																	<path d="M3 16l4.5-4.5a1.5 1.5 0 0 1 2.1 0L14 16m2-3 1.6-1.6a1.5 1.5 0 0 1 2.1 0L21 13" />
+																</svg>
 															</button>
+														)}
+
+														<p class="sheet-title">{label}</p>
+
+														{sheet.sourceType === "pdf" && sheet.pdfUrl && (
+															<a
+																href={sheet.pdfUrl}
+																download
+																class="sheet-download"
+																aria-label={`Download ${label}`}
+															>
+																<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+																	<path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14" stroke-linecap="round" stroke-linejoin="round" />
+																</svg>
+															</a>
 														)}
 														{sheet.sourceType === "canva" && sheet.canvaPdfUrl && (
 															<a
 																href={sheet.canvaPdfUrl}
-																target="_blank"
-																rel="noopener noreferrer"
-																class="sheet-action-secondary"
+																download
+																class="sheet-download"
+																aria-label={`Download ${label}`}
 															>
-																Download PDF
+																<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+																	<path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14" stroke-linecap="round" stroke-linejoin="round" />
+																</svg>
 															</a>
 														)}
 													</div>
+													{sheet.sourceType === "canva" && sheet.canvaEmbedUrl && (
+														<div class="sheet-embed hidden mt-4" data-canva-embed data-canva-src={sheet.canvaEmbedUrl}>
+															<iframe
+																data-canva-iframe
+																loading="lazy"
+																title={label}
+																class="aspect-[4/3] sm:aspect-video w-full rounded-md border-0"
+															></iframe>
+														</div>
+													)}
 												</div>
-												{sheet.sourceType === "canva" && sheet.canvaEmbedUrl && (
-													<div class="sheet-embed hidden mt-4" data-canva-embed data-canva-src={sheet.canvaEmbedUrl}>
-														<iframe
-															data-canva-iframe
-															loading="lazy"
-															title={sheet.title}
-															class="aspect-[4/3] sm:aspect-video w-full rounded-md border-0"
-														></iframe>
-													</div>
-												)}
-											</div>
-										))}
+											);
+										})}
 									</div>
 									<p class="hidden py-16 text-center text-navy-400" data-no-results>
 										No sheets match that filter.
@@ -169,7 +215,7 @@ const tabs = [
 
 <style>
 	.sheets-tab {
-		border-radius: 9999px;
+		border-radius: 0.125rem;
 		padding: 0.625rem 1.5rem;
 		font-family: var(--font-sans);
 		font-weight: 600;
@@ -188,38 +234,115 @@ const tabs = [
 		color: var(--color-navy-700);
 	}
 
-	.sheet-card {
-		border-radius: 0.375rem;
-		background: #fff;
-		box-shadow: inset 0 0 0 1px var(--color-navy-100);
-		padding: 1rem 1.25rem;
+	/* Flat, list-based rows — a fine hairline divider does the separating, no
+	   card boxes/shadows around each sheet. */
+	.sheet-row {
+		border-bottom: 1px solid var(--color-navy-100);
+		padding-block: 0.875rem;
+	}
+	.sheet-row:first-child {
+		padding-top: 0;
+	}
+	.sheet-row-main {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
 	}
 
-	.sheet-action {
-		display: inline-flex;
-		align-items: center;
+	.sheet-thumb {
+		position: relative;
+		flex-shrink: 0;
+		width: 3.25rem;
+		height: 3.25rem;
 		border-radius: 0.25rem;
-		padding: 0.4rem 0.9rem;
-		font-size: 0.8125rem;
+		overflow: hidden;
+		background: var(--color-mist);
+		cursor: zoom-in;
+	}
+	.sheet-row--featured .sheet-thumb {
+		width: 8rem;
+		height: 8rem;
+	}
+	.sheet-thumb img {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	.sheet-thumb:hover img {
+		transform: scale(1.08);
+	}
+	.sheet-thumb-hint {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 0.625rem;
 		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: var(--color-navy-700);
-		background: var(--color-gold-400);
-		transition: background-color 0.15s;
+		letter-spacing: 0.08em;
+		color: #fff;
+		background: rgb(from var(--color-navy-700) r g b / 0.55);
+		opacity: 0;
+		transition: opacity 0.2s ease;
+		text-align: center;
+		padding: 0.25rem;
 	}
-	.sheet-action:hover {
-		background: var(--color-gold-500);
+	.sheet-thumb:hover .sheet-thumb-hint,
+	.sheet-thumb:focus-visible .sheet-thumb-hint {
+		opacity: 1;
 	}
-	.sheet-action-secondary {
-		font-size: 0.8125rem;
-		font-weight: 600;
+	@media (hover: none) {
+		.sheet-thumb-hint {
+			display: none;
+		}
+	}
+
+	.sheet-thumb--placeholder {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--color-navy-300);
+		cursor: pointer;
+	}
+	.sheet-thumb--placeholder svg {
+		width: 1.5rem;
+		height: 1.5rem;
+	}
+
+	.sheet-title {
+		flex: 1;
+		min-width: 0;
+		font-family: var(--font-display);
+		font-weight: 500;
+		font-size: 1.0625rem;
+		color: var(--color-navy-600);
+	}
+	.sheet-row--featured .sheet-title {
+		font-size: 1.25rem;
+	}
+
+	.sheet-download {
+		flex-shrink: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		border-radius: 0.25rem;
 		color: var(--color-navy-500);
-		text-decoration: underline;
-		text-underline-offset: 2px;
+		transition: background-color 0.15s, color 0.15s;
 	}
-	.sheet-action-secondary:hover {
+	.sheet-download:hover {
+		background: var(--color-gold-100);
 		color: var(--color-navy-700);
+	}
+	.sheet-download svg {
+		width: 1.125rem;
+		height: 1.125rem;
 	}
 
 	.sheet-embed iframe {
@@ -232,7 +355,7 @@ const tabs = [
 	// pattern as learn.astro's filter bar and team.astro's card toggles — no new
 	// client-side approach introduced.
 
-	// 1. Tabs: one visible panel at a time, deep-linkable via #parsha-bytes etc.
+	// 1. Tabs: one visible panel at a time, deep-linkable via #torah-bytes etc.
 	const tabButtons = document.querySelectorAll<HTMLButtonElement>("[data-sheets-tab]");
 	const panels = document.querySelectorAll<HTMLElement>("[data-tab-panel]");
 
@@ -309,7 +432,6 @@ const tabs = [
 			const opening = embed.classList.contains("hidden");
 			if (opening && !iframe.src) iframe.src = embed.dataset.canvaSrc ?? "";
 			embed.classList.toggle("hidden", !opening);
-			btn.textContent = opening ? "Hide Sheet" : "View Sheet";
 		});
 	});
 </script>

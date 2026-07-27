@@ -233,11 +233,11 @@ export function resolveVideo(wixVideoUrl?: string): { url: string; thumbnail?: s
  * Resolve a Wix Document field (`wix:document://…`, e.g. an uploaded PDF) to a
  * real downloadable URL + original filename. Undefined when missing/unparseable.
  */
-export function resolveDocument(wixDocumentUrl?: string): { url: string; filename?: string } | undefined {
+export function resolveDocument(wixDocumentUrl?: string): { id: string; url: string; filename?: string } | undefined {
 	if (!wixDocumentUrl) return undefined;
 	try {
 		const doc = media.getDocumentUrl(wixDocumentUrl);
-		return doc?.url ? { url: doc.url, filename: doc.filename } : undefined;
+		return doc?.url ? { id: doc.id, url: doc.url, filename: doc.filename } : undefined;
 	} catch {
 		return undefined;
 	}

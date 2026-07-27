@@ -454,20 +454,21 @@ So the deliberate, two-click export stays manual. The `removeAfter` date is the 
 
 #### `TorahSheets` — one row per sheet
 
-Powers the `/torah-sheets` hub page (Parsha Bytes / Dor L'Dor / Source Sheets). See [design-log/053](design-log/053-torah-sheets-page.md).
+Powers the `/torah-sheets` hub page (Torah Bytes / Dor L'Dor ParshaLink / Source Sheets — the first two display under those labels on-site; `series` still just stores `Torah Bytes` / `Dor L'Dor`, not the full display label). See [design-log/053](design-log/053-torah-sheets-page.md).
 
 | Field | Type | Notes |
 |---|---|---|
 | title | Text | Display name shown on the card |
-| series | Text | **Must be one of** (exact): `Parsha Bytes`, `Dor L'Dor`, `Source Sheets`. Wrong value = sheet silently hidden from every tab. |
-| category | Text | For Parsha Bytes/Dor L'Dor only — the Sefer, or `Chagim & Special Days`; Dor L'Dor also accepts `Pirkei Avos`. One of (exact): `Bereishis`, `Shemos`, `Vayikra`, `Bamidbar`, `Devarim`, `Chagim & Special Days`, `Pirkei Avos` (Dor L'Dor only). Leave empty for Source Sheets. |
-| subcategory | Text | The specific parsha (e.g. `Shemos`), chag/special day (e.g. `Chanukah`), or Pirkei Avos perek (e.g. `Perek Aleph`). Case-insensitive match against the fixed parsha/perek list — an unrecognized value still shows, just bucketed under "Other" in the sidebar instead of a specific group. Chag/special-day names are open-ended (anything you type becomes its own sidebar entry). |
+| series | Text | **Must be one of** (exact): `Torah Bytes`, `Dor L'Dor`, `Source Sheets`. Wrong value = sheet silently hidden from every tab. (Renamed from `Parsha Bytes` — old value still accepted as an alias.) |
+| category | Text | For Torah Bytes/Dor L'Dor only — the Sefer, or `Chagim & Special Days`; Dor L'Dor also accepts `Pirkei Avos`. One of (exact): `Bereishis`, `Shemos`, `Vayikra`, `Bamidbar`, `Devarim`, `Chagim & Special Days`, `Pirkei Avos` (Dor L'Dor only). Leave empty for Source Sheets. |
+| subcategory | Text | The specific parsha (e.g. `Shemos`), chag/special day (e.g. `Chanukah`), or Pirkei Avos perek (e.g. `Perek Aleph`). Case-insensitive match against the fixed parsha/perek list — an unrecognized value still shows, just bucketed under "Other" in the sidebar instead of a specific group. Chag/special-day names are open-ended (anything you type becomes its own sidebar entry). Combined-parsha weeks (e.g. `Matos-Masei`, `Nitzavim-Vayeilech`) are recognized too. |
 | topic | Text | Source Sheets only — any label (e.g. `Halacha`, `Hashkafa`, `Mussar`). Open-ended: the sidebar groups by whatever values actually appear. |
-| date | Date | Sort key (newest first) and the date shown on the card |
+| year | Text | Display-only, e.g. `תשפ״ד` — shown next to the parsha/topic name on the card (no full date is tracked). |
 | sourceType | Text | **Must be one of** (exact, lowercase): `pdf` or `canva`. Anything else is treated as `pdf`. |
 | pdfFile | Document | Used when `sourceType = pdf`. Upload the PDF directly. |
+| pdfThumbnail | Image | Optional. A page-1 preview image shown as the card's thumbnail (click to view larger). **Wix does not auto-generate this** — a PDF's Media Manager "thumbnail" is a generic placeholder icon, not a real page render, so it has to be exported/uploaded like any other image. Without one, the card shows a plain document icon instead — never a broken layout. See design-log #053 addendum for how the initial batch was generated (macOS `qlmanage`). |
 | canvaEmbedUrl | Text | Used when `sourceType = canva` — the Canva **"Share → Embed"** link (looks like `https://www.canva.com/design/.../view?embed`). Renders as a live, always-current embed. |
-| canvaPdfBackup | Document | Optional, Canva sheets only. A PDF exported from the same Canva design (**Share → Download → PDF**) — adds a "Download PDF" button next to the live embed. |
+| canvaPdfBackup | Document | Optional, Canva sheets only. A PDF exported from the same Canva design (**Share → Download → PDF**) — adds a download button next to the live embed. |
 
 **Switching an existing sheet from PDF to a live Canva embed** (e.g. once you start updating a sheet after it's posted): change `sourceType` to `canva`, paste the embed link into `canvaEmbedUrl`, and optionally upload a `canvaPdfBackup`. No dev work needed — the page renders whichever `sourceType` each row has.
 

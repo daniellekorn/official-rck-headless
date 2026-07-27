@@ -1,10 +1,10 @@
 import { items, auth } from "./wix-cms-admin";
-import { resolveDocument } from "./wix-media";
+import { resolveDocument, resolveImage, resolveImageFit } from "./wix-media";
 import { slugify } from "./slug";
 
 const COLLECTION_ID = "TorahSheets";
 
-export type Series = "Parsha Bytes" | "Dor L'Dor" | "Source Sheets";
+export type Series = "Torah Bytes" | "Dor L'Dor" | "Source Sheets";
 export type SourceType = "pdf" | "canva";
 
 export interface TorahSheet {
@@ -14,11 +14,18 @@ export interface TorahSheet {
 	category?: string;
 	subcategory?: string;
 	topic?: string;
-	date?: string;
+	/** Display-only (e.g. "תשפ״ד") — the office doesn't track a full date. */
+	year?: string;
+	/** When this row was added — used only to feature the newest upload, never shown or sorted on. */
+	createdDate?: string;
 	sourceType: SourceType;
 	canvaEmbedUrl?: string;
 	pdfUrl?: string;
 	pdfFilename?: string;
+	/** Row-sized crop, for the list thumbnail. */
+	pdfThumbnailUrl?: string;
+	/** Larger, uncropped — for the "view larger" lightbox. */
+	pdfThumbnailLargeUrl?: string;
 	canvaPdfUrl?: string;
 	canvaPdfFilename?: string;
 }
@@ -40,7 +47,8 @@ export interface SheetSuperGroup {
 // hidden" rule as Flyers.category — see CONTRIBUTING.md) since there's no
 // safe default tab to fall back to across three genuinely different sidebars.
 const SERIES_ALIASES: Record<string, Series> = {
-	"parsha bytes": "Parsha Bytes",
+	"torah bytes": "Torah Bytes",
+	"parsha bytes": "Torah Bytes", // pre-rename value — see design-log #053 addendum
 	"dor l'dor": "Dor L'Dor",
 	"dor ldor": "Dor L'Dor",
 	"source sheets": "Source Sheets",
@@ -72,6 +80,7 @@ export async function getTorahSheets(): Promise<TorahSheet[]> {
 				if (!series) return undefined;
 				const pdf = resolveDocument(row.pdfFile as string | undefined);
 				const canvaPdf = resolveDocument(row.canvaPdfBackup as string | undefined);
+				const thumbnail = row.pdfThumbnail as string | undefined;
 				return {
 					_id: row._id as string,
 					title: (row.title as string) ?? "Untitled",
@@ -79,11 +88,14 @@ export async function getTorahSheets(): Promise<TorahSheet[]> {
 					category: (row.category as string | undefined)?.trim(),
 					subcategory: (row.subcategory as string | undefined)?.trim(),
 					topic: (row.topic as string | undefined)?.trim(),
-					date: toDateString(row.date),
+					year: (row.year as string | undefined)?.trim() || undefined,
+					createdDate: toDateString(row._createdDate),
 					sourceType: normalizeSourceType(row.sourceType),
 					canvaEmbedUrl: (row.canvaEmbedUrl as string | undefined)?.trim() || undefined,
 					pdfUrl: pdf?.url,
 					pdfFilename: pdf?.filename,
+					pdfThumbnailUrl: resolveImage(thumbnail, 260, 260),
+					pdfThumbnailLargeUrl: resolveImageFit(thumbnail, 1000, 1000),
 					canvaPdfUrl: canvaPdf?.url,
 					canvaPdfFilename: canvaPdf?.filename,
 				};
@@ -189,8 +201,8 @@ function groupBySeferAndChagim(sheets: TorahSheet[]): SheetSuperGroup[] {
 	return superGroups.filter((g) => g.groups.length > 0);
 }
 
-export function groupParshaBytes(sheets: TorahSheet[]): SheetSuperGroup[] {
-	return groupBySeferAndChagim(sheets.filter((s) => s.series === "Parsha Bytes"));
+export function groupTorahBytes(sheets: TorahSheet[]): SheetSuperGroup[] {
+	return groupBySeferAndChagim(sheets.filter((s) => s.series === "Torah Bytes"));
 }
 
 export function groupDorLDor(sheets: TorahSheet[]): SheetSuperGroup[] {
