@@ -64,7 +64,7 @@ function toDateString(raw: unknown): string | undefined {
 export async function getTorahSheets(): Promise<TorahSheet[]> {
 	try {
 		const elevated = auth.elevate(items.query);
-		const { items: results } = await elevated(COLLECTION_ID).descending("date").limit(500).find();
+		const { items: results } = await elevated(COLLECTION_ID).limit(500).find();
 
 		return (results as Record<string, unknown>[])
 			.map((row): TorahSheet | undefined => {
@@ -88,7 +88,8 @@ export async function getTorahSheets(): Promise<TorahSheet[]> {
 					canvaPdfFilename: canvaPdf?.filename,
 				};
 			})
-			.filter((s): s is TorahSheet => Boolean(s));
+			.filter((s): s is TorahSheet => Boolean(s))
+			.sort((a, b) => compareParshaOrder(a, b) || a.title.localeCompare(b.title));
 	} catch (err) {
 		console.error(`[torah-sheets] query failed:`, err);
 		return [];
@@ -101,14 +102,49 @@ const SEFER_PARSHIOS: Record<string, string[]> = {
 	Bereishis: ["Bereishis", "Noach", "Lech Lecha", "Vayeira", "Chayei Sarah", "Toldos", "Vayeitzei", "Vayishlach", "Vayeishev", "Mikeitz", "Vayigash", "Vayechi"],
 	Shemos: ["Shemos", "Vaeira", "Bo", "Beshalach", "Yisro", "Mishpatim", "Terumah", "Tetzaveh", "Ki Sisa", "Vayakhel", "Pekudei"],
 	Vayikra: ["Vayikra", "Tzav", "Shmini", "Tazria", "Metzora", "Achrei Mos", "Kedoshim", "Emor", "Behar", "Bechukosai"],
-	Bamidbar: ["Bamidbar", "Naso", "Behaaloscha", "Shlach", "Korach", "Chukas", "Balak", "Pinchas", "Matos", "Masei", "Matos-Masei"],
-	Devarim: ["Devarim", "Vaeschanan", "Eikev", "Re'eh", "Shoftim", "Ki Seitzei", "Ki Savo", "Nitzavim", "Vayeilech", "Nitzavim-Vayeilech", "Haazinu", "Vezos Habracha"],
+	Bamidbar: ["Bamidbar", "Naso", "Behaaloscha", "Shlach", "Korach", "Chukas", "Balak", "Pinchas", "Matos", "Matos-Masei", "Masei"],
+	Devarim: ["Devarim", "Vaeschanan", "Eikev", "Re'eh", "Shoftim", "Ki Seitzei", "Ki Savo", "Nitzavim", "Nitzavim-Vayeilech", "Vayeilech", "Haazinu", "Vezos Habracha"],
 };
+const SEFER_ORDER = Object.keys(SEFER_PARSHIOS);
 
 const CHAGIM_LABEL = "Chagim & Special Days";
+// Jewish calendar year order (Tishrei → Elul) — extend as new chagim/special
+// days get their own sheets.
+const CHAGIM_ORDER = ["Rosh Hashanah", "Yom Kippur", "Sukkos", "Chanukah", "Tu BiShvat", "Purim", "Pesach", "Shavuos"];
 const PIRKEI_AVOS_LABEL = "Pirkei Avos";
 const PIRKEI_AVOS_PERAKIM = ["Perek Aleph", "Perek Beis", "Perek Gimmel", "Perek Daled", "Perek Hei", "Perek Vav"];
 const OTHER_LABEL = "Other";
+
+/**
+ * Card list order (dates aren't used — the office doesn't track them):
+ * Sefer reading order → parsha order within it, then Chagim & Special Days
+ * (Jewish calendar year order), then Pirkei Avos (perek order), then anything
+ * else (Source Sheets — no parsha concept, so title is the only sort key,
+ * applied as the caller's tiebreaker). An unrecognized category/subcategory
+ * still sorts (at the end of its bucket) rather than breaking the sort.
+ */
+function compareParshaOrder(a: TorahSheet, b: TorahSheet): number {
+	const rank = (s: TorahSheet): [number, number] => {
+		const seferIndex = SEFER_ORDER.findIndex((sefer) => sefer.toLowerCase() === s.category?.toLowerCase());
+		if (seferIndex !== -1) {
+			const parshios = SEFER_PARSHIOS[SEFER_ORDER[seferIndex]];
+			const subIndex = parshios.findIndex((p) => p.toLowerCase() === s.subcategory?.toLowerCase());
+			return [seferIndex, subIndex === -1 ? parshios.length : subIndex];
+		}
+		if (s.category?.toLowerCase() === CHAGIM_LABEL.toLowerCase()) {
+			const chagIndex = CHAGIM_ORDER.findIndex((c) => c.toLowerCase() === s.subcategory?.toLowerCase());
+			return [SEFER_ORDER.length, chagIndex === -1 ? CHAGIM_ORDER.length : chagIndex];
+		}
+		if (s.category?.toLowerCase() === PIRKEI_AVOS_LABEL.toLowerCase()) {
+			const perekIndex = PIRKEI_AVOS_PERAKIM.findIndex((p) => p.toLowerCase() === s.subcategory?.toLowerCase());
+			return [SEFER_ORDER.length + 1, perekIndex === -1 ? PIRKEI_AVOS_PERAKIM.length : perekIndex];
+		}
+		return [SEFER_ORDER.length + 2, 0];
+	};
+	const [aMajor, aMinor] = rank(a);
+	const [bMajor, bMinor] = rank(b);
+	return aMajor - bMajor || aMinor - bMinor;
+}
 
 /** Case/whitespace-insensitive match against a closed vocabulary list, preserving the list's canonical casing. */
 function matchVocabulary(value: string | undefined, vocabulary: string[]): string | undefined {
