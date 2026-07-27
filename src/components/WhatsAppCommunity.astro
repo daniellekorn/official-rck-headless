@@ -183,7 +183,6 @@ const posterFor = (s: Short) => {
 								data-short-card
 								data-videos={JSON.stringify(videos)}
 								class="group flex w-[15rem] md:w-[12rem] shrink-0 flex-col"
-								style="opacity:0"
 							>
 								{/* 9:16 video tile (+ ‹ › switcher when a group has several videos) */}
 								<div class="relative">
@@ -291,10 +290,6 @@ const posterFor = (s: Short) => {
 			</div>
 		</div>
 	</div>
-
-	<noscript>
-		<style>[data-short-card] { opacity: 1 !important; }</style>
-	</noscript>
 </section>
 
 <script>
@@ -417,12 +412,14 @@ const posterFor = (s: Short) => {
 		}
 	});
 
-	// Staggered entrance for the tiles.
+	// Staggered entrance for the tiles. The hidden starting state is applied
+	// here, in JS, rather than baked into the server-rendered HTML — if this
+	// script ever fails to run, the tiles default to visible instead of being
+	// stuck invisible forever.
 	const cards = document.querySelectorAll<HTMLElement>("[data-short-card]");
 	const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-	if (cards.length && reduce) {
-		cards.forEach((c) => (c.style.opacity = "1"));
-	} else if (cards.length) {
+	if (cards.length && !reduce) {
+		cards.forEach((c) => (c.style.opacity = "0"));
 		inView(
 			"[data-shorts-row]",
 			() => {
