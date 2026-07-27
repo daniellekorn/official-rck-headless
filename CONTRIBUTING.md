@@ -465,8 +465,7 @@ Powers the `/torah-sheets` hub page (Torah Bytes / Dor L'Dor ParshaLink / Source
 | topic | Text | Source Sheets only — any label (e.g. `Halacha`, `Hashkafa`, `Mussar`). Open-ended: the sidebar groups by whatever values actually appear. |
 | year | Text | Display-only, e.g. `תשפ״ד` — shown next to the parsha/topic name on the card (no full date is tracked). |
 | sourceType | Text | **Must be one of** (exact, lowercase): `pdf` or `canva`. Anything else is treated as `pdf`. |
-| pdfFile | Document | Used when `sourceType = pdf`. Upload the PDF directly. |
-| pdfThumbnail | Image | Optional. A page-1 preview image shown as the card's thumbnail (click to view larger). **Wix does not auto-generate this** — a PDF's Media Manager "thumbnail" is a generic placeholder icon, not a real page render, so it has to be exported/uploaded like any other image. Without one, the card shows a plain document icon instead — never a broken layout. See design-log #053 addendum for how the initial batch was generated (macOS `qlmanage`). |
+| pdfFile | Document | Used when `sourceType = pdf`. Upload the PDF directly — that's the whole step, nothing else needed. The card shows a plain PDF icon with a download badge; clicking it opens the file. (An earlier `pdfThumbnail` Image field, for a real page-1 preview, was tried and dropped — see design-log #053 addendum. A handful of existing rows still carry a leftover value in that field; it's harmless and unused.) |
 | canvaEmbedUrl | Text | Used when `sourceType = canva` — the Canva **"Share → Embed"** link (looks like `https://www.canva.com/design/.../view?embed`). Renders as a live, always-current embed. |
 | canvaPdfBackup | Document | Optional, Canva sheets only. A PDF exported from the same Canva design (**Share → Download → PDF**) — adds a download button next to the live embed. |
 

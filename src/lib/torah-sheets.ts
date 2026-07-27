@@ -1,5 +1,5 @@
 import { items, auth } from "./wix-cms-admin";
-import { resolveDocument, resolveImage, resolveImageFit } from "./wix-media";
+import { resolveDocument } from "./wix-media";
 import { slugify } from "./slug";
 
 const COLLECTION_ID = "TorahSheets";
@@ -22,10 +22,6 @@ export interface TorahSheet {
 	canvaEmbedUrl?: string;
 	pdfUrl?: string;
 	pdfFilename?: string;
-	/** Row-sized crop, for the list thumbnail. */
-	pdfThumbnailUrl?: string;
-	/** Larger, uncropped — for the "view larger" lightbox. */
-	pdfThumbnailLargeUrl?: string;
 	canvaPdfUrl?: string;
 	canvaPdfFilename?: string;
 }
@@ -80,7 +76,6 @@ export async function getTorahSheets(): Promise<TorahSheet[]> {
 				if (!series) return undefined;
 				const pdf = resolveDocument(row.pdfFile as string | undefined);
 				const canvaPdf = resolveDocument(row.canvaPdfBackup as string | undefined);
-				const thumbnail = row.pdfThumbnail as string | undefined;
 				return {
 					_id: row._id as string,
 					title: (row.title as string) ?? "Untitled",
@@ -94,8 +89,6 @@ export async function getTorahSheets(): Promise<TorahSheet[]> {
 					canvaEmbedUrl: (row.canvaEmbedUrl as string | undefined)?.trim() || undefined,
 					pdfUrl: pdf?.url,
 					pdfFilename: pdf?.filename,
-					pdfThumbnailUrl: resolveImage(thumbnail, 260, 260),
-					pdfThumbnailLargeUrl: resolveImageFit(thumbnail, 1000, 1000),
 					canvaPdfUrl: canvaPdf?.url,
 					canvaPdfFilename: canvaPdf?.filename,
 				};
