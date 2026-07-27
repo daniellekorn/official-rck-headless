@@ -72,7 +72,6 @@ const { kind, superGroups = [], groups = [], publications, activePublication } =
 							class="sidebar-filter-btn w-full text-left"
 						>
 							{g.label}
-							<span class="sidebar-filter-count">{g.sheets.length}</span>
 						</button>
 					))}
 				</div>
@@ -88,7 +87,6 @@ const { kind, superGroups = [], groups = [], publications, activePublication } =
 				class="sidebar-filter-btn w-full text-left"
 			>
 				{g.label}
-				<span class="sidebar-filter-count">{g.sheets.length}</span>
 			</button>
 		))}
 	</div>
@@ -115,14 +113,6 @@ const { kind, superGroups = [], groups = [], publications, activePublication } =
 		color: var(--color-navy-700);
 		font-weight: 600;
 	}
-	.sidebar-filter-count {
-		font-size: 0.75rem;
-		color: var(--color-navy-300);
-	}
-	.sidebar-filter-btn.is-active .sidebar-filter-count {
-		color: var(--color-gold-600);
-	}
-
 	.sidebar-section-label {
 		font-size: 0.8125rem;
 		font-weight: 700;
