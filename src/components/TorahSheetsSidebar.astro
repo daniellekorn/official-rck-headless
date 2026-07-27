@@ -10,6 +10,13 @@
  * "nested" (Torah Bytes / Dor L'Dor ParshaLink): Sefer/Chagim/Pirkei Avos as collapsible
  * groups, individual parshios/perakim/chagim as the actual filter buttons.
  * "flat" (Source Sheets): topics as filter buttons, no grouping.
+ *
+ * The "Publication" group at the top switches between the three series —
+ * it replaced a separate top pill-tab row so the whole page reads as one
+ * consistent sidebar-driven browse experience (matches the Denver Kollel
+ * reference's own "Publication" facet). It's deliberately not collapsible
+ * like the Sefer groups below it — it's primary navigation, not a filter
+ * someone browses selectively.
  */
 import type { SheetGroup, SheetSuperGroup } from "../lib/torah-sheets";
 
@@ -17,10 +24,27 @@ interface Props {
 	kind: "nested" | "flat";
 	superGroups?: SheetSuperGroup[];
 	groups?: SheetGroup[];
+	publications: { key: string; label: string }[];
+	activePublication: string;
 }
 
-const { kind, superGroups = [], groups = [] } = Astro.props;
+const { kind, superGroups = [], groups = [], publications, activePublication } = Astro.props;
 ---
+
+<div class="mb-4 pb-4 border-b border-navy-100">
+	<p class="sidebar-section-label">Publication</p>
+	<div class="mt-2 space-y-0.5">
+		{publications.map((p) => (
+			<button
+				type="button"
+				data-pub-select={p.key}
+				class:list={["sidebar-filter-btn w-full text-left", { "is-active": p.key === activePublication }]}
+			>
+				{p.label}
+			</button>
+		))}
+	</div>
+</div>
 
 <button
 	type="button"
@@ -97,6 +121,14 @@ const { kind, superGroups = [], groups = [] } = Astro.props;
 	}
 	.sidebar-filter-btn.is-active .sidebar-filter-count {
 		color: var(--color-gold-600);
+	}
+
+	.sidebar-section-label {
+		font-size: 0.8125rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--color-navy-400);
 	}
 
 	.sidebar-group {
