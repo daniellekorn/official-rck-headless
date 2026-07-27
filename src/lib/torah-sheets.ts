@@ -1,5 +1,5 @@
 import { items, auth } from "./wix-cms-admin";
-import { resolveDocument } from "./wix-media";
+import { resolveDocument, resolveImage } from "./wix-media";
 import { slugify } from "./slug";
 
 const COLLECTION_ID = "TorahSheets";
@@ -22,6 +22,13 @@ export interface TorahSheet {
 	canvaEmbedUrl?: string;
 	pdfUrl?: string;
 	pdfFilename?: string;
+	/**
+	 * A real page-1 preview, when one exists — only ever shown for the single
+	 * "most recent" featured card (see design-log #053 addendum 2), not the
+	 * plain icon every other PDF card uses. Most rows won't have one; that's
+	 * expected, not an error.
+	 */
+	pdfThumbnailUrl?: string;
 	canvaPdfUrl?: string;
 	canvaPdfFilename?: string;
 }
@@ -89,6 +96,7 @@ export async function getTorahSheets(): Promise<TorahSheet[]> {
 					canvaEmbedUrl: (row.canvaEmbedUrl as string | undefined)?.trim() || undefined,
 					pdfUrl: pdf?.url,
 					pdfFilename: pdf?.filename,
+					pdfThumbnailUrl: resolveImage(row.pdfThumbnail as string | undefined, 400, 400),
 					canvaPdfUrl: canvaPdf?.url,
 					canvaPdfFilename: canvaPdf?.filename,
 				};
@@ -121,12 +129,17 @@ const PIRKEI_AVOS_PERAKIM = ["Perek Aleph", "Perek Beis", "Perek Gimmel", "Perek
 const OTHER_LABEL = "Other";
 
 /**
- * Card list order (dates aren't used — the office doesn't track them):
- * Sefer reading order → parsha order within it, then Chagim & Special Days
- * (Jewish calendar year order), then Pirkei Avos (perek order), then anything
- * else (Source Sheets — no parsha concept, so title is the only sort key,
- * applied as the caller's tiebreaker). An unrecognized category/subcategory
- * still sorts (at the end of its bucket) rather than breaking the sort.
+ * Card list order — most recent first (dates aren't used, the office doesn't
+ * track them; "most recent" means furthest along in the reading cycle):
+ * Sefer reading order *reversed* (Devarim → Bereishis) → parsha order within
+ * a Sefer also reversed (last parsha first), then Chagim & Special Days
+ * (Jewish calendar year order, also reversed) and Pirkei Avos (perek order,
+ * reversed), then anything else (Source Sheets — no reading-order concept,
+ * so title is the only sort key, applied as the caller's tiebreaker). An
+ * unrecognized category/subcategory still sorts (at the end of its bucket)
+ * rather than breaking the sort. The Sefer/Chagim/Pirkei-Avos *bucket* order
+ * itself is unchanged (still: 5 Seforim, then Chagim, then Pirkei Avos) —
+ * only which end of each bucket comes first flips.
  */
 function compareParshaOrder(a: TorahSheet, b: TorahSheet): number {
 	const rank = (s: TorahSheet): [number, number] => {
@@ -134,15 +147,18 @@ function compareParshaOrder(a: TorahSheet, b: TorahSheet): number {
 		if (seferIndex !== -1) {
 			const parshios = SEFER_PARSHIOS[SEFER_ORDER[seferIndex]];
 			const subIndex = parshios.findIndex((p) => p.toLowerCase() === s.subcategory?.toLowerCase());
-			return [seferIndex, subIndex === -1 ? parshios.length : subIndex];
+			const minor = subIndex === -1 ? parshios.length : parshios.length - 1 - subIndex;
+			return [SEFER_ORDER.length - 1 - seferIndex, minor];
 		}
 		if (s.category?.toLowerCase() === CHAGIM_LABEL.toLowerCase()) {
 			const chagIndex = CHAGIM_ORDER.findIndex((c) => c.toLowerCase() === s.subcategory?.toLowerCase());
-			return [SEFER_ORDER.length, chagIndex === -1 ? CHAGIM_ORDER.length : chagIndex];
+			const minor = chagIndex === -1 ? CHAGIM_ORDER.length : CHAGIM_ORDER.length - 1 - chagIndex;
+			return [SEFER_ORDER.length, minor];
 		}
 		if (s.category?.toLowerCase() === PIRKEI_AVOS_LABEL.toLowerCase()) {
 			const perekIndex = PIRKEI_AVOS_PERAKIM.findIndex((p) => p.toLowerCase() === s.subcategory?.toLowerCase());
-			return [SEFER_ORDER.length + 1, perekIndex === -1 ? PIRKEI_AVOS_PERAKIM.length : perekIndex];
+			const minor = perekIndex === -1 ? PIRKEI_AVOS_PERAKIM.length : PIRKEI_AVOS_PERAKIM.length - 1 - perekIndex;
+			return [SEFER_ORDER.length + 1, minor];
 		}
 		return [SEFER_ORDER.length + 2, 0];
 	};

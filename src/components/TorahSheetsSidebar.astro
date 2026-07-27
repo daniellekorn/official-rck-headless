@@ -44,7 +44,7 @@ const { kind, superGroups = [], groups = [] } = Astro.props;
 					{sg.groups.map((g) => (
 						<button
 							type="button"
-							data-filter={g.key}
+							data-filter-option={g.key}
 							class="sidebar-filter-btn w-full text-left"
 						>
 							{g.label}
@@ -60,7 +60,7 @@ const { kind, superGroups = [], groups = [] } = Astro.props;
 		{groups.map((g) => (
 			<button
 				type="button"
-				data-filter={g.key}
+				data-filter-option={g.key}
 				class="sidebar-filter-btn w-full text-left"
 			>
 				{g.label}
