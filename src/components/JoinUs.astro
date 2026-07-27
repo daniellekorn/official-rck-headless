@@ -30,7 +30,7 @@ const cards: CardInput[] = Astro.props.cards && Astro.props.cards.length > 0 ? A
 		<div data-joinus-grid class="mx-auto mt-10 sm:mt-12 grid max-w-6xl gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 md:gap-8">
 			{
 				cards.map((card) => (
-					<div data-joinus-card class="flex" style="opacity:0">
+					<div data-joinus-card class="flex">
 					<a
 						href={card.href}
 						class="group relative flex min-h-[300px] sm:min-h-[340px] w-full flex-col overflow-hidden rounded-md bg-gradient-to-br from-gold-400 via-gold-500 to-gold-600 p-8 sm:p-9 ring-1 ring-inset ring-white/25 shadow-[0_26px_54px_-22px_rgba(214,162,30,0.55),0_2px_0_0_rgba(255,255,255,0.25)_inset] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_40px_72px_-24px_rgba(214,162,30,0.7)]"
@@ -112,23 +112,22 @@ const cards: CardInput[] = Astro.props.cards && Astro.props.cards.length > 0 ? A
 			}
 		</div>
 	</div>
-
-	<noscript>
-		<style>[data-joinus-card] { opacity: 1 !important; }</style>
-	</noscript>
 </section>
 
 <script>
 	import { animate, inView, stagger } from "motion";
 
+	// The hidden starting state is applied here, in JS, rather than baked into
+	// the server-rendered HTML (that was the previous approach, via a
+	// style="opacity:0" attribute + a <noscript> override) — if this script
+	// ever fails to run (a bundler/CDN hiccup, an ad/script blocker, "motion"
+	// failing to resolve), the cards now default to visible instead of being
+	// stuck invisible forever with no way to recover.
 	const cards = document.querySelectorAll<HTMLElement>("[data-joinus-card]");
 	const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-	if (!cards.length) {
-		// nothing to do
-	} else if (reduce) {
-		cards.forEach((c) => (c.style.opacity = "1"));
-	} else {
+	if (cards.length && !reduce) {
+		cards.forEach((c) => (c.style.opacity = "0"));
 		inView(
 			"[data-joinus-grid]",
 			() => {
