@@ -101,8 +101,8 @@ const SEFER_PARSHIOS: Record<string, string[]> = {
 	Bereishis: ["Bereishis", "Noach", "Lech Lecha", "Vayeira", "Chayei Sarah", "Toldos", "Vayeitzei", "Vayishlach", "Vayeishev", "Mikeitz", "Vayigash", "Vayechi"],
 	Shemos: ["Shemos", "Vaeira", "Bo", "Beshalach", "Yisro", "Mishpatim", "Terumah", "Tetzaveh", "Ki Sisa", "Vayakhel", "Pekudei"],
 	Vayikra: ["Vayikra", "Tzav", "Shmini", "Tazria", "Metzora", "Achrei Mos", "Kedoshim", "Emor", "Behar", "Bechukosai"],
-	Bamidbar: ["Bamidbar", "Naso", "Behaaloscha", "Shlach", "Korach", "Chukas", "Balak", "Pinchas", "Matos", "Masei"],
-	Devarim: ["Devarim", "Vaeschanan", "Eikev", "Re'eh", "Shoftim", "Ki Seitzei", "Ki Savo", "Nitzavim", "Vayeilech", "Haazinu", "Vezos Habracha"],
+	Bamidbar: ["Bamidbar", "Naso", "Behaaloscha", "Shlach", "Korach", "Chukas", "Balak", "Pinchas", "Matos", "Masei", "Matos-Masei"],
+	Devarim: ["Devarim", "Vaeschanan", "Eikev", "Re'eh", "Shoftim", "Ki Seitzei", "Ki Savo", "Nitzavim", "Vayeilech", "Nitzavim-Vayeilech", "Haazinu", "Vezos Habracha"],
 };
 
 const CHAGIM_LABEL = "Chagim & Special Days";
