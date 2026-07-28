@@ -410,23 +410,25 @@ const tabs = [
 	// anywhere on a card, download link included, up as if it were a filter
 	// button).
 	//
-	// Unfiltered view also caps how many cards show at once (roughly half),
-	// with a "See more" button to reveal the rest — the full list (currently
-	// dozens of sheets) was an unreasonably long scroll otherwise. A specific
-	// filter always shows every match; the cap only applies to "All Sheets".
+	// Unfiltered view also caps how many cards show at once, revealed in
+	// steps via a "See more" button — the full list (currently dozens of
+	// sheets) was an unreasonably long scroll otherwise. A specific filter
+	// always shows every match; the cap only applies to "All Sheets".
 	panels.forEach((panel) => {
 		const cards = Array.from(panel.querySelectorAll<HTMLElement>("[data-sheet]"));
 		const filterBtns = Array.from(panel.querySelectorAll<HTMLButtonElement>("[data-filter-option]"));
 		const resetBtns = Array.from(panel.querySelectorAll<HTMLButtonElement>("[data-filter-reset]"));
 		const noResults = panel.querySelector<HTMLElement>("[data-no-results]");
 		const seeMoreBtn = panel.querySelector<HTMLButtonElement>("[data-see-more]");
-		// Pagination only earns its keep on a genuinely long list — a handful of
-		// sheets in a filter/category shouldn't get a "See more" button just
-		// because it's technically more than half of itself.
-		const PAGINATE_THRESHOLD = 20;
-		const paginate = cards.length > PAGINATE_THRESHOLD;
-		const initialCount = paginate ? Math.ceil(cards.length / 2) : cards.length;
-		let expanded = false;
+		const sheetList = panel.querySelector<HTMLElement>("[data-sheet-list]");
+		// Initial batch, then this many more revealed per "See more" click,
+		// until everything's shown — at which point the button flips to
+		// "See Less" and collapses straight back to INITIAL_COUNT (not just
+		// one step back).
+		const INITIAL_COUNT = 24;
+		const STEP = 20;
+		const paginate = cards.length > INITIAL_COUNT;
+		let visibleCount = paginate ? INITIAL_COUNT : cards.length;
 		let activeFilter: string | null = null;
 
 		const apply = () => {
@@ -434,7 +436,7 @@ const tabs = [
 			let matchIndex = 0;
 			cards.forEach((card) => {
 				const matches = !activeFilter || card.dataset.filter === activeFilter;
-				const capped = !activeFilter && !expanded && matchIndex >= initialCount;
+				const capped = !activeFilter && matchIndex >= visibleCount;
 				if (matches) matchIndex += 1;
 				card.classList.toggle("hidden", !matches || capped);
 				if (matches && !capped) visible += 1;
@@ -443,7 +445,7 @@ const tabs = [
 			filterBtns.forEach((b) => b.classList.toggle("is-active", activeFilter !== null && b.dataset.filterOption === activeFilter));
 			resetBtns.forEach((b) => b.classList.toggle("is-active", activeFilter === null));
 			seeMoreBtn?.classList.toggle("hidden", activeFilter !== null || !paginate);
-			if (seeMoreBtn) seeMoreBtn.textContent = expanded ? "See Less" : "See More";
+			if (seeMoreBtn) seeMoreBtn.textContent = visibleCount >= cards.length ? "See Less" : "See More";
 		};
 
 		filterBtns.forEach((btn) => {
@@ -460,7 +462,12 @@ const tabs = [
 			});
 		});
 		seeMoreBtn?.addEventListener("click", () => {
-			expanded = !expanded;
+			if (visibleCount >= cards.length) {
+				visibleCount = INITIAL_COUNT;
+				sheetList?.scrollIntoView({ behavior: "smooth", block: "start" });
+			} else {
+				visibleCount = Math.min(visibleCount + STEP, cards.length);
+			}
 			apply();
 		});
 

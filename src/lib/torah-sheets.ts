@@ -1,3 +1,4 @@
+import { gematriyaStrToNum } from "@hebcal/core";
 import { items, auth } from "./wix-cms-admin";
 import { resolveDocument, resolveImage } from "./wix-media";
 import { slugify } from "./slug";
@@ -102,7 +103,7 @@ export async function getTorahSheets(): Promise<TorahSheet[]> {
 				};
 			})
 			.filter((s): s is TorahSheet => Boolean(s))
-			.sort((a, b) => compareParshaOrder(a, b) || a.title.localeCompare(b.title));
+			.sort((a, b) => yearRank(b) - yearRank(a) || compareParshaOrder(a, b) || a.title.localeCompare(b.title));
 	} catch (err) {
 		console.error(`[torah-sheets] query failed:`, err);
 		return [];
@@ -129,17 +130,40 @@ const PIRKEI_AVOS_PERAKIM = ["Perek Aleph", "Perek Beis", "Perek Gimmel", "Perek
 const OTHER_LABEL = "Other";
 
 /**
+ * Hebrew year → number (e.g. "תשפ״ה" → 785) for sorting once multiple years'
+ * sheets coexist in the collection — see yearRank below for why this has to
+ * run before compareParshaOrder, not instead of it. Missing/unparseable
+ * years (gematriyaStrToNum throws on non-Hebrew-numeral input) rank lowest
+ * so a row without a year still shows, just at the end of its reading-cycle
+ * position instead of breaking the sort.
+ */
+function yearRank(s: TorahSheet): number {
+	if (!s.year) return -Infinity;
+	try {
+		return gematriyaStrToNum(s.year);
+	} catch {
+		return -Infinity;
+	}
+}
+
+/**
  * Card list order — most recent first (dates aren't used, the office doesn't
- * track them; "most recent" means furthest along in the reading cycle):
- * Sefer reading order *reversed* (Devarim → Bereishis) → parsha order within
- * a Sefer also reversed (last parsha first), then Chagim & Special Days
- * (Jewish calendar year order, also reversed) and Pirkei Avos (perek order,
- * reversed), then anything else (Source Sheets — no reading-order concept,
- * so title is the only sort key, applied as the caller's tiebreaker). An
- * unrecognized category/subcategory still sorts (at the end of its bucket)
- * rather than breaking the sort. The Sefer/Chagim/Pirkei-Avos *bucket* order
- * itself is unchanged (still: 5 Seforim, then Chagim, then Pirkei Avos) —
- * only which end of each bucket comes first flips.
+ * track them; "most recent" means furthest along in the reading cycle) —
+ * but only as a *tiebreaker within the same year* (see yearRank, applied
+ * first by the caller). Without that year-first pass, a combined sheet like
+ * "Nitzavim-Vayeilech" from a past year would outrank the current year's
+ * plain "Nitzavim" just for sitting one slot later in the vocabulary below —
+ * exactly the bug hit when תשפ״ה's sheets were added alongside תשפ״ד's
+ * (see design-log #053 addendum 3). Within a year: Sefer reading order
+ * *reversed* (Devarim → Bereishis) → parsha order within a Sefer also
+ * reversed (last parsha first), then Chagim & Special Days (Jewish calendar
+ * year order, also reversed) and Pirkei Avos (perek order, reversed), then
+ * anything else (Source Sheets — no reading-order concept, so title is the
+ * only sort key, applied as the caller's tiebreaker). An unrecognized
+ * category/subcategory still sorts (at the end of its bucket) rather than
+ * breaking the sort. The Sefer/Chagim/Pirkei-Avos *bucket* order itself is
+ * unchanged (still: 5 Seforim, then Chagim, then Pirkei Avos) — only which
+ * end of each bucket comes first flips.
  */
 function compareParshaOrder(a: TorahSheet, b: TorahSheet): number {
 	const rank = (s: TorahSheet): [number, number] => {
