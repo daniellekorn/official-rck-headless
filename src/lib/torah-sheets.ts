@@ -12,7 +12,8 @@ export interface TorahSheet {
 	_id: string;
 	title: string;
 	series: Series;
-	category?: string;
+	/** Multiple tags allowed — a sheet can combine a parsha with Pirkei Avos and/or Chagim & Special Days and appear under all of them (design-log #053 addendum 7). */
+	category?: string[];
 	subcategory?: string;
 	topic?: string;
 	/** Display-only (e.g. "תשפ״ד") — the office doesn't track a full date. */
@@ -92,7 +93,9 @@ export async function getTorahSheets(): Promise<TorahSheet[]> {
 					_id: row._id as string,
 					title: (row.title as string) ?? "Untitled",
 					series,
-					category: (row.category as string | undefined)?.trim(),
+					category: Array.isArray(row.category)
+						? (row.category as string[]).map((c) => c.trim()).filter(Boolean)
+						: undefined,
 					subcategory: (row.subcategory as string | undefined)?.trim(),
 					topic: (row.topic as string | undefined)?.trim(),
 					year: (row.year as string | undefined)?.trim() || undefined,
@@ -169,21 +172,30 @@ function yearRank(s: TorahSheet): number {
  * unchanged (still: 5 Seforim, then Chagim, then Pirkei Avos) — only which
  * end of each bucket comes first flips.
  */
+/** Whether a sheet is tagged with the given category label — a sheet can carry several (see TorahSheet.category). */
+function hasCategory(s: TorahSheet, label: string): boolean {
+	return s.category?.some((c) => c.toLowerCase() === label.toLowerCase()) ?? false;
+}
+
 function compareParshaOrder(a: TorahSheet, b: TorahSheet): number {
 	const rank = (s: TorahSheet): [number, number] => {
-		const seferIndex = SEFER_ORDER.findIndex((sefer) => sefer.toLowerCase() === s.category?.toLowerCase());
+		// A multi-category sheet's reading-cycle position is decided by its
+		// Sefer tag first (the primary parsha-cycle identity), even if it's
+		// also tagged Chagim/Pirkei Avos — those only decide rank when there's
+		// no Sefer tag at all (a pure Pirkei-Avos or pure-chag sheet).
+		const seferIndex = SEFER_ORDER.findIndex((sefer) => hasCategory(s, sefer));
 		if (seferIndex !== -1) {
 			const parshios = SEFER_PARSHIOS[SEFER_ORDER[seferIndex]];
 			const subIndex = parshios.findIndex((p) => p.toLowerCase() === s.subcategory?.toLowerCase());
 			const minor = subIndex === -1 ? parshios.length : parshios.length - 1 - subIndex;
 			return [SEFER_ORDER.length - 1 - seferIndex, minor];
 		}
-		if (s.category?.toLowerCase() === CHAGIM_LABEL.toLowerCase()) {
+		if (hasCategory(s, CHAGIM_LABEL)) {
 			const chagIndex = CHAGIM_ORDER.findIndex((c) => c.toLowerCase() === s.subcategory?.toLowerCase());
 			const minor = chagIndex === -1 ? CHAGIM_ORDER.length : CHAGIM_ORDER.length - 1 - chagIndex;
 			return [SEFER_ORDER.length, minor];
 		}
-		if (s.category?.toLowerCase() === PIRKEI_AVOS_LABEL.toLowerCase()) {
+		if (hasCategory(s, PIRKEI_AVOS_LABEL)) {
 			const perekIndex = PIRKEI_AVOS_PERAKIM.findIndex((p) => p.toLowerCase() === s.subcategory?.toLowerCase());
 			const minor = perekIndex === -1 ? PIRKEI_AVOS_PERAKIM.length : PIRKEI_AVOS_PERAKIM.length - 1 - perekIndex;
 			return [SEFER_ORDER.length + 1, minor];
@@ -305,7 +317,7 @@ export function pickFeatured(sheets: TorahSheet[]): TorahSheet | undefined {
 	// tie every row into the same catch-all bucket and decide by title
 	// instead, which isn't "most recent" by any real measure. Newest upload
 	// wins instead, matching sortByUploadRecency's ordering for that series.
-	if (batch.every((s) => !s.category)) {
+	if (batch.every((s) => !s.category || s.category.length === 0)) {
 		return [...batch].sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime())[0];
 	}
 
@@ -340,13 +352,13 @@ function otherGroup(sheets: TorahSheet[], vocabulary: string[]): SheetGroup | un
 /** Shared by Parsha Bytes and Dor L'Dor: one super-group per Sefer with populated parshios, plus Chagim & Special Days. */
 function groupBySeferAndChagim(sheets: TorahSheet[]): SheetSuperGroup[] {
 	const bySefer = Object.entries(SEFER_PARSHIOS).map(([sefer, parshios]): SheetSuperGroup => {
-		const inSefer = sheets.filter((s) => s.category?.toLowerCase() === sefer.toLowerCase());
+		const inSefer = sheets.filter((s) => hasCategory(s, sefer));
 		const groups = bySubcategory(inSefer, parshios);
 		const other = otherGroup(inSefer, parshios);
 		return { key: slugify(sefer), label: sefer, groups: other ? [...groups, other] : groups };
 	});
 
-	const chagim = sheets.filter((s) => s.category?.toLowerCase() === CHAGIM_LABEL.toLowerCase());
+	const chagim = sheets.filter((s) => hasCategory(s, CHAGIM_LABEL));
 	const chagimGroups: SheetGroup[] = [...new Set(chagim.map((s) => s.subcategory).filter((v): v is string => Boolean(v)))]
 		.sort((a, b) => a.localeCompare(b))
 		.map((name) => ({ key: slugify(name), label: name, sheets: chagim.filter((s) => s.subcategory === name) }));
@@ -365,7 +377,7 @@ export function groupDorLDor(sheets: TorahSheet[]): SheetSuperGroup[] {
 	const dorLDor = sheets.filter((s) => s.series === "Dor L'Dor");
 	const superGroups = groupBySeferAndChagim(dorLDor);
 
-	const pirkeiAvos = dorLDor.filter((s) => s.category?.toLowerCase() === PIRKEI_AVOS_LABEL.toLowerCase());
+	const pirkeiAvos = dorLDor.filter((s) => hasCategory(s, PIRKEI_AVOS_LABEL));
 	const perakimGroups = bySubcategory(pirkeiAvos, PIRKEI_AVOS_PERAKIM);
 	const other = otherGroup(pirkeiAvos, PIRKEI_AVOS_PERAKIM);
 	const pirkeiAvosGroups = other ? [...perakimGroups, other] : perakimGroups;
@@ -388,7 +400,7 @@ export function groupDorLDor(sheets: TorahSheet[]): SheetSuperGroup[] {
 export function groupAllSheets(sheets: TorahSheet[]): SheetSuperGroup[] {
 	const superGroups = groupBySeferAndChagim(sheets);
 
-	const pirkeiAvos = sheets.filter((s) => s.category?.toLowerCase() === PIRKEI_AVOS_LABEL.toLowerCase());
+	const pirkeiAvos = sheets.filter((s) => hasCategory(s, PIRKEI_AVOS_LABEL));
 	const perakimGroups = bySubcategory(pirkeiAvos, PIRKEI_AVOS_PERAKIM);
 	const otherPerakim = otherGroup(pirkeiAvos, PIRKEI_AVOS_PERAKIM);
 	const pirkeiAvosGroups = otherPerakim ? [...perakimGroups, otherPerakim] : perakimGroups;
