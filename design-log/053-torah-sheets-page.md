@@ -118,6 +118,18 @@ Cross-checking the תשפ״ו batch (43 sheets) against `SEFER_PARSHIOS` before 
 
 Neither bug crashed anything or was visible without deliberately checking the "Other" bucket / reading order — worth remembering that a mistyped or newly-combined title fails silently here, not loudly.
 
+## Addendum 7 — Source Sheets' first topic exposed a batch-featured bug; default landing tab changed
+
+Adding the first `Source Sheets` topic ("From Iyun to Halacha", 9 PDFs bulk-inserted seconds apart) surfaced a bug that never showed up for Torah Bytes/Dor L'Dor: `pickFeatured`'s batch tie-break (once calendar-match fails) fell through to `compareParshaOrder`/title — but Source Sheets rows have no `category`, so they all tie into the same catch-all bucket and the pick becomes alphabetically-first-by-title, not newest. Same root cause in `getTorahSheets()`'s base `.sort()` meant the plain card-list order for Source Sheets (and the "All Publications" tab) was alphabetical too, not upload-recency.
+
+Fixed both: `pickFeatured` now special-cases a batch where every row lacks `category` (no reading-order concept at all) and picks by newest `_createdDate` there instead of falling to the parsha-order fallback. A new `sortByUploadRecency()` export orders by newest `_createdDate` first (missing dates last); applied to the "all" and "source-sheets" tabs' flat card lists specifically — Torah Bytes/Dor L'Dor keep the original year+reading-cycle sort, since upload-recency there is exactly the bug Addendum 3/4 already fixed.
+
+Also: the featured card's real preview image isn't automatic — it still needs a manually-generated `pdfThumbnail` (same `qlmanage -t` pipeline as the original batch) even after the ordering/pick logic is correct; without one the featured row is just the plain icon at a larger size. And per Danielle's direction, clearing an old featured thumbnail when a new one is generated must stay scoped to that sheet's own series — never cross-series (e.g. adding a new featured Source Sheets item must not touch Torah Bytes' thumbnails).
+
+Separately, the default landing tab (no URL hash) changed from "whichever tab is first in the `tabs` array" (previously `All Publications`, incidentally) to an explicit `DEFAULT_TAB_KEY = "torah-bytes"` constant, kept in sync by hand between the Astro SSR panel-visibility check and the client `<script>`'s hash-fallback (both hardcode the literal — this codebase's client scripts don't share Astro frontmatter constants across that boundary).
+
+**Verification:** confirmed via `curl localhost:4321/torah-sheets` — Torah Bytes panel renders non-hidden by default; the Source Sheets panel's 9 cards render newest-`_createdDate`-first with the top row carrying a real `sheet-thumb--preview` image once its `pdfThumbnail` was set.
+
 ## Addendum 6 — featured-sheet rule redefined: single upload vs. batch, calendar-aware; old thumbnails auto-cleared
 
 Danielle's own read of "most recent" once real multi-year data existed didn't match Addendum 4's fix. Adding the תשפ״ו batch (43 sheets, sorted by year+reading-cycle) featured `Haazinu` — furthest along in the reading cycle among what was in the batch — but that's months away from the real current week; she wanted `Vaeschanan` (the parsha actually read this past Shabbos, per the real Hebrew calendar). New rule, in her words: *"the most recently uploaded Torah sheet should take the place of the first one on top with a preview. Unless there is a batch upload, in which case it should be the most recent parsha."*

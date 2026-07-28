@@ -17,7 +17,11 @@ export interface TorahSheet {
 	topic?: string;
 	/** Display-only (e.g. "תשפ״ד") — the office doesn't track a full date. */
 	year?: string;
-	/** When this row was added — used only to feature the newest upload, never shown or sorted on. */
+	/**
+	 * When this row was added — used to pick the featured upload (pickFeatured)
+	 * and, for series with no reading-cycle concept, to order the card list
+	 * itself (see sortByUploadRecency). Never shown on a card.
+	 */
 	createdDate?: string;
 	sourceType: SourceType;
 	canvaEmbedUrl?: string;
@@ -257,6 +261,19 @@ function currentParshaSiteNames(today: Date = new Date()): string[] {
 const BATCH_WINDOW_MS = 30 * 60 * 1000;
 
 /**
+ * Newest-upload-first order. Used where there's no reading-cycle concept to
+ * order by instead (Source Sheets — see the "no reading-order concept" note
+ * on getTorahSheets' sort) or where the ask is explicitly to ignore the
+ * reading cycle and show what's newest regardless of series/year (All
+ * Publications' unfiltered list). Missing/unparseable dates sort last rather
+ * than breaking the order.
+ */
+export function sortByUploadRecency(sheets: TorahSheet[]): TorahSheet[] {
+	const time = (s: TorahSheet) => (s.createdDate ? new Date(s.createdDate).getTime() : -Infinity);
+	return [...sheets].sort((a, b) => time(b) - time(a));
+}
+
+/**
  * Which sheet in a tab gets pulled to the top of the list with a real
  * preview. A single new upload becomes that immediately (whatever the
  * newest `_createdDate` is) — no calendar lookup needed, it's simply *the*
@@ -282,6 +299,15 @@ export function pickFeatured(sheets: TorahSheet[]): TorahSheet | undefined {
 	const currentNames = currentParshaSiteNames().map((n) => n.toLowerCase());
 	const calendarMatch = batch.find((s) => s.subcategory && currentNames.includes(s.subcategory.toLowerCase()));
 	if (calendarMatch) return calendarMatch;
+
+	// A batch with no Sefer/Chagim/Pirkei-Avos category (Source Sheets) has no
+	// reading-order concept to fall back to — compareParshaOrder would just
+	// tie every row into the same catch-all bucket and decide by title
+	// instead, which isn't "most recent" by any real measure. Newest upload
+	// wins instead, matching sortByUploadRecency's ordering for that series.
+	if (batch.every((s) => !s.category)) {
+		return [...batch].sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime())[0];
+	}
 
 	return [...batch].sort(
 		(a, b) => yearRank(b) - yearRank(a) || compareParshaOrder(a, b) || a.title.localeCompare(b.title),

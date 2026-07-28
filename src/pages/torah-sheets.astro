@@ -11,11 +11,17 @@ import {
 	groupDorLDor,
 	groupSourceSheets,
 	pickFeatured,
+	sortByUploadRecency,
 	type TorahSheet,
 } from "../lib/torah-sheets";
 import { slugify } from "../lib/slug";
 
 const sheets = await getTorahSheets();
+
+// The tab a first-time visitor sees before touching any pill/filter — also
+// drives which panel the pre-JS SSR markup renders visible (see class:list
+// below) so there's no flash-then-switch once the client script runs.
+const DEFAULT_TAB_KEY = "torah-bytes";
 
 // Each sheet's sidebar-filter key is whichever level actually applies to its
 // series (subcategory for Torah Bytes/Dor L'Dor, topic for Source Sheets).
@@ -44,9 +50,10 @@ const tabs = [
 		label: "All Publications",
 		kind: "nested" as const,
 		superGroups: groupAllSheets(sheets),
-		// Already sorted most-recent-first across every series — see
-		// compareParshaOrder in torah-sheets.ts, applied once to the full list.
-		sheets,
+		// Unfiltered order here is newest-upload-first across every series —
+		// deliberately ignoring year/reading-cycle (that's what the Torah
+		// Bytes/Dor L'Dor tabs are for) — see sortByUploadRecency.
+		sheets: sortByUploadRecency(sheets),
 	},
 	{
 		key: "torah-bytes",
@@ -67,7 +74,9 @@ const tabs = [
 		label: "Source Sheets",
 		kind: "flat" as const,
 		groups: groupSourceSheets(sheets),
-		sheets: sheets.filter((s) => s.series === "Source Sheets"),
+		// No reading-cycle concept for Source Sheets — newest upload first,
+		// same as the All Publications tab (see sortByUploadRecency).
+		sheets: sortByUploadRecency(sheets.filter((s) => s.series === "Source Sheets")),
 	},
 ].map(orderTab);
 ---
@@ -82,8 +91,8 @@ const tabs = [
 
 		<section class="py-10 sm:py-14">
 			<div class="container-page">
-				{tabs.map((tab, i) => (
-					<div data-tab-panel={tab.key} class:list={["mt-0", { hidden: i !== 0 }]}>
+				{tabs.map((tab) => (
+					<div data-tab-panel={tab.key} class:list={["mt-0", { hidden: tab.key !== DEFAULT_TAB_KEY }]}>
 						<div class="grid gap-8 lg:grid-cols-12">
 							<div class="lg:col-span-3">
 								<details class="lg:hidden">
@@ -398,10 +407,13 @@ const tabs = [
 		});
 	});
 
+	// Matches DEFAULT_TAB_KEY in the frontmatter above — keep in sync with
+	// the SSR panel that's pre-rendered visible, so there's no flash-then-
+	// switch before this script runs.
+	const DEFAULT_TAB_KEY = "torah-bytes";
 	const initialKey = location.hash.slice(1);
 	if (!initialKey || !activateTab(initialKey)) {
-		const first = pubButtons[0]?.dataset.pubSelect;
-		if (first) activateTab(first);
+		activateTab(DEFAULT_TAB_KEY);
 	}
 
 	// 2. Sidebar filtering: single active filter per panel (these are hierarchical
