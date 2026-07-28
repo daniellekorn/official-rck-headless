@@ -42,9 +42,10 @@ const labelClasses =
 
 {visible.length > 0 && (
 	<section class="relative bg-navy-700 py-7 sm:py-9 md:py-10" data-stats-band>
-		{/* One gold hairline edge-to-edge at 50% opacity — unlike Footer.astro's
-		    seam, this one doesn't fade out at the sides, per Danielle's request. */}
-		<div aria-hidden="true" class="absolute inset-x-0 top-0 h-px w-full bg-gold-500/50"></div>
+		{/* Same light-blue hairline as Footer.astro's bottom copyright divider
+		    (border-white/10 on the same bg-navy-700) — edge-to-edge, no fade at
+		    the sides, per Danielle's request. */}
+		<div aria-hidden="true" class="absolute inset-x-0 top-0 h-px w-full bg-white/10"></div>
 		<div class="container-page lg:px-14">
 			{/* Mobile: two centered rows. */}
 			<div class="sm:hidden">
