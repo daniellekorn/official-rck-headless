@@ -63,7 +63,10 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 					)}
 				</div>
 			))}
-			<div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/25 to-black/55"></div>
+			{/* Fades to fully-opaque navy-700 at the very bottom edge — the same
+			    solid color ImpactStats renders directly below, so the seam between
+			    hero media and that band disappears instead of showing a hard cut. */}
+			<div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/25 to-navy-700"></div>
 			{/* Left scrim under the lockup — video frames are unpredictable and the
 			    bottom gradient alone leaves the text over the brightest area. */}
 			<div class="absolute inset-0 bg-gradient-to-r from-navy-700/75 via-navy-700/30 to-transparent"></div>
@@ -85,7 +88,7 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 				aria-hidden="true"
 			>
 			</div>
-			<div class="absolute inset-0 -z-10 bg-gradient-to-b from-black/10 via-transparent to-black/40" aria-hidden="true"></div>
+			<div class="absolute inset-0 -z-10 bg-gradient-to-b from-black/10 via-transparent to-navy-700" aria-hidden="true"></div>
 		</>
 	)}
 

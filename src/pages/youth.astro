@@ -69,7 +69,7 @@ const pagerSections = programs.map((p) => ({ id: p.slug, label: p.title }));
 								class:list={[
 									"mt-10 sm:mt-12",
 									description
-										? "grid items-center gap-10 md:gap-14 lg:gap-20 md:grid-cols-2"
+										? "grid items-start gap-10 md:gap-14 lg:gap-20 md:grid-cols-2"
 										: "flex flex-col items-center gap-8",
 								]}
 							>
@@ -79,12 +79,12 @@ const pagerSections = programs.map((p) => ({ id: p.slug, label: p.title }));
 								>
 									<div
 										class:list={[
-											"w-full overflow-hidden rounded-md bg-navy-800 ring-1 ring-navy-100 shadow-[0_30px_64px_-34px_rgba(7,23,58,0.55)]",
-											// A program with no gallery photos has nothing else to
-											// carry the section visually, so its flyer gets more
-											// room instead of matching the same small size a program
-											// with a full photo banner below it can afford.
-											hasPhotos ? "max-w-sm" : "max-w-sm sm:max-w-md lg:max-w-lg",
+											// Same cap regardless of whether the program also has a
+											// photo gallery below — a program without one used to
+											// get a bigger flyer, but that meant two programs of the
+											// same type (e.g. Dor L'Dor for boys vs. girls) rendered
+											// at different sizes purely because one had photos.
+											"w-full max-w-sm overflow-hidden rounded-md bg-navy-800 ring-1 ring-navy-100 shadow-[0_30px_64px_-34px_rgba(7,23,58,0.55)]",
 										]}
 									>
 										<Flyer
@@ -146,9 +146,11 @@ const pagerSections = programs.map((p) => ({ id: p.slug, label: p.title }));
 								</div>
 							</div>
 
-							{/* One big slideshow of the program's photos, full width below */}
+							{/* Program photos below, capped narrower than the full container —
+							    at full page width these read as oversized next to the more
+							    modestly-sized flyer/description content above them. */}
 							{hasPhotos && (
-								<div class="mt-12 sm:mt-14" data-reveal="up" data-reveal-delay="120">
+								<div class="mt-12 sm:mt-14 mx-auto max-w-2xl" data-reveal="up" data-reveal-delay="120">
 									<PhotoGallery images={program.galleryUrls} label={program.title} />
 								</div>
 							)}

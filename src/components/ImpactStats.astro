@@ -41,7 +41,12 @@ const labelClasses =
 ---
 
 {visible.length > 0 && (
-	<section class="bg-navy-700 py-7 sm:py-9 md:py-10" data-stats-band>
+	<section class="relative bg-navy-700 py-7 sm:py-9 md:py-10" data-stats-band>
+		{/* Same fade-at-the-edges hairline shape as Footer.astro's seam, but
+		    flat (no glow) and a touch more opaque at its center — a quieter
+		    line of contrast between the hero above (now faded to the same
+		    navy-700) and this band, not a decorative accent. */}
+		<div aria-hidden="true" class="absolute inset-x-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-gold-500/60 to-transparent"></div>
 		<div class="container-page lg:px-14">
 			{/* Mobile: two centered rows. */}
 			<div class="sm:hidden">
@@ -103,7 +108,11 @@ const labelClasses =
 		};
 
 		const DURATION = 1500;
-		const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+		// Linear, not eased — an ease-out curve decelerates near the target, so a
+		// count like 27 spends most of its 1.5s crawling through the last few
+		// numbers while the early ones fly by. A constant rate keeps every count
+		// (27, 1,000, whatever) advancing at the same visual pace start to finish.
+		const linear = (t: number) => t;
 
 		// A hover replay can start mid-animation (or mid-replay) — this tracks
 		// each element's latest "run" so a stale rAF loop bows out instead of
@@ -118,7 +127,7 @@ const labelClasses =
 			const step = (now: number) => {
 				if (runIds.get(el) !== runId) return; // superseded by a newer run
 				const t = Math.min(1, (now - start) / DURATION);
-				const current = Math.round(parsed.target * easeOutExpo(t));
+				const current = Math.round(parsed.target * linear(t));
 				const formatted = parsed.grouped ? current.toLocaleString("en-US") : String(current);
 				el.textContent = `${parsed.prefix}${formatted}${parsed.suffix}`;
 				if (t < 1) requestAnimationFrame(step);
