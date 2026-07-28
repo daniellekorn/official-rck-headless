@@ -95,8 +95,13 @@ const { sections } = Astro.props;
 		box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.6);
 		opacity: 0;
 		pointer-events: none;
+		/* Opacity snaps in fast so the box reads as a solid, present navy chip
+		   from the first frame rather than being caught mid-fade (which read as
+		   translucent) — only the slide (transform) keeps the slower, smoother
+		   ease. Fading back out on the way out still uses the same fast timing,
+		   so it doesn't linger half-visible either. */
 		transition:
-			opacity 0.25s ease,
+			opacity 0.1s ease,
 			transform 0.25s ease;
 	}
 	[data-pager-dot]:hover .pager-label,
@@ -116,8 +121,10 @@ const { sections } = Astro.props;
 		);
 
 		// Briefly flash a section's label when it becomes active (scrolling into
-		// it, up or down). It fades back out after ~1.2s unless the visitor is
-		// hovering the dot, in which case the :hover rule keeps it shown.
+		// it, up or down). It fades back out after ~1.8s unless the visitor is
+		// hovering the dot, in which case the :hover rule keeps it shown. (Was
+		// 1.2s — bumped up so the solid navy chip reads as a deliberate, present
+		// label rather than a quick flicker.)
 		let lastActiveId: string | null = null;
 		let peekTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -136,7 +143,7 @@ const { sections } = Astro.props;
 					dots.forEach((d) => d.classList.remove("is-peek"));
 					activeDot.classList.add("is-peek");
 					if (peekTimer) clearTimeout(peekTimer);
-					peekTimer = setTimeout(() => activeDot.classList.remove("is-peek"), 1200);
+					peekTimer = setTimeout(() => activeDot.classList.remove("is-peek"), 1800);
 				}
 			}
 		};
