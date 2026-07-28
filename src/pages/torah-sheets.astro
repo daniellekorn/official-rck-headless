@@ -10,6 +10,7 @@ import {
 	groupTorahBytes,
 	groupDorLDor,
 	groupSourceSheets,
+	pickFeatured,
 	type TorahSheet,
 } from "../lib/torah-sheets";
 import { slugify } from "../lib/slug";
@@ -21,17 +22,20 @@ const sheets = await getTorahSheets();
 const filterKey = (s: TorahSheet) => slugify(s.subcategory || s.topic || "");
 
 // The single most-recent sheet per tab gets a bigger, real-preview treatment
-// (every other PDF card just shows a plain icon). For Torah Bytes/Dor L'Dor,
-// the list is already sorted most-recent-first (reading-order reversed —
-// see compareParshaOrder in torah-sheets.ts), so that's just the first item.
-// Source Sheets has no reading-order concept, so it falls back to whichever
-// row was actually added to the CMS most recently.
-const mostRecentId = (kind: "nested" | "flat", tabSheets: TorahSheet[]): string | undefined => {
-	if (kind === "nested") return tabSheets[0]?._id;
-	return tabSheets.reduce<TorahSheet | undefined>(
-		(latest, s) => (!latest || (s.createdDate ?? "") > (latest.createdDate ?? "") ? s : latest),
-		undefined,
-	)?._id;
+// (every other PDF card just shows a plain icon) *and* is pulled to the top
+// of that tab's list — everything else keeps its normal reading-order
+// position underneath. pickFeatured (torah-sheets.ts) picks which one: a
+// single new upload becomes it immediately; a batch import falls back to
+// whichever sheet in that batch matches the real current Hebrew-calendar
+// parsha.
+const orderTab = <T extends { sheets: TorahSheet[] }>(tab: T): T & { featuredId?: string } => {
+	const featured = pickFeatured(tab.sheets);
+	if (!featured) return { ...tab, featuredId: undefined };
+	return {
+		...tab,
+		sheets: [featured, ...tab.sheets.filter((s) => s._id !== featured._id)],
+		featuredId: featured._id,
+	};
 };
 
 const tabs = [
@@ -65,7 +69,7 @@ const tabs = [
 		groups: groupSourceSheets(sheets),
 		sheets: sheets.filter((s) => s.series === "Source Sheets"),
 	},
-].map((tab) => ({ ...tab, featuredId: mostRecentId(tab.kind, tab.sheets) }));
+].map(orderTab);
 ---
 
 <Layout>

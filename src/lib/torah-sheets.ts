@@ -1,4 +1,4 @@
-import { gematriyaStrToNum } from "@hebcal/core";
+import { gematriyaStrToNum, HDate, Sedra } from "@hebcal/core";
 import { items, auth } from "./wix-cms-admin";
 import { resolveDocument, resolveImage } from "./wix-media";
 import { slugify } from "./slug";
@@ -114,8 +114,8 @@ export async function getTorahSheets(): Promise<TorahSheet[]> {
 
 const SEFER_PARSHIOS: Record<string, string[]> = {
 	Bereishis: ["Bereishis", "Noach", "Lech Lecha", "Vayeira", "Chayei Sarah", "Toldos", "Vayeitzei", "Vayishlach", "Vayeishev", "Mikeitz", "Vayigash", "Vayechi"],
-	Shemos: ["Shemos", "Vaeira", "Bo", "Beshalach", "Yisro", "Mishpatim", "Terumah", "Tetzaveh", "Ki Sisa", "Vayakhel", "Pekudei"],
-	Vayikra: ["Vayikra", "Tzav", "Shmini", "Tazria", "Metzora", "Achrei Mos", "Kedoshim", "Emor", "Behar", "Bechukosai"],
+	Shemos: ["Shemos", "Vaeira", "Bo", "Beshalach", "Yisro", "Mishpatim", "Terumah", "Tetzaveh", "Ki Sisa", "Vayakhel", "Vayakhel-Pekudei", "Pekudei"],
+	Vayikra: ["Vayikra", "Tzav", "Shmini", "Tazria", "Tazria-Metzora", "Metzora", "Achrei Mos", "Achrei Mos-Kedoshim", "Kedoshim", "Emor", "Behar", "Behar-Bechukosai", "Bechukosai"],
 	Bamidbar: ["Bamidbar", "Naso", "Behaaloscha", "Shlach", "Korach", "Chukas", "Balak", "Pinchas", "Matos", "Matos-Masei", "Masei"],
 	Devarim: ["Devarim", "Vaeschanan", "Eikev", "Re'eh", "Shoftim", "Ki Seitzei", "Ki Savo", "Nitzavim", "Nitzavim-Vayeilech", "Vayeilech", "Haazinu", "Vezos Habracha"],
 };
@@ -189,6 +189,103 @@ function compareParshaOrder(a: TorahSheet, b: TorahSheet): number {
 	const [aMajor, aMinor] = rank(a);
 	const [bMajor, bMinor] = rank(b);
 	return aMajor - bMajor || aMinor - bMinor;
+}
+
+// hebcal's own parsha names (Sephardi/Modern-leaning spelling, e.g. "Bereshit",
+// "Vaetchanan") → this site's Ashkenazi transliteration vocabulary above
+// (SEFER_PARSHIOS). Only entries that actually differ; anything not listed
+// here (Bamidbar, Beshalach, Bo, Devarim, Eikev, Emor, Korach, Mishpatim,
+// Nitzavim-Vayeilech, Noach, Pinchas, Re'eh, Shmini, Shoftim, Tazria-Metzora,
+// Terumah, Tetzaveh, Tzav, Vayechi, Vayeilech, Vayigash, Vayikra, Vayishlach)
+// is already spelled the same in both. hebcal combines different parsha
+// pairs in different Hebrew years (leap year / Israel vs Diaspora), so this
+// covers both the standalone and combined forms of each.
+const HEBCAL_TO_SITE_PARSHA: Record<string, string> = {
+	"Achrei Mot-Kedoshim": "Achrei Mos-Kedoshim",
+	"Achrei Mot": "Achrei Mos",
+	"Beha'alotcha": "Behaaloscha",
+	"Behar-Bechukotai": "Behar-Bechukosai",
+	Bechukotai: "Bechukosai",
+	Bereshit: "Bereishis",
+	"Chayei Sara": "Chayei Sarah",
+	Chukat: "Chukas",
+	"Ha'azinu": "Haazinu",
+	"Ki Tavo": "Ki Savo",
+	"Ki Teitzei": "Ki Seitzei",
+	"Ki Tisa": "Ki Sisa",
+	"Lech-Lecha": "Lech Lecha",
+	"Matot-Masei": "Matos-Masei",
+	Matot: "Matos",
+	Masei: "Masei",
+	Miketz: "Mikeitz",
+	Nasso: "Naso",
+	"Sh'lach": "Shlach",
+	Shemot: "Shemos",
+	Toldot: "Toldos",
+	Vaera: "Vaeira",
+	Vaetchanan: "Vaeschanan",
+	"Vayakhel-Pekudei": "Vayakhel-Pekudei",
+	Vayera: "Vayeira",
+	Vayeshev: "Vayeishev",
+	Vayetzei: "Vayeitzei",
+	Yitro: "Yisro",
+};
+
+/**
+ * This site's vocabulary name(s) for whichever parsha the most recently
+ * completed Shabbos actually read, per the real Hebrew calendar (via
+ * hebcal) — used only to break ties within a batch upload (see pickFeatured
+ * below). "Most recently completed" rather than "upcoming" because a Torah
+ * Bytes sheet is a review of a parsha already read, not a preview of next
+ * week's. A combined name hebcal doesn't have a direct site match for
+ * (mismatched combination for this particular year vs. what the office
+ * actually designed) is split on its hyphen so either half still matches.
+ * Returns [] for a chag-only Shabbos with no regular parsha reading — the
+ * caller falls back to the old reading-order heuristic in that case.
+ */
+function currentParshaSiteNames(today: Date = new Date()): string[] {
+	const hd = new HDate(today);
+	const shabbos = hd.onOrBefore(6);
+	const sedra = new Sedra(shabbos.getFullYear(), false);
+	const { parsha } = sedra.lookup(shabbos);
+	if (!parsha || parsha.length === 0) return [];
+	const hebcalName = parsha.join("-");
+	const direct = HEBCAL_TO_SITE_PARSHA[hebcalName] ?? hebcalName;
+	return [direct, ...direct.split("-")];
+}
+
+const BATCH_WINDOW_MS = 30 * 60 * 1000;
+
+/**
+ * Which sheet in a tab gets pulled to the top of the list with a real
+ * preview. A single new upload becomes that immediately (whatever the
+ * newest `_createdDate` is) — no calendar lookup needed, it's simply *the*
+ * current one now. Several sheets landing together (a batch import, several
+ * `_createdDate`s within BATCH_WINDOW_MS of each other) have no individual
+ * "most recent," so among those the pick falls back to whichever actually
+ * matches the real current Hebrew-calendar parsha (currentParshaSiteNames)
+ * — not just whichever sorts "furthest along" in the batch, which doesn't
+ * track the real calendar once a batch spans many weeks (e.g. a 43-sheet
+ * batch covering an entire year: the *last* parsha in reading order is
+ * usually months away, not "now"). If nothing in the batch matches this
+ * week's parsha (a chag-only Shabbos, or the batch just doesn't include the
+ * current week), falls back further to the old furthest-along heuristic
+ * rather than featuring nothing.
+ */
+export function pickFeatured(sheets: TorahSheet[]): TorahSheet | undefined {
+	const withDates = sheets.filter((s): s is TorahSheet & { createdDate: string } => Boolean(s.createdDate));
+	if (withDates.length === 0) return sheets[0];
+	const maxTime = Math.max(...withDates.map((s) => new Date(s.createdDate).getTime()));
+	const batch = withDates.filter((s) => maxTime - new Date(s.createdDate).getTime() <= BATCH_WINDOW_MS);
+	if (batch.length === 1) return batch[0];
+
+	const currentNames = currentParshaSiteNames().map((n) => n.toLowerCase());
+	const calendarMatch = batch.find((s) => s.subcategory && currentNames.includes(s.subcategory.toLowerCase()));
+	if (calendarMatch) return calendarMatch;
+
+	return [...batch].sort(
+		(a, b) => yearRank(b) - yearRank(a) || compareParshaOrder(a, b) || a.title.localeCompare(b.title),
+	)[0];
 }
 
 /** Case/whitespace-insensitive match against a closed vocabulary list, preserving the list's canonical casing. */
