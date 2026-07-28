@@ -42,11 +42,9 @@ const labelClasses =
 
 {visible.length > 0 && (
 	<section class="relative bg-navy-700 py-7 sm:py-9 md:py-10" data-stats-band>
-		{/* Same fade-at-the-edges hairline shape as Footer.astro's seam, but
-		    flat (no glow) and a touch more opaque at its center — a quieter
-		    line of contrast between the hero above (now faded to the same
-		    navy-700) and this band, not a decorative accent. */}
-		<div aria-hidden="true" class="absolute inset-x-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-gold-500/60 to-transparent"></div>
+		{/* One solid, fully opaque gold hairline edge-to-edge — unlike Footer.astro's
+		    seam, this one doesn't fade out at the sides, per Danielle's request. */}
+		<div aria-hidden="true" class="absolute inset-x-0 top-0 h-px w-full bg-gold-500"></div>
 		<div class="container-page lg:px-14">
 			{/* Mobile: two centered rows. */}
 			<div class="sm:hidden">
