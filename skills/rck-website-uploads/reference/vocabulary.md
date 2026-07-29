@@ -171,4 +171,4 @@ If someone gives you one of those, or any other day not in the table: don't forc
 
 Written into `avosPerek`, spelled exactly like that — not `Perek 1`, not `3`, not `פרק ג`. Dor L'Dor only. A Pirkei Avos sheet without this set still shows under "All Sheets" but gets no chapter button.
 
-> Flyer sections are a separate closed list — see `flyers.md`. Nothing in this file applies to flyers.
+> Flyer sections are a separate closed list — see `flows/flyer.md`. Nothing in this file applies to flyers.
