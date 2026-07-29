@@ -38,6 +38,7 @@ export interface TorahSheet {
 	sourceType: SourceType;
 	canvaEmbedUrl?: string;
 	pdfUrl?: string;
+	/** "RCK.{Publication}.{Title}[.{Year}].pdf" — the name the client-side view handler saves the fetched PDF under, never the raw Wix storage filename (see design-log #053 addendum 15). */
 	pdfFilename?: string;
 	/**
 	 * A real page-1 preview, when one exists — only ever shown for the single
@@ -168,7 +169,11 @@ export async function getTorahSheets(): Promise<TorahSheet[]> {
 					// attachment, which on mobile Safari especially means an
 					// unwanted auto-download instead of the built-in PDF viewer).
 					pdfUrl: pdf?.url,
-					pdfFilename: pdf?.filename,
+					// The name a client-side blob download/re-open should present to
+					// the visitor — not the original Wix-stored filename, our own
+					// "RCK.{Publication}.{Title}[.{Year}].pdf" convention (see
+					// downloadFilename above and design-log #053 addendum 15).
+					pdfFilename: pdf ? downloadFilename : undefined,
 					pdfThumbnailUrl: resolveImage(row.pdfThumbnail as string | undefined, 400, 400),
 					canvaPdfUrl: withDownloadName(canvaPdf?.url, downloadFilename),
 					canvaPdfFilename: canvaPdf?.filename,

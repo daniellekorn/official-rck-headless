@@ -141,6 +141,8 @@ const tabs = [
 																rel="noopener noreferrer"
 																class="sheet-thumb sheet-thumb--preview"
 																aria-label={`Read ${label} PDF`}
+																data-pdf-open
+																data-pdf-name={sheet.pdfFilename}
 															>
 																<img src={sheet.pdfThumbnailUrl} alt="" loading="lazy" />
 																<svg class="sheet-thumb-download-icon sheet-thumb-download-icon--overlay" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -154,6 +156,8 @@ const tabs = [
 																rel="noopener noreferrer"
 																class="sheet-thumb sheet-thumb--placeholder"
 																aria-label={`Read ${label} PDF`}
+																data-pdf-open
+																data-pdf-name={sheet.pdfFilename}
 															>
 																<svg class="sheet-thumb-download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 																	<path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14" stroke-linecap="round" stroke-linejoin="round" />
@@ -373,7 +377,7 @@ const tabs = [
 </style>
 
 <script>
-	// Three independent concerns, same vanilla data-attribute + delegated-script
+	// Four independent concerns, same vanilla data-attribute + delegated-script
 	// pattern as learn.astro's filter bar and team.astro's card toggles — no new
 	// client-side approach introduced.
 
@@ -516,6 +520,54 @@ const tabs = [
 			const opening = embed.classList.contains("hidden");
 			if (opening && !iframe.src) iframe.src = embed.dataset.canvaSrc ?? "";
 			embed.classList.toggle("hidden", !opening);
+		});
+	});
+
+	// 4. PDF "Read" links: must open the PDF in a new tab (never auto-download)
+	// while still saving under a proper name if the visitor downloads it from
+	// there — Wix's document CDN only offers one or the other via a URL query
+	// param (`?dn=` forces an outright download with a custom name; a plain
+	// URL opens inline but saves under a meaningless internal storage hash),
+	// never both at once (see design-log #053 addendum 15). So this fetches
+	// the PDF as a blob and re-opens it as a named `File`, whose `.name`
+	// browsers use as the suggested save name for a blob: URL — no server
+	// cooperation needed. `href` still points at the plain URL as a fallback
+	// (works with JS disabled, or if the fetch is blocked).
+	//
+	// The blank tab is opened *synchronously* inside the click handler, before
+	// the `await fetch` — Safari/mobile popup blockers only allow `window.open`
+	// as a direct result of a user gesture, and an async gap (however brief)
+	// breaks that trust chain, silently blocking the tab otherwise.
+	document.querySelectorAll<HTMLAnchorElement>("[data-pdf-open]").forEach((link) => {
+		link.addEventListener("click", (e) => {
+			const src = link.href;
+			const name = link.dataset.pdfName || "document.pdf";
+			if (!src) return;
+			e.preventDefault();
+			// No `noopener` here specifically — per spec, window.open() returns
+			// null when `noopener` is set, and this call needs a live reference
+			// to navigate once the blob is ready. Not a tabnabbing risk: the tab
+			// only ever ends up showing our own trusted PDF (a blob: URL, which
+			// inherits this page's origin, or the plain CDN URL as a fallback),
+			// never attacker-controlled content that could abuse window.opener.
+			const tab = window.open("", "_blank");
+			fetch(src, { mode: "cors" })
+				.then((res) => {
+					if (!res.ok) throw new Error(String(res.status));
+					return res.blob();
+				})
+				.then((blob) => {
+					const file = new File([blob], name, { type: "application/pdf" });
+					const objectUrl = URL.createObjectURL(file);
+					if (tab) tab.location.href = objectUrl;
+					else window.open(objectUrl, "_blank", "noopener");
+				})
+				.catch(() => {
+					// CORS blocked, offline, etc. — fall back to the plain URL (opens
+					// inline same as before, just without the renamed save prompt).
+					if (tab) tab.location.href = src;
+					else window.open(src, "_blank", "noopener");
+				});
 		});
 	});
 </script>
