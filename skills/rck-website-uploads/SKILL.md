@@ -82,7 +82,7 @@ Full field reference: `reference/torah-sheets.md`. Vocabulary: `reference/vocabu
 
 Ask these in order, one message each. Skip anything they already told you.
 
-**A1. The file.** "Send me the Canva link, or attach the PDF." A Canva link is fine — you'll pull it down yourself. They don't need to export anything.
+**A1. The file.** "Send me the Canva link." They don't need to export or download anything — you'll pull the file down yourself. If they attach a PDF instead, take it, but read "Files and attachments" below first: for a PDF the link is the reliable route.
 
 **A2. Which parsha or chag.** "Which parsha or which chag? Hebrew is fine." Accept `עקב`, `Eikev`, `Ekev`, `parshas eikev` — anything.
 
@@ -178,6 +178,13 @@ Wait for a yes. If they change something, show the whole block again with the ch
 Both workflows are: pull the file from Canva → put it in the Wix Media Manager → create or update the CMS row.
 
 **Canva.** Use the Canva connector to export the page they picked — PNG for flyers, PDF for Torah sheets. If the connector can't reach the design, it's almost always permissions: ask them to open the design, hit Share, and make sure it's shared with the account the connector is signed in to.
+
+**Files and attachments.** A Canva link is the primary route for both workflows, and it's the one to steer people to. The two file types behave differently underneath, which is your problem and not theirs:
+
+- **Images (flyers).** The Wix image-upload tool takes chat attachments directly — the platform resolves an attached file into the `download_url` + `file_id` pair the tool wants, so an attached PNG works as well as a link. It hands back a `wixstatic.com` URL, which is exactly what `Flyers.imageUrl` needs.
+- **PDFs (Torah sheets).** That tool is images-only. A PDF goes into the Media Manager through the generic import path, which expects a publicly reachable URL. An attached PDF may or may not resolve to one the API can fetch — treat it as unverified.
+
+So: if someone attaches a PDF, try it, but if the import fails, **don't improvise a workaround and don't silently fall back to something else.** Say the attachment didn't go through and ask for the Canva link instead. Never create a row pointing at a file you didn't actually confirm landed in the Media Manager.
 
 **Wix.** Before your first write of a conversation, **read one existing row** from the collection you're about to write to. This is not optional. It tells you the exact field keys and — critically — the exact format each media field expects. Mirror that format. Two fields in particular are easy to get wrong in a way that produces no error and a broken page:
 

@@ -25,7 +25,9 @@ https://static.wixstatic.com/media/f477b1_abc123….png
 
 It is **not** a Wix internal reference. Writing `wix:image://v1/…` into this field produces a broken image on a live page with no error anywhere. This is the most common way a flyer upload silently fails.
 
-Upload the PNG to the **Flyers** folder in the Media Manager, then take the resulting **public URL** and put that in `imageUrl`. Read an existing flyer row first and mirror exactly what you see there.
+Upload the PNG to the **Flyers** folder in the Media Manager, then take the resulting **public URL** and put that in `imageUrl`. The Wix image-upload tool hands back exactly that — a `wixstatic.com` URL — so use what it returns rather than building a URL yourself. Read an existing flyer row first and mirror what you see there.
+
+That tool accepts a **chat attachment** as readily as a link (the platform resolves an attached file into the `download_url` + `file_id` it expects), so if someone attaches the PNG instead of sending a Canva link, that's fine — no need to send them back for a link.
 
 Prefer an image over a PDF. An image gets the hover zoom, the click-to-enlarge viewer, and a Download button. Use `pdfUrl` only for a document that genuinely needs multiple pages.
 

@@ -67,6 +67,12 @@ Only the featured sheet displays its cover, so a sheet's cover matters most in t
 
 When you generate one, clear `pdfThumbnail` on the other sheets in that series at the same time. They're no longer featured, their covers no longer display, and leaving them behind just accumulates dead images in the Media Manager.
 
+## Getting the PDF in
+
+**Ask for the Canva link, not the file.** The Wix image-upload tool doesn't handle PDFs, so a sheet's PDF goes into the Media Manager via the generic import path, which wants a publicly reachable URL. A Canva export URL is one; a chat attachment may not resolve to one the API can fetch.
+
+If someone attaches a PDF anyway, try it — but if the import fails, say so and ask for the link. Do not fall back to a different file, and do not create the row until you've confirmed the PDF actually landed in the Media Manager. A row pointing at a file that isn't there renders a broken card.
+
 ## Writing to the collection
 
 Read an existing row first and mirror its shape. `pdfFile` and `canvaPdfBackup` are Document fields and hold Wix's internal reference format, not a public URL — copy the format you see rather than constructing one.
