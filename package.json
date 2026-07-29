@@ -12,7 +12,8 @@
     "generate": "wix generate",
     "env": "wix env",
     "skills": "wix skills",
-    "skill:pack": "bash scripts/pack-skill.sh"
+    "skill:pack": "bash scripts/pack-skill.sh",
+    "check:design-log": "node scripts/check-design-log.mjs"
   },
   "dependencies": {
     "@hebcal/core": "^6.6.0",

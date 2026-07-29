@@ -1,0 +1,16 @@
+# Code references that no longer exist and shouldn't — checked by
+# scripts/check-design-log.mjs. Format: <entry-number> <token> [<token>…]
+# Use `*` as the entry number to allow a token everywhere.
+#
+# Only add a line when the entry is *deliberately* naming something gone —
+# a rename record, or a change that got reverted. If the entry still describes
+# dead code as though it were live, it needs a supersession note instead.
+# Every line here should say which.
+
+# Rename record: "src/lib/homepage-slides.ts → src/lib/history.ts" and
+# "Slideshow.astro → HistoryTimeline.astro". Naming the old path is the point.
+015 src/lib/homepage-slides.ts src/components/Slideshow.astro
+
+# The entry documents its own reversal: "The src/middleware.ts from this change
+# is a no-op, so it was reverted." Exactly what a superseded entry should say.
+020 src/middleware.ts

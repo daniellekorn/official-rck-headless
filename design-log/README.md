@@ -29,7 +29,25 @@ A persistent, in-repo memory for *why* this codebase looks the way it does. Chat
 2. Append an **Implementation Results** section as work progresses, including commit SHAs.
 3. Document deviations explicitly: where did the implementation diverge from the original design, and why?
 
+### Reversing an earlier decision — required, not optional
+
+**If your change makes an existing entry's decision untrue, amend that entry in the same PR.** Edit its `**Status:**` line to say what superseded it, and append an addendum with what's now true. This is the one rule that keeps the log from becoming actively misleading.
+
+The failure it prevents, from the record: [#008](008-davening-flat-layout-shabbat-static.md) decided Shabbat times would never be in the CMS and that `dayType = Shabbat` rows are "stored but not rendered". [#041](041-computed-shabbos-times.md) then computed the Shabbos block *and* started rendering those rows — without touching #008, which went on asserting the opposite. Three weeks later that stale text was read as current and produced a wrong instruction in a shipped editor skill ([#055](055-upload-skill-triage.md)).
+
+[#020](020-homepage-stale-cache-no-store.md) is the counter-example, and the standard to copy: it records its own reversal in an *Outcome* section — "the `src/middleware.ts` from this change is a no-op, so it was reverted" — so nobody has to rediscover it.
+
+**A supersession note beats a new entry** when the decision is genuinely reversed. Write a new entry when the *problem* is new; amend the old one when the *answer* changed.
+
+### More than about three addenda means the entry needs consolidating
+
+An entry accumulating addendum after addendum has become a diary, and the "write the conclusion, not the diary" rule above applies to it. On ship, fold the addenda into the design as it now stands and keep only the reversals someone might otherwise re-attempt.
+
 ### After building
+
+0. Run `npm run check:design-log`. It flags entries citing files or `UPPER_SNAKE` constants that no longer exist, and cross-references to entries that don't exist. The baseline is clean, so any hit is yours. A hit is a prompt, not a verdict — either the entry needs a supersession note, or it's naming something gone on purpose (a rename record, a reverted change), which goes in `design-log/.stale-ok` **with a line saying which**.
+
+   It does **not** catch CMS *field* drift — `embedUrl` sat in [#010's](010-flyers-cms-collection.md) schema table long after [#031](031-flyer-image-lightbox.md) removed it, and no amount of grepping finds that. Field names can only be checked against the live collection.
 
 1. Add a **Verification** section: how do we know it works? One short prose paragraph, not a long checklist. For us, that usually means: page renders correctly with empty CMS, page renders correctly with populated CMS, friend's workflow described in CONTRIBUTING.md still applies.
 2. If the change affected `CONTRIBUTING.md` (the non-technical contributor's instructions), confirm that doc was updated.

@@ -24,13 +24,32 @@ export interface ServiceGroup {
 	rows: DaveningTime[];
 }
 
+const DAY_TYPES: readonly string[] = ["Weekday", "Shabbat"];
+
 async function getDaveningTimes(dayType?: DayType): Promise<DaveningTime[]> {
 	try {
 		const elevated = auth.elevate(items.query);
 		let q = elevated(COLLECTION_ID).eq("active", true).ascending("sortOrder").limit(200);
 		if (dayType) q = q.eq("dayType", dayType);
 		const { items: results } = await q.find();
-		return results as DaveningTime[];
+		const rows = results as DaveningTime[];
+
+		// An active row whose dayType isn't exactly "Weekday" or "Shabbat" matches
+		// neither group in getDaveningGrouped() and renders on no page — silently.
+		// Shipped data hits this: five KBA rows spell it "Shabbos" (see #008's
+		// addendum). Warn rather than coerce: those rows duplicate the computed
+		// Shabbos times, so making the match lenient would show each time twice.
+		if (!dayType) {
+			const orphaned = rows.filter((r) => !DAY_TYPES.includes(r.dayType));
+			if (orphaned.length > 0) {
+				console.warn(
+					`[davening] ${orphaned.length} active row(s) have an unrecognized dayType and render nowhere:`,
+					orphaned.map((r) => `${r.service} ${r.time} (dayType="${r.dayType}")`).join(", "),
+				);
+			}
+		}
+
+		return rows;
 	} catch (err) {
 		console.error(`[davening] query failed:`, err);
 		return [];

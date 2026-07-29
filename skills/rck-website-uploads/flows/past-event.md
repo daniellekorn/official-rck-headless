@@ -42,7 +42,7 @@ A title and a date alone is a valid entry. Don't hold the upload for photos that
 | `sortOrder` | Number | Tiebreaker for two events on the same date, lower first. |
 | `active` | Boolean | Show/hide without deleting. Default true. |
 
-`flyerImage` and `gallery` take Wix's internal reference format — not the plain public URL `Flyers.imageUrl` needs. Read an existing row and mirror it (`reference/wix.md`).
+`flyerImage` and `gallery` are media fields — **read an existing row and mirror its format** (`reference/wix.md`). Don't carry the plain-URL rule over from `Flyers.imageUrl`; this collection holds both shapes and both render.
 
 ## Order
 

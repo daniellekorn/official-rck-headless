@@ -114,3 +114,18 @@ Canva → site step could be automated.
   the `Flyers` collection in the CMS dashboard. Until it exists, rows simply have
   no expiry and nothing breaks.
 - Commit SHA: (pending).
+
+## Addendum — the schema table above is stale (2026-07-29)
+
+Recorded after reading the live collection while verifying the upload skill ([#055](055-upload-skill-triage.md)). The Design section's field table no longer describes the shipped collection:
+
+- **`embedUrl` is gone.** Removed in [#031](031-flyer-image-lightbox.md) when flyers became images rather than Canva embeds. No row carries it.
+- **`imageUrl` is the field the page renders**, and it isn't in the table above at all — it arrived with #031.
+- **`subCategory` (Tags) and `removeAfter` (Date)** were added later — [#037](037-flyers-subcategory-tags-field.md) and the take-down date work.
+- **`pdfUrl` is unused.** No shipped row populates it. Still supported by `flyers.ts` as the image → pdf → placeholder fallback.
+
+**And an undocumented duplicate: `image`.** The collection has *both* `image` and `imageUrl`. 25 of 26 rows hold the identical public URL in each, and `flyers.ts` reads **only `imageUrl`**. Nothing reads `image`. So a row filled in via `image` alone renders the "Flyer coming soon" placeholder — the same silent-failure shape as a mistyped `category`, and previously written down nowhere: not here, not in `CONTRIBUTING.md`, not in the upload skill.
+
+Origin unknown — most likely a dashboard-created Image field from before #031 settled on a plain-text URL. Not removed here: dropping a CMS field is a schema write with real data-loss risk (the same reasoning as [#008](008-davening-flat-layout-shabbat-static.md) on `dayType`), and it currently costs nothing but confusion. It is now documented in `flyers.ts`, `CONTRIBUTING.md`, and the skill's flyer flow.
+
+**`youth` is still a valid slug that renders nowhere** — see the category table above, [#017](017-events-and-youth-pages.md), and [#055](055-upload-skill-triage.md). Live check: zero rows use it, so removing it from `FlyerCategory` needs no data migration whenever someone wants to close that trap properly.
