@@ -26,7 +26,7 @@ export interface YouthProgram {
 	 * program should mirror instead of its own `flyerImage` — lets the office
 	 * update one flyer (in Learning) and have it reflect here too. Falls back
 	 * to `flyerImage` when unset or when no learning row matches. See
-	 * design-log #054.
+	 * design-log #057.
 	 */
 	linkedFlyerTitle?: string;
 }

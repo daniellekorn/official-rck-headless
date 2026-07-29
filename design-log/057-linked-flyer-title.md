@@ -1,4 +1,4 @@
-# 054 — Linking duplicate flyers with `linkedFlyerTitle`
+# 057 — Linking duplicate flyers with `linkedFlyerTitle`
 
 **Status:** implemented
 **Date:** 2026-07-29
@@ -33,7 +33,7 @@ Live rows linked: `YouthPrograms` "Dor L'Dor for Boys" → `linkedFlyerTitle: "D
 
 ## Trade-offs
 
-- A title match is stringly-typed: renaming the target learning row's `title` silently breaks the link (falls back to the linked row's own stale image/PDF rather than erroring). Acceptable — the same risk already exists for `FLYER_ALT_TEXT`, and a broken link degrades to the pre-#054 behavior, not a crash. This isn't hypothetical: "Matmidim Chaburos & Program" (`YouthPrograms`) and "Learn & Grow Chaburos for Kids" (`Flyers`/learning) were already the same image under two different titles before this change — the title-based match had to be set up by hand after confirming the duplicate via matching media file IDs, not discovered automatically.
+- A title match is stringly-typed: renaming the target learning row's `title` silently breaks the link (falls back to the linked row's own stale image/PDF rather than erroring). Acceptable — the same risk already exists for `FLYER_ALT_TEXT`, and a broken link degrades to the pre-#057 behavior, not a crash. This isn't hypothetical: "Matmidim Chaburos & Program" (`YouthPrograms`) and "Learn & Grow Chaburos for Kids" (`Flyers`/learning) were already the same image under two different titles before this change — the title-based match had to be set up by hand after confirming the duplicate via matching media file IDs, not discovered automatically.
 - `getFlyers()` now does a second query when any result in a non-learning category carries a link, and `getYouthPrograms()` now always imports `flyers.ts` and may issue one extra query. Negligible at this data volume (build-time SSG, dozens of rows).
 
 ## Verification

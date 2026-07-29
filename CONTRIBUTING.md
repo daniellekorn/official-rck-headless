@@ -35,7 +35,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Youth programs (on /youth) | `YouthPrograms` | Add a row per program: title, description, contact rabbi, optional photo + flyer. |
 | Past events archive (on /events) | `PastEvents` | Add a row per past event: title, date, photo gallery, optional flyer + blurb. Shows newest first. |
 | Davening times (weekday + Shabbos) | *(computed)* + `DaveningTimes` | Regular minyanim **and** the Shabbos schedule are calculated from zmanim in code (design-log #040, #041) — don't enter them as rows. Use `DaveningTimes` only for extras (Selichos, special weeks): `dayType = Weekday` rows appear under the weekday table, `dayType = Shabbat` rows under Shabbos Day. |
-| Flyers (images / PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). For event flyers, set `removeAfter` so they drop off the site on their own. |
+| Flyers (images / PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the three slugs that render — `events`, `learning`, `schedules` (see schema below; `youth` is accepted but invisible). For event flyers, set `removeAfter` so they drop off the site on their own. |
 | Torah Sheets (Parsha Bytes, Dor L'Dor, Source Sheets) | `TorahSheets` | Add a row per sheet: title, series, category/subcategory (or topic for Source Sheets), date, and either a PDF file or a Canva embed link. See schema below and [#053](design-log/053-torah-sheets-page.md). |
 | Footer address, phone, email | `ContactInfo` | Edit the single row. Leave a field empty to hide it from the footer. |
 | Footer social links | `ContactInfo` | Fill in any of `facebookUrl`, `instagramUrl`, `youtubeUrl`, `whatsappUrl`, `twitterUrl`, `linkedinUrl`. Empty = icon hidden. (`whatsappUrl` should be the main community invite — same link as `HomePage.whatsappJoinHref`.) |
@@ -247,7 +247,7 @@ Drives the **Youth Programming page** (`/youth`). Each row is one program (Dor L
 | `contactEmail` | Text | The contact rabbi's email — becomes the "Email" link. Leave empty to show only the generic "Contact" button. |
 | `sortOrder` | Number | Order of sections, lower first. |
 | `active` | Boolean | Show/hide without deleting. |
-| `linkedFlyerTitle` | Text (opt) | Exact `title` of a `Flyers` row in the `learning` category — when set, this program's flyer **mirrors that row's image/PDF** instead of `flyerImage`, so updating the Learning flyer updates the youth page too. Leave empty to keep uploading a separate `flyerImage` here. See design-log #054. |
+| `linkedFlyerTitle` | Text (opt) | Exact `title` of a `Flyers` row in the `learning` category — when set, this program's flyer **mirrors that row's image/PDF** instead of `flyerImage`, so updating the Learning flyer updates the youth page too. Leave empty to keep uploading a separate `flyerImage` here. See design-log #057. |
 
 **To add a rabbi's chaburah to the youth page:** add a `YouthPrograms` row — `title` = the program, `description` = the info, `contactName` + `contactEmail` = the rabbi. That's all that's required; add photos to `gallery` and/or a flyer if you have them. (This is separate from `TeamMembers` — see the note above.)
 
@@ -305,10 +305,19 @@ Selichos) and special one-off rows. One row per service-time variant.
 by service name; `dayType = Shabbat` rows render at the end of the computed
 Shabbos Day list.
 
+> **Five existing rows are broken, on purpose for now — don't "fix" them.** They
+> are KBA's Shabbos times, entered before #041 computed the Shabbos block, and
+> their `dayType` says `Shabbos` so they render nowhere. Two of them (Shacharis
+> 8:45, Tefillat Yeladim 10:00) are *identical* to the computed times and one
+> contradicts it (Mincha 7:15 vs the computed 7:10), so correcting the spelling
+> would show those times twice on the page. The right cleanup is to untick
+> `active` on all five — ask Danielle. Full detail in
+> [#008's addendum](design-log/008-davening-flat-layout-shabbat-static.md).
+
 | Field | Type | Notes |
 |---|---|---|
 | service | Text | `Shacharis`, `Mincha`, `Maariv`, `Selichos` |
-| dayType | Text | `Weekday` or `Shabbat` — controls which section the row appears under. |
+| dayType | Text | `Weekday` or `Shabbat` — controls which section the row appears under. **Spelled `Shabbat`, not `Shabbos`**, unlike the rest of the site. Anything else matches neither section and the row appears nowhere, with no error. |
 | daySpec | Text (opt) | Days shown next to each service: `Sunday`, `Mon, Thu`, `Sun – Thu`, etc. Leave empty only if day specificity doesn't apply. |
 | time | Text | Display string like `7:00 AM`, `Plag`, `10 min before Shkiya`. Wall-clock text, not a parsed time. |
 | notes | Text (opt) | Extra context only — e.g. `Followed by daf yomi`. **Do not** put day-of-week info here; that belongs in `daySpec`. |
@@ -405,35 +414,40 @@ One row per flyer. Set **`imageUrl`** (preferred) or **`pdfUrl`** — a row with
 | Field | Type | Notes |
 |---|---|---|
 | title | Text | Display name shown on site |
-| category | Text | **Must be one of:** `schedules`, `learning`, `youth`, `events` (lowercase, exact). Wrong value = flyer silently hidden. |
-| imageUrl | Text | **Preferred.** A public image URL (export page 1 of the Canva design as PNG). Gets the hover zoom, click-to-enlarge viewer, and Download button. |
+| category | Text | **Use one of:** `schedules`, `learning`, `events` (lowercase, exact). Wrong value = flyer silently hidden. `youth` is a fourth accepted value that **no page renders** — see the slug table below. |
+| imageUrl | Text | **Preferred — this is the one the page reads.** A public image URL (export page 1 of the Canva design as PNG). Gets the hover zoom, click-to-enlarge viewer, and Download button. |
+| ~~image~~ | — | **Don't use.** The collection has a second image field that nothing reads. Most rows hold the same URL in both, but only `imageUrl` reaches the page — fill `image` alone and the flyer shows "Flyer coming soon". See [#010's addendum](design-log/010-flyers-cms-collection.md). |
 | pdfUrl | Text | Direct public PDF URL — fallback for genuinely multi-page documents. Checked after the image. |
 | isActive | Boolean | Show/hide without deleting. Default: true (checked). |
 | displayOrder | Number | Sort order within the category. Lower = first. |
 | subCategory | Tags | Optional. Filter tags — add as many per flyer as apply (e.g. `Halacha`, `Men`, `Sunday`, `Night`). The site groups them automatically into **Topic / Audience / Day / Time** rows in the filter panel: weekdays + `Daily`/`Shabbos`/`Motzei-Shabbos` land under Day, `Morning`/`Afternoon`/`Evening`/`Night` under Time, `Men`/`Women`/`Boys`/`Girls`/`Kids`/`Teens`/`Youth`/`Family`/`Community` under Audience, and anything else under Topic. A flyer shows when **any** selected tag matches. Capitalization doesn't matter (`daily` and `Daily` are the same tag), but tags must not contain the `\|` character. Leave empty if no sub-filtering needed. |
 | removeAfter | Date | Optional. The last day the flyer should appear. It stays up through that whole day (Israel time) and drops off the site by itself the next morning. **Leave empty for anything evergreen** (a standing schedule, a learning program). Only put a date on things that go stale — mainly event flyers. The row is *not* deleted: to bring a flyer back, just change the date to a future one. |
-| linkedFlyerTitle | Text | Optional. Exact `title` of another `Flyers` row in the `learning` category — when set, **this row's image/PDF is ignored** and it mirrors that learning row's `imageUrl`/`pdfUrl` instead. Use this on a `schedules`/`youth`/`events` row that's really the same flyer as one already posted under Learning, so you only update the image once. Learning rows themselves never follow a link (they're always the source). See design-log #054. |
+| linkedFlyerTitle | Text | Optional. Exact `title` of another `Flyers` row in the `learning` category — when set, **this row's image/PDF is ignored** and it mirrors that learning row's `imageUrl`/`pdfUrl` instead. Use this on a `schedules`/`youth`/`events` row that's really the same flyer as one already posted under Learning, so you only update the image once. Learning rows themselves never follow a link (they're always the source). See design-log #057. |
 
 **Exporting a flyer image from Canva:** open the design → **Share → Download → PNG**, and select **page 1 only**. Upload that PNG into the row's image field (or paste a public image URL). That's the whole step.
 
-**Valid `category` slugs:**
+**`category` slugs — three that render, one that doesn't:**
 
-| Type this… | Shows under… |
-|---|---|
-| `schedules` | Schedules |
-| `learning` | Learning |
-| `youth` | Youth Programming |
-| `events` | Events |
+| Type this… | Shows under… | On page |
+|---|---|---|
+| `events` | Events | `/events` |
+| `learning` | Learning | `/learn` |
+| `schedules` | Schedules | `/daven` — **only with the `daily` tag**, see below |
+| ~~`youth`~~ | **nothing — do not use** | none |
+
+> **`youth` is accepted and invisible.** The Youth page is built from `YouthPrograms` rows, not from flyers ([#017](design-log/017-events-and-youth-pages.md)), so a flyer filed under `youth` appears on **no page at all** — the spelling is right, nothing errors, and it simply isn't anywhere. Youth flyers go on the `YouthPrograms` row (see that schema above). A one-off youth *event* is `events` with an audience tag like `Kids` or `Teens`. See [#055](design-log/055-upload-skill-triage.md).
 
 **Special reserved `subCategory` tags — do not reuse for general filtering:**
 
 | category | subCategory tag | Where it appears |
 |---|---|---|
-| `schedules` | `daily` (any capitalization) | Featured daily learning schedule on the Daven with Us page, below the minyan times. Only the first active row carrying this tag in this category is shown. |
+| `schedules` | `daily` (any capitalization) | Featured daily learning schedule on the Daven with Us page, below the minyan times. |
+
+> **The Schedules section has exactly one slot**, and the `daily` tag is what fills it. A `schedules` flyer **without** the tag appears on no page; a **second** one with the tag appears on no page either, because only the first active row shows. So a new weekly schedule is a picture replacement on the existing row, not a new row.
 
 To swap the daily schedule: edit the one row with `category = schedules` and the `daily` tag. Update `imageUrl` with the new page-1 export. No code change needed.
 
-> That `schedules` row's `linkedFlyerTitle` is set to `Community Schedule` (a `learning`-category row also shown on `/learn`), so as of design-log #054 **the two pages already share one image** — editing `Community Schedule`'s `imageUrl` updates both. Only touch the `schedules` row's own `imageUrl` if you want it to show something different from `/learn`.
+> That `schedules` row's `linkedFlyerTitle` is set to `Community Schedule` (a `learning`-category row also shown on `/learn`), so as of design-log #057 **the two pages already share one image** — editing `Community Schedule`'s `imageUrl` updates both. Only touch the `schedules` row's own `imageUrl` if you want it to show something different from `/learn`.
 
 #### The easy way to add a flyer (chat, no dashboard)
 
@@ -466,14 +480,15 @@ Powers the `/torah-sheets` hub page (Torah Bytes / Dor L'Dor ParshaLink / Source
 |---|---|---|
 | title | Text | Display name shown on the card |
 | series | Text | **Must be one of** (exact): `Torah Bytes`, `Dor L'Dor`, `Source Sheets`. Wrong value = sheet silently hidden from every tab. (Renamed from `Parsha Bytes` — old value still accepted as an alias.) |
-| category | Text | For Torah Bytes/Dor L'Dor only — the Sefer, or `Chagim & Special Days`; Dor L'Dor also accepts `Pirkei Avos`. One of (exact): `Bereishis`, `Shemos`, `Vayikra`, `Bamidbar`, `Devarim`, `Chagim & Special Days`, `Pirkei Avos` (Dor L'Dor only). Leave empty for Source Sheets. |
+| category | Tags (a **list**, not one value) | For Torah Bytes/Dor L'Dor only — the Sefer, or `Chagim & Special Days`; Dor L'Dor also accepts `Pirkei Avos`. Each entry must be one of (exact): `Bereishis`, `Shemos`, `Vayikra`, `Bamidbar`, `Devarim`, `Chagim & Special Days`, `Pirkei Avos` (Dor L'Dor only). A sheet can carry **several** — that's how one row shows under both its parsha and its chag (see `chagSubcategory` below). Leave empty for Source Sheets. |
 | subcategory | Text | The specific parsha (e.g. `Shemos`) or chag/special day (e.g. `Chanukah`) — case-insensitive match against a fixed list (see design-log #053 addendum 9); an unrecognized value still shows, just bucketed under "Other" in the sidebar (parsha buckets only — Chagim & Special Days has no "Other" bucket, so an unrecognized chag name there just doesn't get a filter button). Combined-parsha weeks (e.g. `Matos-Masei`, `Nitzavim-Vayeilech`) are recognized too, and surface under either component parsha's button, not their own. Pirkei Avos sheets don't need this field — use `avosPerek` instead (below). |
 | chagSubcategory | Text | Optional — only needed when a sheet is tagged **both** a Sefer and `Chagim & Special Days` and you want it to show under a real chag/special-day name there too (e.g. a "Pinchas" sheet that's also about `Shiva Asar B'Tammuz`: `subcategory` stays `Pinchas` for the parsha filter, `chagSubcategory` = `Shiva Asar B'Tammuz` for the Chagim filter). Leave empty for chag-only sheets — they just use `subcategory` directly. See design-log #053 addendum 10. |
 | avosPerek | Text | Required for Pirkei Avos sheets to get a chapter filter button — **must be one of** (exact): `Chapter 1` ... `Chapter 6`. A sheet tagged `Pirkei Avos` without this set still shows in "All Sheets" but gets no chapter filter button (same "real vocabulary only, no guessing" rule as `chagSubcategory`/`subcategory`'s Chagim behavior). See design-log #053 addendum 11. |
 | topic | Text | Source Sheets only — any label (e.g. `Halacha`, `Hashkafa`, `Mussar`). Open-ended: the sidebar groups by whatever values actually appear. |
 | year | Text | Display-only, e.g. `תשפ״ד` — shown next to the parsha/topic name on the card (no full date is tracked). |
 | sourceType | Text | **Must be one of** (exact, lowercase): `pdf` or `canva`. Anything else is treated as `pdf`. |
-| pdfFile | Document | Used when `sourceType = pdf`. Upload the PDF directly — that's the whole step, nothing else needed. The card shows a plain PDF icon with a download badge; clicking it opens the file. (An earlier `pdfThumbnail` Image field, for a real page-1 preview, was tried and dropped — see design-log #053 addendum. A handful of existing rows still carry a leftover value in that field; it's harmless and unused.) |
+| pdfFile | Document | Used when `sourceType = pdf`. Upload the PDF directly — that's the whole step, nothing else needed. Without a `pdfThumbnail` (below) the card shows a plain PDF icon with a download badge; clicking it opens the file. |
+| pdfThumbnail | Image | Optional page-1 preview. **Never generated automatically** — Wix doesn't render a picture from a PDF, so until someone exports page 1 and uploads it here, the sheet shows the generic PDF icon instead of a real preview. Only the **featured** (top) card in each tab actually displays it, so it matters most in the week a sheet goes up. Once a sheet is no longer featured its thumbnail simply stops being shown — **leave it there.** There's no need to clear old ones "for tidiness": the page decides what to display, an unused value costs nothing, and deleting it throws away a preview that can't come back without re-rendering the PDF. |
 | canvaEmbedUrl | Text | Used when `sourceType = canva` — the Canva **"Share → Embed"** link (looks like `https://www.canva.com/design/.../view?embed`). Renders as a live, always-current embed. |
 | canvaPdfBackup | Document | Optional, Canva sheets only. A PDF exported from the same Canva design (**Share → Download → PDF**) — adds a download button next to the live embed. |
 

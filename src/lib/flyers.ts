@@ -14,6 +14,12 @@ export interface Flyer {
 	 */
 	subCategory?: string[];
 	pdfUrl?: string;
+	/**
+	 * The public image URL the page renders. Note the collection *also* has an
+	 * `image` field, deliberately not read here — 25 of 26 shipped rows carry the
+	 * same URL in both, but only this one reaches the page, so a row with `image`
+	 * alone renders the "Flyer coming soon" placeholder. See #010's addendum.
+	 */
 	imageUrl?: string;
 	isActive?: boolean;
 	displayOrder?: number;
@@ -23,7 +29,7 @@ export interface Flyer {
 	 * row should mirror instead of keeping its own — lets the office update one
 	 * flyer (in Learning) and have it reflect here too. Falls back to this row's
 	 * own `imageUrl`/`pdfUrl` when unset or when no learning row matches. See
-	 * design-log #054.
+	 * design-log #057.
 	 */
 	linkedFlyerTitle?: string;
 }
@@ -72,7 +78,7 @@ export async function getFlyers(category?: FlyerCategory, subCategory?: string):
 			.filter((f) => !wanted || f.subCategory?.includes(wanted));
 
 		// Resolve linkedFlyerTitle: a row outside "learning" can mirror a learning
-		// row's image/pdf instead of keeping its own upload (design-log #054).
+		// row's image/pdf instead of keeping its own upload (design-log #057).
 		// "learning" rows are the source of truth, so they never chase a link.
 		if (category !== "learning" && flyers.some((f) => f.linkedFlyerTitle)) {
 			const learning = await queryActiveByCategory("learning");
