@@ -268,14 +268,16 @@ const gridFlyers = selectedSub
 	// ones, so there's always more (visually identical) content to scroll into
 	// in either direction. Once scroll drifts a full "real set" width past
 	// either edge, jump back by that width with no animation; since the clone
-	// is pixel-identical at that position, the jump is invisible. Skipped
-	// entirely for 0-1 flyers — nothing meaningful to loop.
+	// is pixel-identical at that position, the jump is invisible. Skipped for
+	// 4 or fewer flyers — a short row doesn't need to loop, and looping a row
+	// that barely fills the viewport made the wrap-around too noticeable.
+	const LOOP_MIN = 4;
 	document.querySelectorAll<HTMLElement>("[data-flyers-carousel]").forEach((carousel) => {
 		const track = carousel.querySelector<HTMLElement>("[data-flyers-track]");
 		if (!track) return;
 
 		const originals = Array.from(track.children) as HTMLElement[];
-		if (originals.length <= 1) return;
+		if (originals.length <= LOOP_MIN) return;
 
 		const cloneSet = () =>
 			originals.map((el) => {
@@ -321,7 +323,10 @@ const gridFlyers = selectedSub
 	// Flyers carousel: arrow buttons nudge native scroll by one card's width.
 	// Trackpad/wheel scrolling and touch swipe already work with no JS at all
 	// (plain overflow-x + scroll-snap) — this just adds a click target. Never
-	// disabled — the carousel above loops infinitely in both directions.
+	// disabled: with more than LOOP_MIN flyers the carousel above loops
+	// infinitely in both directions; at or below that count there's nothing to
+	// loop, so an arrow at either end just stops scrolling, same as any plain
+	// scroll container.
 	document.querySelectorAll<HTMLElement>("[data-flyers-carousel]").forEach((carousel) => {
 		const track = carousel.querySelector<HTMLElement>("[data-flyers-track]");
 		const prevBtn = carousel.querySelector<HTMLButtonElement>("[data-flyers-prev]");

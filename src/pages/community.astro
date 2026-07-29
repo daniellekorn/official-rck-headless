@@ -553,13 +553,16 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 	// clone is pixel-identical to the real card at that position, the jump
 	// is invisible. This runs before the community-card/video-spotlight
 	// listener setup below so their querySelectorAll calls pick up the
-	// clones too and wire them up identically to the originals.
+	// clones too and wire them up identically to the originals. Skipped for
+	// 4 or fewer cards (video tile included) — same reasoning as the events
+	// page's flyer carousel: a short row doesn't need to loop.
+	const LOOP_MIN = 4;
 	document.querySelectorAll<HTMLElement>("[data-members-carousel]").forEach((carousel) => {
 		const track = carousel.querySelector<HTMLElement>("[data-members-track]");
 		if (!track) return;
 
 		const originals = Array.from(track.children) as HTMLElement[];
-		if (originals.length === 0) return;
+		if (originals.length <= LOOP_MIN) return;
 
 		const cloneSet = () =>
 			originals.map((el) => {
@@ -671,7 +674,10 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 	// width. Trackpad/mouse-wheel scrolling and touch swipe already work with no
 	// JS at all (plain overflow-x + scroll-snap) — this just adds a click target
 	// for people who'd rather press a button than scroll/swipe. Arrows are never
-	// disabled — the carousel above loops infinitely in both directions.
+	// disabled: with more than LOOP_MIN cards the carousel above loops
+	// infinitely in both directions; at or below that count there's nothing to
+	// loop, so an arrow at either end just stops scrolling, same as any plain
+	// scroll container.
 	document.querySelectorAll<HTMLElement>("[data-members-carousel]").forEach((carousel) => {
 		const track = carousel.querySelector<HTMLElement>("[data-members-track]");
 		const prevBtn = carousel.querySelector<HTMLButtonElement>("[data-members-prev]");
