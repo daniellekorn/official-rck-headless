@@ -4,20 +4,34 @@ Collection `TorahSheets`, one row per sheet. Names come from `reference/vocabula
 
 A Torah Bytes sheet should take **three questions**. Skip anything already answered.
 
+## First, confirm it's a Torah sheet
+
+**Open the design and read it before question 2.** `דף` gets used for anything printed on a page.
+
+| It is one | It isn't |
+|---|---|
+| divrei Torah on the parsha or a chag | a set of times, a seder or program schedule |
+| a sugya, or mekoros on a topic | a sign-up, an announcement, an appeal |
+| a perek of Pirkei Avos | a summer or bein-hazmanim program |
+
+The right-hand column is flyers — `flows/flyer.md`.
+
+**"It's not a parsha or a chag" means the wrong flow, not a series question.** Say so and go back to *Where it goes* in `SKILL.md`. Only a **Source Sheet** is legitimately neither, and a Source Sheet is still mekoros to learn from, so the design settles it. "It's for the summer kollel" describes a program, not a sugya.
+
 ## Ask
 
 1. **The Canva link.**
-2. **Which parsha or chag.** Hebrew is fine. Look it up in `vocabulary.md` — and if you find an exact match, **say nothing about it and move on**. It appears in the read-back, where they'll confirm it. Announcing `ואתחנן → Vaeschanan` mid-flow and then showing it again at read-back reads as asking twice. Speak up only when genuinely unsure: nothing close → stop and ask; close but not exact → name your guess and ask.
-3. **The year.** Don't ask open-ended — offer the current Hebrew year to correct: `Year: תשפ״ו?` Almost every sheet is for the year it's uploaded in.
+2. **Which parsha or chag.** Hebrew is fine. Look it up in `vocabulary.md`; on an exact match **say nothing and move on** — it appears in the read-back for them to confirm. Speak up only when unsure: nothing close → stop and ask; close but not exact → name your guess and ask.
+3. **The year.** Offer the current Hebrew year to correct — `Year: תשפ״ו?` — never open-ended.
 4. **Combined?** Only if their answer suggests it. See below.
 
-**Don't ask for a title on Torah Bytes** — it's the parsha name, every time. Asking is the vocabulary match again in different words. Dor L'Dor and Source Sheets *do* need one, because their titles name a topic rather than the parsha; ask there, and offer to read the sheet and suggest something.
+Don't ask:
 
-**Don't ask about the series** unless nothing in the conversation indicates it. If you must, offer three bare options — not a sentence explaining how to answer.
+- **for a title on Torah Bytes** — it's the parsha name. Dor L'Dor and Source Sheets do need one; offer to read the sheet and suggest it.
+- **about the series**, unless nothing in the conversation indicates it. If you must, three bare options.
+- **about the cover picture.** The answer is always yes. One line in the read-back.
 
-**Don't ask about the cover picture.** The answer is always yes. Note it in the read-back on one line.
-
-**Never turn "which parsha" into a list.** Fifty-four transliterations the person doesn't think in is worse than them typing `עקב` and you matching it.
+**Never turn "which parsha" into a list.** Let them type `עקב` and match it.
 
 ## Fields
 
@@ -48,7 +62,7 @@ category:     ["Vayikra"]
 subcategory:  "Behar-Bechukosai"
 ```
 
-The hyphenated value must be one of the six on the list in `vocabulary.md`. The site splits it and shows the sheet under both `Behar` and `Bechukosai` by itself. Don't create two rows.
+The hyphenated value must be one of the six in `vocabulary.md`. The site shows the sheet under both `Behar` and `Bechukosai` by itself. Don't create two rows.
 
 **A parsha that's also a special day** (Pinchas falling on Shiva Asar B'Tammuz) → still **one row**, tagged both ways:
 
@@ -58,7 +72,7 @@ subcategory:      "Pinchas"                 ← the parsha identity
 chagSubcategory:  "Shiva Asar B'Tammuz"     ← the special-day name
 ```
 
-That one row appears under the `Pinchas` button *and* the `Shiva Asar B'Tammuz` button. Two rows pointing at the same PDF would duplicate the sheet.
+That row appears under both the `Pinchas` and `Shiva Asar B'Tammuz` buttons. Two rows pointing at the same PDF would duplicate the sheet.
 
 A **chag-only** sheet (Chanukah, no parsha) needs no `chagSubcategory` — put the chag in `subcategory` and tag `category: ["Chagim & Special Days"]`.
 
@@ -66,36 +80,32 @@ A Dor L'Dor sheet can be a parsha *and* Pirkei Avos *and* a chag at once — tag
 
 ## The cover picture
 
-`pdfThumbnail` won't happen by itself: Wix renders no preview from a PDF, so until someone renders page 1 and uploads it the sheet shows a generic icon. Always make it.
+**Always make `pdfThumbnail`.** Wix renders no preview from a PDF, so without it the sheet shows a generic icon. Only the featured (newest) sheet displays its cover.
 
-Only the featured (newest) sheet displays its cover, so it matters most in the week a sheet goes up.
-
-**Never clear `pdfThumbnail` on another row.** The page renders a thumbnail only for the featured card, so a leftover value on an older sheet displays nothing and costs nothing. Clearing it is pure data loss — that sheet had a real preview when it was featured, and erasing it means re-rendering the PDF to get it back.
+**Never clear `pdfThumbnail` on another row.** A leftover value on an older sheet displays nothing; clearing it destroys a preview that has to be re-rendered from the PDF to get back.
 
 ## The featured sheet
 
-A single new upload automatically becomes the featured sheet at the top of its tab, based on when the row was created. No field to set.
+A single new upload becomes the featured sheet at the top of its tab, by row creation time. No field to set.
 
-The exception is a **batch** — several rows created within half an hour. Then the site picks whichever matches the real current parsha instead. So when adding a backlog, don't expect the last one you added to be on top; that's deliberate.
+Exception: a **batch** — several rows created within half an hour. The site then picks whichever matches the real current parsha. When adding a backlog, don't expect the last one you added on top.
 
 ## Getting the PDF in
 
-The route that works, and the default:
-
 1. Take the Canva **design** link.
 2. Ask the Canva connector for a **PDF export URL**.
-3. Hand that URL to Wix's Media Manager import (`reference/wix.md` — set `mimeType` explicitly, and wait for the file to be ready).
+3. Hand that URL to Wix's Media Manager import — `reference/wix.md`: set `mimeType` explicitly and wait for the file to be ready.
 
-The Wix image-upload tool doesn't take PDFs, so this goes through the generic import, which needs a publicly reachable URL — a Canva export URL is one. A chat attachment may not resolve to one the API can fetch, so don't reach for that first.
+The Wix image-upload tool doesn't take PDFs, so this goes through the generic import, which needs a publicly reachable URL. Don't reach for a chat attachment first — it may not resolve to one the API can fetch. If someone attaches a PDF anyway, try it; if the import fails, ask for the Canva link. Never substitute a different file.
 
-If someone attaches a PDF anyway, try it — but if the import fails, say so and ask for the Canva link. Don't substitute a different file, and **don't create the row until the PDF has actually landed** in the Media Manager. A row pointing at a file that isn't there renders a broken card.
+**Don't create the row until the PDF has landed** in the Media Manager. A row pointing at a file that isn't there renders a broken card.
 
-Downloads are automatically named `RCK.TorahBytes.{Title}.{Year}.pdf` (Torah Bytes carry the year; the other series don't). Built from the row — no field to set.
+Downloads are named `RCK.TorahBytes.{Title}.{Year}.pdf` automatically from the row — no field to set. Only Torah Bytes carry the year.
 
 ## Verify
 
-Load the site's `/torah-sheets` page (real base URL from the Wix connector) and confirm three things:
+Load `/torah-sheets` (real base URL from the Wix connector):
 
 1. The sheet is on the right tab.
 2. It's at the top, with a real cover.
-3. **Clicking its parsha or chag button in the sidebar actually shows it.** This is the one that catches a bad vocabulary match, and the one people skip.
+3. **Clicking its parsha or chag button in the sidebar shows it.** This is the check that catches a bad vocabulary match.

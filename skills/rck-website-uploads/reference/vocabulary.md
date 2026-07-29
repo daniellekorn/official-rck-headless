@@ -1,14 +1,10 @@
 # The site's closed vocabulary
 
-**This is the single most important file in this skill.**
+**Look every name up here. Every time. Even when you're certain.** If it isn't here, don't write it — stop and ask.
 
-The website filters Torah sheets by matching the value in a row against a fixed list baked into the site's code. The match is case-insensitive but otherwise **exact**. A value that isn't on the list produces **no error message**. The sheet uploads fine, appears in "All Sheets", and is simply missing from the sidebar filter where anyone would look for it. It can sit wrong for months.
+The site's filters match these values case-insensitively but otherwise **exactly**. A value that isn't on the list throws no error: the sheet uploads, shows under "All Sheets", and is missing from the sidebar filter where anyone would look for it.
 
-So: **look the name up here. Every time. Even when you're certain.**
-
-If it isn't here, do not write it. Stop and ask the user.
-
-Source of truth: `SEFER_PARSHIOS`, `CHAGIM_ORDER`, and `PIRKEI_AVOS_PERAKIM` in `src/lib/torah-sheets.ts`. If this file and that file disagree, the code wins and this file needs updating.
+Source of truth: `SEFER_PARSHIOS`, `CHAGIM_ORDER`, and `PIRKEI_AVOS_PERAKIM` in `src/lib/torah-sheets.ts`. If this file disagrees with that one, the code wins.
 
 ---
 
@@ -159,11 +155,11 @@ Listed in Jewish calendar order, Tishrei → Elul.
 | שבעה עשר בתמוז | `Shiva Asar B'Tammuz` |
 | תשעה באב | `Tisha B'Av` |
 
-**Still a closed list.** Unlike the parsha filters there is no "Other" bucket here — a day that isn't above gets **no filter button at all**. The sheet uploads fine and shows under "All Sheets", but nobody browsing by chag will find it.
+**No "Other" bucket here.** A day that isn't above gets no filter button at all — the sheet uploads and shows under "All Sheets", but nobody browsing by chag finds it.
 
-Days deliberately **not** on the list yet: **Rosh Chodesh** (it recurs monthly, so it has no single place in a calendar-ordered list) and **Yom Ha'atzmaut** / **Yom Yerushalayim** (a call for the Kollel to make, not one to make on their behalf).
+Not on the list: **Rosh Chodesh**, **Yom Ha'atzmaut**, **Yom Yerushalayim**.
 
-If someone gives you one of those, or any other day not in the table: don't force it and don't substitute a neighbour. Tell them the site has no filter for that day yet, that the sheet will still upload and still be reachable under "All Sheets", and that Danielle can add the day in a small code change. Then ask whether to go ahead now or wait.
+Given one of those, or any other day not in the table: don't force it, don't substitute a neighbour. Tell them the site has no filter for that day yet, that the sheet will still upload and stay reachable under "All Sheets", and that Danielle can add the day in a small code change. Then ask whether to go ahead now or wait.
 
 ## Pirkei Avos — exactly six
 
@@ -171,4 +167,14 @@ If someone gives you one of those, or any other day not in the table: don't forc
 
 Written into `avosPerek`, spelled exactly like that — not `Perek 1`, not `3`, not `פרק ג`. Dor L'Dor only. A Pirkei Avos sheet without this set still shows under "All Sheets" but gets no chapter button.
 
-> Flyer sections are a separate closed list — see `flows/flyer.md`. Nothing in this file applies to flyers.
+---
+
+## Closed lists elsewhere
+
+Nothing in this file applies outside `TorahSheets`.
+
+| List | Where | A wrong value |
+|---|---|---|
+| Flyer sections — `events` · `learning` · `schedules` | `flows/flyer.md` | flyer on no page. `youth` is accepted and also renders nowhere. |
+| Flyer tags — Day, Time, Audience | `flows/flyer.md` | harmless, falls back to a Topic button. Except `daily`, which is load-bearing. |
+| `dayType` — `Weekday` · `Shabbat` | `flows/times.md` | row joins neither table, appears nowhere. |
