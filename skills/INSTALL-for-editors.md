@@ -39,7 +39,7 @@ Open a new chat and say what you want, in Hebrew or in English. Any of these wor
 
 > *(just paste a Canva link)*
 
-Claude will ask which language you want, then ask you one question at a time until it has what it needs. It shows you exactly what it's about to do and waits for you to say yes before anything goes on the website.
+Write in whichever language you prefer — Claude answers in the same one and stays there. It then asks you one question at a time until it has what it needs. It shows you exactly what it's about to do and waits for you to say yes before anything goes on the website.
 
 ### What to expect
 
@@ -91,7 +91,7 @@ Tell Claude what you're seeing, in plain words. If the same thing fails twice, s
 
 > *(פשוט להדביק קישור מ-Canva)*
 
-Claude ישאל קודם באיזו שפה אתם רוצים לעבוד, ואז ישאל שאלה אחת בכל פעם עד שיהיה לו כל מה שהוא צריך. לפני שהוא מעלה משהו לאתר הוא מראה לכם בדיוק מה הוא עומד לעשות, ומחכה לאישור שלכם.
+תכתבו בשפה שנוחה לכם — Claude יענה באותה שפה וימשיך בה. הוא ישאל שאלה אחת בכל פעם עד שיהיה לו כל מה שהוא צריך. לפני שהוא מעלה משהו לאתר הוא מראה לכם בדיוק מה הוא עומד לעשות, ומחכה לאישור שלכם.
 
 ### למה לצפות
 

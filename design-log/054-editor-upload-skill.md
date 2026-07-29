@@ -90,3 +90,48 @@ The PUT semantics are now in a new `reference/wix-api.md` alongside the endpoint
 **Latency.** The Hebrew run was slow, and roughly all of it was avoidable — a web search to work out Wix endpoints, then the clearing call, its `PUT`-shaped failure, and the restore. `wix-api.md` exists so the endpoints are read rather than searched (explicitly: don't web-search for Wix API details), and dropping the clearing removes a whole failure-and-recovery cycle.
 
 **Language leaked mid-conversation.** The Hebrew run narrated its progress in English ("Now importing the PDF and PNG into Wix Media Manager", "It's PUT, not PATCH") between Hebrew questions. Fixed twice over: everything the user sees is in their chosen language including progress notes, and step-by-step narration is discouraged outright — one line that work is happening, then the result.
+
+## Addendum — reshaped after review
+
+Three things came out of reading the shipped skill back. Version `2026-07-29b`.
+
+### The language gate and the Hebrew script are gone
+
+Both were solving a problem the model doesn't have. Claude already mirrors the language it's written to, so `Step 0 — language` spent a whole round trip asking a question the user had *already answered by typing* `להעלות פלייר` — and in doing so broke the skill's own rule 3 ("never ask what they already told you"), which is the rule whose stated purpose is not looking like you weren't listening. The worst case was the intended one: a Hebrew speaker opens with Hebrew and gets an English form back.
+
+`reference/phrases-he.md` (144 lines of fixed Hebrew wording) is deleted with it. The consistency argument for it was real but small, and it had already cost more than it bought: the file told the assistant to ask `שם הדף: Eikev?` while `SKILL.md` said **don't** ask for a title on Torah Bytes. A parallel script drifts from the flow it's meant to voice, and it drifted within one PR of being written.
+
+What survives is the part that isn't script but instruction, now four lines in `SKILL.md`: reply in the language they wrote in and stay there including progress notes; if you truly can't tell, start in English and switch on their first Hebrew reply; address Hebrew speakers in the **plural** (תשלחו) so nobody is gendered; CMS values stay Latin script regardless. The safety-critical Hebrew messages needed no script either — their *content* ("I won't guess, a wrong name fails silently, ask Danielle") is specified in `vocabulary.md`, and phrasing that faithfully is something the model is good at.
+
+### Structure: an entry file that routes, and one self-contained file per flow
+
+The old split was two overlapping decompositions — `SKILL.md` narrated all four flows *and* `reference/` held the same material organised by collection. So a Torah sheet upload was described in two places, and the PUT warning in four.
+
+Now `SKILL.md` (88 lines) holds only what applies to every job — the nine rules, language, read-back, verify, escalate — plus a three-row table routing to `flows/{torah-sheet,flyer,take-down}.md`. Each flow file is self-contained: its questions, its fields, its verification. Reading one top to bottom shows the whole flow, which is what makes it reviewable. `reference/{vocabulary,wix}.md` stay shared.
+
+The other lever was cutting rationale addressed to the author rather than the model — "an old instruction sheet lists only two", "older written instructions call this a bonus cleanup", "previous attempts failed because". That history is *this file's* job. The editorial rule, now in `skills/README.md`: **keep the consequence, cut the provenance.** "A wrong value fails silently and the sheet vanishes from the filters" changes what the model does; "we learned this in July" doesn't.
+
+874 lines → 583, with the four flows now readable in isolation.
+
+### `PATCH` exists, and it defuses the incident above
+
+The find that justified the whole detour. Chasing "where will the Wix MCP struggle", the REST reference turned up **`PATCH /wix-data/v2/items/{id}`** — a genuine partial update (`fieldModifications` with `SET_FIELD`), where *"only the fields specified in the request are modified. Data that isn't explicitly modified remains unchanged."*
+
+The destructive near-miss recorded above happened because the only update primitive we knew about was `PUT`, and the answer we shipped was the careful-discipline one: read-merge-write, every time, never a partial body. `PATCH` makes the whole failure class unreachable for single-field changes — which is what replacing a flyer image and setting `removeAfter` to yesterday both are. It's now the recommended path, with read-merge-write `PUT` kept as the documented fallback and "never send a partial `PUT`" kept as the rule.
+
+`PUT`'s full-replace semantics are confirmed in Wix's own words, which is worth having on the record: *"After an item is updated, it only contains the fields included in the `dataItem.data` payload in the request. If the existing item has fields with values and those fields aren't included in the updated item, their values are lost."*
+
+**Not yet exercised against the live site.** Docs-verified only; the next real update job should confirm the body shape.
+
+Two more failure points found the same way, both previously unhandled:
+
+- **Media import returns `operationStatus: PENDING`** — *"When you import a file, it's not immediately available."* The skill already said "don't create the row until you've confirmed the PDF landed" without saying how; it now says to wait for the descriptor to be ready. This is very likely what a broken card after an apparently clean upload actually is.
+- **Import needs an explicit `mimeType`** unless the URL or `displayName` carries a file extension — and a Canva export URL frequently carries neither.
+
+### Docs as a documented fallback, connector still first
+
+Danielle's call, and the right one: the Wix connector stays how the skill reads and writes, since it's authenticated and site-aware. But `dev.wix.com/docs` is fetchable as plain markdown — **append `.md` to any docs URL** — so when a call 404s or a shape is rejected there's somewhere to look that isn't a web search. `reference/wix.md` now ends with a table of the five pages that actually matter (data-items, patch, update, error codes, import-file) plus `llms.txt` as the index.
+
+`llms.txt` and `llms-full.txt` both resolve; `llms-full.txt` is ~38 MB and the skill is told never to fetch it. Note that the fallback needs web access on the user's side, which the connector-only path did not.
+
+This also retires the previous instruction's dead end. "Don't web-search for Wix API details; that file or the Wix docs tool" left nothing to do when both came up empty — which is what produced the slow Hebrew run.

@@ -10,19 +10,25 @@ It exists because the raw Wix MCP alone didn't work for the office: people weren
 
 ```
 rck-website-uploads/
-  SKILL.md                   the workflow: language gate, task menu, the four flows
+  SKILL.md                   entry point: rules, language, and a router to the flows
+  flows/
+    torah-sheet.md           adding a Torah sheet, end to end
+    flyer.md                 adding a flyer, and replacing one's picture
+    take-down.md             hiding a flyer, deleting a sheet
   reference/
     vocabulary.md            the closed lists, Hebrew ↔ site value
-    torah-sheets.md          TorahSheets fields
-    flyers.md                Flyers fields
-    phrases-he.md            fixed Hebrew wording
+    wix.md                   endpoints, PATCH vs PUT, media formats, docs fallback
 ```
+
+**`SKILL.md` is the only file that loads on every activation**, so it stays short — rules that apply to every job, and a table pointing at the one flow file the job needs. Each flow file is self-contained: its questions, its fields, and how to verify it, so you can read one top to bottom and see the whole flow. The two reference files are shared by all of them.
+
+Detail belongs in a flow file, not in `SKILL.md`. **Rationale belongs in the design log, not in the skill** — keep the *consequence* of a rule where it changes behaviour ("a wrong value fails silently and nobody notices for weeks") and leave the history of how we learned it in `design-log/054`.
 
 ### Keeping it accurate
 
 `reference/vocabulary.md` mirrors `SEFER_PARSHIOS`, `CHAGIM_ORDER`, and `PIRKEI_AVOS_PERAKIM` in `src/lib/torah-sheets.ts`, and the flyer sections mirror `FlyerCategory` in `src/lib/flyers.ts`. **If you change any of those lists in code, update `vocabulary.md` in the same PR** — a skill that disagrees with the code is worse than no skill, because it teaches the wrong value confidently.
 
-Adding a chag is the likeliest change. `Shabbos HaGadol` in particular is not currently in `CHAGIM_ORDER`, and it comes up every year.
+Adding a chag is the likeliest change — `CHAGIM_ORDER` has no "Other" bucket, so a day that isn't on it gets no filter button at all. `Rosh Chodesh` and `Yom Ha'atzmaut`/`Yom Yerushalayim` are the deliberate omissions (#054); everything else the office has asked for is on the list.
 
 ### Packaging and sharing
 
