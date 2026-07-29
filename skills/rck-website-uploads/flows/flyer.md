@@ -1,93 +1,107 @@
 # Flow — flyers
 
-Collection `Flyers`, one row per flyer. Images live in the Media Manager folder called **Flyers**. Writing: `reference/wix.md`.
+Collection `Flyers`, one row per flyer. Images go in the Media Manager folder **Flyers**. Writing: `reference/wix.md`.
 
-Two jobs here: **a new flyer**, and **replacing the picture on one that's already up**.
+Two jobs: **a new flyer**, and **replacing the picture on one already up**.
 
-## Already happened? Wrong collection.
+## Check first — these aren't flyers
 
-`Flyers` is for current and upcoming things. An event that's over belongs in `PastEvents` — a different collection with different fields (`title`, `eventDate`, `gallery`, `flyerImage`, `flyerPdfUrl`, `blurb`, `sortOrder`, `active`). If someone asks for a flyer for something in the past, say so and ask whether they want it in the archive instead.
+- **Already over** → `flows/past-event.md`. A past-dated flyer isn't hidden; it sits in the upcoming-events carousel looking current.
+- **Ongoing, for kids or teens** → `flows/youth-program.md`.
 
 ## A — a new flyer: ask
 
-1. **The Canva link.**
-2. **Which page** — only if there's more than one. Check the design yourself rather than making them count.
-3. **Title.** Offer to read it and suggest one.
-4. **Which section** — Schedules, Learning, Youth Programming, or Events. Offer all four.
-5. **How long it stays up.** Events almost always need a date; standing schedules don't.
+1. **The Canva link.** Open and read it before asking anything else — it gives you the title, page count, date, and audience.
+2. **Which section**, if the design doesn't settle it — Schedules, Learning, or Events.
+3. **Title** — read it off the design and offer it for confirmation.
+4. **Which page** — only if there's more than one. Count them yourself.
+5. **How long it stays up.** If the design carries a date, offer that date. Events need one; standing schedules and ongoing programs don't.
 
 ## Fields
 
 | Field | Type | What to put in it |
 |---|---|---|
 | `title` | Text | The name shown on the site. |
-| `category` | Text | `schedules`, `learning`, `youth`, or `events`. Lowercase, exact. |
-| `imageUrl` | Text | **The important one.** A plain public image URL — see below. |
-| `pdfUrl` | Text | A public PDF URL. For genuinely multi-page documents only. |
+| `category` | Text | `events`, `learning`, or `schedules`. Lowercase, exact. Never `youth`. |
+| `imageUrl` | Text | A plain public image URL — see below. |
+| `pdfUrl` | Text | A public PDF URL. Genuinely multi-page documents only. |
 | `isActive` | Boolean | Show/hide without deleting. Default true. |
 | `displayOrder` | Number | Order within its section, lower first. |
 | `subCategory` | Tags | Optional filter tags — see below. |
 | `removeAfter` | Date | The last day it shows. Optional. |
 
-## Sections — exactly four
+## Sections
 
-Written into `category`, **lowercase**:
+Written into `category`, lowercase. A wrong or misspelled value puts the flyer on no page, with no warning.
 
-| Site value | Visitor sees | Ask |
-|---|---|---|
-| `schedules` | Schedules | "Is this a schedule?" |
-| `learning` | Learning | "Is this a shiur or learning program?" |
-| `youth` | Youth Programming | "Is this for kids or teens?" |
-| `events` | Events | "Is this a one-off event?" |
+| Value | Visitor sees | Use it when | Renders on |
+|---|---|---|---|
+| `events` | Events | one-off with a date | `/events` |
+| `learning` | Learning | shiur, chaburah, or learning program for adults | `/learn` |
+| `schedules` | Schedules | the weekly minyan-and-shiur schedule | `/daven`, **only with the `daily` tag** |
 
-A wrong or misspelled value means the flyer appears **nowhere**, with no warning. There is no fifth section — if they want one, that's Danielle's.
+**Never write `youth`.** The collection accepts it and no page reads it — a flyer filed there is invisible sitewide, spelled correctly, with no error. Instead:
+
+- **Ongoing** (chaburah, Dor L'Dor, teen learning) → `flows/youth-program.md`.
+- **One-off** (Chanukah mesibah, a trip) → `events` plus an audience tag (`Kids`, `Teens`, `Boys`, `Girls`).
+
+No fifth section exists. If they want one, that's Danielle's.
 
 ## `imageUrl` must be a plain public URL
 
-It holds something like `https://static.wixstatic.com/media/f477b1_abc123….png`.
+Like `https://static.wixstatic.com/media/f477b1_abc123….png`. A `wix:image://v1/…` value renders a broken image on a live page with no error anywhere.
 
-It is **not** a Wix internal reference. Writing `wix:image://v1/…` here produces a broken image on a live page with no error anywhere. This is the most common way a flyer upload silently fails.
+Upload the PNG to the **Flyers** folder and use the URL the upload hands back — don't construct one. Read an existing flyer row and mirror it.
 
-Upload the PNG to the **Flyers** folder, then put the **public URL it hands back** in `imageUrl`. The Wix image-upload tool returns exactly that — a `wixstatic.com` URL — so use what it returns rather than building one. Read an existing flyer row first and mirror it.
+The image-upload tool takes a chat attachment as readily as a link, so an attached PNG is fine — don't send them back for a Canva link.
 
-That tool takes a **chat attachment** as readily as a link, so if someone attaches the PNG instead of sending a Canva link, that's fine — no need to send them back for a link.
+Prefer an image over a PDF: it gets hover zoom, click-to-enlarge, and a Download button.
 
-Prefer an image over a PDF: an image gets the hover zoom, the click-to-enlarge viewer, and a Download button.
+## One page per flyer
 
-## Flyers are one page
-
-Export **one page** as PNG, not the whole design. If the design has several pages, check how many and ask which one. This is why Canva embeds were removed from flyers — an embed showed every page, which was never what anyone wanted.
+Export **one page** as PNG, never the whole design. Several pages → count them and ask which one.
 
 ## Take-down dates
 
-`removeAfter` is the last day the flyer shows. It stays up through that whole day in Israel time and disappears by itself the next morning. The row isn't deleted — set the date forward again and it comes back.
+`removeAfter` is the last day it shows. It stays up through that day (Israel time) and drops off the next morning. The row survives — set a future date and it's back.
 
-- **Event flyers: set a date.** This is the cleanup nobody remembers to do.
-- **Standing schedules and ongoing programs: leave it empty.**
+- **Event flyers: set a date.**
+- **Standing schedules and ongoing programs: leave empty.**
 
 ## Tags
 
-`subCategory` is an optional list of tags. The site sorts them into filter rows by itself:
+`subCategory` is an optional tag list. The site sorts them into filter rows:
 
 - **Day** — weekday names, plus `Daily`, `Shabbos`, `Motzei-Shabbos`
 - **Time** — `Morning`, `Afternoon`, `Evening`, `Night`
 - **Audience** — `Men`, `Women`, `Boys`, `Girls`, `Kids`, `Teens`, `Youth`, `Family`, `Community`
 - **Topic** — anything else
 
-Capitalisation doesn't matter. Tags must not contain a `|`.
+Capitalisation doesn't matter. No `|` in a tag.
 
-**One reserved tag:** a flyer with `category: schedules` and the tag `daily` becomes the featured daily schedule on the Daven page under the minyan times. Only the first active one shows. To swap that schedule, replace the picture on that existing row — don't add a second one.
+## Schedules has exactly one slot
+
+`/daven` shows the **first** flyer with `category: schedules` **and** the tag `daily`. Nothing else in the section renders anywhere:
+
+- A `schedules` flyer without the `daily` tag is on no page.
+- A second `daily` schedule flyer is on no page — the first keeps the slot.
+
+So a new weekly schedule is almost always **section B on the existing row**, not a new row. Find the current `daily` row and confirm it's the one they mean.
+
+If they want a second schedule posted separately, say the page has room for one and that's Danielle's.
+
+The minyan times above the flyer on that page are computed weekly by the site — replacing this picture doesn't change them. If the times are what they're asking about, see `flows/times.md`.
 
 ## B — replacing a flyer's picture
 
-Title, section, and take-down date all stay exactly as they are. Only the image changes.
+Title, section, and take-down date stay. Only the image changes.
 
-1. **Which flyer.** Ask for the title, find it, and read the title back so you're both certain it's the right one.
+1. **Which flyer.** Find it and read the title back.
 2. **The Canva link**, and which page.
 3. **Read back** what's changing and what's staying.
-4. **Swap the image.** This is an **update to an existing row** — `reference/wix.md` before you write. A careless one-field update wipes the title and take-down date you just promised to keep.
-5. **Delete the old image** from the Flyers folder, so superseded versions don't pile up and nobody can tell which is current.
+4. **Swap the image** — an update to an existing row, so `reference/wix.md` first. A careless one-field update wipes the title and date you just promised to keep.
+5. **Delete the old image** from the Flyers folder.
 
 ## Verify
 
-Load the page for the section you filed it under (real base URL from the Wix connector) and confirm the flyer is there and the picture renders. A blank space where the image should be almost always means `imageUrl` got an internal reference instead of a public URL.
+Load the page for its section (real base URL from the Wix connector) and confirm the flyer is there and the picture renders. A blank space almost always means `imageUrl` got an internal reference instead of a public URL.

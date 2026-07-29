@@ -4,31 +4,40 @@ Claude skills shipped with this repo. A skill is a folder containing a `SKILL.md
 
 ## `rck-website-uploads`
 
-A bilingual (Hebrew/English) guided workflow that lets a non-technical person add Torah sheets and flyers to the site from a Canva link, without touching the Wix dashboard and without knowing any field names.
+A bilingual (Hebrew/English) guided workflow that lets a non-technical person put content on the site from a Canva link or an attachment, without touching the Wix dashboard and without knowing any field names.
 
-It exists because the raw Wix MCP alone didn't work for the office: people weren't supplying the information Claude needed, and a mistyped parsha name fails **silently** — the sheet uploads, then quietly goes missing from the sidebar filters. The skill fixes that by asking one question at a time, refusing to call a tool until every answer is in hand, and looking every vocabulary value up in a bundled closed list instead of transliterating from memory.
+It exists because the raw Wix MCP alone didn't work for the office: people weren't supplying the information Claude needed, and a mistyped parsha name fails **silently** — the sheet uploads, then quietly goes missing from the sidebar filters. The skill fixes that by asking one question at a time, refusing to write until every answer is in hand, and looking every vocabulary value up in a bundled closed list instead of transliterating from memory.
 
 ```
 rck-website-uploads/
-  SKILL.md                   entry point: rules, language, and a router to the flows
+  SKILL.md                   entry point: rules, language, triage, and a router to the flows
   flows/
     torah-sheet.md           adding a Torah sheet, end to end
     flyer.md                 adding a flyer, and replacing one's picture
-    take-down.md             hiding a flyer, deleting a sheet
+    youth-program.md         a YouthPrograms row, and its flyer
+    past-event.md            archiving something that already happened
+    times.md                 minyan times — mostly "nothing to upload"
+    take-down.md             hiding a flyer or a row, deleting a sheet
   reference/
     vocabulary.md            the closed lists, Hebrew ↔ site value
     wix.md                   endpoints, PATCH vs PUT, media formats, docs fallback
 ```
 
-**`SKILL.md` is the only file that loads on every activation**, so it stays short — rules that apply to every job, and a table pointing at the one flow file the job needs. Each flow file is self-contained: its questions, its fields, and how to verify it, so you can read one top to bottom and see the whole flow. The two reference files are shared by all of them.
+**`SKILL.md` is the only file that loads on every activation**, so it stays short — rules that apply to every job, the triage that decides *which* job it is, and a table pointing at the one flow file needed. Each flow file is self-contained: its questions, its fields, and how to verify it, so you can read one top to bottom and see the whole flow. The two reference files are shared by all of them.
 
-Detail belongs in a flow file, not in `SKILL.md`. **Rationale belongs in the design log, not in the skill** — keep the *consequence* of a rule where it changes behaviour ("a wrong value fails silently and nobody notices for weeks") and leave the history of how we learned it in `design-log/054`.
+**Triage is the part that earns its place in `SKILL.md`.** Routing on the noun the person used doesn't work — `דף` covers a Torah sheet, a flyer, and a schedule — so the skill opens the design and routes on what it actually says, and rule 10 tells it to back out of a flow rather than keep narrowing inside the wrong one. See [#055](../design-log/055-upload-skill-triage.md).
+
+Detail belongs in a flow file, not in `SKILL.md`.
+
+**Write it like documentation: what to do and how, nothing else.** Lean, clear, concise — imperative sentences, tables over prose, no paragraph that exists to justify the line above it. Rationale goes in the design log, and that includes the softer forms of it: "previous attempts failed because…", "that's the reassurance", "worth naming outright". A bare consequence clause earns its place only when it changes what the model *does* ("a wrong value throws no error: the sheet uploads, then vanishes from the filters" → so look it up). Anything longer is for `design-log/054` and `055`.
 
 ### Keeping it accurate
 
 `reference/vocabulary.md` mirrors `SEFER_PARSHIOS`, `CHAGIM_ORDER`, and `PIRKEI_AVOS_PERAKIM` in `src/lib/torah-sheets.ts`, and the flyer sections mirror `FlyerCategory` in `src/lib/flyers.ts`. **If you change any of those lists in code, update `vocabulary.md` in the same PR** — a skill that disagrees with the code is worse than no skill, because it teaches the wrong value confidently.
 
 Adding a chag is the likeliest change — `CHAGIM_ORDER` has no "Other" bucket, so a day that isn't on it gets no filter button at all. `Rosh Chodesh` and `Yom Ha'atzmaut`/`Yom Yerushalayim` are the deliberate omissions (#054); everything else the office has asked for is on the list.
+
+A subtler kind of drift, and the one that bit in #055: a value can be **spelled correctly and still render nowhere**, because the page that used to read it no longer does. `Flyers.category: youth` is the live example — `FlyerCategory` still accepts it, `/youth` stopped reading it in #017. So when a page stops consuming a collection or a category, check whether the skill still offers it. The check that catches this isn't "is the value in the union?" but **"which page renders a row with this value, and does that page still ask for it?"**
 
 ### Packaging and sharing
 

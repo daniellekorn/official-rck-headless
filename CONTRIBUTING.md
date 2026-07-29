@@ -35,7 +35,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Youth programs (on /youth) | `YouthPrograms` | Add a row per program: title, description, contact rabbi, optional photo + flyer. |
 | Past events archive (on /events) | `PastEvents` | Add a row per past event: title, date, photo gallery, optional flyer + blurb. Shows newest first. |
 | Davening times (weekday + Shabbos) | *(computed)* + `DaveningTimes` | Regular minyanim **and** the Shabbos schedule are calculated from zmanim in code (design-log #040, #041) — don't enter them as rows. Use `DaveningTimes` only for extras (Selichos, special weeks): `dayType = Weekday` rows appear under the weekday table, `dayType = Shabbat` rows under Shabbos Day. |
-| Flyers (images / PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the four valid slugs (see schema below). For event flyers, set `removeAfter` so they drop off the site on their own. |
+| Flyers (images / PDFs) | `Flyers` | Add a row per flyer. Set `category` to one of the three slugs that render — `events`, `learning`, `schedules` (see schema below; `youth` is accepted but invisible). For event flyers, set `removeAfter` so they drop off the site on their own. |
 | Torah Sheets (Parsha Bytes, Dor L'Dor, Source Sheets) | `TorahSheets` | Add a row per sheet: title, series, category/subcategory (or topic for Source Sheets), date, and either a PDF file or a Canva embed link. See schema below and [#053](design-log/053-torah-sheets-page.md). |
 | Footer address, phone, email | `ContactInfo` | Edit the single row. Leave a field empty to hide it from the footer. |
 | Footer social links | `ContactInfo` | Fill in any of `facebookUrl`, `instagramUrl`, `youtubeUrl`, `whatsappUrl`, `twitterUrl`, `linkedinUrl`. Empty = icon hidden. (`whatsappUrl` should be the main community invite — same link as `HomePage.whatsappJoinHref`.) |
@@ -402,7 +402,7 @@ One row per flyer. Set **`imageUrl`** (preferred) or **`pdfUrl`** — a row with
 | Field | Type | Notes |
 |---|---|---|
 | title | Text | Display name shown on site |
-| category | Text | **Must be one of:** `schedules`, `learning`, `youth`, `events` (lowercase, exact). Wrong value = flyer silently hidden. |
+| category | Text | **Use one of:** `schedules`, `learning`, `events` (lowercase, exact). Wrong value = flyer silently hidden. `youth` is a fourth accepted value that **no page renders** — see the slug table below. |
 | imageUrl | Text | **Preferred.** A public image URL (export page 1 of the Canva design as PNG). Gets the hover zoom, click-to-enlarge viewer, and Download button. |
 | pdfUrl | Text | Direct public PDF URL — fallback for genuinely multi-page documents. Checked after the image. |
 | isActive | Boolean | Show/hide without deleting. Default: true (checked). |
@@ -412,20 +412,24 @@ One row per flyer. Set **`imageUrl`** (preferred) or **`pdfUrl`** — a row with
 
 **Exporting a flyer image from Canva:** open the design → **Share → Download → PNG**, and select **page 1 only**. Upload that PNG into the row's image field (or paste a public image URL). That's the whole step.
 
-**Valid `category` slugs:**
+**`category` slugs — three that render, one that doesn't:**
 
-| Type this… | Shows under… |
-|---|---|
-| `schedules` | Schedules |
-| `learning` | Learning |
-| `youth` | Youth Programming |
-| `events` | Events |
+| Type this… | Shows under… | On page |
+|---|---|---|
+| `events` | Events | `/events` |
+| `learning` | Learning | `/learn` |
+| `schedules` | Schedules | `/daven` — **only with the `daily` tag**, see below |
+| ~~`youth`~~ | **nothing — do not use** | none |
+
+> **`youth` is accepted and invisible.** The Youth page is built from `YouthPrograms` rows, not from flyers ([#017](design-log/017-events-and-youth-pages.md)), so a flyer filed under `youth` appears on **no page at all** — the spelling is right, nothing errors, and it simply isn't anywhere. Youth flyers go on the `YouthPrograms` row (see that schema above). A one-off youth *event* is `events` with an audience tag like `Kids` or `Teens`. See [#055](design-log/055-upload-skill-triage.md).
 
 **Special reserved `subCategory` tags — do not reuse for general filtering:**
 
 | category | subCategory tag | Where it appears |
 |---|---|---|
-| `schedules` | `daily` (any capitalization) | Featured daily learning schedule on the Daven with Us page, below the minyan times. Only the first active row carrying this tag in this category is shown. |
+| `schedules` | `daily` (any capitalization) | Featured daily learning schedule on the Daven with Us page, below the minyan times. |
+
+> **The Schedules section has exactly one slot**, and the `daily` tag is what fills it. A `schedules` flyer **without** the tag appears on no page; a **second** one with the tag appears on no page either, because only the first active row shows. So a new weekly schedule is a picture replacement on the existing row, not a new row.
 
 To swap the daily schedule: edit the one row with `category = schedules` and the `daily` tag. Update `imageUrl` with the new page-1 export. No code change needed.
 
