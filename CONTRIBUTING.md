@@ -302,10 +302,19 @@ Selichos) and special one-off rows. One row per service-time variant.
 by service name; `dayType = Shabbat` rows render at the end of the computed
 Shabbos Day list.
 
+> **Five existing rows are broken, on purpose for now — don't "fix" them.** They
+> are KBA's Shabbos times, entered before #041 computed the Shabbos block, and
+> their `dayType` says `Shabbos` so they render nowhere. Two of them (Shacharis
+> 8:45, Tefillat Yeladim 10:00) are *identical* to the computed times and one
+> contradicts it (Mincha 7:15 vs the computed 7:10), so correcting the spelling
+> would show those times twice on the page. The right cleanup is to untick
+> `active` on all five — ask Danielle. Full detail in
+> [#008's addendum](design-log/008-davening-flat-layout-shabbat-static.md).
+
 | Field | Type | Notes |
 |---|---|---|
 | service | Text | `Shacharis`, `Mincha`, `Maariv`, `Selichos` |
-| dayType | Text | `Weekday` or `Shabbat` — controls which section the row appears under. |
+| dayType | Text | `Weekday` or `Shabbat` — controls which section the row appears under. **Spelled `Shabbat`, not `Shabbos`**, unlike the rest of the site. Anything else matches neither section and the row appears nowhere, with no error. |
 | daySpec | Text (opt) | Days shown next to each service: `Sunday`, `Mon, Thu`, `Sun – Thu`, etc. Leave empty only if day specificity doesn't apply. |
 | time | Text | Display string like `7:00 AM`, `Plag`, `10 min before Shkiya`. Wall-clock text, not a parsed time. |
 | notes | Text (opt) | Extra context only — e.g. `Followed by daf yomi`. **Do not** put day-of-week info here; that belongs in `daySpec`. |
@@ -403,7 +412,8 @@ One row per flyer. Set **`imageUrl`** (preferred) or **`pdfUrl`** — a row with
 |---|---|---|
 | title | Text | Display name shown on site |
 | category | Text | **Use one of:** `schedules`, `learning`, `events` (lowercase, exact). Wrong value = flyer silently hidden. `youth` is a fourth accepted value that **no page renders** — see the slug table below. |
-| imageUrl | Text | **Preferred.** A public image URL (export page 1 of the Canva design as PNG). Gets the hover zoom, click-to-enlarge viewer, and Download button. |
+| imageUrl | Text | **Preferred — this is the one the page reads.** A public image URL (export page 1 of the Canva design as PNG). Gets the hover zoom, click-to-enlarge viewer, and Download button. |
+| ~~image~~ | — | **Don't use.** The collection has a second image field that nothing reads. Most rows hold the same URL in both, but only `imageUrl` reaches the page — fill `image` alone and the flyer shows "Flyer coming soon". See [#010's addendum](design-log/010-flyers-cms-collection.md). |
 | pdfUrl | Text | Direct public PDF URL — fallback for genuinely multi-page documents. Checked after the image. |
 | isActive | Boolean | Show/hide without deleting. Default: true (checked). |
 | displayOrder | Number | Sort order within the category. Lower = first. |

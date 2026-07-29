@@ -39,11 +39,15 @@ Rows render after the computed times: `dayType = Weekday` under the weekday tabl
 | `sortOrder` | Number | Order within its service group, lower first. |
 | `active` | Boolean | Show/hide without deleting. Default true. |
 
-### `Shabbat`, not `Shabbos`
+### Shabbos rows: don't add one, don't revive one
 
-The one spelling that matters, and the easy one to get wrong: `dayType` must be **`Shabbat`**, even though the site says Shabbos everywhere else (`Shabbos HaGadol`, `Shabbos Shuva`, the Shabbos table itself). A row saying `Shabbos` joins neither table and appears on no page, with no error.
+The whole Shabbos schedule is computed. `DaveningTimes` is for **weekday** extras in practice — Selichos, a special week.
 
-Rows on the live site are wrong this way right now. Before writing, read the neighbouring rows — and if you see `Shabbos` ones, say so rather than copying them.
+If you're asked to add a Shabbos time, the answer is almost certainly that it's already on the page. Check `/daven` before writing anything.
+
+There are five rows on the live site with `dayType` spelled `Shabbos` instead of `Shabbat`, which is why they render nowhere. **Leave them alone.** They pre-date the computed Shabbos schedule and duplicate it — Shacharis 8:45 and Tefillat Yeladim 10:00 are exactly the computed values, and correcting the spelling would show each of those twice. If someone asks you to fix them, explain that and send it to Danielle.
+
+Writing `Shabbat` on a genuinely new row still works, and still needs that exact spelling — but ask what it's for first.
 
 ## Taking one off
 

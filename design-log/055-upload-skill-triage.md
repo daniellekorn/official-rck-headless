@@ -97,7 +97,19 @@ Three things the pass found that the skill had wrong or missing:
 - **`PastEvents.flyerImage` takes either shape.** The flow file claimed it needs the internal reference; one live row holds a plain `wixstatic` URL and renders fine on `/events`. Corrected to "read a row and mirror it" rather than asserting a format. The `YouthPrograms` preference *is* real and now stated with its actual consequence: only the internal form carries `#originWidth`/`#originHeight`, which `imageAspectRatio` parses to fit the frame — a plain URL renders but falls back to a fixed 3:4.
 - **`DaveningTimes.dayType` is `Shabbat`, and five live rows say `Shabbos`.** `DayType` is `"Weekday" | "Shabbat"`, so `Shabbos` matches neither filter. Confirmed on `/daven`: the five active `Shabbos` rows (KBA's "Parsha of the Week", Shacharis 8:45, Tefillat Yeladim 10:00, Mincha 7:15, Maariv At Tzeis) appear nowhere — the 8:45 and 10:00 visible on the page come from the computed `SHABBOS_MORNING` constants, not from those rows. `times.md` predicted this failure mode before the data was looked at; it now names the spelling explicitly, since `Shabbos` is the form the site uses everywhere else. Also documents `orgName`, an undocumented field on every row.
 
-**Live data left alone.** The five orphaned rows are a content decision — `Shabbat` would surface KBA's times on the RCK site, `active: false` retires them — so they're reported to Danielle, not fixed here.
+**Live data left alone.** Retiring KBA's times is the office's call, so the five rows are reported, not fixed. The recommendation is `active: false` on all five, matching what #040 did to the equivalent weekday rows.
+
+### The stale docs behind the wrong instructions, and one code change
+
+The skill was written from the design log and `CONTRIBUTING.md`, so where it was wrong, they were wrong first. Corrected at the source rather than only in the skill:
+
+- **[#008's](008-davening-flat-layout-shabbat-static.md) two central Shabbat claims are false** — "Shabbat CMS data will never exist" and "`dayType = Shabbat` rows stored but not rendered". #041 computed the Shabbos block and `daven.astro` appends CMS `Shabbat` rows to it as `shabbosExtras`; #008 was never revisited. Status line now flags the supersession, with an addendum carrying the live data.
+- **[#010's](010-flyers-cms-collection.md) field table no longer describes the collection** — `embedUrl` is gone (#031), `imageUrl` isn't listed at all, `subCategory` and `removeAfter` arrived later, `pdfUrl` is unused, and the undocumented `image` duplicate isn't mentioned. Addendum added.
+- **`CONTRIBUTING.md`** gains the `image`-does-nothing row, the `Shabbat`-not-`Shabbos` warning, and a don't-fix-these note on the five rows.
+
+One code change, deliberately small: **`davening.ts` now warns when an active row's `dayType` matches neither value.** This whole class is invisible precisely because nothing complains, and a build-log line is enough to catch the next one. It warns rather than coercing — accepting `Shabbos` as a synonym is the tempting fix and the wrong one, since it unmasks the duplicates. `flyers.ts` gains a comment on why `image` is not read. No render behaviour changes.
+
+**Discovered and left open:** `youth` can now be removed from `FlyerCategory` with no data migration — the live check found zero rows using it. #055 originally listed that follow-up as blocked on exactly that unknown.
 
 **The triage change itself is not yet exercised.** It's behavioural; the next real Hebrew upload is the test, and the thing to watch is whether the skill opens the design before its second question.
 

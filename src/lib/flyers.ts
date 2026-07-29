@@ -14,6 +14,12 @@ export interface Flyer {
 	 */
 	subCategory?: string[];
 	pdfUrl?: string;
+	/**
+	 * The public image URL the page renders. Note the collection *also* has an
+	 * `image` field, deliberately not read here — 25 of 26 shipped rows carry the
+	 * same URL in both, but only this one reaches the page, so a row with `image`
+	 * alone renders the "Flyer coming soon" placeholder. See #010's addendum.
+	 */
 	imageUrl?: string;
 	isActive?: boolean;
 	displayOrder?: number;
