@@ -17,6 +17,8 @@ This will update the skills to the latest version.
 
 Before making non-trivial changes, **read `design-log/`** for prior decisions and check whether a new entry is required. Required entries cover: new/renamed CMS collections or fields, new pages, content-vs-code boundary decisions, library choices with alternatives, workflow changes affecting the non-technical collaborator, and bilingual/RTL behavior. Process and exclusions in `design-log/README.md`.
 
+**If your change makes an existing entry untrue, amend that entry in the same PR** — status line plus an addendum. A stale entry is read as current and produces wrong work downstream (#008 → #055). Run `npm run check:design-log` before opening a PR; the baseline is clean, so any hit is yours.
+
 Cite prior entries by number in conversation when relevant ("see #001"). For in-flight work, append an **Implementation Results** section with commit SHAs once shipped.
 
 ## Editor-facing content
