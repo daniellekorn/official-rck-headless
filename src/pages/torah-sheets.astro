@@ -286,23 +286,36 @@ const tabs = [
 		height: 9.5rem;
 	}
 
+	/* No background "box" — just the icon itself, same minimal icon-button
+	   treatment as .sheet-download, so there's no empty mist-colored square
+	   sitting around a small icon when there's no real PDF thumbnail (the
+	   common case — most sheets don't have one). */
 	.sheet-thumb--placeholder {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: var(--color-navy-300);
+		width: 2.25rem;
+		height: 2.25rem;
+		background: transparent;
+		color: var(--color-navy-500);
 		cursor: pointer;
+		transition: background-color 0.15s, color 0.15s;
 	}
 	.sheet-thumb--placeholder:hover {
-		background: var(--color-navy-50);
+		background: var(--color-gold-100);
+		color: var(--color-navy-700);
 	}
 	.sheet-thumb--placeholder svg {
-		width: 1.5rem;
-		height: 1.5rem;
+		width: 1.125rem;
+		height: 1.125rem;
 	}
-	.sheet-row--featured .sheet-thumb--placeholder svg {
+	.sheet-row--featured .sheet-thumb--placeholder {
 		width: 3rem;
 		height: 3rem;
+	}
+	.sheet-row--featured .sheet-thumb--placeholder svg {
+		width: 1.5rem;
+		height: 1.5rem;
 	}
 
 	/* The one "most recent" card — a real page-1 preview instead of the
