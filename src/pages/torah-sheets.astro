@@ -146,8 +146,9 @@ const tabs = [
 															>
 																<img src={sheet.pdfThumbnailUrl} alt="" loading="lazy" />
 																<svg class="sheet-thumb-view-icon sheet-thumb-view-icon--overlay" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-																	<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" stroke-linecap="round" stroke-linejoin="round" />
-																	<circle cx="12" cy="12" r="2.75" />
+																	<path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h6" stroke-linecap="round" stroke-linejoin="round" />
+																	<path d="M15 3h6v6" stroke-linecap="round" stroke-linejoin="round" />
+																	<path d="M10 14 21 3" stroke-linecap="round" stroke-linejoin="round" />
 																</svg>
 															</a>
 														) : sheet.sourceType === "pdf" ? (
@@ -161,8 +162,9 @@ const tabs = [
 																data-pdf-name={sheet.pdfFilename}
 															>
 																<svg class="sheet-thumb-view-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-																	<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" stroke-linecap="round" stroke-linejoin="round" />
-																	<circle cx="12" cy="12" r="2.75" />
+																	<path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h6" stroke-linecap="round" stroke-linejoin="round" />
+																	<path d="M15 3h6v6" stroke-linecap="round" stroke-linejoin="round" />
+																	<path d="M10 14 21 3" stroke-linecap="round" stroke-linejoin="round" />
 																</svg>
 															</a>
 														) : (
@@ -321,7 +323,7 @@ const tabs = [
 		transform: scale(1.05);
 	}
 
-	/* A single gold "view" (eye) icon marks the thumbnail as a read/open
+	/* A single gold external-link/open icon marks the thumbnail as a read/open
 	   action, not a download — full strength on the plain placeholder box
 	   (sized via the shared .sheet-thumb--placeholder svg rule above),
 	   softened to an overlay (with its own explicit size, since it sits over
