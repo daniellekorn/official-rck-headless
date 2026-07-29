@@ -67,7 +67,9 @@ The answer is always yes, so **don't spend a question on it.** Make it, and note
 
 Only the featured (newest) sheet displays its cover, so it matters most in the week a sheet goes up.
 
-When you generate one, clear `pdfThumbnail` on the other sheets in that series at the same time. They're no longer featured, their covers no longer display, and leaving them behind just accumulates dead images in the Media Manager.
+**Never clear `pdfThumbnail` on any other row.** The page already renders a thumbnail only for the featured card (`isFeatured` gates it in `torah-sheets.astro`), so a leftover value on an older sheet displays nothing and costs nothing. Clearing it is pure data loss — that sheet had a real preview when it was featured, and erasing it means nobody can get it back without re-rendering the PDF.
+
+Older written instructions call this a "bonus cleanup." It isn't. It wiped a real preview the first time it ran.
 
 ## Getting the PDF in
 
@@ -89,7 +91,7 @@ Downloads are automatically named `RCK.TorahBytes.{Title}.{Year}.pdf` (Torah Byt
 
 ## Checking your work
 
-Load `https://rckollel.org/torah-sheets` and confirm three things:
+Load the site's `/torah-sheets` page — get the real base URL from the Wix connector, don't assume a domain — and confirm three things:
 
 1. The sheet is on the right tab.
 2. It's at the top, with a real cover if you made one.

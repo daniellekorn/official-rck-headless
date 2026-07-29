@@ -19,7 +19,7 @@ Ship a **skill** (`skills/rck-website-uploads/`), packaged as a zip the office i
 
 A skill is the right shape here specifically because it can carry **reference files**. The closed vocabulary ships *inside* the skill as a Hebrew → site-value lookup table, so the parsha name is resolved by table lookup rather than by transliteration-from-memory. That single property is the fix for the silent-failure mode; everything else is ergonomics.
 
-Structure: `SKILL.md` holds the workflow (language gate, four-item task menu, one flow per task) and delegates detail to `reference/{vocabulary,torah-sheets,flyers,phrases-he}.md`.
+Structure: `SKILL.md` holds the workflow (language gate, four-item task menu, one flow per task) and delegates detail to `reference/{vocabulary,torah-sheets,flyers,wix-api,phrases-he}.md`. `SKILL.md` is what loads on every activation, so it stays deliberately thin — the reference files are read only when the job at hand needs them.
 
 The behavioural rules that matter, in rough order of how much breakage they prevent:
 
@@ -30,7 +30,7 @@ The behavioural rules that matter, in rough order of how much breakage they prev
 
 ### Bilingual, with fixed wording
 
-Language is the **first** question, asked before anything else, in both languages (`עברית או English?`). Hebrew phrasing lives in `reference/phrases-he.md` as fixed strings rather than being translated per-conversation, so the assistant reads the same way every week — for a skeptical user, consistency *is* trustworthiness. Hebrew addresses the user in the plural (תשלחו, תכתבו), which reads naturally and avoids assuming anyone's gender.
+Language is the **first** question, asked before anything else. The question itself is English ("Which language would you like me to guide you in?") with `English · עברית` as the two choices — Danielle's call, on the grounds that a one-line English question is short enough for a Hebrew reader and the Hebrew option makes the choice self-evident without asking twice. Hebrew phrasing lives in `reference/phrases-he.md` as fixed strings rather than being translated per-conversation, so the assistant reads the same way every week — for a skeptical user, consistency *is* trustworthiness. Hebrew addresses the user in the plural (תשלחו, תכתבו), which reads naturally and avoids assuming anyone's gender.
 
 Values written to the CMS stay in Latin script regardless of conversation language. The site's vocabulary is Ashkenazi transliteration; the only Hebrew that enters the CMS is `year` (`תשפ״ו`).
 
@@ -66,6 +66,27 @@ Fixed in the same PR — see #053 addendum 17, which extends the list from 9 ent
 
 Zip structure confirmed correct for Claude Desktop (skill folder at archive root, `SKILL.md` frontmatter with `name` and `description` parses). Vocabulary tables cross-checked entry-by-entry against `SEFER_PARSHIOS`, `CHAGIM_ORDER`, and `PIRKEI_AVOS_PERAKIM`; flyer sections against `FlyerCategory`. The media-format rules (`Flyers.imageUrl` must be a plain `static.wixstatic.com` URL — a `wix:image://` value passes through `scaleFlyerImage` untransformed and renders broken; `TorahSheets.pdfFile` is a Document field and does take the internal reference) were read off `wix-media.ts` and the row mappings rather than assumed, and the skill is additionally told to read an existing row and mirror its shape before its first write.
 
-**Not yet done: no end-to-end run.** Nobody has installed the zip and uploaded a real sheet through it. The first run should be a throwaway title with `isActive = false` so nothing reaches the public site.
+**Two end-to-end runs since** (one English, one Hebrew), both uploading a real Eikev sheet to the live site successfully. What they exposed is in "Post-first-run corrections" below — including one destructive defect that a `wix env`-less static review could never have caught.
 
 Site content and code are unchanged by this entry — the skill is additive, and the existing dashboard and MCP workflows in `CONTRIBUTING.md` still work.
+
+## Post-first-run corrections
+
+Two real runs (one English, one Hebrew) against the live site. Both completed successfully; both exposed defects worth recording.
+
+**The thumbnail "cleanup" was destructive and pointless — removed.** The skill inherited a line from the office's written instructions describing it as a "bonus cleanup": when uploading a new sheet, clear `pdfThumbnail` on the older ones so stale previews don't accumulate. Carried over without checking it against the render path, which was the mistake — `torah-sheets.astro` already gates the thumbnail on `isFeatured`, so a leftover value on a non-featured row **displays nothing**. The clearing bought exactly zero and cost a real preview: the Vaeschanan sheet lost the page-1 image it had from when it was featured, unrecoverable without re-rendering the PDF.
+
+It also came within one lucky recovery of much worse. Wix Data's item update is **`PUT`, not `PATCH`** — a full replace. The run sent a partial body to clear the one field and wiped that row's `title`, `subcategory`, and `pdfFile` too. It noticed and restored from the Media Manager, but that's luck, not design.
+
+So: the clearing instruction is gone, and two rules replace it —
+
+- **Touch only the row you're working on.** Never edit another row to make the page look a certain way; the page decides what to display, and erased data is gone.
+- **Updates are read-merge-write.** Read the row, merge the change into the complete `data` object, send all of it back. Never build an update body from scratch.
+
+The PUT semantics are now in a new `reference/wix-api.md` alongside the endpoints, since the same trap applies to replacing a flyer image and to taking one down — both are updates.
+
+**Hardcoded a domain that doesn't exist.** The skill told users to check `rckollel.org/torah-sheets`; the live site is on a `wix-site-host.com` address. Invented, never verified. Now: fetch the site URL from the Wix connector, never assume a domain.
+
+**Latency.** The Hebrew run was slow, and roughly all of it was avoidable — a web search to work out Wix endpoints, then the clearing call, its `PUT`-shaped failure, and the restore. `wix-api.md` exists so the endpoints are read rather than searched (explicitly: don't web-search for Wix API details), and dropping the clearing removes a whole failure-and-recovery cycle.
+
+**Language leaked mid-conversation.** The Hebrew run narrated its progress in English ("Now importing the PDF and PNG into Wix Media Manager", "It's PUT, not PATCH") between Hebrew questions. Fixed twice over: everything the user sees is in their chosen language including progress notes, and step-by-step narration is discouraged outright — one line that work is happening, then the result.
