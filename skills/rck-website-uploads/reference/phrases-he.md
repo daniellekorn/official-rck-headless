@@ -8,12 +8,7 @@ Use these exact wordings when the conversation is in Hebrew, so the assistant so
 
 ## Opening
 
-First message, nothing else with it. Both lines every time — Hebrew first if they wrote to you in Hebrew:
-
-> לפני שמתחילים — תרצו שאדריך אתכם באנגלית או בעברית?
-> Before we start — would you like me to guide you in English or Hebrew?
->
-> עברית · English
+The language question itself stays in English (see `SKILL.md`) — it's short, and the `עברית` option makes the choice obvious. Everything from the answer onward is Hebrew.
 
 After they choose Hebrew:
 
