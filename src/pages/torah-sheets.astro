@@ -140,7 +140,7 @@ const tabs = [
 																target="_blank"
 																rel="noopener noreferrer"
 																class="sheet-thumb sheet-thumb--preview"
-																aria-label={`Download ${label} PDF`}
+																aria-label={`Read ${label} PDF`}
 															>
 																<img src={sheet.pdfThumbnailUrl} alt="" loading="lazy" />
 																<svg class="sheet-thumb-download-icon sheet-thumb-download-icon--overlay" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -153,7 +153,7 @@ const tabs = [
 																target="_blank"
 																rel="noopener noreferrer"
 																class="sheet-thumb sheet-thumb--placeholder"
-																aria-label={`Download ${label} PDF`}
+																aria-label={`Read ${label} PDF`}
 															>
 																<svg class="sheet-thumb-download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 																	<path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14" stroke-linecap="round" stroke-linejoin="round" />
@@ -385,6 +385,13 @@ const tabs = [
 	const pubButtons = document.querySelectorAll<HTMLButtonElement>("[data-pub-select]");
 	const panels = document.querySelectorAll<HTMLElement>("[data-tab-panel]");
 
+	// Each panel's filter-reset function (pushed in section 2 below, before
+	// any click can reach here) — switching publications clears every panel's
+	// active filter, so leaving a filtered tab and coming back to it, or to
+	// "All Publications," always starts from "All Sheets" again rather than
+	// silently keeping a stale filter selected on a now-hidden panel.
+	const panelResets: (() => void)[] = [];
+
 	const activateTab = (key: string) => {
 		let matched = false;
 		pubButtons.forEach((btn) => {
@@ -395,6 +402,7 @@ const tabs = [
 		panels.forEach((panel) => {
 			panel.classList.toggle("hidden", panel.dataset.tabPanel !== key);
 		});
+		panelResets.forEach((reset) => reset());
 		return matched;
 	};
 
@@ -486,6 +494,11 @@ const tabs = [
 			} else {
 				visibleCount = Math.min(visibleCount + STEP, cards.length);
 			}
+			apply();
+		});
+
+		panelResets.push(() => {
+			activeFilter = null;
 			apply();
 		});
 

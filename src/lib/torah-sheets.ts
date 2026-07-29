@@ -108,12 +108,20 @@ function sanitizeFilenamePart(s: string): string {
  * hash (e.g. "f477b1_29fecf4...pdf") no matter what the original upload was
  * named — confirmed directly via curl: appending `?dn=<name>` to the
  * resolved URL makes the CDN respond with `Content-Disposition: attachment;
- * filename="<name>"`, so the browser saves under that name instead (and the
- * link no longer needs an HTML `download` attribute, which Wix media being
- * cross-origin would ignore anyway — see Lightbox.astro). Applied to every
- * PDF URL a sheet exposes (the main file and, for Canva sheets, the backup
- * PDF) so a download is always named "RCK.{Publication}.{Title}.pdf",
- * never the meaningless CDN hash.
+ * filename="<name>"`, so the browser saves under that name instead of the
+ * hash (and the link no longer needs an HTML `download` attribute, which Wix
+ * media being cross-origin would ignore anyway — see Lightbox.astro).
+ *
+ * Only applied to `canvaPdfUrl` (the explicit "Download PDF" backup link on
+ * a Canva sheet) — deliberately *not* to `pdfUrl`, the main "Read PDF"
+ * click target. `?dn=` forces `Content-Disposition: attachment`, which
+ * prevents the browser's inline PDF viewer from opening at all (and on
+ * mobile Safari specifically, silently auto-downloads to Files instead of
+ * previewing) — the main click must stay a plain view action. A real
+ * download is only ever named "RCK.{Publication}.{Title}.pdf" (Torah Bytes
+ * additionally gets ".{Year}", matching its own historical filename
+ * convention, e.g. "RCK Torah Bytes. Chukas. תשפ״ו.pdf") when it happens
+ * through that explicit download link — never the meaningless CDN hash.
  */
 function withDownloadName(url: string | undefined, filename: string): string | undefined {
 	if (!url) return undefined;
@@ -130,9 +138,14 @@ export async function getTorahSheets(): Promise<TorahSheet[]> {
 				const series = normalizeSeries(row.series);
 				if (!series) return undefined;
 				const title = (row.title as string) ?? "Untitled";
+				const year = (row.year as string | undefined)?.trim() || undefined;
 				const pdf = resolveDocument(row.pdfFile as string | undefined);
 				const canvaPdf = resolveDocument(row.canvaPdfBackup as string | undefined);
-				const downloadFilename = `RCK.${PUBLICATION_FILENAME[series]}.${sanitizeFilenamePart(title)}.pdf`;
+				// Torah Bytes' own filename convention always carries the Hebrew
+				// year (e.g. "RCK Torah Bytes. Chukas. תשפ״ו.pdf") — the other two
+				// series' sheets don't, so this only applies there.
+				const yearSuffix = series === "Torah Bytes" && year ? `.${sanitizeFilenamePart(year)}` : "";
+				const downloadFilename = `RCK.${PUBLICATION_FILENAME[series]}.${sanitizeFilenamePart(title)}${yearSuffix}.pdf`;
 				return {
 					_id: row._id as string,
 					title,
@@ -144,11 +157,17 @@ export async function getTorahSheets(): Promise<TorahSheet[]> {
 					chagSubcategory: (row.chagSubcategory as string | undefined)?.trim() || undefined,
 					avosPerek: (row.avosPerek as string | undefined)?.trim() || undefined,
 					topic: (row.topic as string | undefined)?.trim(),
-					year: (row.year as string | undefined)?.trim() || undefined,
+					year,
 					createdDate: toDateString(row._createdDate),
 					sourceType: normalizeSourceType(row.sourceType),
 					canvaEmbedUrl: (row.canvaEmbedUrl as string | undefined)?.trim() || undefined,
-					pdfUrl: withDownloadName(pdf?.url, downloadFilename),
+					// Plain URL, no forced-download `?dn=` — the main "Read PDF"
+					// click (title/thumbnail) is a view action, must open inline in
+					// a new tab rather than auto-downloading, on both desktop and
+					// mobile (a `?dn=`-decorated URL forces Content-Disposition:
+					// attachment, which on mobile Safari especially means an
+					// unwanted auto-download instead of the built-in PDF viewer).
+					pdfUrl: pdf?.url,
 					pdfFilename: pdf?.filename,
 					pdfThumbnailUrl: resolveImage(row.pdfThumbnail as string | undefined, 400, 400),
 					canvaPdfUrl: withDownloadName(canvaPdf?.url, downloadFilename),
