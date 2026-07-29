@@ -214,9 +214,34 @@ const SEFER_PARSHIOS: Record<string, string[]> = {
 const SEFER_ORDER = Object.keys(SEFER_PARSHIOS);
 
 const CHAGIM_LABEL = "Chagim & Special Days";
-// Jewish calendar year order (Tishrei → Elul) — extend as new chagim/special
-// days get their own sheets.
-const CHAGIM_ORDER = ["Rosh Hashanah", "Yom Kippur", "Sukkos", "Chanukah", "Tu BiShvat", "Purim", "Pesach", "Shavuos", "Shiva Asar B'Tammuz"];
+// Jewish calendar year order (Tishrei → Elul). Unlike the parsha buckets there
+// is no "Other" fallback here (addendum 9), so a chag missing from this list
+// gets no filter button at all — the sheet uploads and shows under "All
+// Sheets", then quietly can't be found by anyone browsing by chag. An entry
+// with no matching sheet renders nothing (see bySubcategory), so listing a day
+// before a sheet exists for it is inert — which is why this covers the normal
+// year rather than growing one day at a time. See design-log #053 addendum 15.
+const CHAGIM_ORDER = [
+	"Rosh Hashanah",
+	"Shabbos Shuva",
+	"Yom Kippur",
+	"Sukkos",
+	"Shemini Atzeres",
+	"Simchas Torah",
+	"Chanukah",
+	"Asara B'Teves",
+	"Tu BiShvat",
+	"Taanis Esther",
+	"Purim",
+	"Shushan Purim",
+	"Shabbos HaGadol",
+	"Pesach",
+	"Sefiras HaOmer",
+	"Lag BaOmer",
+	"Shavuos",
+	"Shiva Asar B'Tammuz",
+	"Tisha B'Av",
+];
 const PIRKEI_AVOS_LABEL = "Pirkei Avos";
 const PIRKEI_AVOS_PERAKIM = ["Chapter 1", "Chapter 2", "Chapter 3", "Chapter 4", "Chapter 5", "Chapter 6"];
 const OTHER_LABEL = "Other";
