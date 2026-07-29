@@ -1,6 +1,7 @@
 import { items, auth } from "./wix-cms-admin";
 import { resolveImage, resolveGalleryUrls, imageAspectRatio, type GalleryItem } from "./wix-media";
 import { slugify } from "./slug";
+import { getFlyers } from "./flyers";
 
 const COLLECTION_ID = "YouthPrograms";
 
@@ -20,6 +21,14 @@ export interface YouthProgram {
 	contactEmail?: string;
 	sortOrder?: number;
 	active?: boolean;
+	/**
+	 * Exact title of a `Flyers` row (category "learning") whose flyer this
+	 * program should mirror instead of its own `flyerImage` — lets the office
+	 * update one flyer (in Learning) and have it reflect here too. Falls back
+	 * to `flyerImage` when unset or when no learning row matches. See
+	 * design-log #054.
+	 */
+	linkedFlyerTitle?: string;
 }
 
 // Raw shape as stored in the CMS (media fields hold Wix media URLs we resolve).
@@ -37,13 +46,28 @@ export async function getYouthPrograms(): Promise<YouthProgram[]> {
 			.limit(100)
 			.find();
 
-		return (results as YouthProgramRow[]).map((row, i) => ({
-			...row,
-			slug: slugify(row.title ?? "") || `program-${i + 1}`,
-			galleryUrls: resolveGalleryUrls(row.gallery),
-			flyerImageUrl: resolveImage(row.flyerImage, 900, 1200),
-			flyerAspect: imageAspectRatio(row.flyerImage),
-		}));
+		const rows = results as YouthProgramRow[];
+		let learningByTitle: Map<string, { imageUrl?: string; pdfUrl?: string }> | null = null;
+		if (rows.some((r) => r.linkedFlyerTitle)) {
+			const learning = await getFlyers("learning");
+			learningByTitle = new Map(
+				learning.map((f) => [f.title?.trim().toLowerCase(), { imageUrl: f.imageUrl, pdfUrl: f.pdfUrl }]),
+			);
+		}
+
+		return rows.map((row, i) => {
+			const linked = row.linkedFlyerTitle
+				? learningByTitle?.get(row.linkedFlyerTitle.trim().toLowerCase())
+				: undefined;
+			return {
+				...row,
+				slug: slugify(row.title ?? "") || `program-${i + 1}`,
+				galleryUrls: resolveGalleryUrls(row.gallery),
+				flyerImageUrl: linked?.imageUrl ?? resolveImage(row.flyerImage, 900, 1200),
+				flyerPdfUrl: linked?.pdfUrl ?? row.flyerPdfUrl,
+				flyerAspect: linked ? undefined : imageAspectRatio(row.flyerImage),
+			};
+		});
 	} catch (err) {
 		console.error(`[youth-programs] query failed:`, err);
 		return [];

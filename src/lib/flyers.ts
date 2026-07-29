@@ -18,6 +18,14 @@ export interface Flyer {
 	isActive?: boolean;
 	displayOrder?: number;
 	removeAfter?: Date | string;
+	/**
+	 * Exact title of a `category = "learning"` row whose `imageUrl`/`pdfUrl` this
+	 * row should mirror instead of keeping its own — lets the office update one
+	 * flyer (in Learning) and have it reflect here too. Falls back to this row's
+	 * own `imageUrl`/`pdfUrl` when unset or when no learning row matches. See
+	 * design-log #054.
+	 */
+	linkedFlyerTitle?: string;
 }
 
 /** Today's date as YYYY-MM-DD in Israel time, regardless of where the server runs. */
@@ -43,20 +51,40 @@ function isExpired(removeAfter: Flyer["removeAfter"], now: Date): boolean {
 	return israelDateStr(date) < israelDateStr(now);
 }
 
+async function queryActiveByCategory(category?: FlyerCategory): Promise<Flyer[]> {
+	const elevated = auth.elevate(items.query);
+	let q = elevated(COLLECTION_ID).eq("isActive", true).ascending("displayOrder").limit(100);
+	if (category) q = q.eq("category", category);
+	const { items: results } = await q.find();
+	return results as Flyer[];
+}
+
 export async function getFlyers(category?: FlyerCategory, subCategory?: string): Promise<Flyer[]> {
 	try {
-		const elevated = auth.elevate(items.query);
-		let q = elevated(COLLECTION_ID).eq("isActive", true).ascending("displayOrder").limit(100);
-		if (category) q = q.eq("category", category);
-		const { items: results } = await q.find();
+		const results = await queryActiveByCategory(category);
 		const now = new Date();
 		// The subCategory filter runs in memory (not in the query) so it can be
 		// case-insensitive — the DB's hasSome is not, and office-entered tags mix case.
 		const wanted = subCategory?.toLowerCase();
-		return (results as Flyer[])
+		let flyers = (results as Flyer[])
 			.filter((f) => !isExpired(f.removeAfter, now))
 			.map((f) => ({ ...f, subCategory: normalizeTags(f.subCategory) }))
 			.filter((f) => !wanted || f.subCategory?.includes(wanted));
+
+		// Resolve linkedFlyerTitle: a row outside "learning" can mirror a learning
+		// row's image/pdf instead of keeping its own upload (design-log #054).
+		// "learning" rows are the source of truth, so they never chase a link.
+		if (category !== "learning" && flyers.some((f) => f.linkedFlyerTitle)) {
+			const learning = await queryActiveByCategory("learning");
+			const byTitle = new Map(learning.map((f) => [f.title?.trim().toLowerCase(), f]));
+			flyers = flyers.map((f) => {
+				if (!f.linkedFlyerTitle) return f;
+				const source = byTitle.get(f.linkedFlyerTitle.trim().toLowerCase());
+				return source ? { ...f, imageUrl: source.imageUrl, pdfUrl: source.pdfUrl } : f;
+			});
+		}
+
+		return flyers;
 	} catch (err) {
 		console.error(`[flyers] query failed:`, err);
 		return [];

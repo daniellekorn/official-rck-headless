@@ -247,10 +247,13 @@ Drives the **Youth Programming page** (`/youth`). Each row is one program (Dor L
 | `contactEmail` | Text | The contact rabbi's email — becomes the "Email" link. Leave empty to show only the generic "Contact" button. |
 | `sortOrder` | Number | Order of sections, lower first. |
 | `active` | Boolean | Show/hide without deleting. |
+| `linkedFlyerTitle` | Text (opt) | Exact `title` of a `Flyers` row in the `learning` category — when set, this program's flyer **mirrors that row's image/PDF** instead of `flyerImage`, so updating the Learning flyer updates the youth page too. Leave empty to keep uploading a separate `flyerImage` here. See design-log #054. |
 
 **To add a rabbi's chaburah to the youth page:** add a `YouthPrograms` row — `title` = the program, `description` = the info, `contactName` + `contactEmail` = the rabbi. That's all that's required; add photos to `gallery` and/or a flyer if you have them. (This is separate from `TeamMembers` — see the note above.)
 
 > The `Flyers` collection still has a `youth` category, but the `/youth` page no longer reads it — youth flyers belong on the `YouthPrograms` row now. Put youth flyers there.
+
+**Sharing one flyer with the Learning page (e.g. Dor L'Dor):** if a program's flyer is also posted under `Flyers` (category `learning`, e.g. "Dor L'Dor for Boys"), set `linkedFlyerTitle` on the `YouthPrograms` row to that exact title instead of uploading `flyerImage` separately. From then on, updating the Learning flyer's image updates this program's flyer automatically — no more editing two places.
 
 #### `PastEvents` — one row per past event
 
@@ -409,6 +412,7 @@ One row per flyer. Set **`imageUrl`** (preferred) or **`pdfUrl`** — a row with
 | displayOrder | Number | Sort order within the category. Lower = first. |
 | subCategory | Tags | Optional. Filter tags — add as many per flyer as apply (e.g. `Halacha`, `Men`, `Sunday`, `Night`). The site groups them automatically into **Topic / Audience / Day / Time** rows in the filter panel: weekdays + `Daily`/`Shabbos`/`Motzei-Shabbos` land under Day, `Morning`/`Afternoon`/`Evening`/`Night` under Time, `Men`/`Women`/`Boys`/`Girls`/`Kids`/`Teens`/`Youth`/`Family`/`Community` under Audience, and anything else under Topic. A flyer shows when **any** selected tag matches. Capitalization doesn't matter (`daily` and `Daily` are the same tag), but tags must not contain the `\|` character. Leave empty if no sub-filtering needed. |
 | removeAfter | Date | Optional. The last day the flyer should appear. It stays up through that whole day (Israel time) and drops off the site by itself the next morning. **Leave empty for anything evergreen** (a standing schedule, a learning program). Only put a date on things that go stale — mainly event flyers. The row is *not* deleted: to bring a flyer back, just change the date to a future one. |
+| linkedFlyerTitle | Text | Optional. Exact `title` of another `Flyers` row in the `learning` category — when set, **this row's image/PDF is ignored** and it mirrors that learning row's `imageUrl`/`pdfUrl` instead. Use this on a `schedules`/`youth`/`events` row that's really the same flyer as one already posted under Learning, so you only update the image once. Learning rows themselves never follow a link (they're always the source). See design-log #054. |
 
 **Exporting a flyer image from Canva:** open the design → **Share → Download → PNG**, and select **page 1 only**. Upload that PNG into the row's image field (or paste a public image URL). That's the whole step.
 
@@ -428,6 +432,8 @@ One row per flyer. Set **`imageUrl`** (preferred) or **`pdfUrl`** — a row with
 | `schedules` | `daily` (any capitalization) | Featured daily learning schedule on the Daven with Us page, below the minyan times. Only the first active row carrying this tag in this category is shown. |
 
 To swap the daily schedule: edit the one row with `category = schedules` and the `daily` tag. Update `imageUrl` with the new page-1 export. No code change needed.
+
+> That `schedules` row's `linkedFlyerTitle` is set to `Community Schedule` (a `learning`-category row also shown on `/learn`), so as of design-log #054 **the two pages already share one image** — editing `Community Schedule`'s `imageUrl` updates both. Only touch the `schedules` row's own `imageUrl` if you want it to show something different from `/learn`.
 
 #### The easy way to add a flyer (chat, no dashboard)
 
