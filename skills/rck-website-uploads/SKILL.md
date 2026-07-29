@@ -5,6 +5,10 @@ description: Guided, bilingual (Hebrew/English) workflow for adding content to t
 
 # RCK website uploads
 
+**Version:** 2026-07-29
+
+If anyone asks which version they're on, or you're asked to help debug odd behaviour, give them that date — copies are installed per person and can drift.
+
 The people using you are **not technical**, several are **native Hebrew speakers**, and some don't trust this setup yet. Make it feel like asking a competent person for help.
 
 **Site ID:** `3360b9e1-0290-476e-ae3a-c88de2821929` (RCK Official Headless). Never ask for it.
@@ -12,7 +16,7 @@ The people using you are **not technical**, several are **native Hebrew speakers
 ## Rules
 
 1. **Ask which language first** — before anything else, including tool calls.
-2. **One question per message.** Never bundle, never send a form. Previous attempts failed because people were handed a wall of fields and answered incompletely.
+2. **One question per message** — and nothing else in it. Don't bundle two questions, and don't staple a statement to a question (`ואתחנן → Vaeschanan. שנה: תשפ״ו?` is two things wearing one coat). Never send a form. Previous attempts failed because people were handed a wall of fields and answered incompletely.
 3. **Never ask what they already told you.** "Upload the Torah Bytes sheet" answers both the task *and* the series — don't confirm it back and then ask it as a question anyway. Re-asking makes you look like you weren't listening, which is the exact thing this audience is wary of.
 4. **Ask the fewest questions that get the job done.** Every question you can turn into a default they merely confirm, or drop entirely, is worth it. Six short exchanges beats nine polite ones.
 5. **No tool calls until every answer is in hand.**
@@ -66,10 +70,11 @@ Fields: `reference/torah-sheets.md`. Names: `reference/vocabulary.md`.
 One message each, skipping anything already answered. Aim for four questions, not seven.
 
 1. **The Canva link.** They don't export anything — you do.
-2. **Which parsha or chag.** Hebrew is fine. Then **look it up** — no match, nothing close → stop and ask; close but not exact → name your guess and ask.
+2. **Which parsha or chag.** Hebrew is fine. Then **look it up** — and if you find an exact match, say nothing about it and move on. It appears in the read-back, where they'll confirm it. Announcing `ואתחנן → Vaeschanan` mid-flow and *then* showing it again at read-back reads as being asked the same thing twice. Speak up only when you're genuinely unsure: nothing close → stop and ask; close but not exact → name your guess and ask.
 3. **The year.** Don't ask open-ended — offer the current Hebrew year and let them correct it: `Year: תשפ״ו?` Almost every sheet is for the year it's uploaded in.
-4. **Title.** Offer the parsha name and let them accept it: `Title: **Eikev**?` That's what most Torah Bytes sheets use. Only offer to read the sheet for a suggestion if they don't like it.
-5. **Combined?** Only ask if their answer suggests it. Two parshios → one row, hyphenated. Parsha + chag → still one row, both tagged. See `torah-sheets.md`.
+4. **Combined?** Only ask if their answer suggests it. Two parshios → one row, hyphenated. Parsha + chag → still one row, both tagged. See `torah-sheets.md`.
+
+**Don't ask for a title on Torah Bytes.** It's the parsha name, every time — asking is just the vocabulary match a second time in different words. Use the matched name and show it in the read-back. Dor L'Dor and Source Sheets *do* need one, because their titles name a topic rather than the parsha; ask there, and offer to read the sheet and suggest something.
 
 **Don't ask about the series** unless nothing in the conversation indicates it. "Upload the Torah Bytes sheet" already said it. If you genuinely need to, offer three bare options — not a sentence explaining how to answer.
 

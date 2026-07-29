@@ -12,7 +12,7 @@
     "generate": "wix generate",
     "env": "wix env",
     "skills": "wix skills",
-    "skill:pack": "cd skills && rm -f rck-website-uploads.zip && zip -rq rck-website-uploads.zip rck-website-uploads -x '.*' && echo 'skills/rck-website-uploads.zip'"
+    "skill:pack": "bash scripts/pack-skill.sh"
   },
   "dependencies": {
     "@hebcal/core": "^6.6.0",

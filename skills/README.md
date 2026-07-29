@@ -29,17 +29,26 @@ Adding a chag is the likeliest change. `Shabbos HaGadol` in particular is not cu
 Claude Desktop takes a skill as a `.zip` whose **root is the skill folder**:
 
 ```bash
-npm run skill:pack     # writes skills/rck-website-uploads.zip
+npm run skill:pack     # writes skills/rck-website-uploads-<version>.zip
 ```
 
-The zip is **not committed** — it's a build artifact, and a stale one that disagrees with the source folder is exactly the kind of thing that teaches people the wrong value. Regenerate it whenever you change the skill and re-send it.
+The version comes from the `**Version:**` line at the top of `SKILL.md` — **bump it whenever you change the skill.** Because installed copies can drift (see below), a datestamped filename is how you tell "this is broken" from "you're three versions behind". The skill also reports its own version if you ask it.
 
-Then either:
+The zip is **not committed** — it's a build artifact, and a stale one that disagrees with the source folder is exactly the kind of thing that teaches people the wrong value.
 
-- **Send people the zip.** They install it themselves — Claude Desktop → Settings → Customize → Skills → upload. Custom skills are private to the account that uploads them, so each person needs their own copy. This is the route for anyone outside your Claude organisation, which includes the Kollel office.
-- **Share it within an organisation.** On Team and Enterprise plans an owner can enable sharing in Organization settings → Skills, after which skills can be shared with individuals or the whole org, and recipients pick up your updates automatically. Only useful if the people using it are in the same org as you.
+### Two ways to get it to people
 
-Hand out `INSTALL-for-editors.md` alongside the zip — it's the bilingual setup page, written for someone who has never installed anything in Claude before.
+**Send the zip** (what we do today). They install it themselves: Claude Desktop → Settings → Customize → Skills → upload. *"Custom skills you upload are private to your individual account"* — so everyone needs their own copy, **and nobody gets your fixes until you re-send and they re-upload.** That's the real cost of this route.
+
+**Share it inside an organisation** (better, if it's available). On Team and Enterprise plans:
+
+- An owner enables sharing in Organization settings → Skills — it's off by default — and you then share the skill with individuals. Recipients get it view-only, and *"if you update the skill later, recipients automatically get the updated version."*
+- Or an owner uploads it org-wide, and it appears for everyone in Customize → Skills with nothing for them to install. *"Only owners can add or remove organization-wide skills"*; members can toggle it off but can't edit or delete it.
+
+Either way the re-send problem disappears — you edit, they have it. **The catch is org membership, not plan features:** sharing only reaches people inside your own Claude organisation. For the Kollel office that means the Kollel needs its own Team plan with you in it. That's an admin decision, and it's much cheaper than any engineering alternative.
+
+Hand out `INSTALL-for-editors.md` alongside the zip if you're on the manual route — it's the bilingual setup page, written for someone who has never installed anything in Claude before.
+
 
 ### Prerequisites on the user's side
 

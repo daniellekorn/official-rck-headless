@@ -21,7 +21,9 @@ In Claude Desktop: **Settings → Connectors**. Turn on:
 
 **2. Install the skill.**
 
-**Settings → Customize → Skills → Upload skill**, and pick the `rck-website-uploads.zip` file you were sent.
+**Settings → Customize → Skills → Upload skill**, and pick the `rck-website-uploads-….zip` file you were sent.
+
+The date in the filename is the version. If you're ever sent a newer one, upload it the same way and delete the old one — otherwise you'll be running an outdated copy.
 
 That's it. You never have to do this again.
 
@@ -71,7 +73,9 @@ Tell Claude what you're seeing, in plain words. If the same thing fails twice, s
 
 **2. להתקין את ה-Skill.**
 
-**Settings → Customize → Skills → Upload skill**, ולבחור את הקובץ `rck-website-uploads.zip` שנשלח אליכם.
+**Settings → Customize → Skills → Upload skill**, ולבחור את הקובץ `rck-website-uploads-….zip` שנשלח אליכם.
+
+התאריך בשם הקובץ הוא מספר הגרסה. אם תקבלו בעתיד קובץ חדש יותר — תעלו אותו באותה הדרך ותמחקו את הישן, אחרת תמשיכו לעבוד עם גרסה מיושנת.
 
 זהו. את זה לא צריך לעשות שוב.
 
