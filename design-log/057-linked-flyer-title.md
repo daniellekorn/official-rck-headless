@@ -39,3 +39,5 @@ Live rows linked: `YouthPrograms` "Dor L'Dor for Boys" → `linkedFlyerTitle: "D
 ## Verification
 
 Confirmed both `getFlyers("schedules", "daily")` and `getYouthPrograms()` resolve the linked image/pdf from the matching `learning` row when `linkedFlyerTitle` is set, and fall through to the row's own image when it's empty or unmatched; `npx astro check` passes. CONTRIBUTING.md documents the new field on both collections and the Daven/Learn schedule sharing behavior.
+
+**Revisited:** asked directly whether a stable `sharedFlyerKey` would be more robust than title-matching against future renames. Kept title-matching — these titles rarely change, and the simpler single-field editing experience was judged worth the (already-documented) rename risk over a second field to keep in sync. CONTRIBUTING.md's `Flyers.title` row and a new callout under the `Flyers` schema table now flag explicitly that renaming a `learning` row's title repoints or breaks whatever's linked to it, and name the four currently-linked rows so an editor can check before renaming.
