@@ -140,7 +140,7 @@ const tabs = [
 																target="_blank"
 																rel="noopener noreferrer"
 																class="sheet-thumb sheet-thumb--preview"
-																aria-label={`Read ${label} PDF`}
+																aria-label={`View ${label} PDF`}
 																data-pdf-open
 																data-pdf-name={sheet.pdfFilename}
 															>
@@ -155,7 +155,7 @@ const tabs = [
 																target="_blank"
 																rel="noopener noreferrer"
 																class="sheet-thumb sheet-thumb--placeholder"
-																aria-label={`Read ${label} PDF`}
+																aria-label={`View ${label} PDF`}
 																data-pdf-open
 																data-pdf-name={sheet.pdfFilename}
 															>
@@ -177,7 +177,32 @@ const tabs = [
 															</button>
 														)}
 
+														{sheet.sourceType === "pdf" ? (
+														<a
+															href={sheet.pdfUrl}
+															target="_blank"
+															rel="noopener noreferrer"
+															class="sheet-title"
+															data-pdf-open
+															data-pdf-name={sheet.pdfFilename}
+														>
+															{label}
+														</a>
+													) : (
 														<p class="sheet-title">{label}</p>
+													)}
+
+														{sheet.sourceType === "pdf" && sheet.pdfDownloadUrl && (
+															<a
+																href={sheet.pdfDownloadUrl}
+																class="sheet-download"
+																aria-label={`Download ${label} PDF`}
+															>
+																<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+																	<path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14" stroke-linecap="round" stroke-linejoin="round" />
+																</svg>
+															</a>
+														)}
 
 														{sheet.sourceType === "canva" && sheet.canvaPdfUrl && (
 															<a
@@ -319,6 +344,10 @@ const tabs = [
 		font-weight: 500;
 		font-size: 1.0625rem;
 		color: var(--color-navy-600);
+		text-decoration: none;
+	}
+	a.sheet-title:hover {
+		text-decoration: underline;
 	}
 	.sheet-row--featured .sheet-title {
 		font-size: 1.25rem;
@@ -523,51 +552,50 @@ const tabs = [
 		});
 	});
 
-	// 4. PDF "Read" links: must open the PDF in a new tab (never auto-download)
-	// while still saving under a proper name if the visitor downloads it from
-	// there — Wix's document CDN only offers one or the other via a URL query
-	// param (`?dn=` forces an outright download with a custom name; a plain
-	// URL opens inline but saves under a meaningless internal storage hash),
-	// never both at once (see design-log #053 addendum 15). So this fetches
-	// the PDF as a blob and re-opens it as a named `File`, whose `.name`
-	// browsers use as the suggested save name for a blob: URL — no server
-	// cooperation needed. `href` still points at the plain URL as a fallback
-	// (works with JS disabled, or if the fetch is blocked).
+	// 4. "View PDF" links (thumbnail/title/main click): plain `href` + `target`
+	// already opens the PDF inline in a new tab on every browser — that's the
+	// whole mechanism, and it must stay untouched in Chromium browsers
+	// (Chrome, Edge, Opera, Brave, …), confirmed by direct testing that
+	// Chrome's own built-in PDF viewer doesn't honor a renamed blob's `File`
+	// name for its own save button, so a real download from that tab still
+	// lands under the blob's internal UUID (see design-log #053 addendum 16)
+	// — a correctly-named download is what the separate Download button
+	// (`pdfDownloadUrl`, `?dn=`) is for there, not this link.
 	//
-	// The blank tab is opened *synchronously* inside the click handler, before
-	// the `await fetch` — Safari/mobile popup blockers only allow `window.open`
-	// as a direct result of a user gesture, and an async gap (however brief)
-	// breaks that trust chain, silently blocking the tab otherwise.
-	document.querySelectorAll<HTMLAnchorElement>("[data-pdf-open]").forEach((link) => {
-		link.addEventListener("click", (e) => {
-			const src = link.href;
-			const name = link.dataset.pdfName || "document.pdf";
-			if (!src) return;
-			e.preventDefault();
-			// No `noopener` here specifically — per spec, window.open() returns
-			// null when `noopener` is set, and this call needs a live reference
-			// to navigate once the blob is ready. Not a tabnabbing risk: the tab
-			// only ever ends up showing our own trusted PDF (a blob: URL, which
-			// inherits this page's origin, or the plain CDN URL as a fallback),
-			// never attacker-controlled content that could abuse window.opener.
-			const tab = window.open("", "_blank");
-			fetch(src, { mode: "cors" })
-				.then((res) => {
-					if (!res.ok) throw new Error(String(res.status));
-					return res.blob();
-				})
-				.then((blob) => {
-					const file = new File([blob], name, { type: "application/pdf" });
-					const objectUrl = URL.createObjectURL(file);
-					if (tab) tab.location.href = objectUrl;
-					else window.open(objectUrl, "_blank", "noopener");
-				})
-				.catch(() => {
-					// CORS blocked, offline, etc. — fall back to the plain URL (opens
-					// inline same as before, just without the renamed save prompt).
-					if (tab) tab.location.href = src;
-					else window.open(src, "_blank", "noopener");
-				});
+	// Non-Chromium browsers' PDF viewers may not share that specific
+	// limitation — unverified here (no Firefox/Safari available to test
+	// against), so this is a best-effort attempt, not a guarantee: fetch the
+	// PDF as a blob, re-open it as a named `File` (browsers that DO respect
+	// it use `.name` as the suggested save name), falling back to the plain
+	// URL on any failure (CORS block, offline, or simply not working there).
+	const isChromiumPdfViewer = /Chrome|Chromium|Edg\/|OPR\/|Brave/i.test(navigator.userAgent);
+	if (!isChromiumPdfViewer) {
+		document.querySelectorAll<HTMLAnchorElement>("[data-pdf-open]").forEach((link) => {
+			link.addEventListener("click", (e) => {
+				const src = link.href;
+				const name = link.dataset.pdfName || "document.pdf";
+				if (!src) return;
+				e.preventDefault();
+				// No `noopener` here specifically — per spec, window.open() returns
+				// null when `noopener` is set, and this call needs a live
+				// reference to navigate once the blob is ready.
+				const tab = window.open("", "_blank");
+				fetch(src, { mode: "cors" })
+					.then((res) => {
+						if (!res.ok) throw new Error(String(res.status));
+						return res.blob();
+					})
+					.then((blob) => {
+						const file = new File([blob], name, { type: "application/pdf" });
+						const objectUrl = URL.createObjectURL(file);
+						if (tab) tab.location.href = objectUrl;
+						else window.open(objectUrl, "_blank", "noopener");
+					})
+					.catch(() => {
+						if (tab) tab.location.href = src;
+						else window.open(src, "_blank", "noopener");
+					});
+			});
 		});
-	});
+	}
 </script>

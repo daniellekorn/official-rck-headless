@@ -37,8 +37,11 @@ export interface TorahSheet {
 	createdDate?: string;
 	sourceType: SourceType;
 	canvaEmbedUrl?: string;
+	/** Plain view URL — opens inline in a new tab, no forced download. */
 	pdfUrl?: string;
-	/** "RCK.{Publication}.{Title}[.{Year}].pdf" — the name the client-side view handler saves the fetched PDF under, never the raw Wix storage filename (see design-log #053 addendum 15). */
+	/** Forces a real download via `?dn=`, always named "RCK.{Publication}.{Title}[.{Year}].pdf" — the only reliable way to control a download's filename (see design-log #053 addendum 16). Distinct from `pdfUrl`, which must stay a plain view link. */
+	pdfDownloadUrl?: string;
+	/** Same name as pdfDownloadUrl's `?dn=` value, exposed on its own — used by the non-Chromium view-tab rename attempt (see design-log #053 addendum 16). */
 	pdfFilename?: string;
 	/**
 	 * A real page-1 preview, when one exists — only ever shown for the single
@@ -113,16 +116,29 @@ function sanitizeFilenamePart(s: string): string {
  * hash (and the link no longer needs an HTML `download` attribute, which Wix
  * media being cross-origin would ignore anyway — see Lightbox.astro).
  *
- * Only applied to `canvaPdfUrl` (the explicit "Download PDF" backup link on
- * a Canva sheet) — deliberately *not* to `pdfUrl`, the main "Read PDF"
- * click target. `?dn=` forces `Content-Disposition: attachment`, which
- * prevents the browser's inline PDF viewer from opening at all (and on
- * mobile Safari specifically, silently auto-downloads to Files instead of
- * previewing) — the main click must stay a plain view action. A real
- * download is only ever named "RCK.{Publication}.{Title}.pdf" (Torah Bytes
- * additionally gets ".{Year}", matching its own historical filename
- * convention, e.g. "RCK Torah Bytes. Chukas. תשפ״ו.pdf") when it happens
- * through that explicit download link — never the meaningless CDN hash.
+ * Applied to `pdfDownloadUrl` (the explicit "Download PDF" button, sharing
+ * this exact same `downloadFilename`/`withDownloadName` logic with
+ * `canvaPdfUrl` below rather than duplicating it) — deliberately *not* to
+ * `pdfUrl`, the "View PDF" click target (thumbnail/title/main action).
+ * `?dn=` forces `Content-Disposition: attachment`, which prevents the
+ * browser's inline PDF viewer from opening at all (and on mobile Safari
+ * specifically, silently auto-downloads to Files instead of previewing),
+ * so the view action must stay a plain URL, and downloading needs its own
+ * separate, explicit control.
+ *
+ * A client-side fetch → blob → named-File hand-off was tried as a way to
+ * get both "opens inline" and "correct name if saved" from the *same*
+ * click, but doesn't hold up in real desktop Chrome: navigating a tab
+ * directly to a blob: URL hands the whole tab to Chrome's built-in PDF
+ * viewer, and *its own* save/download button has its own filename logic
+ * that doesn't reliably honor the underlying File's `.name` — confirmed by
+ * a real download landing under the blob's own internal UUID instead (see
+ * design-log #053 addendum 16). `?dn=`/`Content-Disposition` is the only
+ * mechanism that reliably works, and it requires an outright download, so
+ * a real download is only ever named "RCK.{Publication}.{Title}.pdf" (Torah
+ * Bytes additionally gets ".{Year}", matching its own historical filename
+ * convention, e.g. "RCK Torah Bytes. Chukas. תשפ״ו.pdf") through that
+ * explicit, separate download control — never the meaningless CDN hash.
  */
 function withDownloadName(url: string | undefined, filename: string): string | undefined {
 	if (!url) return undefined;
@@ -162,17 +178,16 @@ export async function getTorahSheets(): Promise<TorahSheet[]> {
 					createdDate: toDateString(row._createdDate),
 					sourceType: normalizeSourceType(row.sourceType),
 					canvaEmbedUrl: (row.canvaEmbedUrl as string | undefined)?.trim() || undefined,
-					// Plain URL, no forced-download `?dn=` — the main "Read PDF"
-					// click (title/thumbnail) is a view action, must open inline in
-					// a new tab rather than auto-downloading, on both desktop and
-					// mobile (a `?dn=`-decorated URL forces Content-Disposition:
-					// attachment, which on mobile Safari especially means an
-					// unwanted auto-download instead of the built-in PDF viewer).
+					// Plain URL, no forced-download `?dn=` — the "View PDF" click
+					// (thumbnail/title/main action) opens inline in a new tab
+					// rather than auto-downloading, on both desktop and mobile (a
+					// `?dn=`-decorated URL forces Content-Disposition: attachment,
+					// which on mobile Safari especially means an unwanted
+					// auto-download instead of the built-in PDF viewer).
 					pdfUrl: pdf?.url,
-					// The name a client-side blob download/re-open should present to
-					// the visitor — not the original Wix-stored filename, our own
-					// "RCK.{Publication}.{Title}[.{Year}].pdf" convention (see
-					// downloadFilename above and design-log #053 addendum 15).
+					// The real, correctly-named download — a separate control from
+					// pdfUrl above (see design-log #053 addendum 16).
+					pdfDownloadUrl: withDownloadName(pdf?.url, downloadFilename),
 					pdfFilename: pdf ? downloadFilename : undefined,
 					pdfThumbnailUrl: resolveImage(row.pdfThumbnail as string | undefined, 400, 400),
 					canvaPdfUrl: withDownloadName(canvaPdf?.url, downloadFilename),
