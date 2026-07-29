@@ -31,15 +31,21 @@ After they choose Hebrew:
 
 > איזו פרשה או איזה חג? אפשר בעברית.
 
-> איזו שנה? למשל תשפ״ו.
+Offer the year rather than asking open-ended:
 
-> זה Torah Bytes? אם כן, פשוט תכתבו "כן". אם זה Dor L'Dor או Source Sheets — תגידו לי.
+> שנה: תשפ״ו?
+
+Offer the title rather than asking open-ended:
+
+> שם הדף: **Eikev**? (זה מה שרוב הדפים של Torah Bytes משתמשים בו.)
 
 > זה דף שמשלב שתי פרשיות, או פרשה יחד עם חג?
 
-> איך לקרוא לדף? אני יכול לקרוא אותו ולהציע שם, אם תרצו.
+Series — **only** if nothing in the conversation already said it. Three bare options, no explanation:
 
-> שאכין תמונת שער לדף? בלי זה מופיע סמל PDF כללי במקום תצוגה מקדימה אמיתית.
+> Torah Bytes · Dor L'Dor · Source Sheets
+
+Don't ask about the cover picture at all — always make one and say it in the read-back.
 
 ## Flyer questions
 
@@ -66,11 +72,12 @@ Always before writing anything:
 > סדרה:     Torah Bytes
 > חומש:     Devarim
 > שנה:      תשפ״ו
-> קובץ:     ה-PDF מ-Canva ששלחתם
-> תמונת שער: כן, אכין אחת
+> תמונת שער: אכין אחת, ואנקה את הישנות מהדפים הקודמים
 > ```
 >
 > להמשיך?
+
+הבלוק, ואז "להמשיך?" — בלי שום פסקת הסבר באמצע.
 
 For a flyer:
 

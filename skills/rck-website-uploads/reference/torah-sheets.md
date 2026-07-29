@@ -59,11 +59,13 @@ A single new upload automatically becomes the featured sheet at the top of its t
 
 The exception is a **batch** — several rows created within half an hour of each other. Then the site picks whichever one matches the real current parsha instead. So if you're adding a backlog, don't expect the last one you added to be the one on top; that's deliberate.
 
-## The cover picture is never automatic
+## The cover picture — always make one, never ask
 
-`pdfThumbnail` is the one thing that will not happen by itself. Wix does not render a preview from a PDF. Until someone renders page 1 and uploads it, the sheet sits correctly at the top of the list showing a **generic PDF icon** instead of a real preview.
+`pdfThumbnail` will not happen by itself: Wix doesn't render a preview from a PDF, so until someone renders page 1 and uploads it, the sheet sits at the top of the list showing a generic icon instead of a real preview.
 
-Only the featured sheet displays its cover, so a sheet's cover matters most in the week it goes up.
+The answer is always yes, so **don't spend a question on it.** Make it, and note it in the read-back on one line.
+
+Only the featured (newest) sheet displays its cover, so it matters most in the week a sheet goes up.
 
 When you generate one, clear `pdfThumbnail` on the other sheets in that series at the same time. They're no longer featured, their covers no longer display, and leaving them behind just accumulates dead images in the Media Manager.
 
