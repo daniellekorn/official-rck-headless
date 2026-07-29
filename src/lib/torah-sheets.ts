@@ -24,6 +24,8 @@ export interface TorahSheet {
 	 * Chagim-tagged sheets are chag-only and just use `subcategory` directly.
 	 */
 	chagSubcategory?: string;
+	/** Which of the six Pirkei Avos chapters this sheet is about (e.g. "Chapter 1") — only set for Pirkei Avos-tagged sheets. */
+	avosPerek?: string;
 	topic?: string;
 	/** Display-only (e.g. "תשפ״ד") — the office doesn't track a full date. */
 	year?: string;
@@ -58,12 +60,6 @@ export interface SheetSuperGroup {
 	key: string;
 	label: string;
 	groups: SheetGroup[];
-}
-
-export interface GroupedSheets {
-	superGroups: SheetSuperGroup[];
-	/** Top-level, non-collapsible filter buttons alongside the nested Sefer/Chagim groups — currently just Pirkei Avos (see pirkeiAvosFlatGroup). */
-	flatGroups: SheetGroup[];
 }
 
 // Raw (lowercased, trimmed) CMS `series` values → canonical Series. A sheet
@@ -113,6 +109,7 @@ export async function getTorahSheets(): Promise<TorahSheet[]> {
 						: undefined,
 					subcategory: (row.subcategory as string | undefined)?.trim(),
 					chagSubcategory: (row.chagSubcategory as string | undefined)?.trim() || undefined,
+					avosPerek: (row.avosPerek as string | undefined)?.trim() || undefined,
 					topic: (row.topic as string | undefined)?.trim(),
 					year: (row.year as string | undefined)?.trim() || undefined,
 					createdDate: toDateString(row._createdDate),
@@ -149,7 +146,7 @@ const CHAGIM_LABEL = "Chagim & Special Days";
 // days get their own sheets.
 const CHAGIM_ORDER = ["Rosh Hashanah", "Yom Kippur", "Sukkos", "Chanukah", "Tu BiShvat", "Purim", "Pesach", "Shavuos", "Shiva Asar B'Tammuz"];
 const PIRKEI_AVOS_LABEL = "Pirkei Avos";
-const PIRKEI_AVOS_PERAKIM = ["Perek Aleph", "Perek Beis", "Perek Gimmel", "Perek Daled", "Perek Hei", "Perek Vav"];
+const PIRKEI_AVOS_PERAKIM = ["Chapter 1", "Chapter 2", "Chapter 3", "Chapter 4", "Chapter 5", "Chapter 6"];
 const OTHER_LABEL = "Other";
 
 /**
@@ -198,12 +195,11 @@ function hasCategory(s: TorahSheet, label: string): boolean {
  * (torah-sheets.astro) renders these as a space-separated `data-filter`
  * attribute and matches a clicked button against any one of them. A combined
  * subcategory (e.g. "Vayakhel-Pekudei") yields a key per component so the
- * sheet surfaces under either parsha's button; a Pirkei-Avos-tagged sheet
- * also always gets the flat "pirkei-avos" key regardless of what other keys
- * it carries, so a parsha+Avos sheet matches both filters; a sheet with a
- * separate `chagSubcategory` (a real chag name distinct from its parsha
- * subcategory — see TorahSheet.chagSubcategory) gets that key too, so it
- * matches both its parsha button and its actual Chagim button.
+ * sheet surfaces under either parsha's button; a sheet with a separate
+ * `chagSubcategory` or `avosPerek` (real chag/chapter identities distinct
+ * from its parsha subcategory — see those fields on TorahSheet) gets that
+ * key too, so e.g. a parsha+Avos sheet matches both its parsha button and
+ * its chapter button.
  */
 export function filterKeys(s: TorahSheet): string[] {
 	const keys = new Set<string>();
@@ -214,8 +210,8 @@ export function filterKeys(s: TorahSheet): string[] {
 		}
 	}
 	if (s.chagSubcategory) keys.add(slugify(s.chagSubcategory));
+	if (s.avosPerek) keys.add(slugify(s.avosPerek));
 	if (s.topic) keys.add(slugify(s.topic));
-	if (hasCategory(s, PIRKEI_AVOS_LABEL)) keys.add(slugify(PIRKEI_AVOS_LABEL));
 	return [...keys];
 }
 
@@ -238,7 +234,7 @@ function compareParshaOrder(a: TorahSheet, b: TorahSheet): number {
 			return [SEFER_ORDER.length, minor];
 		}
 		if (hasCategory(s, PIRKEI_AVOS_LABEL)) {
-			const perekIndex = PIRKEI_AVOS_PERAKIM.findIndex((p) => p.toLowerCase() === s.subcategory?.toLowerCase());
+			const perekIndex = PIRKEI_AVOS_PERAKIM.findIndex((p) => p.toLowerCase() === s.avosPerek?.toLowerCase());
 			const minor = perekIndex === -1 ? PIRKEI_AVOS_PERAKIM.length : PIRKEI_AVOS_PERAKIM.length - 1 - perekIndex;
 			return [SEFER_ORDER.length + 1, minor];
 		}
@@ -385,7 +381,7 @@ function matchesVocabName(subcategory: string | undefined, name: string, allowCo
 	return false;
 }
 
-/** Default match target: a sheet's plain subcategory. Chagim buckets pass a different getter — see chagLabel below. */
+/** Default match target: a sheet's plain subcategory. Chagim/Pirkei-Avos buckets pass a different getter — see groupBySeferAndChagim. */
 const bySubcategoryValue = (s: TorahSheet) => s.subcategory;
 
 /**
@@ -394,8 +390,9 @@ const bySubcategoryValue = (s: TorahSheet) => s.subcategory;
  * excluded from the button list entirely — a combined-parsha sheet only
  * ever surfaces under its component buttons, never a button of its own.
  * `getValue` picks which field on the sheet to match against (defaults to
- * `subcategory`; Chagim buckets pass `chagLabel` instead, since a sheet's
- * `subcategory` may hold its parsha identity rather than a chag name).
+ * `subcategory`; Chagim/Pirkei-Avos buckets pass `chagSubcategory`/
+ * `avosPerek` instead, since a sheet's `subcategory` may hold its parsha
+ * identity rather than a chag/chapter name).
  */
 function bySubcategory(
 	sheets: TorahSheet[],
@@ -441,37 +438,37 @@ function groupBySeferAndChagim(sheets: TorahSheet[]): SheetSuperGroup[] {
 	const chagim = sheets.filter((s) => hasCategory(s, CHAGIM_LABEL));
 	const chagimGroups = bySubcategory(chagim, CHAGIM_ORDER, false, (s) => s.chagSubcategory || s.subcategory);
 
+	// Pirkei Avos buttons are chapters (Chapter 1–6), matched against
+	// avosPerek — same "real vocabulary only, no Other" rule as Chagim above,
+	// since a sheet without an assigned chapter has nothing meaningful to
+	// bucket it under (design-log #053 addendum 11).
+	const avos = sheets.filter((s) => hasCategory(s, PIRKEI_AVOS_LABEL));
+	const avosGroups = bySubcategory(avos, PIRKEI_AVOS_PERAKIM, false, (s) => s.avosPerek);
+
 	const superGroups = [...bySefer];
 	if (chagimGroups.length > 0) superGroups.push({ key: slugify(CHAGIM_LABEL), label: CHAGIM_LABEL, groups: chagimGroups });
+	if (avosGroups.length > 0) superGroups.push({ key: slugify(PIRKEI_AVOS_LABEL), label: PIRKEI_AVOS_LABEL, groups: avosGroups });
 
 	return superGroups.filter((g) => g.groups.length > 0);
 }
 
-/** A sheet tagged Pirkei Avos gets exactly one flat filter button — no perek breakdown (perek isn't tracked per-sheet), no "Other" bucket underneath it. */
-function pirkeiAvosFlatGroup(sheets: TorahSheet[]): SheetGroup[] {
-	const avos = sheets.filter((s) => hasCategory(s, PIRKEI_AVOS_LABEL));
-	return avos.length > 0 ? [{ key: slugify(PIRKEI_AVOS_LABEL), label: PIRKEI_AVOS_LABEL, sheets: avos }] : [];
+export function groupTorahBytes(sheets: TorahSheet[]): SheetSuperGroup[] {
+	return groupBySeferAndChagim(sheets.filter((s) => s.series === "Torah Bytes"));
 }
 
-export function groupTorahBytes(sheets: TorahSheet[]): GroupedSheets {
-	return { superGroups: groupBySeferAndChagim(sheets.filter((s) => s.series === "Torah Bytes")), flatGroups: [] };
-}
-
-export function groupDorLDor(sheets: TorahSheet[]): GroupedSheets {
-	const dorLDor = sheets.filter((s) => s.series === "Dor L'Dor");
-	return { superGroups: groupBySeferAndChagim(dorLDor), flatGroups: pirkeiAvosFlatGroup(dorLDor) };
+export function groupDorLDor(sheets: TorahSheet[]): SheetSuperGroup[] {
+	return groupBySeferAndChagim(sheets.filter((s) => s.series === "Dor L'Dor"));
 }
 
 /**
  * "All Publications": every sheet from every series in one browsable tree.
- * Sefer/Chagim buckets merge Torah Bytes and Dor L'Dor sheets under the same
- * parsha (so e.g. "Noach" shows both series' sheets together — the reading-
- * order vocabulary doesn't care which series a sheet belongs to), Pirkei
- * Avos is the same flat top-level filter groupDorLDor produces, and Source
- * Sheets' topics get their own trailing super-group since they don't fit the
- * parsha-cycle structure at all.
+ * Sefer/Chagim/Pirkei-Avos buckets merge Torah Bytes and Dor L'Dor sheets
+ * under the same parsha/chag/chapter (so e.g. "Noach" shows both series'
+ * sheets together — the reading-order vocabulary doesn't care which series a
+ * sheet belongs to), and Source Sheets' topics get their own trailing
+ * super-group since they don't fit the parsha-cycle structure at all.
  */
-export function groupAllSheets(sheets: TorahSheet[]): GroupedSheets {
+export function groupAllSheets(sheets: TorahSheet[]): SheetSuperGroup[] {
 	const superGroups = groupBySeferAndChagim(sheets);
 
 	const sourceSheetGroups = groupSourceSheets(sheets);
@@ -479,7 +476,7 @@ export function groupAllSheets(sheets: TorahSheet[]): GroupedSheets {
 		superGroups.push({ key: "source-sheets", label: "Source Sheets", groups: sourceSheetGroups });
 	}
 
-	return { superGroups, flatGroups: pirkeiAvosFlatGroup(sheets) };
+	return superGroups;
 }
 
 /** Source Sheets: flat groups by open-ended topic (sorted alphabetically), same "Other" bucket for untagged rows. */

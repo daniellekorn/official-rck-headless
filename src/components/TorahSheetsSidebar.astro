@@ -23,14 +23,12 @@ import type { SheetGroup, SheetSuperGroup } from "../lib/torah-sheets";
 interface Props {
 	kind: "nested" | "flat";
 	superGroups?: SheetSuperGroup[];
-	/** Top-level, non-collapsible filter buttons alongside the nested groups below (e.g. Pirkei Avos) — "nested" kind only. */
-	flatGroups?: SheetGroup[];
 	groups?: SheetGroup[];
 	publications: { key: string; label: string }[];
 	activePublication: string;
 }
 
-const { kind, superGroups = [], flatGroups = [], groups = [], publications, activePublication } = Astro.props;
+const { kind, superGroups = [], groups = [], publications, activePublication } = Astro.props;
 const activeLabel = publications.find((p) => p.key === activePublication)?.label ?? "";
 ---
 
@@ -82,19 +80,6 @@ const activeLabel = publications.find((p) => p.key === activePublication)?.label
 				</div>
 			</details>
 		))}
-		{flatGroups.length > 0 && (
-			<div class="space-y-0.5 pt-1">
-				{flatGroups.map((g) => (
-					<button
-						type="button"
-						data-filter-option={g.key}
-						class="sidebar-filter-btn w-full text-left font-semibold text-navy-600"
-					>
-						{g.label}
-					</button>
-				))}
-			</div>
-		)}
 	</div>
 ) : (
 	<div class="mt-2 space-y-0.5">

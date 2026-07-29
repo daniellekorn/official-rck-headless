@@ -48,7 +48,7 @@ const tabs = [
 		key: "all",
 		label: "All Publications",
 		kind: "nested" as const,
-		...groupAllSheets(sheets),
+		superGroups: groupAllSheets(sheets),
 		// Unfiltered order here is newest-upload-first across every series —
 		// deliberately ignoring year/reading-cycle (that's what the Torah
 		// Bytes/Dor L'Dor tabs are for) — see sortByUploadRecency.
@@ -58,14 +58,14 @@ const tabs = [
 		key: "torah-bytes",
 		label: "Torah Bytes",
 		kind: "nested" as const,
-		...groupTorahBytes(sheets),
+		superGroups: groupTorahBytes(sheets),
 		sheets: sheets.filter((s) => s.series === "Torah Bytes"),
 	},
 	{
 		key: "dor-ldor",
 		label: "Dor L'Dor ParshaLink",
 		kind: "nested" as const,
-		...groupDorLDor(sheets),
+		superGroups: groupDorLDor(sheets),
 		sheets: sheets.filter((s) => s.series === "Dor L'Dor"),
 	},
 	{
@@ -100,7 +100,7 @@ const tabs = [
 									</summary>
 									<div class="mt-3 pb-6 border-b border-navy-100" data-sidebar>
 										{tab.kind === "nested" ? (
-											<TorahSheetsSidebar kind="nested" superGroups={tab.superGroups} flatGroups={tab.flatGroups} publications={tabs} activePublication={tab.key} />
+											<TorahSheetsSidebar kind="nested" superGroups={tab.superGroups} publications={tabs} activePublication={tab.key} />
 										) : (
 											<TorahSheetsSidebar kind="flat" groups={tab.groups} publications={tabs} activePublication={tab.key} />
 										)}
@@ -109,7 +109,7 @@ const tabs = [
 
 								<aside class="hidden lg:block lg:border-e lg:border-navy-100 lg:pe-6" data-sidebar>
 									{tab.kind === "nested" ? (
-										<TorahSheetsSidebar kind="nested" superGroups={tab.superGroups} flatGroups={tab.flatGroups} publications={tabs} activePublication={tab.key} />
+										<TorahSheetsSidebar kind="nested" superGroups={tab.superGroups} publications={tabs} activePublication={tab.key} />
 									) : (
 										<TorahSheetsSidebar kind="flat" groups={tab.groups} publications={tabs} activePublication={tab.key} />
 									)}
