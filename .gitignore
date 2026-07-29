@@ -27,6 +27,9 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
+# packaged skill zips — regenerate with the command in skills/README.md
+skills/*.zip
+
 # playwright artifacts
 .playwright-mcp/
 homepage-full.png
