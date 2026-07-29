@@ -12,9 +12,9 @@ import {
 	groupSourceSheets,
 	pickFeatured,
 	sortByUploadRecency,
+	filterKeys,
 	type TorahSheet,
 } from "../lib/torah-sheets";
-import { slugify } from "../lib/slug";
 
 const sheets = await getTorahSheets();
 
@@ -23,9 +23,8 @@ const sheets = await getTorahSheets();
 // below) so there's no flash-then-switch once the client script runs.
 const DEFAULT_TAB_KEY = "torah-bytes";
 
-// Each sheet's sidebar-filter key is whichever level actually applies to its
-// series (subcategory for Torah Bytes/Dor L'Dor, topic for Source Sheets).
-const filterKey = (s: TorahSheet) => slugify(s.subcategory || s.topic || "");
+// Each sheet's sidebar-filter keys — see filterKeys (torah-sheets.ts) for
+// the full multi-value logic (combined-parsha components, Pirkei Avos, etc).
 
 // The single most-recent sheet per tab gets a bigger, real-preview treatment
 // (every other PDF card just shows a plain icon) *and* is pulled to the top
@@ -49,7 +48,7 @@ const tabs = [
 		key: "all",
 		label: "All Publications",
 		kind: "nested" as const,
-		superGroups: groupAllSheets(sheets),
+		...groupAllSheets(sheets),
 		// Unfiltered order here is newest-upload-first across every series —
 		// deliberately ignoring year/reading-cycle (that's what the Torah
 		// Bytes/Dor L'Dor tabs are for) — see sortByUploadRecency.
@@ -59,14 +58,14 @@ const tabs = [
 		key: "torah-bytes",
 		label: "Torah Bytes",
 		kind: "nested" as const,
-		superGroups: groupTorahBytes(sheets),
+		...groupTorahBytes(sheets),
 		sheets: sheets.filter((s) => s.series === "Torah Bytes"),
 	},
 	{
 		key: "dor-ldor",
 		label: "Dor L'Dor ParshaLink",
 		kind: "nested" as const,
-		superGroups: groupDorLDor(sheets),
+		...groupDorLDor(sheets),
 		sheets: sheets.filter((s) => s.series === "Dor L'Dor"),
 	},
 	{
@@ -101,7 +100,7 @@ const tabs = [
 									</summary>
 									<div class="mt-3 pb-6 border-b border-navy-100" data-sidebar>
 										{tab.kind === "nested" ? (
-											<TorahSheetsSidebar kind="nested" superGroups={tab.superGroups} publications={tabs} activePublication={tab.key} />
+											<TorahSheetsSidebar kind="nested" superGroups={tab.superGroups} flatGroups={tab.flatGroups} publications={tabs} activePublication={tab.key} />
 										) : (
 											<TorahSheetsSidebar kind="flat" groups={tab.groups} publications={tabs} activePublication={tab.key} />
 										)}
@@ -110,7 +109,7 @@ const tabs = [
 
 								<aside class="hidden lg:block lg:border-e lg:border-navy-100 lg:pe-6" data-sidebar>
 									{tab.kind === "nested" ? (
-										<TorahSheetsSidebar kind="nested" superGroups={tab.superGroups} publications={tabs} activePublication={tab.key} />
+										<TorahSheetsSidebar kind="nested" superGroups={tab.superGroups} flatGroups={tab.flatGroups} publications={tabs} activePublication={tab.key} />
 									) : (
 										<TorahSheetsSidebar kind="flat" groups={tab.groups} publications={tabs} activePublication={tab.key} />
 									)}
@@ -132,7 +131,7 @@ const tabs = [
 												<div
 													class:list={["sheet-row", { "sheet-row--featured": isFeatured }]}
 													data-sheet
-													data-filter={filterKey(sheet)}
+													data-filter={filterKeys(sheet).join(" ")}
 												>
 													<div class="sheet-row-main">
 														{sheet.sourceType === "pdf" && isFeatured && sheet.pdfThumbnailUrl ? (
@@ -416,8 +415,11 @@ const tabs = [
 		activateTab(DEFAULT_TAB_KEY);
 	}
 
-	// 2. Sidebar filtering: single active filter per panel (these are hierarchical
-	// categories, not independent tags, so no multi-select AND logic needed).
+	// 2. Sidebar filtering: only one filter button can be *active* at a time,
+	// but each card can *match* several (data-filter is a space-separated list
+	// — see filterKeys in torah-sheets.ts — so a combined-parsha sheet matches
+	// both component-parsha buttons, and a parsha+Pirkei-Avos sheet matches
+	// both its parsha button and the flat Pirkei Avos button).
 	// Sidebar content is rendered twice per panel (mobile <details> + desktop
 	// aside — a <details> can't be forced open at a breakpoint via CSS alone),
 	// so filter *trigger* buttons use data-filter-option (not data-filter —
@@ -451,7 +453,7 @@ const tabs = [
 			let visible = 0;
 			let matchIndex = 0;
 			cards.forEach((card) => {
-				const matches = !activeFilter || card.dataset.filter === activeFilter;
+				const matches = !activeFilter || (card.dataset.filter?.split(" ").includes(activeFilter) ?? false);
 				const capped = !activeFilter && matchIndex >= visibleCount;
 				if (matches) matchIndex += 1;
 				card.classList.toggle("hidden", !matches || capped);
