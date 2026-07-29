@@ -315,6 +315,15 @@ const tabs = [
 		width: 9.5rem;
 		height: 9.5rem;
 	}
+	/* Same specificity collision as .see-more-btn.hidden below: .sheet-thumb's
+	   own `display` (and --placeholder's `display: flex`) ties with Tailwind's
+	   .hidden{display:none} at equal specificity, and this component's <style>
+	   compiles after Tailwind's utilities — so without this, JS toggling
+	   .hidden on a thumb link (design-log #053 addenda 18/19) silently did
+	   nothing: the preview and fallback icon both stayed visible side by side. */
+	.sheet-thumb.hidden {
+		display: none;
+	}
 
 	/* No background "box" — just the icon itself, same minimal icon-button
 	   treatment as .sheet-download, so there's no empty mist-colored square
