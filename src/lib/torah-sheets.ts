@@ -89,6 +89,37 @@ function toDateString(raw: unknown): string | undefined {
 	return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
 }
 
+// Compact, no-space form of each series' display name, matching the
+// convention already baked into the office's own PDF filenames (e.g.
+// "RCK.DorLDor.*.pdf") — used to build the forced-download filename below.
+const PUBLICATION_FILENAME: Record<Series, string> = {
+	"Torah Bytes": "TorahBytes",
+	"Dor L'Dor": "DorLDor",
+	"Source Sheets": "SourceSheets",
+};
+
+/** A title can contain characters unsafe in a saved filename (e.g. a combo sheet's "Pinchas / Shiva Asar B'Tammuz" has a "/"). */
+function sanitizeFilenamePart(s: string): string {
+	return s.replace(/[\\/:*?"<>|]/g, "-").trim();
+}
+
+/**
+ * Wix's document CDN otherwise serves every PDF under its internal storage
+ * hash (e.g. "f477b1_29fecf4...pdf") no matter what the original upload was
+ * named — confirmed directly via curl: appending `?dn=<name>` to the
+ * resolved URL makes the CDN respond with `Content-Disposition: attachment;
+ * filename="<name>"`, so the browser saves under that name instead (and the
+ * link no longer needs an HTML `download` attribute, which Wix media being
+ * cross-origin would ignore anyway — see Lightbox.astro). Applied to every
+ * PDF URL a sheet exposes (the main file and, for Canva sheets, the backup
+ * PDF) so a download is always named "RCK.{Publication}.{Title}.pdf",
+ * never the meaningless CDN hash.
+ */
+function withDownloadName(url: string | undefined, filename: string): string | undefined {
+	if (!url) return undefined;
+	return `${url}${url.includes("?") ? "&" : "?"}dn=${encodeURIComponent(filename)}`;
+}
+
 export async function getTorahSheets(): Promise<TorahSheet[]> {
 	try {
 		const elevated = auth.elevate(items.query);
@@ -98,11 +129,13 @@ export async function getTorahSheets(): Promise<TorahSheet[]> {
 			.map((row): TorahSheet | undefined => {
 				const series = normalizeSeries(row.series);
 				if (!series) return undefined;
+				const title = (row.title as string) ?? "Untitled";
 				const pdf = resolveDocument(row.pdfFile as string | undefined);
 				const canvaPdf = resolveDocument(row.canvaPdfBackup as string | undefined);
+				const downloadFilename = `RCK.${PUBLICATION_FILENAME[series]}.${sanitizeFilenamePart(title)}.pdf`;
 				return {
 					_id: row._id as string,
-					title: (row.title as string) ?? "Untitled",
+					title,
 					series,
 					category: Array.isArray(row.category)
 						? (row.category as string[]).map((c) => c.trim()).filter(Boolean)
@@ -115,10 +148,10 @@ export async function getTorahSheets(): Promise<TorahSheet[]> {
 					createdDate: toDateString(row._createdDate),
 					sourceType: normalizeSourceType(row.sourceType),
 					canvaEmbedUrl: (row.canvaEmbedUrl as string | undefined)?.trim() || undefined,
-					pdfUrl: pdf?.url,
+					pdfUrl: withDownloadName(pdf?.url, downloadFilename),
 					pdfFilename: pdf?.filename,
 					pdfThumbnailUrl: resolveImage(row.pdfThumbnail as string | undefined, 400, 400),
-					canvaPdfUrl: canvaPdf?.url,
+					canvaPdfUrl: withDownloadName(canvaPdf?.url, downloadFilename),
 					canvaPdfFilename: canvaPdf?.filename,
 				};
 			})
