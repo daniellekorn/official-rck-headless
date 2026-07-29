@@ -177,7 +177,9 @@ Wait for a yes. If they change something, show the whole block again with the ch
 
 Both workflows are: pull the file from Canva → put it in the Wix Media Manager → create or update the CMS row.
 
-**Canva.** Use the Canva connector to export the page they picked — PNG for flyers, PDF for Torah sheets. If the connector can't reach the design, it's almost always permissions: ask them to open the design, hit Share, and make sure it's shared with the account the connector is signed in to.
+**Canva.** The user gives you a link to the *design*. Ask the Canva connector to produce an **export URL** from it — a PDF for a Torah sheet, a PNG of the chosen page for a flyer — and hand that export URL to Wix. Don't ask the user to export anything; the two-step (design link in, export URL out) is yours to do.
+
+If the connector can't reach the design, it's almost always permissions: ask them to open it in Canva, hit Share, and confirm it's shared with the account the connector is signed in to.
 
 **Files and attachments.** A Canva link is the primary route for both workflows, and it's the one to steer people to. The two file types behave differently underneath, which is your problem and not theirs:
 

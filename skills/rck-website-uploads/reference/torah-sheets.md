@@ -69,9 +69,15 @@ When you generate one, clear `pdfThumbnail` on the other sheets in that series a
 
 ## Getting the PDF in
 
-**Ask for the Canva link, not the file.** The Wix image-upload tool doesn't handle PDFs, so a sheet's PDF goes into the Media Manager via the generic import path, which wants a publicly reachable URL. A Canva export URL is one; a chat attachment may not resolve to one the API can fetch.
+**The route that's known to work**, and the default:
 
-If someone attaches a PDF anyway, try it — but if the import fails, say so and ask for the link. Do not fall back to a different file, and do not create the row until you've confirmed the PDF actually landed in the Media Manager. A row pointing at a file that isn't there renders a broken card.
+1. Take the Canva **design** link the user sent.
+2. Ask the Canva connector to produce a **PDF export URL** from it.
+3. Hand that export URL to Wix's Media Manager import.
+
+The Wix image-upload tool doesn't handle PDFs, so the import goes through the generic path, which wants a publicly reachable URL — which a Canva export URL is. A chat attachment may not resolve to one the API can fetch, so don't reach for that first.
+
+If someone attaches a PDF anyway, try it — but if the import fails, say so and ask for the Canva link. Do not fall back to a different file, and do not create the row until you've confirmed the PDF actually landed in the Media Manager. A row pointing at a file that isn't there renders a broken card.
 
 ## Writing to the collection
 
