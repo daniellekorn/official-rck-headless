@@ -364,6 +364,13 @@ const tabs = [
 		font-size: 1.0625rem;
 		color: var(--color-navy-600);
 		text-decoration: none;
+		/* Some imported titles carry a long unbroken "Prefix.Word" run with no
+		   space (e.g. "ParshaLink.Pinchas", "Iyun2Halacha.Chaburah" — leftover
+		   bulk-import titles never renamed) that a normal word-wrap can't break
+		   on — without this, that single "word" forces the row wider than a
+		   mobile viewport, pushing .sheet-download off-screen. min-width: 0
+		   alone isn't enough for that case; overflow-wrap: anywhere is. */
+		overflow-wrap: anywhere;
 	}
 	a.sheet-title:hover {
 		text-decoration: underline;
