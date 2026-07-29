@@ -53,6 +53,8 @@ Like `https://static.wixstatic.com/media/f477b1_abc123….png`. A `wix:image://v
 
 Upload the PNG to the **Flyers** folder and use the URL the upload hands back — don't construct one. Read an existing flyer row and mirror it.
 
+**The collection also has an `image` field and nothing reads it.** Most rows carry the same URL in both, but only `imageUrl` reaches the page — fill `image` alone and the flyer shows the "coming soon" placeholder. Always write `imageUrl`.
+
 The image-upload tool takes a chat attachment as readily as a link, so an attached PNG is fine — don't send them back for a Canva link.
 
 Prefer an image over a PDF: it gets hover zoom, click-to-enlarge, and a Download button.

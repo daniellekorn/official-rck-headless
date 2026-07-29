@@ -87,6 +87,18 @@ Computed-times claims read off `src/lib/zmanim-schedule.ts` and the `DaveningTim
 
 Version bumped to `2026-07-29c` so an installed copy is identifiable (#054 — copies drift per person).
 
-**Not yet exercised against the live site.** The triage change is behavioural and wants a real run to confirm; the next Hebrew upload is the test, and the specific thing to watch is whether the skill opens the design before its second question.
+### Checked against the live CMS
+
+Read-only pass over the real site (`raanana-co-05a91814-daniellakorn.wix-site-host.com` — fetched from the connector, confirming the never-guess-a-domain rule), plus two live page loads. Confirmed as documented: `Flyers.imageUrl` holds a plain `static.wixstatic.com` URL on all 26 rows; `YouthPrograms.flyerImage` holds `wix:image://`; `TorahSheets.pdfFile` / `pdfThumbnail` hold `wix:document://` / `wix:image://`; there is exactly **one** `schedules` flyer and it is correctly tagged `daily`, so "replace the picture, don't add a row" is the right instruction; and **no `youth` flyer rows exist**, so that trap is real but unsprung — the fix is preventive, not a cleanup.
+
+Three things the pass found that the skill had wrong or missing:
+
+- **`Flyers` has an `image` field that nothing reads.** 25 of 26 rows carry the same URL in both `image` and `imageUrl`; `flyers.ts` only ever reads `imageUrl`. Filling `image` alone yields the "coming soon" placeholder. Same silent-failure class, previously undocumented anywhere.
+- **`PastEvents.flyerImage` takes either shape.** The flow file claimed it needs the internal reference; one live row holds a plain `wixstatic` URL and renders fine on `/events`. Corrected to "read a row and mirror it" rather than asserting a format. The `YouthPrograms` preference *is* real and now stated with its actual consequence: only the internal form carries `#originWidth`/`#originHeight`, which `imageAspectRatio` parses to fit the frame — a plain URL renders but falls back to a fixed 3:4.
+- **`DaveningTimes.dayType` is `Shabbat`, and five live rows say `Shabbos`.** `DayType` is `"Weekday" | "Shabbat"`, so `Shabbos` matches neither filter. Confirmed on `/daven`: the five active `Shabbos` rows (KBA's "Parsha of the Week", Shacharis 8:45, Tefillat Yeladim 10:00, Mincha 7:15, Maariv At Tzeis) appear nowhere — the 8:45 and 10:00 visible on the page come from the computed `SHABBOS_MORNING` constants, not from those rows. `times.md` predicted this failure mode before the data was looked at; it now names the spelling explicitly, since `Shabbos` is the form the site uses everywhere else. Also documents `orgName`, an undocumented field on every row.
+
+**Live data left alone.** The five orphaned rows are a content decision — `Shabbat` would surface KBA's times on the RCK site, `active: false` retires them — so they're reported to Danielle, not fixed here.
+
+**The triage change itself is not yet exercised.** It's behavioural; the next real Hebrew upload is the test, and the thing to watch is whether the skill opens the design before its second question.
 
 Site content and code are unchanged — this entry is skill and docs only.

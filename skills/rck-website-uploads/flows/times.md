@@ -32,11 +32,18 @@ Rows render after the computed times: `dayType = Weekday` under the weekday tabl
 |---|---|---|
 | `service` | Text | `Shacharis`, `Mincha`, `Maariv`, or `Selichos`. Rows group under this heading; another name works and sorts last. |
 | `dayType` | Text | `Weekday` or `Shabbat`, exact and capitalised. Anything else and the row joins neither table — it appears nowhere. |
+| `orgName` | Text | Present on existing rows (`RCK`, `KBA`). No page reads it, so it changes nothing. Mirror the neighbouring rows and move on. |
 | `daySpec` | Text | The days as they should read: `Sunday`, `Mon, Thu`, `Sun – Thu`. |
 | `time` | Text | Display text, not a parsed time — `7:00 AM`, `Plag`, `10 min before Shkiya`. |
 | `notes` | Text | Extra context only, e.g. `Followed by Daf Yomi`. Never day-of-week info — that's `daySpec`. |
 | `sortOrder` | Number | Order within its service group, lower first. |
 | `active` | Boolean | Show/hide without deleting. Default true. |
+
+### `Shabbat`, not `Shabbos`
+
+The one spelling that matters, and the easy one to get wrong: `dayType` must be **`Shabbat`**, even though the site says Shabbos everywhere else (`Shabbos HaGadol`, `Shabbos Shuva`, the Shabbos table itself). A row saying `Shabbos` joins neither table and appears on no page, with no error.
+
+Rows on the live site are wrong this way right now. Before writing, read the neighbouring rows — and if you see `Shabbos` ones, say so rather than copying them.
 
 ## Taking one off
 

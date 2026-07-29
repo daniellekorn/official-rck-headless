@@ -34,7 +34,7 @@ If it matches an existing title, name the row you found and confirm it's the sam
 | `sortOrder` | Number | Section order on the page, lower first. |
 | `active` | Boolean | Show/hide without deleting. Default true. |
 
-`flyerImage` is an **Image** field and takes Wix's internal reference format — unlike `Flyers.imageUrl`, which needs a plain public URL. Read an existing row and mirror it (`reference/wix.md`).
+`flyerImage` wants Wix's **internal reference** (`wix:image://v1/…`), not the plain public URL `Flyers.imageUrl` needs. Only the internal form carries `#originWidth`/`#originHeight`, which is what lets the page match the frame to the image's own shape; a plain URL renders but falls back to a fixed 3:4 crop. Read an existing row and mirror it (`reference/wix.md`).
 
 Every program shows a flyer slot; an empty one renders "Flyer coming soon". A program with no flyer yet is fine — say so rather than treating the flyer as blocking.
 
