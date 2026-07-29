@@ -1,6 +1,6 @@
 # 055 — The upload skill routes on the artifact, not on the noun
 
-**Status:** Shipped. Skill version `2026-07-29c`. Follows [#054](054-editor-upload-skill.md).
+**Status:** Shipped. Skill version `2026-07-29d`. Follows [#054](054-editor-upload-skill.md).
 **Date:** 2026-07-29
 
 ## Problem
