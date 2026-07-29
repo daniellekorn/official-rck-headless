@@ -422,6 +422,17 @@ const isContactActive = pathname === "/contact";
 
 		layout();
 
+		// The nav's web fonts load with `font-display: swap` (Layout.astro), so
+		// the very first `layout()` call above measures against the fallback
+		// font's (narrower) metrics. If Oswald/Onest swap in wider once they
+		// load — which doesn't fire `resize` — a row that "fit" a moment ago can
+		// overflow the pill for real, with nothing left to re-measure it. Since
+		// `.nav-pill` has no `overflow-hidden` (by design, so a dropdown/mega
+		// menu isn't clipped), that overflow was visible as the CTA spilling
+		// past the white bar's edge instead of getting folded into the
+		// hamburger like it should have been.
+		document.fonts?.ready?.then(layout);
+
 		let resizeTicking = false;
 		window.addEventListener(
 			"resize",

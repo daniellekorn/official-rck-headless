@@ -51,3 +51,10 @@ A single breakpoint can't both (a) show the full bar with reasonably large text 
 ## Verification
 
 `astro check` clean (same 3 pre-existing, unrelated `index.astro` errors as before this change). Confirmed via the dev server that both the new script and the original toggle/scroll script compile and load as separate modules, and that the new script's logic (element selectors, the fold loop, the hamburger-visibility toggle) is present in the served output. No headless-browser tool was available in this session to automate an actual resize-and-screenshot check — Danielle verified the live behavior by resizing a real browser window.
+
+## Addendum — Donate button spilling past the pill, just before the hamburger point
+
+Reported directly: narrowing the window on desktop, right around where folding should start, the Donate button was visibly spilling off the white bar rather than getting tucked into the hamburger. Root cause: `Layout.astro`'s web fonts load with `font-display: swap` — `layout()`'s very first call (on script load) measures `navPill.scrollWidth` against the *fallback* font's metrics, which are narrower than Oswald/Onest. If the real font swaps in wider after that measurement, the row that "fit" a moment ago can overflow for real — and nothing re-triggers `layout()` to notice, since a font swap doesn't fire `resize`. `.nav-pill` has no `overflow-hidden` (deliberately, so dropdowns/mega menus aren't clipped), so the overflow was visible as the CTA spilling past the bar's edge instead of folding.
+
+- **Fix**: `document.fonts?.ready?.then(layout)` added right after the initial `layout()` call — re-runs the same fold logic once the real fonts are actually in place, catching the case where font-swap changed the measured widths after the first pass.
+- **Verification**: `astro check`/`astro build` clean. Not click-tested live — no headless browser / connected Chrome extension available in this session; recommend confirming by throttling the network (to widen the gap between first paint and font load) while narrowing the window through the fold range.
