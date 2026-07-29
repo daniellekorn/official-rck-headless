@@ -131,18 +131,27 @@ const tabs = [
 												<div
 													class:list={["sheet-row", { "sheet-row--featured": isFeatured }]}
 													data-sheet
+													data-featured={isFeatured ? "" : undefined}
 													data-filter={filterKeys(sheet).join(" ")}
 												>
 													<div class="sheet-row-main">
-														{sheet.sourceType === "pdf" && isFeatured && sheet.pdfThumbnailUrl ? (
+														{/* Dual preview/fallback markup: always for the tab's own
+														    featured pick (every tab), and additionally for *every*
+														    thumbnailed row on Source Sheets — that tab promotes
+														    whichever card sorts first under the active topic filter,
+														    not just the tab-wide pick, so any of its rows might need
+														    to show its real image. See design-log #053 addendum 18. */}
+														{sheet.sourceType === "pdf" && sheet.pdfThumbnailUrl && (isFeatured || tab.key === "source-sheets") ? (
+															<>
 															<a
 																href={sheet.pdfUrl}
 																target="_blank"
 																rel="noopener noreferrer"
-																class="sheet-thumb sheet-thumb--preview"
+																class:list={["sheet-thumb", "sheet-thumb--preview", { hidden: !isFeatured }]}
 																aria-label={`View ${label} PDF`}
 																data-pdf-open
 																data-pdf-name={sheet.pdfFilename}
+																data-thumb-preview
 															>
 																<img src={sheet.pdfThumbnailUrl} alt="" loading="lazy" />
 																<svg class="sheet-thumb-view-icon sheet-thumb-view-icon--overlay" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -151,6 +160,27 @@ const tabs = [
 																	<path d="M10 14 21 3" stroke-linecap="round" stroke-linejoin="round" />
 																</svg>
 															</a>
+															{/* Same plain icon every non-thumbnailed PDF card uses —
+															    shown by default for a thumbnailed row that isn't
+															    (yet) the promoted one; JS swaps the two as filters
+															    change. See design-log #053/#054. */}
+															<a
+																href={sheet.pdfUrl}
+																target="_blank"
+																rel="noopener noreferrer"
+																class:list={["sheet-thumb", "sheet-thumb--placeholder", { hidden: isFeatured }]}
+																aria-label={`View ${label} PDF`}
+																data-pdf-open
+																data-pdf-name={sheet.pdfFilename}
+																data-thumb-fallback
+															>
+																<svg class="sheet-thumb-view-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+																	<path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h6" stroke-linecap="round" stroke-linejoin="round" />
+																	<path d="M15 3h6v6" stroke-linecap="round" stroke-linejoin="round" />
+																	<path d="M10 14 21 3" stroke-linecap="round" stroke-linejoin="round" />
+																</svg>
+															</a>
+															</>
 														) : sheet.sourceType === "pdf" ? (
 															<a
 																href={sheet.pdfUrl}
@@ -506,6 +536,23 @@ const tabs = [
 		const noResults = panel.querySelector<HTMLElement>("[data-no-results]");
 		const seeMoreBtn = panel.querySelector<HTMLButtonElement>("[data-see-more]");
 		const sheetList = panel.querySelector<HTMLElement>("[data-sheet-list]");
+		// Source Sheets promotes whichever card is first in the *current* view
+		// (topic filter or not) to the big real-image treatment — its topic
+		// filters are their own mini-series (e.g. "From Iyun to Halacha"), so
+		// each one gets its own lead card, not just the tab-wide pick. Every
+		// other tab keeps the simpler rule below: only ever the tab's own
+		// featured pick, and only pre-filter. See design-log #053 addendum 18.
+		const isSourceSheets = panel.dataset.tabPanel === "source-sheets";
+		const featuredRow = panel.querySelector<HTMLElement>("[data-featured]");
+		// Toggles one card's box between the big real-preview (or, lacking a
+		// generated thumbnail, just the plain icon at the enlarged size the
+		// featured row already uses) and the normal small icon every other
+		// card uses.
+		const setPromoted = (card: HTMLElement, promoted: boolean) => {
+			card.classList.toggle("sheet-row--featured", promoted);
+			card.querySelector<HTMLElement>("[data-thumb-preview]")?.classList.toggle("hidden", !promoted);
+			card.querySelector<HTMLElement>("[data-thumb-fallback]")?.classList.toggle("hidden", promoted);
+		};
 		// Initial batch, then this many more revealed per "See more" click,
 		// until everything's shown — at which point the button flips to
 		// "See Less" and collapses straight back to INITIAL_COUNT (not just
@@ -519,18 +566,28 @@ const tabs = [
 		const apply = () => {
 			let visible = 0;
 			let matchIndex = 0;
+			let topMatch: HTMLElement | null = null;
 			cards.forEach((card) => {
 				const matches = !activeFilter || (card.dataset.filter?.split(" ").includes(activeFilter) ?? false);
 				const capped = !activeFilter && matchIndex >= visibleCount;
 				if (matches) matchIndex += 1;
+				if (matches && !capped) {
+					visible += 1;
+					if (!topMatch) topMatch = card;
+				}
 				card.classList.toggle("hidden", !matches || capped);
-				if (matches && !capped) visible += 1;
 			});
 			noResults?.classList.toggle("hidden", visible > 0);
 			filterBtns.forEach((b) => b.classList.toggle("is-active", activeFilter !== null && b.dataset.filterOption === activeFilter));
 			resetBtns.forEach((b) => b.classList.toggle("is-active", activeFilter === null));
 			seeMoreBtn?.classList.toggle("hidden", activeFilter !== null || !paginate);
 			if (seeMoreBtn) seeMoreBtn.textContent = visibleCount >= cards.length ? "See Less" : "See More";
+
+			if (isSourceSheets) {
+				cards.forEach((card) => setPromoted(card, card === topMatch));
+			} else if (featuredRow) {
+				setPromoted(featuredRow, activeFilter === null);
+			}
 		};
 
 		filterBtns.forEach((btn) => {
