@@ -171,19 +171,4 @@ If someone gives you one of those, or any other day not in the table: don't forc
 
 Written into `avosPerek`, spelled exactly like that — not `Perek 1`, not `3`, not `פרק ג`. Dor L'Dor only. A Pirkei Avos sheet without this set still shows under "All Sheets" but gets no chapter button.
 
----
-
-## Flyer sections — exactly four
-
-Written into `Flyers.category`, **lowercase**:
-
-| Site value | What the visitor sees | Ask the user |
-|---|---|---|
-| `schedules` | Schedules | "Is this a schedule?" |
-| `learning` | Learning | "Is this a shiur or learning program?" |
-| `youth` | Youth Programming | "Is this for kids or teens?" |
-| `events` | Events | "Is this a one-off event?" |
-
-An older instruction sheet floating around says the only options are `learning` and `events`. **That is wrong** and it silently files youth and schedule flyers in the wrong section. There are four.
-
-Wrong or misspelled value = the flyer doesn't appear anywhere, with no warning.
+> Flyer sections are a separate closed list — see `flyers.md`. Nothing in this file applies to flyers.

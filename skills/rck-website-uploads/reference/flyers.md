@@ -7,13 +7,26 @@ Collection ID: `Flyers`. One row per flyer. Images live in the Wix Media Manager
 | Field | Type | What to put in it |
 |---|---|---|
 | `title` | Text | The name shown on the site. |
-| `category` | Text | `schedules`, `learning`, `youth`, or `events`. Lowercase, exact. **Four options, not two** — see `vocabulary.md`. |
+| `category` | Text | `schedules`, `learning`, `youth`, or `events`. Lowercase, exact. **Four, not two** — see below. |
 | `imageUrl` | Text | **The important one.** A plain public image URL. See below. |
 | `pdfUrl` | Text | A public PDF URL. Fallback for genuinely multi-page documents only. |
 | `isActive` | Boolean | Show/hide without deleting. Default true. |
 | `displayOrder` | Number | Order within its section, lower first. |
 | `subCategory` | Tags | Optional filter tags. See below. |
 | `removeAfter` | Date | The last day it shows. Optional. |
+
+## Sections — exactly four
+
+Written into `category`, **lowercase**:
+
+| Site value | Visitor sees | Ask |
+|---|---|---|
+| `schedules` | Schedules | "Is this a schedule?" |
+| `learning` | Learning | "Is this a shiur or learning program?" |
+| `youth` | Youth Programming | "Is this for kids or teens?" |
+| `events` | Events | "Is this a one-off event?" |
+
+An older instruction sheet says the only options are `learning` and `events`. **That's wrong**, and it silently files youth and schedule flyers in the wrong section. Wrong or misspelled value = the flyer appears nowhere, with no warning.
 
 ## `imageUrl` must be a plain public URL
 
