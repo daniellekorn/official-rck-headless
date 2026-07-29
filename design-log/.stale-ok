@@ -14,3 +14,7 @@
 # The entry documents its own reversal: "The src/middleware.ts from this change
 # is a no-op, so it was reverted." Exactly what a superseded entry should say.
 020 src/middleware.ts
+
+# Addendum 2 documents its own removal: "removed the `>= XL_BREAKPOINT`
+# early-return entirely (and the now-unused XL_BREAKPOINT constant)."
+048 XL_BREAKPOINT

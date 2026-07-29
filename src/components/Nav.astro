@@ -343,17 +343,20 @@ const isContactActive = pathname === "/contact";
 </script>
 
 <script>
-	// Progressive "priority nav": below the `xl` breakpoint (1280px — matches the
-	// `xl:flex`/`xl:hidden` classes above), Tailwind's own CSS already collapses
-	// everything into the hamburger — that's the safe, zero-JS default and what
-	// renders on first paint, so there's never a flash of an overflowing bar.
-	// This script then progressively re-reveals as many nav items as actually
-	// fit, folding the lowest-priority ones (from the end of the list — Youth,
-	// Events, Community, … ) back into the hamburger one at a time as the
-	// window narrows. Every item stays reachable via the hamburger drawer
+	// Progressive "priority nav": Tailwind's `xl:flex`/`xl:hidden` classes give
+	// a safe zero-JS default for first paint (menu collapsed into the
+	// hamburger below 1280px, shown in full at/above it) — that default is
+	// what renders before this script runs, so there's never a flash of an
+	// overflowing bar. This script then measures the row's *actual* content
+	// width and folds the lowest-priority items (from the end of the list —
+	// Youth, Events, Community, … ) back into the hamburger one at a time,
+	// at *any* viewport width — it no longer trusts that the full menu
+	// always fits at/above 1280px. That assumption broke once the item list
+	// grew past what fits there (e.g. adding Torah Sheets): the Donate
+	// button would spill past the white pill with nothing to catch it,
+	// because the old code skipped measuring entirely once past that
+	// breakpoint. Every item stays reachable via the hamburger drawer
 	// regardless of whether it's also shown inline. See design log #048.
-	const XL_BREAKPOINT = 1280;
-
 	const navPill = document.querySelector<HTMLElement>(".nav-pill");
 	const navList = document.querySelector<HTMLUListElement>("[data-nav-list]");
 	const navCta = document.querySelector<HTMLElement>("[data-nav-cta]");
@@ -370,16 +373,6 @@ const isContactActive = pathname === "/contact";
 		const overflowing = () => navPill.scrollWidth > navPill.clientWidth + 1; // +1: rounding slack
 
 		const layout = () => {
-			if (window.innerWidth >= XL_BREAKPOINT) {
-				// Full width: let the CSS `xl:` classes render cleanly, no overrides.
-				navList.style.removeProperty("display");
-				navCta.style.removeProperty("display");
-				items.forEach((li) => li.style.removeProperty("display"));
-				navToggle?.style.removeProperty("display");
-				mobileDonate?.style.removeProperty("display");
-				return;
-			}
-
 			// Force everything visible so we can measure the row's true content
 			// width, then fold items from the end until it fits (or nothing's left).
 			navList.style.display = "flex";
@@ -410,14 +403,14 @@ const isContactActive = pathname === "/contact";
 			}
 
 			// The hamburger only needs to exist to hold whatever didn't fit inline.
-			// If nothing got folded (a perfect fit below `xl`), hide it — a full
-			// inline menu sitting next to a redundant hamburger would look broken.
+			// If nothing got folded (a perfect fit), hide it — a full inline menu
+			// sitting next to a redundant hamburger would look broken. When
+			// folding *did* happen, it must be explicitly shown (not just left to
+			// the underlying `xl:hidden` class), since folding can now happen at
+			// or above the `xl` breakpoint too, where that class would otherwise
+			// hide it regardless of whether anything actually needs it.
 			const nothingFolded = !anyItemHidden && !ctaHidden;
-			if (nothingFolded) {
-				navToggle?.style.setProperty("display", "none");
-			} else {
-				navToggle?.style.removeProperty("display");
-			}
+			navToggle?.style.setProperty("display", nothingFolded ? "none" : "inline-flex");
 		};
 
 		layout();
