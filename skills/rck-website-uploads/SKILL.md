@@ -57,9 +57,11 @@ If their opening message already made it obvious, say what you assumed and skip 
 
 ## Question shape
 
-**Closed** questions — a short known set of answers — get asked as an explicit option list, nothing else. Written that way the app can offer tappable choices; written as prose it can't. These are: language · task · series · flyer section · which page · combined or not · take-down date or not · cover picture or not · every confirmation.
+**Closed** questions — a short known set of answers — get asked as an explicit option list, nothing else. Written that way the app can offer tappable choices; written as prose it can't. These are: language · task · flyer section · which page · combined or not · take-down date or indefinite · every confirmation. (Series too, on the rare occasion it isn't already known.)
 
-**Open** questions get asked plainly: the Canva link · which parsha or chag · the year · the title.
+**Open** questions get asked plainly: the Canva link · which parsha or chag · the year · a Dor L'Dor or Source Sheets title.
+
+Never asked at all: the cover picture (always yes), and a Torah Bytes title (it's the parsha name).
 
 **Never turn "which parsha" into a list.** Fifty-four transliterations the user doesn't think in is worse than typing `עקב` and having you match it.
 
@@ -67,7 +69,7 @@ If their opening message already made it obvious, say what you assumed and skip 
 
 Fields: `reference/torah-sheets.md`. Names: `reference/vocabulary.md`.
 
-One message each, skipping anything already answered. Aim for four questions, not seven.
+One message each, skipping anything already answered. A Torah Bytes sheet should take **three** questions.
 
 1. **The Canva link.** They don't export anything — you do.
 2. **Which parsha or chag.** Hebrew is fine. Then **look it up** — and if you find an exact match, say nothing about it and move on. It appears in the read-back, where they'll confirm it. Announcing `ואתחנן → Vaeschanan` mid-flow and *then* showing it again at read-back reads as being asked the same thing twice. Speak up only when you're genuinely unsure: nothing close → stop and ask; close but not exact → name your guess and ask.
@@ -94,15 +96,35 @@ Already happened? It belongs in the past-events archive, not here. Say so and as
 
 ## C — replace a flyer's picture
 
-Keeps title and take-down date. Ask which flyer → find it → read the title back → get the link and page → confirm → swap the image and delete the old file from the Media Manager.
+Title, section, and take-down date all stay exactly as they are. Only the image changes.
+
+1. **Which flyer.** Ask for the title, find it, and read the title back so you're both certain it's the right one.
+2. **The Canva link**, and which page.
+3. **Read back** what's changing and what's staying.
+4. **Swap the image.** This is an *update to an existing row* — read `reference/wix-api.md` first. Sending only the new image field would wipe the title and take-down date you just promised to keep.
+5. **Delete the old image** from the Flyers folder, so superseded versions don't pile up.
 
 ## D — take something down
 
-Find it, read the title back, confirm. For flyers prefer setting the take-down date to yesterday over deleting — instant and reversible. Say that. Only delete if asked twice.
+First work out **what kind of thing it is** — a flyer, a Torah sheet, or a past event. It changes what "take down" can even mean. Find the row, read its title back, and confirm you have the right one before touching anything.
+
+**A flyer can be hidden.** Set its take-down date to yesterday: off the site immediately, and back again by changing the date. Offer this rather than deleting, and say it's reversible. Delete only if they ask a second time.
+
+**A Torah sheet can't.** There's no hide or expiry field on `TorahSheets` — taking one down means deleting the row, and it can't be un-hidden, only re-uploaded. Say that plainly and get an explicit yes. The PDF itself stays in the Media Manager, so a re-upload wouldn't start from nothing — mention that, it's the part that makes the decision easier.
+
+Either way this is an update or a delete on an existing row: `reference/wix-api.md` before you write.
+
+## Anything else
+
+Someone will eventually ask for something outside the four — fix a typo in a title, move a flyer to a different section, re-tag a sheet. Do it, under the same rules: find the row, read back what's changing, treat it as an update (`reference/wix-api.md`), verify after.
+
+If what they want is a change to how the site *looks* rather than what's on it, that's Danielle's — see the last section.
 
 ## Read-back
 
-Before every write, in their language, including the **translated** value — this is where a wrong match gets caught by someone who reads Hebrew and has never heard of the site's internal list.
+**Every flow ends here, not just A.** Before any write, show a block listing exactly what you're about to write or change — no more, no less — in their language, and wait.
+
+For a new Torah sheet, include the **translated** value. This is where a wrong match gets caught by someone who reads Hebrew and has never heard of the site's internal list:
 
 ```
 Sheet:   Eikev  (עקב)
@@ -110,6 +132,14 @@ Series:  Torah Bytes
 Book:    Devarim
 Year:    תשפ״ו
 Cover:   I'll make one
+```
+
+When you're changing something that already exists (C, D, anything else), say what's staying as well as what's moving — that's the reassurance:
+
+```
+Flyer:      Shavuos Night Learning
+Changing:   the picture → page 2 of the new Canva design
+Staying:    title, section (Events), comes down 2 June
 ```
 
 The block, then "Go ahead?" — nothing in between. **No paragraph explaining the mechanics.** If a side effect on another row is genuinely unavoidable, it gets its own line inside the block in about six words; explain it only if they ask. But the usual answer is that it isn't unavoidable — see rule 10.
