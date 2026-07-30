@@ -63,18 +63,20 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 					)}
 				</div>
 			))}
-			{/* Fades to fully-opaque navy-700 at the very bottom edge — the same
+			{/* Fades to fully-opaque navy-650 at the very bottom edge — the same
 			    solid color ImpactStats renders directly below, so the seam between
-			    hero media and that band disappears instead of showing a hard cut. */}
-			<div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/25 to-navy-700"></div>
+			    hero media and that band disappears instead of showing a hard cut.
+			    navy-650 (not 700): lightened ~25% off it per Yosef's request to
+			    reduce the hero's overall darkness — ImpactStats moved to match. */}
+			<div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/19 to-navy-650"></div>
 			{/* Left scrim under the lockup — video frames are unpredictable and the
 			    bottom gradient alone leaves the text over the brightest area. */}
-			<div class="absolute inset-0 bg-gradient-to-r from-navy-700/75 via-navy-700/30 to-transparent"></div>
+			<div class="absolute inset-0 bg-gradient-to-r from-navy-700/56 via-navy-700/22 to-transparent"></div>
 		</div>
 	) : (
 		<>
 			<div
-				class="absolute inset-0 -z-10 bg-navy-700"
+				class="absolute inset-0 -z-10 bg-navy-650"
 				style="background-image:
 					radial-gradient(1200px 600px at 20% 20%, rgb(from var(--color-gold-500) r g b / 0.18), transparent 60%),
 					radial-gradient(900px 500px at 85% 80%, rgb(from var(--color-navy-500) r g b / 0.6), transparent 60%),
@@ -88,7 +90,7 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 				aria-hidden="true"
 			>
 			</div>
-			<div class="absolute inset-0 -z-10 bg-gradient-to-b from-black/10 via-transparent to-navy-700" aria-hidden="true"></div>
+			<div class="absolute inset-0 -z-10 bg-gradient-to-b from-black/7 via-transparent to-navy-650" aria-hidden="true"></div>
 		</>
 	)}
 

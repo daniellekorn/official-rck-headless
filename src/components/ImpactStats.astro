@@ -41,10 +41,11 @@ const labelClasses =
 ---
 
 {visible.length > 0 && (
-	<section class="relative bg-navy-700 py-7 sm:py-9 md:py-10" data-stats-band>
+	<section class="relative bg-navy-650 py-7 sm:py-9 md:py-10" data-stats-band>
 		{/* Same light-blue hairline as Footer.astro's bottom copyright divider
-		    (border-white/10 on the same bg-navy-700) — edge-to-edge, no fade at
-		    the sides, per Danielle's request. */}
+		    (border-white/10) — edge-to-edge, no fade at the sides, per
+		    Danielle's request. bg is navy-650, not Footer's navy-700 — lightened
+		    to match the Hero's reduced darkness (see Hero.astro). */}
 		<div aria-hidden="true" class="absolute inset-x-0 top-0 h-px w-full bg-white/10"></div>
 		<div class="container-page lg:px-14">
 			{/* Mobile: two centered rows. */}

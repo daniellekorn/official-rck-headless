@@ -1,18 +1,24 @@
 ---
 /**
- * HistoryTimeline — the "Our History" timeline. Widescreen (16:9) panels — portrait
- * (3:4) on mobile so long captions fit — with a Hebrew accent line in the top-right
- * corner and title + caption overlaid on the photo. The strip auto-pans slowly and
- * loops seamlessly; visitors can also move it themselves with the prev/next arrows
- * or by swiping (it's a native horizontal scroller under the hood). Auto-pan pauses
- * on hover and for a few seconds after any manual interaction. A blurred copy of
- * the same photo fills any letterbox gaps when an image's aspect doesn't match.
+ * HistoryTimeline — the "Our History" timeline. Modeled on the UNC Kenan-Flagler
+ * history page (a dot at each milestone, photo + title + description right
+ * beside it), kept horizontal instead of vertical to stay inside this section
+ * of the homepage. A single spine runs along the top of the strip with a dot
+ * at each milestone; a short stem drops down to the photo — bounded by a
+ * max-width/max-height box but rendered at its own aspect ratio (never
+ * cropped), just a drop shadow behind it, no frame or background — then the
+ * title and caption below it. Every milestone flows the same direction
+ * (down) so the whole thing fits in the section without scrolling the page
+ * to see it.
  *
- * Ported from the "A · Widescreen" demo option (see design log #024 / the /demo
- * page); manual navigation + the `hebrew` field added in #043.
+ * Static — nothing moves on its own. It's a native horizontal scroller
+ * (swipe/trackpad drag work directly); the prev/next arrows step one
+ * milestone at a time.
  */
+import Highlight from "./Highlight.astro";
+
 interface EntryInput {
-	/** Hebrew accent line, e.g. "מאין באנו" — top-right corner of the card. */
+	/** Hebrew accent line, e.g. "מאין באנו" — shown above each milestone's dot. */
 	hebrew?: string;
 	title?: string;
 	caption?: string;
@@ -26,8 +32,6 @@ interface InternalEntry extends EntryInput {
 
 interface Props {
 	entries?: EntryInput[];
-	/** Seconds the auto-pan takes per card — controls pan speed. */
-	secondsPerCard?: number;
 }
 
 const placeholder: InternalEntry[] = [
@@ -38,47 +42,85 @@ const placeholder: InternalEntry[] = [
 	{ title: "Looking Ahead", caption: "Building the next chapter of RCK, together.", from: "var(--color-navy-700)", to: "var(--color-gold-200)" },
 ];
 
-const { secondsPerCard = 12 } = Astro.props;
 const entries: InternalEntry[] =
 	Astro.props.entries && Astro.props.entries.length > 0 ? Astro.props.entries : placeholder;
 
-// Duplicate the list so the strip can wrap seamlessly (jumping by half the
-// track width lands on identical content).
-const loop = [...entries, ...entries];
+/**
+ * A caption can carry a Hebrew date range (e.g. a niftar's dates, in
+ * parens) and/or the ת.נ.צ.ב.ה memorial acronym — both conventionally read
+ * smaller than the surrounding sentence. Splits on those patterns generically
+ * (not tied to any one milestone's wording) so any caption gets the same
+ * treatment automatically.
+ */
+function splitCaptionEmphasis(text: string): { text: string; small: boolean }[] {
+	const pattern = /\([^)]*[֐-׿][^)]*\)|ת\.?נ\.?צ\.?ב\.?ה\.?|תנצב״ה/g;
+	const segments: { text: string; small: boolean }[] = [];
+	let lastIndex = 0;
+	let match: RegExpExecArray | null;
+	while ((match = pattern.exec(text))) {
+		if (match.index > lastIndex) segments.push({ text: text.slice(lastIndex, match.index), small: false });
+		segments.push({ text: match[0], small: true });
+		lastIndex = match.index + match[0].length;
+	}
+	if (lastIndex < text.length) segments.push({ text: text.slice(lastIndex), small: false });
+	return segments;
+}
+
+/**
+ * The Reb Yisroel Horwitz milestone's photo is a Canva export whose canvas is
+ * wider than the portrait crop it frames — the margins are genuinely
+ * transparent (checked: alpha 0), not opaque white, so they were showing the
+ * section's own near-white background through as blank "sides." Filled with
+ * a gradient sampled from the photo's own purple-lit backdrop so the margins
+ * read as part of the image instead of empty space. Matched by the Wix media
+ * file ID (stable across title edits), not the title text. If more images
+ * ever need this, promote it to a real `OurHistory` field instead of adding
+ * more IDs here.
+ */
+const TRANSPARENT_MARGIN_IMAGE_IDS = ["f477b1_eca174a90a384829ac36e2e3efe793b3"];
+function marginFillStyle(imageUrl?: string): string | undefined {
+	if (!imageUrl || !TRANSPARENT_MARGIN_IMAGE_IDS.some((id) => imageUrl.includes(id))) return undefined;
+	return "background: linear-gradient(135deg, #9d769b 0%, #5a3c5a 100%);";
+}
 ---
 
-<div class="history-tl relative" data-history-tl data-seconds-per-card={secondsPerCard}>
-	<div class="history-tl__viewport" data-history-viewport>
-		<div class="history-tl__track" data-history-track>
-			{loop.map((entry, i) => (
-				<article
-					class="history-card aspect-[3/4] sm:aspect-[16/9] w-[88vw] sm:w-[60vw] lg:w-[48vw]"
-					aria-hidden={i >= entries.length ? "true" : undefined}
-				>
-					{/* blurred same-image fill behind, so odd ratios look intentional */}
-					{entry.imageUrl ? (
-						<>
-							<img src={entry.imageUrl} alt="" aria-hidden="true" class="history-card__bg" />
-							<img src={entry.imageUrl} alt={entry.title ?? ""} class="history-card__img" loading="lazy" />
-						</>
-					) : (
-						<div
-							class="history-card__placeholder"
-							style={`background: linear-gradient(135deg, ${entry.from ?? "var(--color-navy-500)"} 0%, ${entry.to ?? "var(--color-gold-500)"} 100%);`}
-							aria-hidden="true"
-						/>
-					)}
-
-					{/* legibility gradient */}
-					<div class="history-card__scrim" aria-hidden="true"></div>
-
+<div class="history-flow relative" data-history-tl>
+	<div class="history-flow__viewport" data-history-viewport>
+		<div class="history-flow__track" data-history-track>
+			<div class="history-flow__spine" aria-hidden="true"></div>
+			{entries.map((entry) => (
+				<article class="flow-stop">
 					{entry.hebrew && (
-						<span lang="he" dir="rtl" class="history-card__hebrew">{entry.hebrew}</span>
+						<span lang="he" dir="rtl" class="flow-stop__hebrew">{entry.hebrew}</span>
 					)}
-
-					<div class="history-card__overlay">
-						{entry.title && <h3 class="history-card__title">{entry.title}</h3>}
-						{entry.caption && <p class="history-card__caption">{entry.caption}</p>}
+					<span class="flow-stop__dot" aria-hidden="true"></span>
+					<span class="flow-stop__connector" aria-hidden="true"></span>
+					<div class="flow-stop__content">
+						<span class="flow-stop__img-wrap" style={marginFillStyle(entry.imageUrl)}>
+							{entry.imageUrl ? (
+								<img src={entry.imageUrl} alt={entry.title ?? ""} class="flow-stop__img" loading="lazy" />
+							) : (
+								<div
+									class="flow-stop__img flow-stop__img--placeholder"
+									style={`background: linear-gradient(135deg, ${entry.from ?? "var(--color-navy-500)"} 0%, ${entry.to ?? "var(--color-gold-500)"} 100%);`}
+									aria-hidden="true"
+								/>
+							)}
+						</span>
+						<div class="flow-stop__text">
+							{entry.title && (
+								<h3 class="flow-stop__title">
+									<Highlight duration={1400} delay={200}>{entry.title}</Highlight>
+								</h3>
+							)}
+							{entry.caption && (
+								<p class="flow-stop__caption">
+									{splitCaptionEmphasis(entry.caption).map((seg) =>
+										seg.small ? <small class="flow-stop__caption-small">{seg.text}</small> : seg.text,
+									)}
+								</p>
+							)}
+						</div>
 					</div>
 				</article>
 			))}
@@ -108,19 +150,233 @@ const loop = [...entries, ...entries];
 </div>
 
 <style>
-	.history-tl__viewport {
+	.history-flow {
+		--top: 3.1rem; /* spine/dot distance from the top of the track — leaves room for the hebrew line above the dot */
+		--title-size: 1rem;
+		--hebrew-size: 1.4rem;
+		--img-w: 17rem; /* max width/height a photo is allowed to render at — its own */
+		--img-h: 9rem; /* aspect ratio decides the actual size within that box, so nothing crops */
+		--stem: 0.9rem;
+		--dot: 0.9rem;
+		--content-w: 15rem;
+		--stop-gap: 2rem;
+	}
+	@media (min-width: 640px) {
+		.history-flow {
+			--top: 3.4rem;
+			--title-size: 1.0625rem;
+			--hebrew-size: 1.55rem;
+			--img-w: 21rem;
+			--img-h: 11rem;
+			--stem: 1rem;
+			--dot: 1rem;
+			--content-w: 18rem;
+			--stop-gap: 2.5rem;
+		}
+	}
+	@media (min-width: 1024px) {
+		.history-flow {
+			--top: 3.75rem;
+			--title-size: 1.125rem;
+			--hebrew-size: 1.7rem;
+			--img-w: 25rem;
+			--img-h: 13rem;
+			--stem: 1.1rem;
+			--content-w: 21rem;
+			--stop-gap: 3rem;
+		}
+	}
+
+	.history-flow__viewport {
+		height: 23rem;
 		overflow-x: auto;
+		/* Fixed and hidden, not "visible"/"auto" — a slightly-too-tall stop used
+		   to make the strip vertically scrollable too, which read as the whole
+		   row silently drifting up/down by a few px. The section is sized
+		   generously (below) so real content shouldn't hit this ceiling. */
+		overflow-y: hidden;
 		scrollbar-width: none;
 		-ms-overflow-style: none;
 		-webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
 		mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
 	}
-	.history-tl__viewport::-webkit-scrollbar {
+	@media (min-width: 640px) {
+		.history-flow__viewport {
+			height: 26rem;
+		}
+	}
+	@media (min-width: 1024px) {
+		.history-flow__viewport {
+			height: 29rem;
+		}
+	}
+	.history-flow__viewport::-webkit-scrollbar {
 		display: none;
 	}
-	.history-tl__track {
+
+	.history-flow__track {
+		position: relative;
 		display: flex;
+		align-items: stretch;
+		height: 100%;
 		width: max-content;
+		padding-inline: 2.5rem;
+	}
+
+	.history-flow__spine {
+		position: absolute;
+		inset-inline: 0;
+		top: var(--top);
+		height: 2px;
+		background: linear-gradient(
+			90deg,
+			transparent,
+			rgb(from var(--color-gold-500) r g b / 0.55) 4%,
+			rgb(from var(--color-gold-500) r g b / 0.55) 96%,
+			transparent
+		);
+	}
+
+	.flow-stop {
+		position: relative;
+		flex: 0 0 auto;
+		width: var(--content-w);
+		height: 100%;
+		margin-right: var(--stop-gap);
+	}
+
+	.flow-stop__hebrew {
+		position: absolute;
+		top: 0;
+		left: 50%;
+		width: 100%;
+		transform: translateX(-50%);
+		font-family: "Frank Ruhl Libre", var(--font-hebrew), serif;
+		font-weight: 700;
+		font-size: var(--hebrew-size);
+		color: var(--color-navy-700);
+		text-align: center;
+		white-space: nowrap;
+		z-index: 2;
+	}
+
+	.flow-stop__dot {
+		position: absolute;
+		top: var(--top);
+		left: 50%;
+		width: var(--dot);
+		height: var(--dot);
+		transform: translate(-50%, -50%);
+		border-radius: 9999px;
+		background: var(--color-gold-500);
+		box-shadow: 0 0 0 3px var(--color-mist), 0 2px 8px rgb(from var(--color-navy-700) r g b / 0.4);
+		z-index: 3;
+	}
+
+	.flow-stop__connector {
+		position: absolute;
+		top: var(--top);
+		left: 50%;
+		width: 3px;
+		height: var(--stem);
+		transform: translateX(-50%);
+		background: linear-gradient(var(--color-gold-300), var(--color-gold-500));
+		z-index: 1;
+	}
+
+	.flow-stop__content {
+		position: absolute;
+		top: calc(var(--top) + var(--stem));
+		left: 50%;
+		width: 100%;
+		transform: translateX(-50%);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.6rem;
+		text-align: center;
+		z-index: 2;
+	}
+
+	.flow-stop__img-wrap {
+		position: relative;
+		display: inline-block;
+		flex: 0 0 auto;
+		overflow: hidden;
+		border-radius: 0.85rem;
+		/* No frame/background — just the photo and a shadow behind it. Living on
+		   the wrapper (not the img) so clipping the sheen below doesn't also
+		   clip the shadow, which paints outside the border box. */
+		box-shadow: 0 16px 34px -12px rgb(from var(--color-navy-700) r g b / 0.55);
+		transition: transform 0.3s ease, box-shadow 0.3s ease;
+	}
+	.flow-stop__img-wrap:hover {
+		/* Same lift the Join Us cards get on hover. */
+		transform: translateY(-0.5rem);
+		box-shadow: 0 24px 44px -14px rgb(from var(--color-navy-700) r g b / 0.6);
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.flow-stop__img-wrap {
+			transition: none;
+		}
+	}
+	.flow-stop__img {
+		display: block;
+	}
+	img.flow-stop__img {
+		/* Bounded by max-width/max-height, not a fixed box — the browser scales
+		   the photo down to fit while keeping its own aspect ratio, so nothing
+		   is ever cropped. Actual rendered size varies photo to photo. */
+		width: auto;
+		height: auto;
+		max-width: var(--img-w);
+		max-height: var(--img-h);
+		object-fit: contain;
+	}
+	.flow-stop__img--placeholder {
+		width: var(--img-w);
+		height: var(--img-h);
+	}
+
+	.flow-stop__text {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		width: 100%;
+		gap: 0.3rem;
+	}
+
+	.flow-stop__title {
+		font-family: var(--font-sans);
+		font-weight: 700;
+		letter-spacing: -0.01em;
+		font-size: var(--title-size);
+		color: var(--color-navy-700);
+		width: 100%;
+		text-align: justify;
+		text-align-last: center;
+	}
+
+	.flow-stop__caption {
+		font-size: 0.875rem;
+		line-height: 1.45;
+		color: var(--color-navy-400);
+		width: 100%;
+		text-align: justify;
+		text-align-last: center;
+	}
+	.flow-stop__caption-small {
+		font-size: 0.85em;
+	}
+	@media (min-width: 640px) {
+		.flow-stop__caption {
+			font-size: 0.9rem;
+		}
+	}
+	@media (min-width: 1024px) {
+		.flow-stop__caption {
+			font-size: 0.9375rem;
+		}
 	}
 
 	.history-tl__btn {
@@ -147,202 +403,24 @@ const loop = [...entries, ...entries];
 		outline: 2px solid var(--color-gold-500);
 		outline-offset: 2px;
 	}
-
-	.history-card {
-		position: relative;
-		flex: 0 0 auto;
-		margin-right: 1.25rem;
-		overflow: hidden;
-		border-radius: 0.375rem;
-		background: var(--color-navy-700);
-		box-shadow: 0 28px 60px -34px rgb(from var(--color-navy-700) r g b / 0.7);
-		border: 1px solid rgba(255, 255, 255, 0.08);
-	}
-	@media (min-width: 640px) {
-		.history-card {
-			margin-right: 1.5rem;
-		}
-	}
-
-	.history-card__bg {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		transform: scale(1.15);
-		filter: blur(22px) saturate(1.1) brightness(0.65);
-	}
-	.history-card__img {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		object-fit: contain;
-		/* Mobile cards are portrait (3:4) holding a typically-landscape photo, so
-		   `contain` letterboxes it — pin the image to the top instead of the
-		   default center so the letterbox gap (blurred fill) lands at the
-		   bottom, where the caption overlay already sits, instead of the photo
-		   itself being covered. */
-		object-position: 50% 0%;
-	}
-	.history-card__placeholder {
-		position: absolute;
-		inset: 0;
-	}
-	/* Mobile cards are portrait (3:4) so the full caption fits — the scrim rises
-	   higher and type runs smaller. From sm: up cards are 16:9 with roomier type. */
-	.history-card__scrim {
-		position: absolute;
-		inset: 0;
-		background: linear-gradient(to top, rgba(2, 8, 23, 0.94) 10%, rgba(2, 8, 23, 0.55) 48%, transparent 78%);
-	}
-
-	.history-card__hebrew {
-		position: absolute;
-		top: 0.9rem;
-		right: 1.1rem;
-		z-index: 1;
-		font-family: "Frank Ruhl Libre", var(--font-hebrew), serif;
-		font-weight: 700;
-		font-size: 1.75rem;
-		line-height: 1.2;
-		color: var(--color-gold-200, #f6d66b);
-		/* Layered shadow — a tight dark contact shadow to separate the letterforms
-		   from busy photo detail directly behind them, plus a wider soft glow so
-		   the gold still reads against light backgrounds. Needed more than the
-		   single soft shadow gave, since a photo's brightness varies a lot
-		   behind where this sits from card to card. */
-		text-shadow:
-			0 1px 2px rgba(2, 8, 23, 0.95),
-			0 2px 6px rgba(2, 8, 23, 0.85),
-			0 8px 24px rgba(2, 8, 23, 0.65);
-	}
-
-	.history-card__overlay {
-		position: absolute;
-		inset-inline: 0;
-		bottom: 0;
-		padding: 1.15rem 1.25rem 1.3rem;
-		color: #fff;
-	}
-	.history-card__title {
-		font-family: var(--font-sans);
-		font-weight: 700;
-		letter-spacing: -0.01em;
-		font-size: 1.2rem;
-		color: #fff;
-	}
-	.history-card__caption {
-		margin-top: 0.3rem;
-		font-size: 0.875rem;
-		line-height: 1.45;
-		max-width: 52ch;
-		color: rgba(255, 255, 255, 0.78);
-	}
-	@media (min-width: 640px) {
-		.history-card__img {
-			object-position: 50% 50%;
-		}
-		.history-card__scrim {
-			background: linear-gradient(to top, rgba(2, 8, 23, 0.92) 4%, rgba(2, 8, 23, 0.45) 34%, transparent 62%);
-		}
-		.history-card__hebrew {
-			top: 1.1rem;
-			right: 1.4rem;
-			font-size: 2.125rem;
-		}
-		.history-card__overlay {
-			padding: 1.5rem 1.8rem 1.7rem;
-		}
-		.history-card__title {
-			font-size: 1.4rem;
-		}
-		.history-card__caption {
-			font-size: 0.95rem;
-		}
-	}
 </style>
 
 <script>
-	// Auto-pan + manual navigation. The strip is a native horizontal scroller,
-	// so swipe/trackpad always work; a rAF loop advances scrollLeft for the slow
-	// marquee effect and wraps by half the (duplicated) track width for a
-	// seamless loop. Hover pauses; any manual input pauses briefly, then the
-	// pan resumes.
+	// Purely manual — nothing scrolls on its own. The strip is a native
+	// horizontal scroller (swipe/trackpad drag work directly); the arrows
+	// just step one milestone at a time.
 	document.querySelectorAll<HTMLElement>("[data-history-tl]").forEach((root) => {
 		const viewport = root.querySelector<HTMLElement>("[data-history-viewport]");
 		const track = root.querySelector<HTMLElement>("[data-history-track]");
 		if (!viewport || !track) return;
-		const cards = track.querySelectorAll<HTMLElement>(".history-card");
-		if (cards.length < 4) return; // needs ≥2 real entries for looping to make sense
+		const stops = track.querySelectorAll<HTMLElement>(".flow-stop");
+		if (stops.length < 2) return;
 
-		const secondsPerCard = Number(root.dataset.secondsPerCard) || 12;
 		const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-		const half = () => track.scrollWidth / 2;
-		const step = () => cards[1].offsetLeft - cards[0].offsetLeft; // card width + gap
-
-		let hovered = false;
-		let holdUntil = 0; // pause auto-pan until this timestamp after manual input
-		let smoothing = false; // an arrow-triggered smooth scroll is in flight
-		let pendingTarget: number | null = null;
-		let settleTimer: ReturnType<typeof setTimeout> | undefined;
-
-		const hold = (ms: number) => {
-			holdUntil = Math.max(holdUntil, performance.now() + ms);
-		};
-
-		root.addEventListener("pointerenter", (e) => {
-			if (e.pointerType === "mouse") hovered = true;
-		});
-		root.addEventListener("pointerleave", (e) => {
-			if (e.pointerType === "mouse") hovered = false;
-		});
-		(["wheel", "touchstart", "pointerdown"] as const).forEach((t) =>
-			viewport.addEventListener(t, () => hold(4000), { passive: true }),
-		);
-
-		// Seamless wrap — content is duplicated, so jumping by half is invisible.
-		const wrap = () => {
-			const h = half();
-			if (viewport.scrollLeft >= h) viewport.scrollLeft -= h;
-			else if (viewport.scrollLeft < 0) viewport.scrollLeft += h;
-		};
-
-		let last = performance.now();
-		const tick = (now: number) => {
-			const dt = Math.min(now - last, 100); // clamp after tab-switch pauses
-			last = now;
-			if (!reduce && !hovered && !smoothing && now > holdUntil) {
-				viewport.scrollLeft += (step() / (secondsPerCard * 1000)) * dt;
-			}
-			if (!smoothing) wrap();
-			requestAnimationFrame(tick);
-		};
-		requestAnimationFrame(tick);
+		const step = () => stops[1].offsetLeft - stops[0].offsetLeft; // stop width + gap
 
 		const go = (dir: 1 | -1) => {
-			hold(6000);
-			const s = step();
-			const h = half();
-			const base = pendingTarget ?? viewport.scrollLeft;
-			let target = (Math.round(base / s) + dir) * s;
-			// A scroller can't go below 0, so hop into the duplicate half first
-			// (identical pixels) and aim from there.
-			if (target < 0) {
-				viewport.scrollLeft += h;
-				target += h;
-			}
-			pendingTarget = target;
-			smoothing = true;
-			clearTimeout(settleTimer);
-			settleTimer = setTimeout(() => {
-				smoothing = false;
-				pendingTarget = null;
-				wrap();
-			}, 700);
-			viewport.scrollTo({ left: target, behavior: reduce ? "auto" : "smooth" });
+			viewport.scrollTo({ left: viewport.scrollLeft + dir * step(), behavior: reduce ? "auto" : "smooth" });
 		};
 
 		root.querySelector("[data-history-prev]")?.addEventListener("click", () => go(-1));

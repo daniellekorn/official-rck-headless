@@ -65,7 +65,7 @@ const isContactActive = pathname === "/contact";
 >
 	<div class="relative mx-auto w-full max-w-[1600px] px-3 sm:px-5">
 		<nav
-			class="nav-pill mx-auto flex max-w-[1600px] items-center justify-between gap-3 sm:gap-4 rounded-sm bg-white px-5 sm:px-7 py-2.5 sm:py-3 ring-1 ring-gold-400/50 shadow-[0_6px_20px_-10px_rgba(15,23,42,0.35)]"
+			class="nav-pill mx-auto flex max-w-[1600px] items-center justify-between gap-3 sm:gap-4 rounded-sm bg-white/94 px-5 sm:px-7 py-2.5 sm:py-3 ring-1 ring-gold-400/50 shadow-[0_6px_20px_-10px_rgba(15,23,42,0.35)]"
 		>
 			<a href="/" aria-label="RCK — The Ra'anana Community Kollel — Home" class="shrink-0">
 				<img
@@ -83,13 +83,17 @@ const isContactActive = pathname === "/contact";
 								href={link.href}
 								aria-current={link.active ? "page" : undefined}
 								class:list={[
-									"inline-flex items-center gap-1 text-[17.5px] 2xl:text-[20.5px] font-medium transition-colors whitespace-nowrap",
-									link.active
-										? "text-navy-600 underline underline-offset-[6px] decoration-2 decoration-gold-500"
-										: "text-navy-500 hover:text-gold-500",
+									"relative inline-flex items-center gap-1 text-[17.5px] 2xl:text-[20.5px] font-medium transition-colors whitespace-nowrap",
+									link.active ? "text-navy-600" : "text-navy-500 hover:text-gold-500",
 								]}
 							>
 								{link.label}
+								{link.active && (
+									<span
+										aria-hidden="true"
+										class="absolute left-1/2 -bottom-1.5 h-[2px] w-5 -translate-x-1/2 rounded-full bg-gold-500"
+									/>
+								)}
 								{link.children && (
 									<svg
 										viewBox="0 0 24 24"
@@ -128,17 +132,17 @@ const isContactActive = pathname === "/contact";
 				<a
 					href="/contact"
 					class:list={[
-						"rounded-sm border px-4 py-2 text-[17.5px] 2xl:text-[20.5px] font-medium transition-colors whitespace-nowrap",
+						"rounded-sm px-4 py-2 text-[17.5px] 2xl:text-[20.5px] font-medium transition-colors whitespace-nowrap",
 						isContactActive
-							? "border-gold-500 text-gold-600 bg-gold-50"
-							: "border-navy-200 text-navy-500 hover:bg-navy-50",
+							? "text-gold-600 bg-gold-50"
+							: "text-navy-500 hover:bg-navy-50",
 					]}
 				>
 					Contact
 				</a>
 				<a
 					href="/donate"
-					class="group inline-flex items-center gap-1.5 rounded-sm bg-gold-500 px-5 py-2 text-[17.5px] 2xl:text-[20.5px] font-semibold text-navy-700 shadow-sm transition-all hover:bg-gold-400 hover:shadow-md whitespace-nowrap"
+					class="group inline-flex items-center gap-1.5 rounded-sm bg-gold-500/85 px-5 py-2 text-[17.5px] 2xl:text-[20.5px] font-semibold text-navy-700 shadow-sm transition-all hover:bg-gold-400/90 hover:shadow-md whitespace-nowrap"
 				>
 					<svg viewBox="0 0 24 24" class="h-4 w-4 transition-transform duration-300 group-hover:scale-110" fill="currentColor" aria-hidden="true">
 						<path d="M12 20.3 4.6 13a4.6 4.6 0 0 1 6.5-6.5l.9.9.9-.9A4.6 4.6 0 0 1 19.4 13L12 20.3Z" />
@@ -151,7 +155,7 @@ const isContactActive = pathname === "/contact";
 				href="/donate"
 				data-mobile-donate
 				aria-label="Donate"
-				class="hidden shrink-0 items-center gap-1.5 rounded-sm bg-gold-500 px-3 py-2 text-sm font-semibold text-navy-700 shadow-sm transition-all hover:bg-gold-400 whitespace-nowrap"
+				class="hidden shrink-0 items-center gap-1.5 rounded-sm bg-gold-500/85 px-3 py-2 text-sm font-semibold text-navy-700 shadow-sm transition-all hover:bg-gold-400/90 whitespace-nowrap"
 			>
 				<svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true">
 					<path d="M12 20.3 4.6 13a4.6 4.6 0 0 1 6.5-6.5l.9.9.9-.9A4.6 4.6 0 0 1 19.4 13L12 20.3Z" />
@@ -167,10 +171,10 @@ const isContactActive = pathname === "/contact";
 				aria-label="Toggle menu"
 				class="xl:hidden inline-flex h-11 w-11 items-center justify-center rounded-sm text-navy-600 hover:bg-navy-50 transition-colors"
 			>
-				<svg data-icon="open" viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8">
+				<svg data-icon="open" viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.4">
 					<path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
 				</svg>
-				<svg data-icon="close" viewBox="0 0 24 24" class="hidden h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8">
+				<svg data-icon="close" viewBox="0 0 24 24" class="hidden h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.4">
 					<path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
 				</svg>
 			</button>
@@ -249,7 +253,7 @@ const isContactActive = pathname === "/contact";
 				<li class="p-2">
 					<a
 						href="/donate"
-						class="flex w-full items-center justify-center gap-1.5 rounded-md bg-gold-500 px-4 py-3 text-base font-semibold text-navy-700 hover:bg-gold-400 transition-colors"
+						class="flex w-full items-center justify-center gap-1.5 rounded-md bg-gold-500/85 px-4 py-3 text-base font-semibold text-navy-700 hover:bg-gold-400/90 transition-colors"
 					>
 						<svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true">
 							<path d="M12 20.3 4.6 13a4.6 4.6 0 0 1 6.5-6.5l.9.9.9-.9A4.6 4.6 0 0 1 19.4 13L12 20.3Z" />

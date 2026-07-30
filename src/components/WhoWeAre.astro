@@ -21,7 +21,7 @@ const {
 } = Astro.props;
 ---
 
-<section class="bg-mist py-20 md:py-24">
+<section class="bg-mist py-12 md:py-14">
 	<div class="container-page">
 		<div class="text-center">
 			<h2 class="font-display text-4xl md:text-5xl font-medium text-navy-600" data-reveal="up">
@@ -43,8 +43,8 @@ const {
 		</div>
 	</div>
 
-	<!-- Full-bleed widescreen marquee (breaks out of container-page on purpose). -->
-	<div class="mt-14 md:mt-16">
+	<!-- Full-bleed free-flow timeline (breaks out of container-page on purpose). -->
+	<div class="mt-8 md:mt-10">
 		<HistoryTimeline entries={entries} />
 	</div>
 </section>
