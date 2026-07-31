@@ -89,7 +89,7 @@ If a field name doesn't match exactly what's listed here, the code can't see it.
 | heroPrimaryCtaHref | Text | "/daven" (relative path) |
 | heroSecondaryCtaLabel | Text | "Our Programs" |
 | heroSecondaryCtaHref | Text | "/events" |
-| statNumber1 / statLabel1 | Text | First of five stats in the thin dark-navy band between the hero and the first section — e.g. "27+" / "Years of Devotion". A number-like value ("27+", "1,000") counts up from zero when scrolled into view; a word with no digits ("HUNDREDS") just displays as typed. See [design-log/051](design-log/051-impact-stats-band.md). |
+| statNumber1 / statLabel1 | Text | **`statNumber1` is ignored** — "Years of Devotion" counts years since RCK's November 1998 founding and is computed in code (`src/lib/founding.ts`), ticking up automatically every November so it never needs editing. `statLabel1` still controls the label text. See [design-log/058](design-log/058-automated-years-of-devotion.md). |
 | statNumber2 / statLabel2 | Text | e.g. "100+" / "Shiurim Weekly" |
 | statNumber3 / statLabel3 | Text | e.g. "1,000" / "Hours of Torah Weekly" |
 | statNumber4 / statLabel4 | Text | e.g. "HUNDREDS" / "Of Families Connected" |
@@ -161,14 +161,14 @@ Drives the WhatsApp band's left-hand group list *and* the featured video tiles o
 
 #### `OurHistory` — one row per milestone (5–10 typical)
 
-Drives the slow auto-panning history timeline under "Who We Are" on the homepage. Rows are ordered by `sortOrder`, lowest first — that is the one and only ordering knob.
+Drives the horizontally-scrollable history timeline under "Who We Are" on the homepage. Rows are ordered by `sortOrder`, lowest first — that is the one and only ordering knob.
 
 | Field | Type | Notes |
 |---|---|---|
 | image | Image | Required. Shown as the milestone photo. |
 | hebrew | Text | Optional Hebrew accent line, e.g. `מאין באנו`. Shown in gold in the top-right corner of the card. Leave empty for none. (Renamed from `year` — see [design-log/043](design-log/043-ourhistory-hebrew-field-timeline-nav.md).) |
 | title | Text | Milestone heading shown on the photo |
-| caption | Text | Description under the title |
+| caption | Text | Description under the title. The "Today and Onward" row's caption contains the token `{{YEARS_IN}}`, replaced at render time with the same computed, spelled-out year count as the homepage's "Years of Devotion" stat (e.g. "Twenty-eight") — keep that token in place rather than typing the number, or it'll stop auto-updating each November. See [design-log/058](design-log/058-automated-years-of-devotion.md). |
 | sortOrder | Number | Display order. Lower numbers first. |
 | active | Boolean | Hide a milestone without deleting it |
 

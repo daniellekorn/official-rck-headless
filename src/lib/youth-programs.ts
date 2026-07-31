@@ -17,6 +17,13 @@ export interface YouthProgram {
 	flyerPdfUrl?: string; // direct PDF URL
 	flyerImageUrl?: string; // resolved static flyer image (preferred)
 	flyerAspect?: string; // the uploaded image's own aspect ratio (e.g. "2040 / 1148") — some programs post an actual photo, not a portrait print flyer, so the frame should match it instead of the usual fixed 3:4
+	/**
+	 * True when `flyerImage` is a landscape candid photo rather than a portrait
+	 * print flyer (no `linkedFlyerTitle` override, aspect ratio wider than tall).
+	 * Renders as a plain, non-downloadable image matching the program photo
+	 * galleries below, instead of the flyer frame's zoom/download chrome.
+	 */
+	isPhoto?: boolean;
 	contactName?: string; // contact rabbi, e.g. "Rav Avraham Aharon"
 	contactEmail?: string;
 	sortOrder?: number;
@@ -59,13 +66,18 @@ export async function getYouthPrograms(): Promise<YouthProgram[]> {
 			const linked = row.linkedFlyerTitle
 				? learningByTitle?.get(row.linkedFlyerTitle.trim().toLowerCase())
 				: undefined;
+			const flyerAspect = linked ? undefined : imageAspectRatio(row.flyerImage);
+			const [aspectW, aspectH] = flyerAspect ? flyerAspect.split(" / ").map(Number) : [];
+			const isPhoto = !linked && Boolean(aspectW && aspectH && aspectW / aspectH > 1.15);
 			return {
 				...row,
 				slug: slugify(row.title ?? "") || `program-${i + 1}`,
 				galleryUrls: resolveGalleryUrls(row.gallery),
-				flyerImageUrl: linked?.imageUrl ?? resolveImage(row.flyerImage, 900, 1200),
+				flyerImageUrl:
+					linked?.imageUrl ?? resolveImage(row.flyerImage, isPhoto ? 1200 : 900, isPhoto ? 675 : 1200),
 				flyerPdfUrl: linked?.pdfUrl ?? row.flyerPdfUrl,
-				flyerAspect: linked ? undefined : imageAspectRatio(row.flyerImage),
+				flyerAspect,
+				isPhoto,
 			};
 		});
 	} catch (err) {

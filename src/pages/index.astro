@@ -25,6 +25,7 @@ import { getHomepage, normalizeImageOn, normalizeAccentLine } from "../lib/homep
 import { getHistory } from "../lib/history";
 import { getHeroMedia } from "../lib/hero-media";
 import { getWhatsappGroups } from "../lib/whatsapp-groups";
+import { yearsOfDevotion, spellOutYears } from "../lib/founding";
 
 const [homepage, history, heroSlides, whatsappGroups] = await Promise.all([
 	getHomepage(),
@@ -52,9 +53,10 @@ const imageTextSection1 = {
 
 // Impact stats band, between the hero and the first content section. Defaults
 // match what Danielle asked for so the page renders identically before the
-// CMS row is populated — see design-log/051.
+// CMS row is populated — see design-log/051. "Years of Devotion" is computed,
+// not read from statNumber1 — see design-log/058.
 const impactStats = [
-	{ value: homepage?.statNumber1 ?? "27+", label: homepage?.statLabel1 ?? "Years of Devotion" },
+	{ value: `${yearsOfDevotion()}+`, label: homepage?.statLabel1 ?? "Years of Devotion" },
 	{ value: homepage?.statNumber2 ?? "100+", label: homepage?.statLabel2 ?? "Shiurim Weekly" },
 	{ value: homepage?.statNumber3 ?? "1,000", label: homepage?.statLabel3 ?? "Hours of Torah Weekly" },
 	{ value: homepage?.statNumber4 ?? "HUNDREDS", label: homepage?.statLabel4 ?? "Of Families Connected" },
@@ -136,7 +138,15 @@ const imageTextSection2 = {
 			<WhoWeAre
 				title={homepage?.whoWeAreTitle}
 				hebrew={homepage?.whoWeAreHebrew}
-				entries={history.map((h) => ({ hebrew: h.hebrew, title: h.title, caption: h.caption, imageUrl: h.imageUrl }))}
+				entries={history.map((h) => ({
+					hebrew: h.hebrew,
+					title: h.title,
+					// {{YEARS_IN}} in a caption (the "Today and Onward" milestone) is
+					// replaced with the computed, spelled-out year count — see #058.
+					// A no-op on captions without the token.
+					caption: h.caption?.replace("{{YEARS_IN}}", spellOutYears(yearsOfDevotion())),
+					imageUrl: h.imageUrl,
+				}))}
 			/>
 		</div>
 

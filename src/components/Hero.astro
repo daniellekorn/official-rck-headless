@@ -121,7 +121,7 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 			</div>
 		</div>
 
-		<div class="mt-12 flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-4" data-reveal="up" data-reveal-delay="450">
+		<div class="hero-ctas mt-12 flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-4" data-reveal="up" data-reveal-delay="450">
 			{primaryCtaLabel && (
 				<a
 					href={primaryCtaHref}
@@ -151,6 +151,18 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 	@media (prefers-reduced-motion: reduce) {
 		.hero-slide {
 			transition: none;
+		}
+	}
+
+	/* On mobile the CTA row sits near the very bottom of the min-h-screen hero,
+	   so it only starts intersecting the viewport once the visitor is already
+	   scrolling past it. The desktop-tuned 450ms reveal delay (plus the shared
+	   900ms transition) then finishes too late — a normal scroll swipe carries
+	   past before the buttons are done fading in. Override to a much shorter
+	   delay below the sm breakpoint only; desktop keeps the original stagger. */
+	@media (max-width: 639px) {
+		.hero-ctas {
+			transition-delay: 100ms !important;
 		}
 	}
 </style>

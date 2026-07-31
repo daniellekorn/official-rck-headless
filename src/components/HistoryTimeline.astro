@@ -188,7 +188,12 @@ function marginFillStyle(imageUrl?: string): string | undefined {
 	}
 
 	.history-flow__viewport {
-		height: 23rem;
+		/* Tall enough for the longest caption on the narrowest (mobile) content
+		   width — the Reb Yisroel Horwitz milestone's caption (Hebrew dates +
+		   ת.נ.צ.ב.ה) wraps to more lines than any other entry and was clipped by
+		   the fixed height below 23rem. Taller than strictly needed for shorter
+		   entries is an accepted trade (see overflow-y note below). */
+		height: 31rem;
 		overflow-x: auto;
 		/* Fixed and hidden, not "visible"/"auto" — a slightly-too-tall stop used
 		   to make the strip vertically scrollable too, which read as the whole
@@ -310,8 +315,11 @@ function marginFillStyle(imageUrl?: string): string | undefined {
 		box-shadow: 0 16px 34px -12px rgb(from var(--color-navy-700) r g b / 0.55);
 		transition: transform 0.3s ease, box-shadow 0.3s ease;
 	}
-	.flow-stop__img-wrap:hover {
-		/* Same lift the Join Us cards get on hover. */
+	.flow-stop__img-wrap:hover,
+	.flow-stop__img-wrap.is-active {
+		/* Same lift the Join Us cards get on hover. .is-active is the touch-device
+		   equivalent, driven by scroll position (see script below) since touch
+		   has no real :hover to react to. */
 		transform: translateY(-0.5rem);
 		box-shadow: 0 24px 44px -14px rgb(from var(--color-navy-700) r g b / 0.6);
 	}
@@ -425,5 +433,36 @@ function marginFillStyle(imageUrl?: string): string | undefined {
 
 		root.querySelector("[data-history-prev]")?.addEventListener("click", () => go(-1));
 		root.querySelector("[data-history-next]")?.addEventListener("click", () => go(1));
+
+		// Touch devices have no real :hover, so the lift effect that highlights
+		// an image on desktop hover needs a scroll-driven equivalent: whichever
+		// milestone is most visible in the viewport gets .is-active (same lift),
+		// and every other milestone loses it — only one lifted at a time.
+		if (!window.matchMedia("(hover: hover)").matches) {
+			const wraps = Array.from(track.querySelectorAll<HTMLElement>(".flow-stop__img-wrap"));
+			if (wraps.length > 0) {
+				const ratios = new Map<HTMLElement, number>();
+				const applyActive = () => {
+					let best: HTMLElement | null = null;
+					let bestRatio = 0;
+					ratios.forEach((ratio, el) => {
+						if (ratio > bestRatio) {
+							bestRatio = ratio;
+							best = el;
+						}
+					});
+					wraps.forEach((w) => w.classList.toggle("is-active", w === best));
+				};
+				const thresholds = Array.from({ length: 21 }, (_, i) => i / 20);
+				const io = new IntersectionObserver(
+					(entries) => {
+						entries.forEach((entry) => ratios.set(entry.target as HTMLElement, entry.intersectionRatio));
+						applyActive();
+					},
+					{ root: viewport, threshold: thresholds },
+				);
+				wraps.forEach((w) => io.observe(w));
+			}
+		}
 	});
 </script>

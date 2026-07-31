@@ -77,23 +77,34 @@ const pagerSections = programs.map((p) => ({ id: p.slug, label: p.title }));
 									class:list={["flex w-full justify-center", description && (flyerLeft ? "md:order-1" : "md:order-2")]}
 									data-reveal={description ? (flyerLeft ? "left" : "right") : "up"}
 								>
-									<div
-										class:list={[
-											// Same cap regardless of whether the program also has a
-											// photo gallery below — a program without one used to
-											// get a bigger flyer, but that meant two programs of the
-											// same type (e.g. Dor L'Dor for boys vs. girls) rendered
-											// at different sizes purely because one had photos.
-											"w-full max-w-sm overflow-hidden rounded-md bg-navy-800 ring-1 ring-navy-100 shadow-[0_30px_64px_-34px_rgba(7,23,58,0.55)]",
-										]}
-									>
-										<Flyer
-											imageUrl={program.flyerImageUrl}
-											pdfUrl={program.flyerPdfUrl}
-											title={program.title}
-											aspectRatio={program.flyerAspect}
+									{program.isPhoto && program.flyerImageUrl ? (
+										// A candid photo, not a print flyer — plain image matching
+										// the gallery photos below, no zoom/download chrome.
+										<img
+											src={program.flyerImageUrl}
+											alt={`${program.title} photo`}
+											loading="lazy"
+											class="aspect-[16/9] w-full max-w-sm md:max-w-md rounded-md object-cover ring-1 ring-navy-100 shadow-[0_30px_64px_-34px_rgba(7,23,58,0.5)]"
 										/>
-									</div>
+									) : (
+										<div
+											class:list={[
+												// Same cap regardless of whether the program also has a
+												// photo gallery below — a program without one used to
+												// get a bigger flyer, but that meant two programs of the
+												// same type (e.g. Dor L'Dor for boys vs. girls) rendered
+												// at different sizes purely because one had photos.
+												"w-full max-w-sm overflow-hidden rounded-md bg-navy-800 ring-1 ring-navy-100 shadow-[0_30px_64px_-34px_rgba(7,23,58,0.55)]",
+											]}
+										>
+											<Flyer
+												imageUrl={program.flyerImageUrl}
+												pdfUrl={program.flyerPdfUrl}
+												title={program.title}
+												aspectRatio={program.flyerAspect}
+											/>
+										</div>
+									)}
 								</div>
 
 								<div
