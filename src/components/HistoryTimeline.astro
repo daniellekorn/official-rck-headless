@@ -192,8 +192,10 @@ function marginFillStyle(imageUrl?: string): string | undefined {
 		   width — the Reb Yisroel Horwitz milestone's caption (Hebrew dates +
 		   ת.נ.צ.ב.ה) wraps to more lines than any other entry and was clipped by
 		   the fixed height below 23rem. Taller than strictly needed for shorter
-		   entries is an accepted trade (see overflow-y note below). */
-		height: 31rem;
+		   entries is an accepted trade (see overflow-y note below) — but keep
+		   this as tight as the longest caption allows, since any extra shows as
+		   dead space at the bottom of the section for every shorter entry. */
+		height: 28rem;
 		overflow-x: auto;
 		/* Fixed and hidden, not "visible"/"auto" — a slightly-too-tall stop used
 		   to make the strip vertically scrollable too, which read as the whole
