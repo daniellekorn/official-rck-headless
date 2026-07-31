@@ -614,13 +614,20 @@ const tabs = [
 				apply();
 				// On mobile the sidebar sits above the results (single-column
 				// layout below `lg:`), so a filtered result set lands off-screen
-				// under the still-open <details> — jump to it, centered in the
-				// viewport rather than pinned to the top. Desktop shows the
-				// sidebar and results side by side, so no scroll is needed there;
-				// the publication tab switcher (section 1 above) deliberately
-				// doesn't do this — only choosing a sidebar subfilter should.
-				if (window.matchMedia("(max-width: 1023px)").matches) {
-					sheetList?.scrollIntoView({ behavior: "smooth", block: "center" });
+				// under the still-open <details> — jump to it. Lands with the
+				// *top* of the results at the vertical middle of the screen (not
+				// pinned to the very top, and not `scrollIntoView({block:
+				// "center"})`, which centers on the element's own midpoint — for
+				// a results list taller than the viewport that scrolls to some
+				// arbitrary point mid-list instead of its start). A longer list
+				// still requires a manual scroll for the rest, by design.
+				// Desktop shows the sidebar and results side by side, so no
+				// scroll is needed there; the publication tab switcher (section 1
+				// above) deliberately doesn't do this — only choosing a sidebar
+				// subfilter should.
+				if (window.matchMedia("(max-width: 1023px)").matches && sheetList) {
+					const top = sheetList.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2;
+					window.scrollTo({ top, behavior: "smooth" });
 				}
 			});
 		});
