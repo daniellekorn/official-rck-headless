@@ -403,6 +403,14 @@ function marginFillStyle(imageUrl?: string): string | undefined {
 		box-shadow: 0 12px 28px -12px rgb(from var(--color-navy-700) r g b / 0.55);
 		transition: background-color 0.2s ease, transform 0.2s ease;
 	}
+	/* Touch swipe already makes the strip's scrollability obvious on mobile —
+	   the arrows are redundant there and just sit on top of the content.
+	   Desktop (mouse/trackpad) keeps them. */
+	@media (max-width: 639px) {
+		.history-tl__btn {
+			display: none;
+		}
+	}
 	.history-tl__btn:hover {
 		background: var(--color-gold-400);
 		transform: translateY(-50%) scale(1.06);
