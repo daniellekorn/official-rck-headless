@@ -170,23 +170,23 @@ const singleVideo = slides.length === 1 && slides[0].kind === "video";
 <script>
 	// Hero media sequence: crossfade through stacked image/video slides.
 	// Images hold for data-hold ms; videos play once (muted) then fade to the
-	// next; the sequence loops. Honors prefers-reduced-motion (no cycle, no
-	// autoplay — first slide stays put; a video shows its poster). See #029.
+	// next; the sequence loops. The hero video always autoplays regardless of
+	// prefers-reduced-motion (Low Power Mode / OS "Reduce Motion") — Yosef
+	// wants the hero video treated as core content, not decorative motion, so
+	// it must not go dark for those visitors. Only the CSS crossfade *speed*
+	// still respects reduced-motion (instant cut instead of an animated fade,
+	// see the .hero-slide media query below). See #029, addendum below.
 	(() => {
 		const container = document.querySelector<HTMLElement>("[data-hero-slides]");
 		if (!container) return;
 		const slides = Array.from(container.querySelectorAll<HTMLElement>("[data-hero-slide]"));
 		if (slides.length <= 1) {
 			// Single slide: nothing to cycle. A lone video loops on its own (loop
-			// attr set in markup); just start it unless motion is reduced.
+			// attr set in markup); just start it.
 			const lone = slides[0]?.querySelector<HTMLVideoElement>("[data-hero-video]");
-			const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-			if (lone && !reduce) lone.play().catch(() => {});
+			lone?.play().catch(() => {});
 			return;
 		}
-
-		const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-		if (reduce) return; // first slide is already visible; leave it static.
 
 		// Kept in sync with the .hero-slide CSS transition duration above.
 		const FADE_MS = 3200;

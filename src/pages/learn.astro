@@ -98,6 +98,7 @@ const tagGroups = groupTags(uniqueSubCategories(allLearning));
 						<div
 							data-flyer
 							data-sub={(flyer.subCategory ?? []).join("|")}
+							data-always-match={flyer.title === "Community Schedule" ? "true" : undefined}
 							class="rounded-md overflow-hidden bg-white ring-1 ring-navy-100 shadow-sm"
 						>
 							<Flyer
@@ -196,12 +197,25 @@ const tagGroups = groupTags(uniqueSubCategories(allLearning));
 		// Active tag selections. Empty set = show everything.
 		const active = new Set<string>();
 
+		// The Community Schedule card (data-always-match, set server-side by
+		// title — see learn.astro) is the site's one general schedule and is
+		// meant to satisfy every filter combination, so every visitor filtering
+		// for anything still finds it. Move it to the front of the grid once,
+		// up-front — its position doesn't depend on which filters are active.
+		const alwaysMatch = grid.querySelector<HTMLElement>("[data-always-match]");
+		if (alwaysMatch) grid.prepend(alwaysMatch);
+
 		const apply = () => {
 			cards.forEach((card) => {
 				// data-sub is the card's tag list joined with "|" (a flyer can have many tags).
 				const tags = (card.dataset.sub ?? "").split("|").filter(Boolean);
-				// AND logic: flyer must match every active filter, not just one.
-				const show = active.size === 0 || [...active].every((t) => tags.includes(t));
+				// AND logic: flyer must match every active filter, not just one —
+				// except the always-match card (Community Schedule), which bypasses
+				// the tag check entirely and shows under any filter combination.
+				const show =
+					card.dataset.alwaysMatch === "true" ||
+					active.size === 0 ||
+					[...active].every((t) => tags.includes(t));
 				card.classList.toggle("hidden", !show);
 			});
 			clearBtn?.classList.toggle("hidden", active.size === 0);

@@ -1,6 +1,6 @@
 # 029 — Hero media sequence (image → silent video → image crossfade)
 
-**Status:** implemented — the `HomePage.heroImage` fallback superseded by #030 (HeroMedia is the single source of truth; empty → brand gradient)
+**Status:** implemented — the `HomePage.heroImage` fallback superseded by #030 (HeroMedia is the single source of truth; empty → brand gradient). The reduced-motion autoplay behavior below is superseded by the 2026-08-02 addendum: the hero video now always autoplays regardless of `prefers-reduced-motion`.
 **Date:** 2026-06-30
 **Author:** claude-session (danielle directing)
 **Related:** #001 (content/code boundary), #009 (hero lockup is structural), #018 (homepage layout config), #020 (homepage no-store cache)
@@ -142,6 +142,19 @@ Built and verified; commit pending.
 **Note — `VideoResolution`:** `getVideoUrl`'s 2nd arg is the SDK's
 `VideoResolution` **enum**, not a string literal; pass `VideoResolution.MID`, not
 `"720p"` (the latter fails `astro check`).
+
+**Addendum (2026-08-02):** Reverses the "reduced-motion users never see the
+video" call above. Yosef reported the hero video not playing on phones in Low
+Power Mode / with the OS "Reduce Motion" accessibility setting on — the
+`prefers-reduced-motion: reduce` gate this entry built (skip the whole
+cycle/autoplay, show slide 0 statically) was working as designed, but the
+hero video is core marketing content here, not decorative motion, so he wants
+it to always play. `src/components/Hero.astro`'s client script no longer
+checks `prefers-reduced-motion` before calling `video.play()` — the crossfade
+cycle and video autoplay now run identically regardless of that preference.
+The CSS `@media (prefers-reduced-motion: reduce) { transition: none }` rule
+is untouched (crossfades still cut instantly instead of animating for that
+preference; only the "no video" part was reversed).
 
 **Verification (live, dev server):** empty collection → hero renders from
 `heroImage` as before (no `data-hero-slides`). Seeded two image slides → the
