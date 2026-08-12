@@ -1,5 +1,5 @@
 import { items, auth } from "./wix-cms-admin";
-import { resolveImageFit } from "./wix-media";
+import { resolveImage } from "./wix-media";
 
 const COLLECTION_ID = "OurHistory";
 
@@ -26,13 +26,7 @@ export async function getHistory(): Promise<HistoryEntry[]> {
 
 		return (results as HistoryEntry[]).map((entry) => ({
 			...entry,
-			// `fit` (not `fill`): HistoryTimeline's img box is bounded by
-			// max-width/max-height + object-fit: contain specifically so photos
-			// render uncropped at their own aspect ratio — `resolveImage`'s
-			// forced 4:3 fill crop was cutting the sides off wide/panorama
-			// milestone photos (e.g. "Today and Onward") before they ever
-			// reached that box.
-			imageUrl: resolveImageFit(entry.image, 1200, 900),
+			imageUrl: resolveImage(entry.image),
 		}));
 	} catch (err) {
 		console.error(`[history] query failed:`, err);
