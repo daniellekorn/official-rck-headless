@@ -1,9 +1,22 @@
 import { items, auth } from "./wix-cms-admin";
-import { resolveImage, resolveGalleryUrls, imageAspectRatio, type GalleryItem } from "./wix-media";
+import { resolveImage, resolveCroppedImage, resolveGalleryUrls, imageAspectRatio, type GalleryItem } from "./wix-media";
 import { slugify } from "./slug";
 import { getFlyers } from "./flyers";
 
 const COLLECTION_ID = "YouthPrograms";
+
+/**
+ * The Teen Learning photo's canvas has genuine transparent padding baked in
+ * above/below the actual photo (162px top, 494px bottom margin on the
+ * original 4000x3200 upload) — a plain centered fill crop lands ~19px into
+ * the bottom margin, showing as a thin white/transparent bar under the
+ * photo. Crop to the content band (y 309–2559 of the original — already
+ * 16:9, fully inside the opaque photo) instead of the whole canvas. Matched
+ * by the Wix media file ID (stable across CMS edits), same pattern as
+ * HistoryTimeline.astro's TRANSPARENT_MARGIN_IMAGE_IDS — promote to a real
+ * field if more images ever need this.
+ */
+const TRANSPARENT_MARGIN_PHOTO_IDS = ["f477b1_fa47a08dc42249189dc8f116f5a2fd9d"];
 
 // One row per youth program (Dor L'Dor, Matmidim, Teen Learning, …). Each
 // renders as its own section on /youth: always a title + description, and
@@ -69,12 +82,17 @@ export async function getYouthPrograms(): Promise<YouthProgram[]> {
 			const flyerAspect = linked ? undefined : imageAspectRatio(row.flyerImage);
 			const [aspectW, aspectH] = flyerAspect ? flyerAspect.split(" / ").map(Number) : [];
 			const isPhoto = !linked && Boolean(aspectW && aspectH && aspectW / aspectH > 1.15);
+			const hasTransparentMargin =
+				isPhoto && TRANSPARENT_MARGIN_PHOTO_IDS.some((id) => row.flyerImage?.includes(id));
 			return {
 				...row,
 				slug: slugify(row.title ?? "") || `program-${i + 1}`,
 				galleryUrls: resolveGalleryUrls(row.gallery),
 				flyerImageUrl:
-					linked?.imageUrl ?? resolveImage(row.flyerImage, isPhoto ? 1200 : 900, isPhoto ? 675 : 1200),
+					linked?.imageUrl ??
+					(hasTransparentMargin
+						? resolveCroppedImage(row.flyerImage, 0, 309, 4000, 2250, 1200, 675)
+						: resolveImage(row.flyerImage, isPhoto ? 1200 : 900, isPhoto ? 675 : 1200)),
 				flyerPdfUrl: linked?.pdfUrl ?? row.flyerPdfUrl,
 				flyerAspect,
 				isPhoto,

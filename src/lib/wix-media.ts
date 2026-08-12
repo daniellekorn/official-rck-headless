@@ -103,6 +103,33 @@ export function resolveImage(
 }
 
 /**
+ * Like resolveImage, but crops an exact rectangle in the original upload's
+ * own pixel space before scaling to fill — for a source photo with baked-in
+ * padding (e.g. a transparent canvas margin around the real content) where a
+ * plain centered fill crop lands inside that padding. Built by hand rather
+ * than via the SDK's `media.getCroppedImageUrl` — that helper's w/h params
+ * don't reliably reach the resulting URL (same class of bug as
+ * `getScaledToFitImageUrl`, which regressed history.ts — see that revert).
+ * Uses the same static.wixstatic.com transform scheme resolveImage's own
+ * output already relies on, so it needs no SDK trust beyond URL parsing.
+ */
+export function resolveCroppedImage(
+	wixImageUrl: string | undefined,
+	cropX: number,
+	cropY: number,
+	cropWidth: number,
+	cropHeight: number,
+	w: number,
+	h: number,
+): string | undefined {
+	if (!wixImageUrl) return undefined;
+	const m = wixImageUrl.match(/^wix:image:\/\/v1\/([^/]+)\//);
+	if (!m) return undefined;
+	const fileId = m[1];
+	return `https://static.wixstatic.com/media/${fileId}/v1/crop/x_${cropX},y_${cropY},w_${cropWidth},h_${cropHeight}/fill/w_${w},h_${h},al_c,q_90,usm_0.66_1.00_0.01,enc_auto/${fileId}`;
+}
+
+/**
  * Like `resolveImage`, but `fit` (not `fill`): scales down to stay within the
  * box while keeping the photo's native aspect ratio, no cropping. Use this
  * for "view full size" contexts (e.g. a lightbox) — `resolveImage`'s forced
