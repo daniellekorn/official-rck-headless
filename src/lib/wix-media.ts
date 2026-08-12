@@ -130,6 +130,22 @@ export function resolveCroppedImage(
 }
 
 /**
+ * Like `resolveImageFit` below, but built by hand instead of via the SDK's
+ * `media.getScaledToFitImageUrl` — that helper doesn't reliably honor its own
+ * width/height params (it produced a nonsensical crop for a wide panorama
+ * photo and regressed every row of the History timeline when used broadly;
+ * see that revert in git history). Use for a single scoped image at a time,
+ * not as a drop-in replacement for `resolveImageFit`.
+ */
+export function resolveImageFitManual(wixImageUrl: string | undefined, w: number, h: number): string | undefined {
+	if (!wixImageUrl) return undefined;
+	const m = wixImageUrl.match(/^wix:image:\/\/v1\/([^/]+)\//);
+	if (!m) return undefined;
+	const fileId = m[1];
+	return `https://static.wixstatic.com/media/${fileId}/v1/fit/w_${w},h_${h},q_90,enc_auto/${fileId}`;
+}
+
+/**
  * Like `resolveImage`, but `fit` (not `fill`): scales down to stay within the
  * box while keeping the photo's native aspect ratio, no cropping. Use this
  * for "view full size" contexts (e.g. a lightbox) — `resolveImage`'s forced
