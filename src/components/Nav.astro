@@ -326,6 +326,15 @@ const isContactActive = pathname === "/contact";
 		if (e.key === "Escape") setOpen(false);
 	});
 
+	// Click anywhere outside the open menu (and outside the toggle button
+	// itself, which already opens/closes it on its own click) closes it too.
+	document.addEventListener("click", (e) => {
+		if (toggle?.getAttribute("aria-expanded") !== "true") return;
+		if (!(e.target instanceof Node)) return;
+		if (toggle.contains(e.target) || menu?.contains(e.target)) return;
+		setOpen(false);
+	});
+
 	// Hide-on-scroll-down, reveal-on-scroll-up. The header animates via the
 	// `transition-transform` class in the markup; here we just set the transform.
 	// Always shown near the top of the page and whenever the mobile menu is open.
