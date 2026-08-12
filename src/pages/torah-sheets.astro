@@ -16,7 +16,14 @@ import {
 	type TorahSheet,
 } from "../lib/torah-sheets";
 
-const sheets = await getTorahSheets();
+// Temporarily hides the Dor L'Dor / "ParshaLink" series everywhere on this
+// page — its own tab, its rows in "All Publications", and its sidebar
+// filters — without deleting any of the code that builds it. Flip back to
+// `true` to fully restore; that's the only change needed. Requested by
+// Yosef 2026-08-12; the series is fully built, just not ready to be public.
+const SHOW_PARSHALINK = false;
+
+const sheets = (await getTorahSheets()).filter((s) => SHOW_PARSHALINK || s.series !== "Dor L'Dor");
 
 // The tab a first-time visitor sees before touching any pill/filter — also
 // drives which panel the pre-JS SSR markup renders visible (see class:list
@@ -61,13 +68,17 @@ const tabs = [
 		superGroups: groupTorahBytes(sheets),
 		sheets: sheets.filter((s) => s.series === "Torah Bytes"),
 	},
-	{
-		key: "dor-ldor",
-		label: "Dor L'Dor ParshaLink",
-		kind: "nested" as const,
-		superGroups: groupDorLDor(sheets),
-		sheets: sheets.filter((s) => s.series === "Dor L'Dor"),
-	},
+	...(SHOW_PARSHALINK
+		? [
+				{
+					key: "dor-ldor",
+					label: "Dor L'Dor ParshaLink",
+					kind: "nested" as const,
+					superGroups: groupDorLDor(sheets),
+					sheets: sheets.filter((s) => s.series === "Dor L'Dor"),
+				},
+			]
+		: []),
 	{
 		key: "source-sheets",
 		label: "Source Sheets",
