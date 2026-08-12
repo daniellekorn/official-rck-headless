@@ -75,6 +75,8 @@ const isContactActive = pathname === "/contact";
 				/>
 			</a>
 
+			<div class="flex items-center gap-4 xl:gap-5 min-w-0">
+
 			<ul class="hidden items-center gap-3 2xl:gap-5 xl:flex" data-nav-list>
 				{
 					navLinks.map((link) => (
@@ -128,6 +130,22 @@ const isContactActive = pathname === "/contact";
 				}
 			</ul>
 
+			<button
+				type="button"
+				data-mobile-toggle
+				aria-controls="mobile-menu"
+				aria-expanded="false"
+				aria-label="Toggle menu"
+				class="xl:hidden inline-flex h-11 w-11 items-center justify-center rounded-sm text-navy-600 hover:bg-navy-50 transition-colors"
+			>
+				<svg data-icon="open" viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.4">
+					<path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
+				</svg>
+				<svg data-icon="close" viewBox="0 0 24 24" class="hidden h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.4">
+					<path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
+				</svg>
+			</button>
+
 			<div class="hidden xl:flex items-center gap-2 shrink-0" data-nav-cta>
 				<a
 					href="/contact"
@@ -163,21 +181,7 @@ const isContactActive = pathname === "/contact";
 				Donate
 			</a>
 
-			<button
-				type="button"
-				data-mobile-toggle
-				aria-controls="mobile-menu"
-				aria-expanded="false"
-				aria-label="Toggle menu"
-				class="xl:hidden inline-flex h-11 w-11 items-center justify-center rounded-sm text-navy-600 hover:bg-navy-50 transition-colors"
-			>
-				<svg data-icon="open" viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.4">
-					<path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
-				</svg>
-				<svg data-icon="close" viewBox="0 0 24 24" class="hidden h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.4">
-					<path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
-				</svg>
-			</button>
+			</div>
 		</nav>
 
 		<div
@@ -288,6 +292,18 @@ const isContactActive = pathname === "/contact";
 		const isOpen = toggle.getAttribute("aria-expanded") === "true";
 		setOpen(!isOpen);
 	});
+
+	// Desktop-only: hovering the hamburger opens the menu immediately, mirroring
+	// the hover-open submenus in the desktop nav list. It never auto-closes on
+	// mouseleave though (unlike those submenus) — once open, only clicking the
+	// button (now showing the X) closes it. Gated to real hover+fine-pointer
+	// devices so a touch tap's synthetic mouseenter-before-click doesn't fire
+	// this and then have the click handler immediately toggle it back closed.
+	if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+		toggle?.addEventListener("mouseenter", () => {
+			if (toggle.getAttribute("aria-expanded") !== "true") setOpen(true);
+		});
+	}
 
 	menu?.querySelectorAll("a").forEach((a) => {
 		a.addEventListener("click", () => setOpen(false));
