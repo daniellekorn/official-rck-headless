@@ -276,10 +276,15 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 								<p>
 									At RCK we have a professional and well-trained team of dayanim ready to serve the
 									community with sensitivity, professionalism, and full halachic integrity. Contact{" "}
-									<a href={contactHref("Re: Beis Din")} class="font-semibold text-gold-600 hover:text-gold-500">
-										{page.beisDinContactName}
-									</a>{" "}
-									to schedule an appointment.
+									<a href="/team#leadership" class="font-semibold text-gold-600 hover:text-gold-500">{page.beisDinContactName}</a>{" "}
+									to schedule an appointment
+									{page.beisDinContactPhone ? (
+										<>:{" "}
+										<a href={`tel:${page.beisDinContactPhone.replace(/[\s\-]/g, "")}`} class="font-semibold text-gold-600 hover:text-gold-500">
+											{page.beisDinContactPhone}
+										</a>
+										</>
+									) : "."}
 								</p>
 							) : (
 								<p>
@@ -302,18 +307,11 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 								</ul>
 							</div>
 
-							{(page?.beisDinContactPhone || page?.beisDinContactEmail) && (
+							{page?.beisDinContactEmail && (
 								<div class="mt-5 flex flex-wrap gap-x-5 gap-y-1 text-sm">
-									{page.beisDinContactPhone && (
-										<a href={`tel:${page.beisDinContactPhone.replace(/[\s\-]/g, "")}`} class="font-medium text-gold-600 hover:text-gold-500">
-											{page.beisDinContactPhone}
-										</a>
-									)}
-									{page.beisDinContactEmail && (
-										<a href={`mailto:${page.beisDinContactEmail}`} class="font-medium text-gold-600 hover:text-gold-500 break-all">
-											{page.beisDinContactEmail}
-										</a>
-									)}
+									<a href={`mailto:${page.beisDinContactEmail}`} class="font-medium text-gold-600 hover:text-gold-500 break-all">
+										{page.beisDinContactEmail}
+									</a>
 								</div>
 							)}
 						</div>
