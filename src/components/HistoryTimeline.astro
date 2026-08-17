@@ -336,15 +336,23 @@ function marginFillStyle(imageUrl?: string): string | undefined {
 	img.flow-stop__img {
 		/* Bounded by max-width/max-height, not a fixed box — the browser scales
 		   the photo down to fit while keeping its own aspect ratio, so nothing
-		   is ever cropped. Actual rendered size varies photo to photo. */
+		   is ever cropped. Actual rendered size varies photo to photo.
+
+		   max-width is capped at --content-w (not just --img-w) so a
+		   wide/panoramic photo (e.g. the "Today and Onward" milestone's
+		   scale-to-fit image, see history.ts SCALE_TO_FIT_PHOTO_IDS) can never
+		   render wider than its own flow-stop column and spill into the
+		   --stop-gap that separates it from its neighbor — that spillover was
+		   shrinking the visible gap for that one milestone versus every other
+		   (all narrower than --content-w, so they never hit this edge). */
 		width: auto;
 		height: auto;
-		max-width: var(--img-w);
+		max-width: min(var(--img-w), var(--content-w));
 		max-height: var(--img-h);
 		object-fit: contain;
 	}
 	.flow-stop__img--placeholder {
-		width: var(--img-w);
+		width: min(var(--img-w), var(--content-w));
 		height: var(--img-h);
 	}
 
