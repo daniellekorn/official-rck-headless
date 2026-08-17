@@ -82,6 +82,27 @@ function marginFillStyle(imageUrl?: string): string | undefined {
 	if (!imageUrl || !TRANSPARENT_MARGIN_IMAGE_IDS.some((id) => imageUrl.includes(id))) return undefined;
 	return "background: linear-gradient(135deg, #9d769b 0%, #5a3c5a 100%);";
 }
+
+/**
+ * The "Today and Onward" milestone's photo is a wide panorama (4000×1848,
+ * ~2.16:1) that history.ts's SCALE_TO_FIT_PHOTO_IDS renders uncropped —
+ * every other milestone is a ~4:3 crop, narrow enough to fit height-bound
+ * inside --content-w with room to spare. At 2.16:1, being height-bound
+ * (matching siblings) needs far more width than --content-w allows, so
+ * capping its box at --content-w (like every other stop) squashed it well
+ * below sibling height instead. Widening just this stop's own --content-w/
+ * --img-w to fit the photo at full sibling height fixes both: no overflow
+ * into the neighboring gap, and no longer visibly smaller than the rest.
+ */
+const WIDE_ASPECT_IMAGES: Record<string, number> = {
+	"f477b1_473aba46a21c4b959dadcd9fa1c9ade1": 4000 / 1848,
+};
+function wideAspectStyle(imageUrl?: string): string | undefined {
+	if (!imageUrl) return undefined;
+	const aspect = Object.entries(WIDE_ASPECT_IMAGES).find(([id]) => imageUrl.includes(id))?.[1];
+	if (!aspect) return undefined;
+	return `--content-w: calc(var(--img-h) * ${aspect}); --img-w: calc(var(--img-h) * ${aspect});`;
+}
 ---
 
 <div class="history-flow relative" data-history-tl>
@@ -89,7 +110,7 @@ function marginFillStyle(imageUrl?: string): string | undefined {
 		<div class="history-flow__track" data-history-track>
 			<div class="history-flow__spine" aria-hidden="true"></div>
 			{entries.map((entry) => (
-				<article class="flow-stop">
+				<article class="flow-stop" style={wideAspectStyle(entry.imageUrl)}>
 					{entry.hebrew && (
 						<span lang="he" dir="rtl" class="flow-stop__hebrew">{entry.hebrew}</span>
 					)}
@@ -338,13 +359,14 @@ function marginFillStyle(imageUrl?: string): string | undefined {
 		   the photo down to fit while keeping its own aspect ratio, so nothing
 		   is ever cropped. Actual rendered size varies photo to photo.
 
-		   max-width is capped at --content-w (not just --img-w) so a
-		   wide/panoramic photo (e.g. the "Today and Onward" milestone's
-		   scale-to-fit image, see history.ts SCALE_TO_FIT_PHOTO_IDS) can never
-		   render wider than its own flow-stop column and spill into the
-		   --stop-gap that separates it from its neighbor — that spillover was
-		   shrinking the visible gap for that one milestone versus every other
-		   (all narrower than --content-w, so they never hit this edge). */
+		   max-width is capped at --content-w (not just --img-w) as a general
+		   safety net: a photo whose --img-w happens to exceed --content-w (true
+		   at every breakpoint by default, see .history-flow variables above)
+		   would otherwise render wider than its own flow-stop column and spill
+		   into the --stop-gap toward its neighbor. wideAspectStyle() above
+		   handles the one known wide-aspect photo by widening its column to
+		   match instead of relying on this clamp — this is just the fallback
+		   for anything that isn't opted into that. */
 		width: auto;
 		height: auto;
 		max-width: min(var(--img-w), var(--content-w));
