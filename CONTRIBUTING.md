@@ -30,7 +30,7 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | The list of chat groups (left side) | `WhatsappGroups` | One row per group — the `name` shows in the list. Fill `joinHref` to make that entry clickable (opens that group's invite). Add / reorder (`sortOrder`) / hide (`active`) rows. See [#044](design-log/044-whatsapp-groups-collection.md). |
 | Featured groups (the right-side video tiles) | `WhatsappGroups` | Tick `featured` on a row, then add videos either way (or both): drag video files straight into `Video Uploads`, or paste YouTube links into `Video URLs` (one per line — full URLs are fine). Visitors flip between a group's videos with the ‹ › arrows. First four featured rows show. See [#046](design-log/046-whatsapp-video-uploads.md). |
 | Team members | `TeamMembers` | Add a row. Photo, name, role, bio, etc. |
-| Community FAQ (meals, gabbai, taharas hamishpacha, beis din) | `CommunityPage` | Edit the single row — one group of fields per topic. See schema below. |
+| Community FAQ (meals, aliya, gabbai, taharas hamishpacha, beis din) | `CommunityPage` | Edit the single row — one group of fields per topic. See schema below. The Aliya topic has no CMS fields at all — its wording and contact (Rabbi Isaac Bernstein) are hardcoded in `community.astro`, see [#061](design-log/061-community-page-aliya-faq.md). |
 | Community members ("Meet some of the members" section on /community) | `CommunityMembers` | Add a row per family: photo, name, description. Same hover/tap-to-reveal card as the team page. |
 | Youth programs (on /youth) | `YouthPrograms` | Add a row per program: title, description, contact rabbi, optional photo + flyer. |
 | Past events archive (on /events) | `PastEvents` | Add a row per past event: title, date, photo gallery, optional flyer + blurb. Shows newest first. |
@@ -193,7 +193,7 @@ See design log [#025](design-log/025-team-page-two-sections.md) for why the taxo
 
 #### `CommunityPage` — exactly **one** row, never more
 
-Drives the FAQ topics on `/community`. The four questions themselves, and the sentence each name/link sits inside, are fixed page copy (not editable here) — this collection only holds the names/contact details spliced into those fixed sentences. See design log [#047](design-log/047-community-page.md), [#049](design-log/049-community-content-refinements.md).
+Drives the FAQ topics on `/community`. The five questions themselves, and the sentence each name/link sits inside, are fixed page copy (not editable here) — this collection only holds the names/contact details spliced into those fixed sentences. The Aliya topic (see table above) isn't backed by this collection at all — it's fully hardcoded, contact included. See design log [#047](design-log/047-community-page.md), [#049](design-log/049-community-content-refinements.md), [#061](design-log/061-community-page-aliya-faq.md).
 
 | Field | Type | Notes |
 |---|---|---|
