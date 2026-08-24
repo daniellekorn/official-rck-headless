@@ -51,7 +51,7 @@ const TEAM_ANCHOR = {
 	leadership: "/team#leadership",
 	avreichim: "/team#avreichim",
 };
-const rabbiLinkClass = "font-semibold text-gold-600 transition-colors hover:text-gold-500";
+const rabbiLinkClass = "font-medium text-gold-600 transition-colors hover:text-gold-500";
 
 // Accordion chrome shared by all five FAQ topics — native <details>/<summary>
 // so each opens/closes independently with zero JS and keyboard support for
@@ -247,14 +247,14 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 									{page?.gabbaiName ? (
 										<p>
 											For Shabbos, contact our gabbai,{" "}
-											<a href={contactHref("Re: Gabbi")} class="font-semibold text-gold-600 hover:text-gold-500">
+											<a href={contactHref("Re: Gabbi")} class="font-medium text-gold-600 hover:text-gold-500">
 												{page.gabbaiName}
 											</a>
 											, regarding yahrtzeits, special simchas, and other gabbai matters.
 											{page.gabbaiWifeName && (
 												<>
 													{" "}His wife,{" "}
-													<a href={contactHref("Re: Tefillat Yeladim")} class="font-semibold text-gold-600 hover:text-gold-500">
+													<a href={contactHref("Re: Tefillat Yeladim")} class="font-medium text-gold-600 hover:text-gold-500">
 														{page.gabbaiWifeName}
 													</a>
 													, also leads our popular and exciting Tefillat Yeladim!
@@ -329,7 +329,9 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 										</address>
 									)}
 									{page?.taharasEnglishRabbi2Name && (
-										<div class="mt-5 border-t border-navy-100 pt-5">
+										<div class="mt-5">
+											<div class="h-px w-1/2 bg-navy-100" aria-hidden="true"></div>
+											<div class="mt-5">
 											{page.taharasEnglishRabbi2Name && (
 												<a href={TEAM_ANCHOR.avreichim} class="inline-block text-lg font-medium text-navy-600 hover:text-gold-600">
 													{page.taharasEnglishRabbi2Name}
@@ -353,6 +355,7 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 													</span>
 												</address>
 											)}
+											</div>
 										</div>
 									)}
 								</div>
@@ -399,7 +402,7 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 								<p>
 									At RCK we have a professional and well-trained team of dayanim ready to serve the
 									community with sensitivity, professionalism, and full halachic integrity. Contact{" "}
-									<a href={TEAM_ANCHOR.leadership} class="font-semibold text-gold-600 hover:text-gold-500">{page.beisDinContactName}</a>{" "}
+									<a href={TEAM_ANCHOR.leadership} class="font-medium text-gold-600 hover:text-gold-500">{page.beisDinContactName}</a>{" "}
 									to schedule an appointment
 									{page.beisDinContactPhone ? (
 										<>:{" "}
