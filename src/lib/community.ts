@@ -25,6 +25,9 @@ export interface CommunityPage {
 	taharasEnglishRabbiName?: string;
 	taharasEnglishRabbiPhone?: string;
 	taharasEnglishRabbiAddress?: string;
+	taharasEnglishRabbi2Name?: string;
+	taharasEnglishRabbi2Phone?: string;
+	taharasEnglishRabbi2Address?: string;
 	taharasHebrewRabbiName?: string;
 	taharasHebrewRabbiPhone?: string;
 	taharasHebrewRabbiAddress?: string;

@@ -207,13 +207,16 @@ Drives the FAQ topics on `/community`. The five questions themselves, and the se
 | gabbaiPhone | Text | |
 | gabbaiEmail | Text | |
 | gabbaiPhoto | Image | |
-| taharasEnglishRabbiName | Text | The English-speaking rav for taharas hamishpacha shaalos. If he already has a `TeamMembers` row, his name here links to `/team#leadership` — keep the names in sync. |
+| taharasEnglishRabbiName | Text | The primary English-speaking rav for taharas hamishpacha shaalos. Links to his `/team` bio section (`#leadership` or `#avreichim`, whichever his `TeamMembers` row is actually in) — keep the names in sync. |
 | taharasEnglishRabbiPhone | Text | |
-| taharasEnglishRabbiAddress | Text | |
+| taharasEnglishRabbiAddress | Text | Displayed exactly as entered (e.g. "46 Hafetz Haim"); the map link auto-appends Ra'anana/Israel behind the scenes, so don't add the city/country here just for that. |
+| taharasEnglishRabbi2Name | Text | A second English-speaking rav, shown right under the first one in the same English column. Leave empty to show only one. Same `/team` linking behavior. |
+| taharasEnglishRabbi2Phone | Text | |
+| taharasEnglishRabbi2Address | Text | Same display/map behavior as `taharasEnglishRabbiAddress`. |
 | taharasHebrewRabbiName | Text | The Hebrew-speaking rav. Same linking behavior as above. |
 | taharasHebrewRabbiPhone | Text | |
 | taharasHebrewRabbiAddress | Text | |
-| beisDinContactName | Text | Who to contact to open a case / schedule an appointment. Feeds the fixed sentence "...Contact **{name}** to schedule an appointment." — their name links to the contact page with subject "Re: Beis Din". The "Our Services" checklist below it (Monetary Disputes, Arbitration & Mediation, Halachic Wills, Shalom Bayis, Halachic Contracts) is fixed page copy, not a field. |
+| beisDinContactName | Text | Who to contact to open a case / schedule an appointment. Feeds the fixed sentence "...Contact **{name}** to schedule an appointment." — their name links to their `/team` bio section, same as the taharas rabbis above. The "Our Services" checklist below it (Monetary Disputes, Arbitration & Mediation, Halachic Wills, Shalom Bayis, Halachic Contracts) is fixed page copy, not a field. |
 | beisDinContactPhone | Text | |
 | beisDinContactEmail | Text | |
 
