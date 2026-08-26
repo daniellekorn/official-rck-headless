@@ -1,4 +1,4 @@
-# 062 — Second Taharas rabbi + every named rabbi links to his /team bio
+# 063 — Second Taharas rabbi + every named rabbi links to his /team bio
 
 **Status:** implemented
 **Date:** 2026-08-24
