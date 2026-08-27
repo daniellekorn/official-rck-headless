@@ -577,6 +577,11 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 									<h3 class="font-display text-xl sm:text-2xl font-medium text-navy-600 truncate">
 										{m.familyName}
 									</h3>
+									{m.hebrewName && (
+										<p class="mt-1 text-sm sm:text-base text-navy-500 font-medium">
+											{m.hebrewName}
+										</p>
+									)}
 									{hasBio && (
 										<span class="bio-toggle-label mt-3 inline-flex items-center gap-1 font-sans text-[11px] font-bold uppercase tracking-[0.22em] text-gold-500" aria-hidden="true"></span>
 									)}
