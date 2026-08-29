@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
 import PageHeader from "../components/PageHeader.astro";
+import ContactButtons from "../components/ContactButtons.astro";
 import { getCommunityPage, getCommunityMembers } from "../lib/community";
 import { ricosToPlainText } from "../lib/ricos";
 import { googleMapsUrl } from "../lib/maps";
@@ -27,11 +28,9 @@ const BEIS_DIN_SERVICES = [
 
 // Meals hosting contact — shown while the CMS `mealsFamilyName` field (a
 // single-family setup, see below) is unpopulated. Number is Israeli mobile,
-// entered in local format; helpers below derive the `tel:` and WhatsApp
+// entered in local format; <ContactButtons> derives the `tel:` and WhatsApp
 // (`wa.me`, country code 972) links from that same number.
 const MEALS_CONTACT = { name: "Yael Bernstein", phone: "053-216-4726" };
-const telHref = (phone: string) => `tel:${phone.replace(/[\s-]/g, "")}`;
-const whatsappHref = (phone: string) => `https://wa.me/972${phone.replace(/[\s-]/g, "").replace(/^0/, "")}`;
 
 // Aliya FAQ contact — same hardcoded-fallback pattern as MEALS_CONTACT above
 // (no CMS field for this yet; promote to CommunityPage if it ever needs to
@@ -96,11 +95,9 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 									)}
 									<div class="min-w-0">
 										<p class="font-medium text-gold-600">{page.mealsFamilyName}</p>
-										<div class="mt-1.5 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+										<div class="mt-1.5 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
 											{page.mealsPhone && (
-												<a href={`tel:${page.mealsPhone.replace(/[\s\-]/g, "")}`} class="font-medium text-gold-600 hover:text-gold-500">
-													{page.mealsPhone}
-												</a>
+												<ContactButtons phone={page.mealsPhone} name={page.mealsFamilyName} />
 											)}
 											{page.mealsEmail && (
 												<a href={`mailto:${page.mealsEmail}`} class="font-medium text-gold-600 hover:text-gold-500 break-all">
@@ -118,61 +115,13 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 										<span>
 											Reach out to <span class="font-medium text-gold-600">{MEALS_CONTACT.name}</span>
 										</span>
-										<div class="flex items-center gap-2">
-											<a
-												href={telHref(MEALS_CONTACT.phone)}
-												aria-label={`Call ${MEALS_CONTACT.name}`}
-												class="group inline-flex items-center gap-1.5 rounded-sm border border-gold-500 px-3 py-1.5 text-sm font-semibold text-navy-600 transition-colors hover:bg-gold-100 active:bg-gold-100"
-											>
-												<svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110" fill="currentColor" aria-hidden="true">
-													<path d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z" />
-												</svg>
-												Call
-											</a>
-											<a
-												href={whatsappHref(MEALS_CONTACT.phone)}
-												target="_blank"
-												rel="noopener noreferrer"
-												aria-label={`WhatsApp ${MEALS_CONTACT.name}`}
-												class="group inline-flex items-center gap-1.5 rounded-sm border border-gold-500 px-3 py-1.5 text-sm font-semibold text-navy-600 transition-colors hover:bg-gold-100 active:bg-gold-100"
-											>
-												<svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110" fill="currentColor" aria-hidden="true">
-													<path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.85-1.46A10 10 0 1 0 12 2Zm0 18.2a8.18 8.18 0 0 1-4.17-1.14l-.3-.18-2.86.86.86-2.78-.2-.32A8.2 8.2 0 1 1 12 20.2Z"/>
-													<path d="M17.5 14.4c-.27-.14-1.6-.79-1.85-.88-.25-.09-.43-.14-.61.14-.18.27-.7.88-.86 1.06-.16.18-.32.2-.59.07-.27-.14-1.14-.42-2.17-1.34-.8-.71-1.34-1.6-1.5-1.87-.16-.27-.02-.42.12-.55.12-.12.27-.32.4-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.14-.61-1.47-.84-2.01-.22-.53-.44-.46-.61-.46l-.52-.01c-.18 0-.48.07-.73.34-.25.27-.95.93-.95 2.27 0 1.34.97 2.63 1.11 2.81.14.18 1.91 2.92 4.63 4.09.65.28 1.15.45 1.54.58.65.2 1.24.18 1.71.11.52-.08 1.6-.65 1.83-1.28.23-.63.23-1.17.16-1.28-.07-.11-.25-.18-.52-.32Z"/>
-												</svg>
-												WhatsApp
-											</a>
-										</div>
+										<ContactButtons phone={MEALS_CONTACT.phone} name={MEALS_CONTACT.name} />
 									</div>
 									<div class="mt-3 flex flex-wrap items-center gap-2">
 										<span>
 											Or <a href={TEAM_ANCHOR.avreichim} class={rabbiLinkClass}>{MEALS_CONTACT_2.name}</a>
 										</span>
-										<div class="flex items-center gap-2">
-											<a
-												href={telHref(MEALS_CONTACT_2.phone)}
-												aria-label={`Call ${MEALS_CONTACT_2.name}`}
-												class="group inline-flex items-center gap-1.5 rounded-sm border border-gold-500 px-3 py-1.5 text-sm font-semibold text-navy-600 transition-colors hover:bg-gold-100 active:bg-gold-100"
-											>
-												<svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110" fill="currentColor" aria-hidden="true">
-													<path d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z" />
-												</svg>
-												Call
-											</a>
-											<a
-												href={whatsappHref(MEALS_CONTACT_2.phone)}
-												target="_blank"
-												rel="noopener noreferrer"
-												aria-label={`WhatsApp ${MEALS_CONTACT_2.name}`}
-												class="group inline-flex items-center gap-1.5 rounded-sm border border-gold-500 px-3 py-1.5 text-sm font-semibold text-navy-600 transition-colors hover:bg-gold-100 active:bg-gold-100"
-											>
-												<svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110" fill="currentColor" aria-hidden="true">
-													<path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.85-1.46A10 10 0 1 0 12 2Zm0 18.2a8.18 8.18 0 0 1-4.17-1.14l-.3-.18-2.86.86.86-2.78-.2-.32A8.2 8.2 0 1 1 12 20.2Z"/>
-													<path d="M17.5 14.4c-.27-.14-1.6-.79-1.85-.88-.25-.09-.43-.14-.61.14-.18.27-.7.88-.86 1.06-.16.18-.32.2-.59.07-.27-.14-1.14-.42-2.17-1.34-.8-.71-1.34-1.6-1.5-1.87-.16-.27-.02-.42.12-.55.12-.12.27-.32.4-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.14-.61-1.47-.84-2.01-.22-.53-.44-.46-.61-.46l-.52-.01c-.18 0-.48.07-.73.34-.25.27-.95.93-.95 2.27 0 1.34.97 2.63 1.11 2.81.14.18 1.91 2.92 4.63 4.09.65.28 1.15.45 1.54.58.65.2 1.24.18 1.71.11.52-.08 1.6-.65 1.83-1.28.23-.63.23-1.17.16-1.28-.07-.11-.25-.18-.52-.32Z"/>
-												</svg>
-												WhatsApp
-											</a>
-										</div>
+										<ContactButtons phone={MEALS_CONTACT_2.phone} name={MEALS_CONTACT_2.name} />
 									</div>
 								</div>
 							)}
@@ -196,31 +145,7 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 							<p class="mt-3">
 								Contact <a href={TEAM_ANCHOR.avreichim} class={rabbiLinkClass}>{ALIYA_CONTACT.name}</a> with any questions.
 							</p>
-							<div class="mt-3 flex items-center gap-2">
-								<a
-									href={telHref(ALIYA_CONTACT.phone)}
-									aria-label={`Call ${ALIYA_CONTACT.name}`}
-									class="group inline-flex items-center gap-1.5 rounded-sm border border-gold-500 px-3 py-1.5 text-sm font-semibold text-navy-600 transition-colors hover:bg-gold-100 active:bg-gold-100"
-								>
-									<svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110" fill="currentColor" aria-hidden="true">
-										<path d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z" />
-									</svg>
-									Call
-								</a>
-								<a
-									href={whatsappHref(ALIYA_CONTACT.phone)}
-									target="_blank"
-									rel="noopener noreferrer"
-									aria-label={`WhatsApp ${ALIYA_CONTACT.name}`}
-									class="group inline-flex items-center gap-1.5 rounded-sm border border-gold-500 px-3 py-1.5 text-sm font-semibold text-navy-600 transition-colors hover:bg-gold-100 active:bg-gold-100"
-								>
-									<svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110" fill="currentColor" aria-hidden="true">
-										<path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.85-1.46A10 10 0 1 0 12 2Zm0 18.2a8.18 8.18 0 0 1-4.17-1.14l-.3-.18-2.86.86.86-2.78-.2-.32A8.2 8.2 0 1 1 12 20.2Z"/>
-										<path d="M17.5 14.4c-.27-.14-1.6-.79-1.85-.88-.25-.09-.43-.14-.61.14-.18.27-.7.88-.86 1.06-.16.18-.32.2-.59.07-.27-.14-1.14-.42-2.17-1.34-.8-.71-1.34-1.6-1.5-1.87-.16-.27-.02-.42.12-.55.12-.12.27-.32.4-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.14-.61-1.47-.84-2.01-.22-.53-.44-.46-.61-.46l-.52-.01c-.18 0-.48.07-.73.34-.25.27-.95.93-.95 2.27 0 1.34.97 2.63 1.11 2.81.14.18 1.91 2.92 4.63 4.09.65.28 1.15.45 1.54.58.65.2 1.24.18 1.71.11.52-.08 1.6-.65 1.83-1.28.23-.63.23-1.17.16-1.28-.07-.11-.25-.18-.52-.32Z"/>
-									</svg>
-									WhatsApp
-								</a>
-							</div>
+							<ContactButtons phone={ALIYA_CONTACT.phone} name={ALIYA_CONTACT.name} class="mt-3" />
 							<p class="mt-4">B&rsquo;Hatzlacha and a Yishuv Tov!</p>
 						</div>
 					</details>
@@ -264,11 +189,9 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 									) : (
 										<p>Gabbai contact info is coming soon — check back shortly, or reach out via our <a href="/contact" class="font-medium text-gold-600 hover:text-gold-500">contact page</a>.</p>
 									)}
-									<div class="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+									<div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
 										{page?.gabbaiPhone && (
-											<a href={`tel:${page.gabbaiPhone.replace(/[\s\-]/g, "")}`} class="font-medium text-gold-600 hover:text-gold-500">
-												{page.gabbaiPhone}
-											</a>
+											<ContactButtons phone={page.gabbaiPhone} name={page.gabbaiName ?? "the gabbai"} />
 										)}
 										{page?.gabbaiEmail && (
 											<a href={`mailto:${page.gabbaiEmail}`} class="font-medium text-gold-600 hover:text-gold-500 break-all">
@@ -311,9 +234,11 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 										</a>
 									)}
 									{page?.taharasEnglishRabbiPhone && (
-										<a href={`tel:${page.taharasEnglishRabbiPhone.replace(/[\s\-]/g, "")}`} class="mt-1 inline-block text-sm font-medium text-gold-600 hover:text-gold-500">
-											{page.taharasEnglishRabbiPhone}
-										</a>
+										<ContactButtons
+											phone={page.taharasEnglishRabbiPhone}
+											name={page.taharasEnglishRabbiName ?? "the rabbi"}
+											class="mt-1.5"
+										/>
 									)}
 									{page?.taharasEnglishRabbiAddress && (
 										<address class="mt-1 flex items-start gap-1.5 not-italic text-sm text-navy-400">
@@ -338,9 +263,11 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 												</a>
 											)}
 											{page?.taharasEnglishRabbi2Phone && (
-												<a href={`tel:${page.taharasEnglishRabbi2Phone.replace(/[\s\-]/g, "")}`} class="mt-1 inline-block text-sm font-medium text-gold-600 hover:text-gold-500">
-													{page.taharasEnglishRabbi2Phone}
-												</a>
+												<ContactButtons
+													phone={page.taharasEnglishRabbi2Phone}
+													name={page.taharasEnglishRabbi2Name ?? "the rabbi"}
+													class="mt-1.5"
+												/>
 											)}
 											{page?.taharasEnglishRabbi2Address && (
 												<address class="mt-1 flex items-start gap-1.5 not-italic text-sm text-navy-400">
@@ -367,9 +294,11 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 										</a>
 									)}
 									{page?.taharasHebrewRabbiPhone && (
-										<a href={`tel:${page.taharasHebrewRabbiPhone.replace(/[\s\-]/g, "")}`} class="mt-1 inline-block text-sm font-medium text-gold-600 hover:text-gold-500">
-											{page.taharasHebrewRabbiPhone}
-										</a>
+										<ContactButtons
+											phone={page.taharasHebrewRabbiPhone}
+											name={page.taharasHebrewRabbiName ?? "the rabbi"}
+											class="mt-1.5"
+										/>
 									)}
 									{page?.taharasHebrewRabbiAddress && (
 										<address class="mt-1 flex items-start gap-1.5 not-italic text-sm text-navy-400">
@@ -399,19 +328,17 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 						</summary>
 						<div class={panelClass}>
 							{page?.beisDinContactName ? (
-								<p>
-									At RCK we have a professional and well-trained team of dayanim ready to serve the
-									community with sensitivity, professionalism, and full halachic integrity. Contact{" "}
-									<a href={TEAM_ANCHOR.leadership} class="font-medium text-gold-600 hover:text-gold-500">{page.beisDinContactName}</a>{" "}
-									to schedule an appointment
-									{page.beisDinContactPhone ? (
-										<>:{" "}
-										<a href={`tel:${page.beisDinContactPhone.replace(/[\s\-]/g, "")}`} class="text-sm font-semibold text-gold-600 hover:text-gold-500">
-											{page.beisDinContactPhone}
-										</a>
-										</>
-									) : "."}
-								</p>
+								<>
+									<p>
+										At RCK we have a professional and well-trained team of dayanim ready to serve the
+										community with sensitivity, professionalism, and full halachic integrity. Contact{" "}
+										<a href={TEAM_ANCHOR.leadership} class="font-medium text-gold-600 hover:text-gold-500">{page.beisDinContactName}</a>{" "}
+										to schedule an appointment.
+									</p>
+									{page.beisDinContactPhone && (
+										<ContactButtons phone={page.beisDinContactPhone} name={page.beisDinContactName} class="mt-3" />
+									)}
+								</>
 							) : (
 								<p>
 									At RCK we have a professional and well-trained team of dayanim ready to serve the

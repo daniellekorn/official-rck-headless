@@ -247,12 +247,13 @@ Drives the **Youth Programming page** (`/youth`). Each row is one program (Dor L
 | `flyerImage` | Image (opt) | **Preferred.** A static flyer image (export page 1 of the Canva design as PNG). Gets a click-to-enlarge viewer + Download button. |
 | `flyerPdfUrl` | Text (opt) | Direct public PDF URL — fallback for multi-page documents. Checked after the image. |
 | `contactName` | Text | The contact rabbi's name, e.g. `Rav Avraham Aharon`. |
-| `contactEmail` | Text | The contact rabbi's email — becomes the "Email" link. Leave empty to show only the generic "Contact" button. |
+| `contactEmail` | Text (opt) | The contact rabbi's email — becomes the "Email" button's `mailto:` link. Leave empty and "Email" instead routes to the site's Contact page, pre-filled with this program's name. |
+| `contactPhone` | Text (opt) | The contact rabbi's phone — becomes a "WhatsApp" button next to Email. Local Israeli format (`053-347-8419`) or full international with a leading `+` (`+1 (516) 761-5889`). Leave empty to hide the WhatsApp button. |
 | `sortOrder` | Number | Order of sections, lower first. |
 | `active` | Boolean | Show/hide without deleting. |
 | `linkedFlyerTitle` | Text (opt) | Exact `title` of a `Flyers` row in the `learning` category — when set, this program's flyer **mirrors that row's image/PDF** instead of `flyerImage`, so updating the Learning flyer updates the youth page too. Leave empty to keep uploading a separate `flyerImage` here. See design-log #057. |
 
-**To add a rabbi's chaburah to the youth page:** add a `YouthPrograms` row — `title` = the program, `description` = the info, `contactName` + `contactEmail` = the rabbi. That's all that's required; add photos to `gallery` and/or a flyer if you have them. (This is separate from `TeamMembers` — see the note above.)
+**To add a rabbi's chaburah to the youth page:** add a `YouthPrograms` row — `title` = the program, `description` = the info, `contactName` + `contactEmail`/`contactPhone` = the rabbi. That's all that's required; add photos to `gallery` and/or a flyer if you have them. (This is separate from `TeamMembers` — see the note above.)
 
 > The `Flyers` collection still has a `youth` category, but the `/youth` page no longer reads it — youth flyers belong on the `YouthPrograms` row now. Put youth flyers there.
 

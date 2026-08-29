@@ -223,6 +223,16 @@ function wideAspectStyle(imageUrl?: string): string | undefined {
 		   row silently drifting up/down by a few px. The section is sized
 		   generously (below) so real content shouldn't hit this ceiling. */
 		overflow-y: hidden;
+		/* Without this, the browser leaves both axes on the table for this
+		   element (default `touch-action: auto`) and on some touchscreens
+		   (reported: a touchscreen laptop, not reproducible on trackpad/mouse —
+		   those fire wheel events, never touch ones) a vertical swipe started
+		   over this strip gets misread as more horizontal panning right after a
+		   horizontal swipe, so the page shakes in place instead of moving to the
+		   next/previous section. `pan-x` tells the browser up front that this
+		   element only claims horizontal single-finger panning, so a vertical
+		   drag is handed straight to the page scroll instead. */
+		touch-action: pan-x;
 		scrollbar-width: none;
 		-ms-overflow-style: none;
 		-webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);

@@ -39,6 +39,7 @@ export interface YouthProgram {
 	isPhoto?: boolean;
 	contactName?: string; // contact rabbi, e.g. "Rav Avraham Aharon"
 	contactEmail?: string;
+	contactPhone?: string; // becomes the WhatsApp option alongside Email; local Israeli or full "+"-international format
 	sortOrder?: number;
 	active?: boolean;
 	/**
