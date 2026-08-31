@@ -251,6 +251,17 @@ function wideAspectStyle(imageUrl?: string): string | undefined {
 			height: 29rem;
 		}
 	}
+	@media (max-width: 639px) {
+		/* Mobile gets buttons instead of swipe. overflow-x: clip means this
+		   element is no longer a scroll container, so it cannot trap touch
+		   events — vertical page scroll always works. touch-action: auto
+		   lets the browser handle all gestures natively (nothing to scroll
+		   horizontally, so only vertical panning activates). */
+		.history-flow__viewport {
+			overflow-x: clip;
+			touch-action: auto;
+		}
+	}
 	.history-flow__viewport::-webkit-scrollbar {
 		display: none;
 	}
@@ -262,6 +273,11 @@ function wideAspectStyle(imageUrl?: string): string | undefined {
 		height: 100%;
 		width: max-content;
 		padding-inline: 2.5rem;
+	}
+	@media (max-width: 639px) {
+		.history-flow__track {
+			transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+		}
 	}
 
 	.history-flow__spine {
@@ -367,7 +383,8 @@ function wideAspectStyle(imageUrl?: string): string | undefined {
 		box-shadow: 0 24px 44px -14px rgb(from var(--color-navy-700) r g b / 0.6);
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.flow-stop__img-wrap {
+		.flow-stop__img-wrap,
+		.history-flow__track {
 			transition: none;
 		}
 	}
@@ -461,13 +478,9 @@ function wideAspectStyle(imageUrl?: string): string | undefined {
 		box-shadow: 0 12px 28px -12px rgb(from var(--color-navy-700) r g b / 0.55);
 		transition: background-color 0.2s ease, transform 0.2s ease;
 	}
-	/* Touch swipe already makes the strip's scrollability obvious on mobile —
-	   the arrows are redundant there and just sit on top of the content.
-	   Desktop (mouse/trackpad) keeps them. */
-	@media (max-width: 639px) {
-		.history-tl__btn {
-			display: none;
-		}
+	.history-tl__btn:disabled {
+		opacity: 0.3;
+		pointer-events: none;
 	}
 	.history-tl__btn:hover {
 		background: var(--color-gold-400);
@@ -480,31 +493,60 @@ function wideAspectStyle(imageUrl?: string): string | undefined {
 </style>
 
 <script>
-	// Purely manual — nothing scrolls on its own. The strip is a native
-	// horizontal scroller (swipe/trackpad drag work directly); the arrows
-	// just step one milestone at a time.
 	document.querySelectorAll<HTMLElement>("[data-history-tl]").forEach((root) => {
 		const viewport = root.querySelector<HTMLElement>("[data-history-viewport]");
 		const track = root.querySelector<HTMLElement>("[data-history-track]");
 		if (!viewport || !track) return;
-		const stops = track.querySelectorAll<HTMLElement>(".flow-stop");
+		const stops = Array.from(track.querySelectorAll<HTMLElement>(".flow-stop"));
 		if (stops.length < 2) return;
 
 		const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-		const step = () => stops[1].offsetLeft - stops[0].offsetLeft; // stop width + gap
+		const mqDesktop = window.matchMedia("(min-width: 640px)");
+		const step = () => stops[1].offsetLeft - stops[0].offsetLeft;
 
-		const go = (dir: 1 | -1) => {
-			viewport.scrollTo({ left: viewport.scrollLeft + dir * step(), behavior: reduce ? "auto" : "smooth" });
+		const prevBtn = root.querySelector<HTMLButtonElement>("[data-history-prev]");
+		const nextBtn = root.querySelector<HTMLButtonElement>("[data-history-next]");
+		let mobileIdx = 0;
+
+		const syncBtns = () => {
+			if (mqDesktop.matches) return;
+			if (prevBtn) prevBtn.disabled = mobileIdx === 0;
+			if (nextBtn) nextBtn.disabled = mobileIdx === stops.length - 1;
 		};
 
-		root.querySelector("[data-history-prev]")?.addEventListener("click", () => go(-1));
-		root.querySelector("[data-history-next]")?.addEventListener("click", () => go(1));
+		const go = (dir: 1 | -1) => {
+			if (mqDesktop.matches) {
+				// Desktop: native scroll inside the overflow-x: auto viewport
+				viewport.scrollTo({ left: viewport.scrollLeft + dir * step(), behavior: reduce ? "auto" : "smooth" });
+			} else {
+				// Mobile: viewport is overflow-x: clip (not a scroll container), so
+				// navigation moves the track with a CSS transform instead.
+				mobileIdx = Math.max(0, Math.min(stops.length - 1, mobileIdx + dir));
+				const offset = stops[mobileIdx].offsetLeft - stops[0].offsetLeft;
+				track.style.transform = reduce ? `translateX(-${offset}px)` : `translateX(-${offset}px)`;
+				syncBtns();
+				// Lift the now-centred image on touch devices
+				const wraps = track.querySelectorAll<HTMLElement>(".flow-stop__img-wrap");
+				wraps.forEach((w, i) => w.classList.toggle("is-active", i === mobileIdx));
+			}
+		};
 
-		// Touch devices have no real :hover, so the lift effect that highlights
-		// an image on desktop hover needs a scroll-driven equivalent: whichever
-		// milestone is most visible in the viewport gets .is-active (same lift),
-		// and every other milestone loses it — only one lifted at a time.
-		if (!window.matchMedia("(hover: hover)").matches) {
+		prevBtn?.addEventListener("click", () => go(-1));
+		nextBtn?.addEventListener("click", () => go(1));
+
+		// Reset both navigation modes on layout switch
+		mqDesktop.addEventListener("change", () => {
+			track.style.transform = "";
+			viewport.scrollLeft = 0;
+			mobileIdx = 0;
+			syncBtns();
+		});
+
+		syncBtns();
+
+		// Desktop touch / non-hover: IntersectionObserver drives the lift effect
+		// based on which milestone is most visible during free scroll.
+		if (!window.matchMedia("(hover: hover)").matches && mqDesktop.matches) {
 			const wraps = Array.from(track.querySelectorAll<HTMLElement>(".flow-stop__img-wrap"));
 			if (wraps.length > 0) {
 				const ratios = new Map<HTMLElement, number>();
@@ -512,17 +554,14 @@ function wideAspectStyle(imageUrl?: string): string | undefined {
 					let best: HTMLElement | null = null;
 					let bestRatio = 0;
 					ratios.forEach((ratio, el) => {
-						if (ratio > bestRatio) {
-							bestRatio = ratio;
-							best = el;
-						}
+						if (ratio > bestRatio) { bestRatio = ratio; best = el; }
 					});
 					wraps.forEach((w) => w.classList.toggle("is-active", w === best));
 				};
 				const thresholds = Array.from({ length: 21 }, (_, i) => i / 20);
 				const io = new IntersectionObserver(
 					(entries) => {
-						entries.forEach((entry) => ratios.set(entry.target as HTMLElement, entry.intersectionRatio));
+						entries.forEach((e) => ratios.set(e.target as HTMLElement, e.intersectionRatio));
 						applyActive();
 					},
 					{ root: viewport, threshold: thresholds },
