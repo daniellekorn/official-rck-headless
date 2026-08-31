@@ -218,11 +218,15 @@ function wideAspectStyle(imageUrl?: string): string | undefined {
 		   dead space at the bottom of the section for every shorter entry. */
 		height: 28rem;
 		overflow-x: auto;
-		/* Fixed and hidden, not "visible"/"auto" — a slightly-too-tall stop used
-		   to make the strip vertically scrollable too, which read as the whole
-		   row silently drifting up/down by a few px. The section is sized
-		   generously (below) so real content shouldn't hit this ceiling. */
-		overflow-y: hidden;
+		/* clip, not hidden — both visually clip overflow, but hidden (combined with
+		   overflow-x: auto) creates a 2D scroll container that captures all touch
+		   events, including vertical ones. iOS Safari then ignores touch-action: pan-x
+		   and traps vertical swipes inside the strip. clip doesn't create a scroll
+		   container for the Y axis, so vertical touches fall through to the page.
+		   Also avoids the spec rule that recomputes overflow-y: visible → auto (the
+		   original vertical-drift bug) — that recomputation only applies to visible,
+		   not clip. Safari 16+ / Chrome 90+ / Firefox 102+. */
+		overflow-y: clip;
 		/* pan-x: tells the browser this container only handles horizontal touch
 		   gestures, so vertical swipes fall through to the page scroll instead
 		   of getting trapped inside the overflow container. Without this, a
