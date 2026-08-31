@@ -119,7 +119,7 @@ function wideAspectStyle(imageUrl?: string): string | undefined {
 					<div class="flow-stop__content">
 						<span class="flow-stop__img-wrap" style={marginFillStyle(entry.imageUrl)}>
 							{entry.imageUrl ? (
-								<img src={entry.imageUrl} alt={entry.title ?? ""} class="flow-stop__img" loading="lazy" />
+								<img src={entry.imageUrl} alt={entry.title ?? ""} class="flow-stop__img" loading="lazy" draggable="false" />
 							) : (
 								<div
 									class="flow-stop__img flow-stop__img--placeholder"
@@ -350,6 +350,13 @@ function wideAspectStyle(imageUrl?: string): string | undefined {
 		   clip the shadow, which paints outside the border box. */
 		box-shadow: 0 16px 34px -12px rgb(from var(--color-navy-700) r g b / 0.55);
 		transition: transform 0.3s ease, box-shadow 0.3s ease;
+		/* iOS Safari intercepts touches on images for its long-press context menu
+		   and treats overflow:hidden elements as potential scroll containers —
+		   both override the ancestor viewport's touch-action: pan-x. Disable the
+		   callout and restate pan-x explicitly here so iOS sees it on the element
+		   that actually receives the touch hit-test. */
+		touch-action: pan-x;
+		-webkit-touch-callout: none;
 	}
 	.flow-stop__img-wrap:hover,
 	.flow-stop__img-wrap.is-active {
@@ -368,6 +375,7 @@ function wideAspectStyle(imageUrl?: string): string | undefined {
 		display: block;
 	}
 	img.flow-stop__img {
+		touch-action: pan-x;
 		/* Bounded by max-width/max-height, not a fixed box — the browser scales
 		   the photo down to fit while keeping its own aspect ratio, so nothing
 		   is ever cropped. Actual rendered size varies photo to photo.
@@ -397,6 +405,11 @@ function wideAspectStyle(imageUrl?: string): string | undefined {
 		align-items: center;
 		width: 100%;
 		gap: 0.3rem;
+		/* Prevent iOS from treating a vertical swipe on text as a selection
+		   gesture, which would consume the touch before pan-x can handle it. */
+		user-select: none;
+		-webkit-user-select: none;
+		touch-action: pan-x;
 	}
 
 	.flow-stop__title {
