@@ -157,9 +157,14 @@ const isContactActive = pathname === "/contact";
 				>
 					Contact
 					{isContactActive && (
+						/* bottom-0.5, not -bottom-1.5 like the other nav items' bar: this
+						   link carries py-2 (8px) that the plain nav links don't, so the
+						   same -bottom-1.5 offset from this taller box lands 8px lower on
+						   the page. Pulling it in by that same 8px (net: -1.5 + 2 = 0.5)
+						   re-aligns it with every other active-page underline. */
 						<span
 							aria-hidden="true"
-							class="absolute left-1/2 -bottom-1.5 h-[2px] w-5 -translate-x-1/2 rounded-full bg-gold-500"
+							class="absolute left-1/2 bottom-0.5 h-[2px] w-5 -translate-x-1/2 rounded-full bg-gold-500"
 						/>
 					)}
 				</a>
