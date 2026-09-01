@@ -4,6 +4,7 @@ import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
 import PageHeader from "../components/PageHeader.astro";
 import CoverflowCarousel from "../components/CoverflowCarousel.astro";
+import Highlight from "../components/Highlight.astro";
 import Flyer from "../components/Flyer.astro";
 import { getFlyers, uniqueSubCategories } from "../lib/flyers";
 import { groupTags } from "../lib/tag-groups";
@@ -20,7 +21,26 @@ const tagGroups = groupTags(uniqueSubCategories(allLearning));
 		titleNavy="With Us"
 	/>
 
-	{allLearning.length > 0 && <CoverflowCarousel items={allLearning} />}
+	{allLearning.length > 0 && (
+		<CoverflowCarousel items={allLearning}>
+			<Fragment slot="aside">
+				<h2
+					class="font-display text-[2rem] sm:text-[2.5rem] leading-[1.05] font-medium uppercase text-navy-600"
+					data-reveal="left"
+				>
+					Find the <Highlight>Right Learning</Highlight> for You!
+				</h2>
+				<p class="mt-5 text-base leading-relaxed text-navy-500" data-reveal="up" data-reveal-delay="180">
+					We offer shiurim, chaburos, and chavrusos for all levels of learning, in English,
+					Hebrew, and even Spanish! Take a look at our community learning schedule to see
+					everything available, then filter through the flyers to find the learning
+					opportunity that's right for you. Didn't find it?{" "}
+					<a href="/contact" class="font-medium text-gold-600 hover:text-gold-500">Contact us</a>
+					{" "}— we'd love to help you get set up.
+				</p>
+			</Fragment>
+		</CoverflowCarousel>
+	)}
 
 	<section class="py-10 sm:py-14 bg-mist">
 		<div class="container-page">
