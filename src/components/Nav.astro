@@ -149,14 +149,19 @@ const isContactActive = pathname === "/contact";
 			<div class="hidden xl:flex items-center gap-2 shrink-0" data-nav-cta>
 				<a
 					href="/contact"
+					aria-current={isContactActive ? "page" : undefined}
 					class:list={[
-						"rounded-sm px-4 py-2 text-[17.5px] 2xl:text-[20.5px] font-medium transition-colors whitespace-nowrap",
-						isContactActive
-							? "text-gold-600 bg-gold-50"
-							: "text-navy-500 hover:bg-navy-50",
+						"relative rounded-sm px-4 py-2 text-[17.5px] 2xl:text-[20.5px] font-medium transition-colors whitespace-nowrap",
+						isContactActive ? "text-navy-600" : "text-navy-500 hover:bg-navy-50",
 					]}
 				>
 					Contact
+					{isContactActive && (
+						<span
+							aria-hidden="true"
+							class="absolute left-1/2 -bottom-1.5 h-[2px] w-5 -translate-x-1/2 rounded-full bg-gold-500"
+						/>
+					)}
 				</a>
 				<a
 					href="/donate"
