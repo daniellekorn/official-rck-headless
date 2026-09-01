@@ -41,9 +41,7 @@ const inlineVars = `--rck-color:${color};--rck-height:${height};--rck-position:$
 	class:list={["rck-highlight", !immediate && "rck-highlight--scroll", immediate && "rck-highlight--immediate"]}
 	style={inlineVars}
 	data-rck-highlight={!immediate ? "" : undefined}
->
-	<slot />
-</span>
+><slot /></span>
 
 <style is:global>
 	.rck-highlight {

@@ -4,6 +4,7 @@ import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
 import PageHeader from "../components/PageHeader.astro";
 import ContactButtons from "../components/ContactButtons.astro";
+import Highlight from "../components/Highlight.astro";
 import { getCommunityPage, getCommunityMembers } from "../lib/community";
 import { ricosToPlainText } from "../lib/ricos";
 import { googleMapsUrl } from "../lib/maps";
@@ -11,6 +12,15 @@ import { googleMapsUrl } from "../lib/maps";
 const page = await getCommunityPage();
 const members = await getCommunityMembers();
 const hasMembers = members.length > 0;
+
+// Member Spotlight (the family-carousel section below, id="members" — what
+// Yosef calls "Community Spotlight") is pulled off the live site for now but
+// kept in full so it can come back with a one-line flip. Set true to
+// republish; it will render below the new "Community Voices" section, which
+// permanently owns this slot on the page and took over the video tile that
+// used to open the Member Spotlight carousel (see design-log #060 for the
+// same flag pattern used on Torah Sheets' ParshaLink).
+const SHOW_MEMBER_SPOTLIGHT = false;
 
 const mealsDescription = page?.mealsDescription ? ricosToPlainText(page.mealsDescription) : "";
 
@@ -371,7 +381,69 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 			</div>
 		</section>
 
-		<!-- Meet our members -->
+		{/* Community Voices: text-left / video-right band, same two-column
+		    shape as the Learn page's CoverflowCarousel "with-aside" layout
+		    (hand-rolled here rather than reusing that component, since it's
+		    one fixed video, not a flyer carousel to page through). Sits in
+		    the slot the Member Spotlight section used to occupy; that
+		    section (below, currently flagged off) will render underneath
+		    this one whenever SHOW_MEMBER_SPOTLIGHT flips back on. */}
+		<section id="community-voices" class="bg-mist py-14 sm:py-16">
+			<div class="container-page grid grid-cols-1 justify-items-center items-center gap-10 lg:gap-12 lg:grid-cols-[minmax(0,440px)_minmax(0,1fr)] lg:justify-items-stretch">
+				<div class="mx-auto w-full max-w-sm lg:mx-0">
+					<h2
+						class="sm:whitespace-nowrap text-center lg:text-left font-display text-[2.25rem] sm:text-[2.75rem] lg:text-[3rem] leading-[1.05] font-medium uppercase text-navy-600"
+						data-reveal="left"
+					>
+						Community Voices
+					</h2>
+					<p class="mt-5 text-center lg:text-left text-lg leading-relaxed text-navy-500" data-reveal="up" data-reveal-delay="180">
+						<Highlight>Hear what RCK means to our community,</Highlight> in their own words.{" "}
+						<Highlight>Watch the video</Highlight> from last year&rsquo;s dinner.
+					</p>
+				</div>
+
+				<div class="min-w-0 w-full mx-auto max-w-2xl" data-reveal="right">
+					<div class="group relative aspect-video w-full overflow-hidden rounded-md ring-1 ring-navy-100 shadow-[0_25px_60px_-18px_rgba(7,23,58,0.35)] bg-navy-700" data-video-spotlight data-video-id="TUAYUbxZCHY">
+						<img
+							data-video-spotlight-thumb
+							src="https://img.youtube.com/vi/TUAYUbxZCHY/hqdefault.jpg"
+							alt="RCK Community Voices – What the RCK Means to Us"
+							loading="lazy"
+							class="h-full w-full object-cover opacity-75 transition-opacity duration-300 group-hover:opacity-55"
+						/>
+						<div data-video-spotlight-scrim class="absolute inset-0 bg-navy-700/30" aria-hidden="true"></div>
+						<button
+							type="button"
+							data-video-spotlight-play
+							aria-label="Play video"
+							class="absolute inset-0 flex items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-500"
+						>
+							<span class="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-gold-500 text-navy-700 shadow-lg transition-transform duration-300 group-hover:scale-110">
+								<svg viewBox="0 0 24 24" class="h-7 w-7 sm:h-8 sm:w-8 translate-x-0.5" fill="currentColor" aria-hidden="true">
+									<path d="M8 5v14l11-7z" />
+								</svg>
+							</span>
+						</button>
+						<button
+							type="button"
+							data-lightbox-open
+							data-lightbox-gallery={JSON.stringify([{ type: "youtube", videoId: "TUAYUbxZCHY" }])}
+							data-lightbox-index="0"
+							data-lightbox-title="RCK Community Voices – What the RCK Means to Us"
+							aria-label="Enlarge video"
+							class="absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-sm bg-navy-700/70 text-white backdrop-blur-sm transition-colors hover:bg-navy-700/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-500"
+						>
+							<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+								<path d="M9 3H3v6M15 3h6v6M3 15v6h6M21 15v6h-6" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+						</button>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		{SHOW_MEMBER_SPOTLIGHT && (
 		<section id="members" class="scroll-mt-24 bg-mist py-16 sm:py-20 md:py-24">
 			<div class="container-page">
 				<div class="text-center mb-10 sm:mb-14" data-reveal="up">
@@ -561,6 +633,7 @@ const panelClass = "pb-8 pt-1 text-navy-500 leading-relaxed";
 				)}
 			</div>
 		</section>
+		)}
 	</main>
 	<Footer />
 </Layout>
