@@ -400,6 +400,7 @@ const isContactActive = pathname === "/contact";
 	const navList = document.querySelector<HTMLUListElement>("[data-nav-list]");
 	const navCta = document.querySelector<HTMLElement>("[data-nav-cta]");
 	const navToggle = document.querySelector<HTMLButtonElement>("[data-mobile-toggle]");
+	const mobileMenuPanel = document.querySelector<HTMLElement>("[data-mobile-menu]");
 	const mobileDonate = document.querySelector<HTMLElement>("[data-mobile-donate]");
 
 	if (navPill && navList && navCta) {
@@ -450,6 +451,14 @@ const isContactActive = pathname === "/contact";
 			// hide it regardless of whether anything actually needs it.
 			const nothingFolded = !anyItemHidden && !ctaHidden;
 			navToggle?.style.setProperty("display", nothingFolded ? "none" : "inline-flex");
+
+			// The dropdown panel itself still carries `xl:hidden` (for the safe
+			// zero-JS default above), which forces display:none at/above that
+			// breakpoint regardless of aria-expanded state. Once folding can
+			// happen at or above `xl` too (see above), the panel needs the same
+			// explicit override as the toggle button, or opening it there just
+			// swaps the hamburger icon to an X with no visible menu underneath.
+			mobileMenuPanel?.style.setProperty("display", nothingFolded ? "none" : "block");
 		};
 
 		layout();
