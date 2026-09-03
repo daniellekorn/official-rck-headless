@@ -1,6 +1,6 @@
 # 037 — `Flyers.subCategory` is now a Tags (multi-value) field
 
-**Status:** implemented
+**Status:** implemented (see 2026-09-03 addendum)
 **Date:** 2026-07-05
 **Author:** claude-session (danielle directing)
 **Related:** [#010](010-flyers-cms-collection.md), [#012](012-learn-page.md), [#017](017-events-and-youth-pages.md)
@@ -51,3 +51,12 @@ filter chips list each tag once.
 ## Implementation Results
 
 Shipped in 8730ce7 (together with #038).
+
+## Addendum (2026-09-03)
+
+Yosef asked to remove the Category filter from `/events` entirely — the
+dropdown, the `?sub=` query param, and the in-memory `subCategory` filtering
+described above no longer exist on that page. `/events` now always renders
+every flyer from `getFlyers("events")`. `uniqueSubCategories()` and the tag
+model are unchanged and still power `/learn`'s multi-select filter; this
+addendum only retires the sentence above about `/events`' `?sub=` behavior.
