@@ -29,10 +29,16 @@ const hasAside = Astro.slots.has("aside");
 	]}
 	data-coverflow-section
 >
+	{/* On the stacked mobile layout, tapping the active card scales it 1.35x from
+	    its own center (see .pos-active:hover/.is-zoomed below), so it grows
+	    upward by 0.175 * its height — the gap has to absorb that (plus ~16px
+	    breathing room) or the zoomed flyer overlaps the aside text above. The
+	    card's own height is clamp(340px, 52vh, 520px) (.coverflow-stage below),
+	    so this mirrors that formula rather than reserving a flat worst-case gap. */}
 	<div
 		class:list={[
 			hasAside &&
-				"container-page grid items-center gap-10 lg:gap-12 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]",
+				"container-page grid items-center gap-[clamp(76px,calc(9.1vh_+_16px),108px)] lg:gap-12 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]",
 		]}
 	>
 		{hasAside && (
@@ -139,7 +145,10 @@ const hasAside = Astro.slots.has("aside");
 		</button>
 	</div>
 
-	<div class="flex justify-center gap-2 mt-6" data-coverflow-dots>
+	<div
+		class:list={["flex justify-center gap-2", hasAside ? "mt-10" : "mt-6"]}
+		data-coverflow-dots
+	>
 		{items.map((_, i) => (
 			<button
 				type="button"
