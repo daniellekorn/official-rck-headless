@@ -35,7 +35,7 @@ jobs:
           echo "week=$(node -p "require('./automation/out/meta.json').weekOf")" >> "$GITHUB_OUTPUT"
           echo "base=$(node -p "require('./automation/out/meta.json').base")" >> "$GITHUB_OUTPUT"
 
-       - name: Check the mail secrets are visible to this run
+      - name: Check the mail secrets are visible to this run
         run: |
           echo "MAIL_USERNAME set: ${{ secrets.MAIL_USERNAME != '' }}"
           echo "MAIL_PASSWORD set: ${{ secrets.MAIL_PASSWORD != '' }}"
