@@ -58,7 +58,7 @@ for (const input of dates) {
 		);
 	}
 
-	// Shabbos schedule (vs hebcal.com Ra'anana: candles = shkiya − 18, havdalah = tzeit 8.5°).
+	// Shabbos schedule (candles = shkiya − 20 per the printed luach, not hebcal's −18 default; havdalah = tzeit 8.5°).
 	const shabbos = getComputedShabbosSchedule(probe);
 	const parshaLabel = shabbos.parsha ? `Parshas ${shabbos.parsha}` : "(Yom Tov reading)";
 	console.log(`  ── Shabbos ${shabbos.dateLabel} · ${parshaLabel}`);
@@ -70,6 +70,6 @@ for (const input of dates) {
 	const zFri = new Zmanim(LOCATION, new Date(Date.UTC(fy, fm - 1, fd, 12)), false);
 	const zSat = new Zmanim(LOCATION, new Date(Date.UTC(fy, fm - 1, fd + 1, 12)), false);
 	console.log(
-		`     raw: erev shkiya ${clock.format(zFri.sunset())}   candles(−18) ${clock.format(zFri.sunsetOffset(-18, true))}   tzeis 8.5° ${clock.format(zSat.tzeit(8.5))}`,
+		`     raw: erev shkiya ${clock.format(zFri.sunset())}   candles(−20) ${clock.format(zFri.sunsetOffset(-20, true))}   tzeis 8.5° ${clock.format(zSat.tzeit(8.5))}`,
 	);
 }

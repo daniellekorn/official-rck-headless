@@ -1,6 +1,6 @@
 # 041 — Shabbos davening times computed from zmanim
 
-**Status:** implemented
+**Status:** implemented; Hadlakas Neiros offset superseded by [#066](066-candle-lighting-20-minutes.md) (18 min → 20 min)
 **Date:** 2026-07-05
 **Author:** claude-session (danielle directing)
 **Related:** [#040](040-computed-davening-times.md), [#003](003-davening-schedule-restructure.md)
@@ -73,3 +73,11 @@ blocks with the parsha-and-date caption.
 ## Implementation Results
 
 Shipped in `2a48ddd` (schedule code, page, verify script, CONTRIBUTING).
+
+## Addendum (2026-09-06)
+
+The "exactly what hebcal publishes" Hadlakas Neiros rule (row above, 18 min)
+is no longer current. Yosef confirmed 20 minutes against the printed luach
+across 10+ weeks of dates and asked for the change; hebcal's 18-min default
+was never actually verified against the luach itself, only against
+hebcal.com's own output. See [#066](066-candle-lighting-20-minutes.md).

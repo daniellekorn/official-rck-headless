@@ -28,7 +28,7 @@ const MAARIV_AFTER_SHKIYA = 18; // minutes after shkiya
 const FIXED_MAARIV = 20 * 60; // the 8:00 pm minyan, dropped once shkiya+18 reaches it
 
 // ── Shabbos rules (confirmed with the rav, July 2026; see #041). ──
-const CANDLES_BEFORE_SHKIYA = 18; // hebcal's Ra'anana candle-lighting offset
+const CANDLES_BEFORE_SHKIYA = 20; // confirmed against the printed luach (10+ weeks), not hebcal's 18-min default; see #066
 const EREV_MINCHA_VS_CANDLES = 10; // before candles on summer clock, after on winter clock
 const SHABBOS_MORNING = [
 	{ label: "Midrash Shiur", minutes: 8 * 60 },
@@ -227,8 +227,9 @@ export function getComputedShabbosSchedule(now: Date = new Date()): ComputedShab
 	const friday = addDays(scheduleSunday(civilDateOf(now)), 5);
 	const shabbos = addDays(friday, 1);
 
-	// Hadlakas neiros exactly as hebcal publishes it for Ra'anana: sea-level
-	// shkiya − 18, rounded to the nearest minute (verified vs hebcal.com).
+	// Hadlakas neiros: sea-level shkiya − 20, rounded to the nearest minute.
+	// Not hebcal's 18-min default — 20 is what the printed luach uses,
+	// confirmed across 10+ weeks of dates (#066).
 	const zFri = new Zmanim(LOCATION, anchor(friday), false);
 	const candles = minutesOf(zFri.sunsetOffset(-CANDLES_BEFORE_SHKIYA, true));
 	// Mincha & Kabbalos Shabbos flips with the clock change: 10 min before
