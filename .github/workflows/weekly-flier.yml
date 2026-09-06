@@ -1,0 +1,61 @@
+name: Weekly davening flier
+
+# Runs every Sunday 03:05 UTC — 06:05 in Israel on summer clock, 05:05 on
+# winter clock. Change the times below if you want it earlier or later.
+on:
+  schedule:
+    - cron: "5 3 * * 0"
+  workflow_dispatch: {}
+
+jobs:
+  flier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      # Playwright is installed here, so nothing in the repo's package.json changes.
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
+      - name: Render the flier
+        run: node automation/render.mjs
+
+      - name: Read week label
+        id: meta
+        run: |
+          echo "week=$(node -p "require('./automation/out/meta.json').weekOf")" >> "$GITHUB_OUTPUT"
+          echo "base=$(node -p "require('./automation/out/meta.json').base")" >> "$GITHUB_OUTPUT"
+
+      - name: Email the flier
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          from: RCK Flier Robot
+          to: ${{ secrets.MAIL_TO }}
+          subject: "Davening flier — week of ${{ steps.meta.outputs.week }}"
+          body: |
+            This week's weekday davening flier is attached: JPG for WhatsApp, PDF for printing.
+
+            Times were computed by the same code that runs rckollel.com/daven.
+            Please glance at them before sending it out.
+          attachments: automation/out/${{ steps.meta.outputs.base }}.jpg,automation/out/${{ steps.meta.outputs.base }}.pdf
+
+      # Keeps a copy in the Actions run for 90 days, in case the email fails.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: daven-flier
+          path: automation/out/*
