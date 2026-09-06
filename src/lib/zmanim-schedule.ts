@@ -85,9 +85,14 @@ export interface ComputedTaanisRow {
 	startTime: string;
 	/** Short weekday the start falls on, e.g. "Mon" — Tisha B'Av's start is the evening before. */
 	startDayLabel: string;
+	/** Whether the start day itself falls in this Sun–Sat week (vs. this row
+	 * being included only because the *end* falls here — a split Tisha B'Av). */
+	startInWeek: boolean;
 	endTime: string;
 	/** Short weekday the end falls on, e.g. "Tue". */
 	endDayLabel: string;
+	/** Whether the end day itself falls in this Sun–Sat week. */
+	endInWeek: boolean;
 }
 
 export interface ComputedWeekdaySchedule {
@@ -286,7 +291,9 @@ function getComputedTaanisRows(sunday: CivilDate): ComputedTaanisRow[] {
 		const isTishaBav = desc.startsWith("Tish'a B'Av");
 		const startDay = isTishaBav ? addDays(day, -1) : day;
 		const endDay = day;
-		if (!inWeek(startDay) && !inWeek(endDay)) continue;
+		const startInWeek = inWeek(startDay);
+		const endInWeek = inWeek(endDay);
+		if (!startInWeek && !endInWeek) continue;
 
 		const zStart = new Zmanim(LOCATION, anchor(startDay), false);
 		const zEnd = new Zmanim(LOCATION, anchor(endDay), false);
@@ -297,8 +304,10 @@ function getComputedTaanisRows(sunday: CivilDate): ComputedTaanisRow[] {
 			name: TAANIS_DISPLAY_NAME[desc],
 			startTime,
 			startDayLabel: DAY_NAMES[dayOfWeek(startDay)],
+			startInWeek,
 			endTime,
 			endDayLabel: DAY_NAMES[dayOfWeek(endDay)],
+			endInWeek,
 		});
 	}
 	return rows;

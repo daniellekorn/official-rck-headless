@@ -70,10 +70,13 @@ years change.
 - `getComputedTaanisRows(sunday)` scans `sunday` through `sunday + 7`
   (enough to catch every start/end day that can land in the displayed
   Sun–Sat week) and returns a `ComputedTaanisRow[]` — `name`, `startTime`,
-  `startDayLabel`, `endTime`, `endDayLabel` — computed via `Zmanim` on the
-  fast's own date (`alotHaShachar()`/`sunset()` for start,
-  `sunsetOffset(19, true)` for end, the same style as the existing Shabbos
-  candle-lighting offset math).
+  `startDayLabel`, `startInWeek`, `endTime`, `endDayLabel`, `endInWeek` —
+  computed via `Zmanim` on the fast's own date (`alotHaShachar()`/`sunset()`
+  for start, `sunsetOffset(19, true)` for end, the same style as the existing
+  Shabbos candle-lighting offset math). `startInWeek`/`endInWeek` say whether
+  each side's own day actually falls in this Sun–Sat week — needed because a
+  split Tisha B'Av still populates both `startTime` and `endTime` even when
+  only one side belongs to the requesting week.
 - `getComputedWeekdaySchedule()`'s return now includes `taanis:
   ComputedTaanisRow[]`, computed from the same `sunday` it already derives —
   so the flyer script (`automation/render.mjs`), which already imports this
@@ -85,16 +88,31 @@ years change.
   service/daySpec/time/notes rendering verbatim, no template changes. Empty
   weeks render exactly as before.
 
-`automation/flier-html.mjs` (confirmed with Yosef before building): the
-Shacharis card's `card()` now takes `{ prefix, overrideBody }` instead of a
-single `override` string — `prefix` renders above the card's body
-unconditionally (the fast banner's spot), `overrideBody` replaces the body
-only (the existing Selichos+Shacharis paired grid). `taanisBlock()` renders a
-gold-bordered box (fast name + "Begins … · Ends …") from the same `taanis`
+`automation/flier-html.mjs` (confirmed with Yosef before building; revised
+per his follow-up below): the Shacharis and Maariv cards' `card()` now takes
+`{ prefix, overrideBody }` instead of a single `override` string — `prefix`
+renders above the card's body unconditionally (the fast banners' spot),
+`overrideBody` replaces the body only (the existing Selichos+Shacharis paired
+grid, Shacharis-only). `taanisEdgeBlock(taanisRows, "start" | "end")` renders
+one gold caption+line (Selichos' own colors) per fast, from the same `taanis`
 array `render.mjs` already destructures off `getComputedWeekdaySchedule()`
 and passes into `buildFlierHtml()` — one call, same data, page and flyer
-cannot drift apart. Empty `taanis` renders `""`, so a normal week's flyer is
+cannot drift apart. Empty result renders `""`, so a normal week's flyer is
 byte-for-byte what it was before this entry.
+
+**Addendum (same day):** Yosef asked for the start and end to appear
+separately — "Start of Fast: {time}" atop the Shacharis card, "End of Fast:
+{time}" atop the Maariv card, both in Selichos' gold — rather than one
+combined line. Splitting the display surfaced a real gap in the original
+design: a row's `startTime`/`endTime` were always both populated even when
+only one side's day actually fell in the requesting week (the split-Tisha-
+B'Av case), so showing both edges unconditionally would have printed next
+week's end time on this week's Maariv card. Fixed by adding `startInWeek`/
+`endInWeek` booleans to `ComputedTaanisRow` (computed in
+`getComputedTaanisRows` from the same `inWeek()` check that already decided
+whether to include the row at all) and gating both the flyer's
+`taanisEdgeBlock` and `/daven`'s Begins/Ends rows on them — each week now
+shows only the half that's actually its own.
 
 ## Trade-offs
 
@@ -107,13 +125,14 @@ strings.
 ## Verification
 
 Checked `getComputedWeekdaySchedule()` against all five fasts across
-2026–2027 (dawn/sunset/end times matched the luach's expected ranges) and
-against a deferred-Tisha-B'Av year (2029, 9 Av on Shabbat) confirming the
-fast appears on both the week ending Saturday and the week starting the
-following Sunday, each with the correct half of the info. Rendered the
-actual flyer (`node automation/render.mjs <date>`) for Tzom Gedaliah (which
-overlaps regular-season Selichos), Asara B'Tevet, Tisha B'Av, and a
-no-fast week, and inspected each JPG: the banner sits cleanly above the
-Selichos/Shacharis content with no overflow, and the no-fast week is
-pixel-identical to before. `npx tsc --noEmit` and `npm run check:design-log`
-both clean.
+2026–2027 (dawn/sunset/end times matched the luach's expected ranges).
+Rendered the actual flyer (`node automation/render.mjs <date>`) for Tzom
+Gedaliah (overlaps regular-season Selichos), Asara B'Tevet, Tisha B'Av, and a
+no-fast week, and inspected each JPG: "Start of Fast" sits cleanly atop
+Shacharis (above the Selichos block when both apply that week), "End of
+Fast" atop Maariv, no overflow, and the no-fast week is pixel-identical to
+before. Rendered both sides of a deferred-Tisha-B'Av split (2029, 9 Av on
+Shabbat): the Saturday-ending week's flyer shows only "Start of Fast" (no
+end block on Maariv), the following week's shows only "End of Fast" (no
+start block on Shacharis) — confirmed the same on `/daven`'s Begins/Ends
+rows. `npx tsc --noEmit` and `npm run check:design-log` both clean.

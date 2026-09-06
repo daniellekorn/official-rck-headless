@@ -45,15 +45,16 @@ const weekday = weekdayGroups.map((group) => {
 
 // Fast days (see design-log #068): shown as their own row above Shacharis,
 // same spot Selichos takes when in season. Computed, not CMS — empty on
-// every week without a fast, so nothing renders (no placeholder).
-if (computed.taanis.length > 0) {
-	weekday.unshift({
-		service: "Taanis",
-		timeGroups: computed.taanis.flatMap((f) => [
-			{ daySpec: `${f.name} — Begins`, items: [{ time: f.startTime, notes: f.startDayLabel }] },
-			{ daySpec: `${f.name} — Ends`, items: [{ time: f.endTime, notes: f.endDayLabel }] },
-		]),
-	});
+// every week without a fast, so nothing renders (no placeholder). Only the
+// half (start/end) whose own day actually falls in this week is shown — a
+// split Tisha B'Av lists "Begins" on one week's page and "Ends" on the
+// other's, never both on the same week.
+const taanisTimeGroups = computed.taanis.flatMap((f) => [
+	...(f.startInWeek ? [{ daySpec: `${f.name} — Begins`, items: [{ time: f.startTime, notes: f.startDayLabel }] }] : []),
+	...(f.endInWeek ? [{ daySpec: `${f.name} — Ends`, items: [{ time: f.endTime, notes: f.endDayLabel }] }] : []),
+]);
+if (taanisTimeGroups.length > 0) {
+	weekday.unshift({ service: "Taanis", timeGroups: taanisTimeGroups });
 }
 
 const hasWeekday = weekday.length > 0;

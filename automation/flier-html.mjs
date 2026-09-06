@@ -103,22 +103,28 @@ function card(service, rows, { prefix = "", overrideBody = "" } = {}) {
 }
 
 /**
- * The fast-day banner: gold-bordered, above everything else in the Shacharis
- * card (the same spot Selichos takes on /daven — see design-log #068).
- * Returns "" when there's no fast this week, in which case card() renders
- * exactly as it always has.
+ * Fast-day banners, in Selichos' own gold — a caption naming the fast plus
+ * one line, above everything else in their card: "Start of Fast" atop
+ * Shacharis, "End of Fast" atop Maariv (see design-log #068). Only the half
+ * whose own day falls in *this* week renders — a split Tisha B'Av shows
+ * "Start of Fast" on one week's flyer and "End of Fast" on the other's,
+ * never both on the same one. Returns "" with nothing to show, in which case
+ * card() renders exactly as it always has.
  */
-function taanisBlock(taanisRows) {
-  if (taanisRows.length === 0) return "";
-  return `
-      <div style="margin-top:12px;padding:14px 18px;border:3px solid #dfb030;border-radius:6px;background:#fbf3e0">${taanisRows
-        .map(
-          (f) => `
+function taanisEdgeBlock(taanisRows, edge) {
+  const rows = taanisRows.filter((f) => (edge === "start" ? f.startInWeek : f.endInWeek));
+  if (rows.length === 0) return "";
+  return rows
+    .map(
+      (f) => `
+      <div style="margin-top:12px;padding-bottom:12px;border-bottom:3px solid #dfb030">
         <div style="${GOLD_CAP}">${f.name}</div>
-        <div style="font-family:'Oswald',sans-serif;font-size:32px;line-height:1.3;font-weight:500;color:#1a1a1a;margin-top:4px">Begins ${f.startTime} <span style="color:#a47915">(${f.startDayLabel})</span> &nbsp;·&nbsp; Ends ${f.endTime} <span style="color:#a47915">(${f.endDayLabel})</span></div>`,
-        )
-        .join("")}
-      </div>`;
+        <div style="font-family:'Oswald',sans-serif;font-size:38px;line-height:1.3;font-weight:500;color:#a47915;margin-top:4px">${
+          edge === "start" ? `Start of Fast: ${f.startTime}` : `End of Fast: ${f.endTime}`
+        }</div>
+      </div>`,
+    )
+    .join("");
 }
 
 /**
@@ -134,11 +140,14 @@ export function buildFlierHtml({ weekOf, rows, taanis = [], photoUrl, logoUrl, q
   const selichosRows = rows.filter((r) => r.service === "Selichos");
   const cards = SERVICES.map((s) => {
     const mine = rows.filter((r) => r.service === s);
-    if (s !== "Shacharis") return card(s, mine);
-    return card(s, mine, {
-      prefix: taanisBlock(taanis),
-      overrideBody: selichosBlock(mine.map((r) => to24(r.time)), selichosRows),
-    });
+    if (s === "Shacharis") {
+      return card(s, mine, {
+        prefix: taanisEdgeBlock(taanis, "start"),
+        overrideBody: selichosBlock(mine.map((r) => to24(r.time)), selichosRows),
+      });
+    }
+    if (s === "Maariv") return card(s, mine, { prefix: taanisEdgeBlock(taanis, "end") });
+    return card(s, mine);
   }).join("");
   return `<!DOCTYPE html>
 <html lang="en">
