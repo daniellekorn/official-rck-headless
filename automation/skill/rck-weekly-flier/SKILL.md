@@ -1,11 +1,11 @@
 ---
 name: rck-weekly-flier
-description: "Creates the RCK weekly davening flier (weekday minyanim) as a printable PDF and a WhatsApp-ready JPG, using the same computed times the website's /daven page shows. Use whenever someone asks for this week's davening flier, the minyan times flyer, the לוח זמנים for the week, a flier for the television screen, or says things like 'make this week's flier', 'I need the times for the screen', 'תעשה את הלוח לשבוע'. Also handles a specific week (a date), and Selichos weeks."
+description: "Renders the RCK weekday davening flier locally from the repo — a 1920x1080 JPG for screens and WhatsApp plus a printable PDF — using the same computed zmanim the website's /daven page shows. Use for any request for this week's davening times, davening schedule, minyan times, minyanim flier, times for the screen, or the לוח זמנים of tefillos, including for a named week or date. This is the ONLY skill that generates the davening times flier. It does not upload anything and does not touch the website — for putting existing flyers, sheets or schedules onto the site, use the website-uploads skill instead."
 ---
 
 # RCK weekly davening flier
 
-**Version:** 2026-09-06b
+**Version:** 2026-09-06c
 
 Report that version if asked.
 
