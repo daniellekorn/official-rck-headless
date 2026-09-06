@@ -60,7 +60,7 @@ async function getDaveningTimes(dayType?: DayType): Promise<DaveningTime[]> {
  * Stable display order for services. Anything not in this list goes to the
  * bottom in the order it first appears.
  */
-const SERVICE_ORDER = ["Shacharis", "Mincha", "Maariv", "Selichos"] as const;
+const SERVICE_ORDER = ["Selichos", "Shacharis", "Mincha", "Maariv"] as const;
 const serviceRank = (s: string) => {
 	const i = SERVICE_ORDER.indexOf(s as (typeof SERVICE_ORDER)[number]);
 	return i === -1 ? SERVICE_ORDER.length : i;

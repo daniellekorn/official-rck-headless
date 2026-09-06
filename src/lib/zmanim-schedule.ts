@@ -27,6 +27,11 @@ const LATE_MINCHA_BEFORE_SHKIYA = 10; // minutes before shkiya
 const MAARIV_AFTER_SHKIYA = 18; // minutes after shkiya
 const FIXED_MAARIV = 20 * 60; // the 8:00 pm minyan, dropped once shkiya+18 reaches it
 
+// ── Selichos (confirmed with Yosef, Sept 2026; see #067). ──
+const SELICHOS_BEFORE = 20; // minutes before each Shacharis, normally
+const SELICHOS_BEFORE_EREV_ROSH_HASHANA = 40;
+const SELICHOS_BEFORE_EREV_YOM_KIPPUR = 15;
+
 // ── Shabbos rules (confirmed with the rav, July 2026; see #041). ──
 const CANDLES_BEFORE_SHKIYA = 20; // confirmed against the printed luach (10+ weeks), not hebcal's 18-min default; see #066
 const EREV_MINCHA_VS_CANDLES = 10; // before candles on summer clock, after on winter clock
@@ -40,7 +45,7 @@ const SHABBOS_MINCHA_BEFORE_CANDLES = 10; // vs erev Shabbos hadlakas neiros
 const TZEIS_ANGLE = 8.5; // hebcal's tzeit hakochavim: sun 8.5° below horizon
 
 export interface ComputedDaveningRow {
-	service: "Shacharis" | "Mincha" | "Maariv";
+	service: "Shacharis" | "Mincha" | "Maariv" | "Selichos";
 	daySpec: string;
 	time: string;
 	notes?: string;
@@ -135,6 +140,90 @@ function isRoshChodesh(c: CivilDate): boolean {
 }
 
 /**
+ * Selichos season (Ashkenazi minhag, see #067):
+ *
+ *  - Leil Selichos is the Motzei Shabbos on/before (1 Tishrei − 4 days) — the
+ *    same rule @hebcal/core uses internally for its "Leil Selichot" event
+ *    (`HDate.dayOnOrBefore(SAT, tishrei1.abs() - 4)`), reproduced here with
+ *    this file's own TZ-safe civil-date arithmetic instead of `HDate.greg()`
+ *    (which resolves via the *runtime's* local timezone, not Jerusalem's —
+ *    unsafe on a server that isn't necessarily set to Asia/Jerusalem).
+ *  - The first weekday morning Selichos is said the second morning after
+ *    that Motzei Shabbos (i.e. the Monday), not the Sunday right after it —
+ *    the Sunday's is a special late-night one, not tied to the regular
+ *    before-Shacharis time (confirmed with Yosef, Sept 2026).
+ *  - It continues every weekday morning through Erev Yom Kippur, skipping
+ *    Rosh Hashana itself (no Selichos on Yom Tov).
+ */
+interface SelichosWindow {
+	erevRoshHashana: CivilDate;
+	roshHashana1: CivilDate;
+	roshHashana2: CivilDate;
+	erevYomKippur: CivilDate;
+	seasonStart: CivilDate;
+}
+
+/** Milliseconds timestamp for a CivilDate — safe for equality/ordering (see `anchor`). */
+const civilTime = (c: CivilDate) => anchor(c).getTime();
+
+function selichosWindowForYear(ref: CivilDate, refAbs: number, hebrewYear: number): SelichosWindow {
+	const tishrei1Abs = new HDate(1, months.TISHREI, hebrewYear).abs();
+	const tishrei1 = addDays(ref, tishrei1Abs - refAbs);
+
+	let leilSelichos = addDays(tishrei1, -4);
+	while (dayOfWeek(leilSelichos) !== 6) leilSelichos = addDays(leilSelichos, -1); // walk back to Saturday
+
+	return {
+		erevRoshHashana: addDays(tishrei1, -1),
+		roshHashana1: tishrei1,
+		roshHashana2: addDays(tishrei1, 1),
+		erevYomKippur: addDays(tishrei1, 8),
+		seasonStart: addDays(leilSelichos, 2), // the Monday after Leil Selichos, not the Sunday
+	};
+}
+
+/** Both candidate Rosh Hashanas (the one that started this Hebrew year, and next year's) — at
+ * most one is ever close enough to `ref` to matter; checking both avoids picking the wrong one
+ * near the Rosh Hashana boundary itself. */
+function selichosWindows(ref: CivilDate): SelichosWindow[] {
+	const refAbs = new HDate(anchor(ref)).abs();
+	const hebrewYear = new HDate(anchor(ref)).getFullYear();
+	return [hebrewYear, hebrewYear + 1].map((y) => selichosWindowForYear(ref, refAbs, y));
+}
+
+interface SelichosDayInfo {
+	offset: number;
+	/** Set only for the erev Rosh Hashana / erev Yom Kippur one-off exceptions. */
+	label?: string;
+}
+
+function selichosInfoFor(day: CivilDate, windows: SelichosWindow[]): SelichosDayInfo | null {
+	for (const w of windows) {
+		if (civilTime(day) === civilTime(w.erevRoshHashana))
+			return { offset: SELICHOS_BEFORE_EREV_ROSH_HASHANA, label: "Erev Rosh Hashana" };
+		if (civilTime(day) === civilTime(w.erevYomKippur))
+			return { offset: SELICHOS_BEFORE_EREV_YOM_KIPPUR, label: "Erev Yom Kippur" };
+		if (civilTime(day) === civilTime(w.roshHashana1) || civilTime(day) === civilTime(w.roshHashana2)) return null; // no Selichos on Yom Tov
+		if (civilTime(day) >= civilTime(w.seasonStart) && civilTime(day) <= civilTime(w.erevYomKippur))
+			return { offset: SELICHOS_BEFORE };
+	}
+	return null;
+}
+
+/** Joins day-of-week indices (0=Sun) into "Sun – Wed" style ranges, e.g. [1,2,3,4] → "Mon – Thu". */
+function formatDaySpec(indices: number[]): string {
+	const ranges: number[][] = [];
+	for (const i of indices) {
+		const last = ranges[ranges.length - 1];
+		if (last && i === last[last.length - 1] + 1) last.push(i);
+		else ranges.push([i]);
+	}
+	return ranges
+		.map((r) => (r.length > 1 ? `${DAY_NAMES[r[0]]} – ${DAY_NAMES[r[r.length - 1]]}` : DAY_NAMES[r[0]]))
+		.join(", ");
+}
+
+/**
  * Compute the weekday minyan schedule for the week containing `now`
  * (Friday/Shabbos roll to the coming week). Pure and deterministic.
  */
@@ -170,6 +259,35 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 	if (roshChodeshDays.length > 0) {
 		const spec = `Rosh Chodesh (${roshChodeshDays.join(" & ")})`;
 		for (const t of SHACHARIS_ROSH_CHODESH) rows.push({ service: "Shacharis", daySpec: spec, time: fmtTime(t) });
+	}
+
+	// Selichos (see #067): a regular bucket at Shacharis − 20 for whichever
+	// Sun–Fri days of this week fall in season, plus one-off rows for erev
+	// Rosh Hashana / erev Yom Kippur if either lands in this week. Assumes no
+	// in-season day is also Rosh Chodesh (only Rosh Chodesh Tishrei — Rosh
+	// Hashana itself — falls anywhere near the season, and it's excluded).
+	// Rows are collected keyed by their earliest day-of-week, then pushed in
+	// that order — a later-in-the-week special day (e.g. Fri) must render
+	// after an earlier regular bucket (e.g. Mon–Thu), not before it.
+	const selichosWindowsThisWeek = selichosWindows(sunday);
+	const selichosRegularDays: number[] = [];
+	const selichosBuckets: { sortKey: number; daySpec: string; offset: number }[] = [];
+	for (let i = 0; i <= 5; i++) {
+		const day = addDays(sunday, i);
+		const info = selichosInfoFor(day, selichosWindowsThisWeek);
+		if (!info) continue;
+		if (info.label) {
+			selichosBuckets.push({ sortKey: i, daySpec: `${info.label} (${DAY_NAMES[i]})`, offset: info.offset });
+		} else {
+			selichosRegularDays.push(i);
+		}
+	}
+	if (selichosRegularDays.length > 0) {
+		selichosBuckets.push({ sortKey: selichosRegularDays[0], daySpec: formatDaySpec(selichosRegularDays), offset: SELICHOS_BEFORE });
+	}
+	selichosBuckets.sort((a, b) => a.sortKey - b.sortKey);
+	for (const bucket of selichosBuckets) {
+		for (const t of SHACHARIS) rows.push({ service: "Selichos", daySpec: bucket.daySpec, time: fmtTime(t - bucket.offset) });
 	}
 
 	rows.push({ service: "Mincha", daySpec: "Sun – Thu", time: fmtTime(earlyMincha) });

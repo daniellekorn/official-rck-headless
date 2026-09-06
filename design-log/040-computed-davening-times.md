@@ -1,9 +1,9 @@
 # 040 — Weekday davening times computed from zmanim
 
-**Status:** implemented
+**Status:** implemented; Selichos escape hatch superseded by [#067](067-computed-selichos-times.md)
 **Date:** 2026-07-05
 **Author:** claude-session (danielle directing)
-**Related:** [#003](003-davening-schedule-dayspec.md), [#008](008-davening-flat-layout.md), [#020](020-homepage-stale-cache.md)
+**Related:** [#003](003-davening-schedule-dayspec.md), [#008](008-davening-flat-layout.md), [#020](020-homepage-stale-cache.md), [#067](067-computed-selichos-times.md)
 
 ## Problem
 
@@ -63,7 +63,8 @@ then).
   tool to reach for if a flyer ever disagrees with the site.
 - **v1 limitations:** fast days, erev Yom Tov, chol hamoed, and Chanukah are
   *not* special-cased — the office covers those via CMS extra rows or the
-  flyer. CMS rows can add lines but cannot remove computed ones.
+  flyer. CMS rows can add lines but cannot remove computed ones. (Selichos
+  is no longer in this list — computed as of #067.)
 - Rule changes (e.g. the 12:50 floor, the 6:10 cutoff) are one-line constant
   edits at the top of `zmanim-schedule.ts` — a code change, not a CMS edit.
 
