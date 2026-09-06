@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Runs the flier every Sunday at 06:30 local time.
+  Install:  cp automation/com.rckollel.weeklyflier.plist ~/Library/LaunchAgents/
+            launchctl load ~/Library/LaunchAgents/com.rckollel.weeklyflier.plist
+  Test now: launchctl start com.rckollel.weeklyflier
+  Logs:     /tmp/rck-flier.log  and  /tmp/rck-flier.err
+
+  Replace YOURNAME with your macOS short username (run `whoami`).
+  If the Mac is asleep at 06:30, launchd runs it as soon as it wakes.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.rckollel.weeklyflier</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/Yosef/official-rck-headless/automation/weekly-flier.sh</string>
+  </array>
+
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Weekday</key><integer>0</integer>
+    <key>Hour</key><integer>6</integer>
+    <key>Minute</key><integer>30</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/rck-flier.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/rck-flier.err</string>
+</dict>
+</plist>

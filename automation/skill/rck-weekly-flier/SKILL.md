@@ -1,0 +1,76 @@
+---
+name: rck-weekly-flier
+description: "Creates the RCK weekly davening flier (weekday minyanim) as a printable PDF and a WhatsApp-ready JPG, using the same computed times the website's /daven page shows. Use whenever someone asks for this week's davening flier, the minyan times flyer, the לוח זמנים for the week, a flier for the television screen, or says things like 'make this week's flier', 'I need the times for the screen', 'תעשה את הלוח לשבוע'. Also handles a specific week (a date), and Selichos weeks."
+---
+
+# RCK weekly davening flier
+
+**Version:** 2026-09-06a
+
+Report that version if asked.
+
+Produces two files for the coming week: a **JPG** (television screen, WhatsApp) and a **PDF** (printing). Both are drawn from `getComputedWeekdaySchedule()` in `src/lib/zmanim-schedule.ts` — the same function `rckollel.com/daven` calls. **Never type a zman in by hand and never compute one yourself.** If a time looks wrong, the website is the authority and the fix belongs in that module.
+
+## Rules
+
+1. **Run it, don't rebuild it.** The flier is `automation/render.mjs`. No new script, no editing the design to "fix" a time.
+2. **One question at most.** Only ask which week if the person named a date you can't resolve. Otherwise: current week.
+3. **Show, then hand over.** Tell them the times you got, then where the files are.
+4. **A time that disagrees with /daven is a stop.** Say so; don't ship the flier. That's Danielle's.
+5. **Never publish it.** Not to Wix, not to the site, not as a repo page. These files are for print, screen and WhatsApp only.
+
+## Do it
+
+From the repo root:
+
+```bash
+node automation/render.mjs              # the current week
+node automation/render.mjs 2026-09-13   # the week containing that date
+```
+
+It prints the week label and every row, then writes both files to `automation/out/`:
+
+```
+automation/out/daven-flier-2026-09-13.jpg
+automation/out/daven-flier-2026-09-13.pdf
+```
+
+Copy them where the person can find them — `~/Downloads` unless they say otherwise:
+
+```bash
+cp automation/out/daven-flier-*.jpg automation/out/daven-flier-*.pdf ~/Downloads/
+```
+
+Then report the times you saw, in one block, and the two filenames.
+
+## First run on a new machine
+
+`render.mjs` needs Playwright, which is not in `package.json`:
+
+```bash
+npm install --save-dev playwright
+npx playwright install chromium
+```
+
+Node must be **22.18 or newer** (the script imports the site's TypeScript directly). `node -v` to check. Everything else comes from `npm ci`.
+
+## Selichos and other special weeks
+
+`automation/special.json` is optional. When it exists, its values are drawn on the flier:
+
+```json
+{ "selichos": "6:20 AM" }
+```
+
+Selichos is **20 minutes before each Shacharis**, and **40 minutes before on Erev Rosh Hashana**. Those are the rav's rules, not a guess — but the site does not compute Selichos yet, so the value in this file is typed by a person. **Confirm the time with whoever asked before writing the file**, and delete the file when the season is over, or the flier will keep printing it.
+
+## When it goes wrong
+
+| What you see | What it means |
+|---|---|
+| `Cannot find package 'playwright'` | first run on this machine — see above |
+| `Unknown file extension ".ts"` | Node is older than 22.18 |
+| Times differ from /daven | stop, and tell Danielle — never correct the flier |
+| A row missing (no 18:00, no 20:00) | correct. The rules drop those minyanim in some weeks |
+
+The design lives in `automation/flier-html.mjs` as plain inline-styled HTML at 1920×1080. Changes to how it *looks* are a design job, not this skill's.

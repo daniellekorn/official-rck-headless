@@ -23,16 +23,58 @@ function groupByDaySpec(rows) {
   return out;
 }
 
-function selichosLine(time) {
-  if (!time) return "";
-  return `
-      <div style="display:flex;align-items:baseline;gap:18px;margin-top:16px;padding-bottom:16px;border-bottom:3px solid #dfb030">
-        <div style="font-family:'Oswald',sans-serif;font-size:40px;line-height:1;font-weight:500;color:#a47915">Selichos</div>
-        <div style="font-family:'Oswald',sans-serif;font-size:56px;line-height:1;font-weight:500;color:#1a1a1a">${/[AP]M/i.test(time) ? to24(time) : time}</div>
-      </div>`;
+/** "07:00" minus n minutes → "06:40" */
+function minusMinutes(hhmm, n) {
+  const [h, m] = hhmm.split(":").map(Number);
+  const t = (h * 60 + m - n + 1440) % 1440;
+  return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
 }
 
-function card(service, rows, extra = "") {
+const GOLD_CAP =
+  "font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;font-size:17px;color:#a47915;line-height:1.3";
+
+/**
+ * The Shacharis card's Selichos treatment: a gold column of Selichos times to
+ * the left of each Shacharis time, derived from the offset rather than typed.
+ * Returns "" when Selichos is off, in which case card() renders normally.
+ */
+function shacharisWithSelichos(rows, sel) {
+  if (!sel || !sel.on) return "";
+  const offset = sel.offsetMin ?? 20;
+  const times = rows.map((r) => to24(r.time));
+  const daySpec = sel.daySpec ?? "Sun – Thu";
+  const pairs = times
+    .map(
+      (t) => `
+          <div style="font-family:'Oswald',sans-serif;font-size:60px;line-height:1.06;font-weight:500;color:#a47915;border-right:3px solid #dfb030;padding-right:26px">${minusMinutes(t, offset)}</div>
+          <div style="font-family:'Oswald',sans-serif;font-size:92px;line-height:1.06;font-weight:500;color:#1a1a1a">${t}</div>`,
+    )
+    .join("");
+
+  // Erev Rosh Hashana runs at a wider offset, on its own line below.
+  const erevRH = sel.erevRHOffsetMin
+    ? `
+        <div style="margin-top:18px;padding-top:14px;border-top:3px solid #dfb030">
+          <div style="${GOLD_CAP}">Selichos · Erev Rosh Hashana (Friday)</div>
+          <div style="font-family:'Oswald',sans-serif;font-size:52px;line-height:1.06;font-weight:500;color:#a47915;margin-top:8px">${times.map((t) => minusMinutes(t, sel.erevRHOffsetMin)).join(" | ")}</div>
+        </div>`
+    : "";
+
+  return `
+      <div style="font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;font-size:22px;color:#a47915;margin-top:12px">${rows[0] ? rows[0].daySpec : "Sunday – Friday"}</div>
+      <div style="display:grid;grid-template-columns:auto 1fr;column-gap:26px;row-gap:8px;align-items:baseline;margin-top:18px">
+        <div style="${GOLD_CAP};grid-column:1">Selichos<br />${daySpec}</div>
+        <div style="grid-column:2"></div>${pairs}
+      </div>${erevRH}`;
+}
+
+function card(service, rows, override = "") {
+  if (override) {
+    return `
+    <div style="background:#f7f5f0;border-top:6px solid #102a56;box-sizing:border-box;padding:28px 34px 24px;display:flex;flex-direction:column">
+      <div style="font-family:'Oswald',sans-serif;font-size:68px;line-height:1;font-weight:500;color:#102a56">${service}</div>${override}
+    </div>`;
+  }
   const groups = groupByDaySpec(rows);
   const total = rows.length;
   const size = total <= 2 ? 104 : total === 3 ? 96 : 74;
@@ -52,7 +94,7 @@ function card(service, rows, extra = "") {
   return `
     <div style="background:#f7f5f0;border-top:6px solid #102a56;box-sizing:border-box;padding:28px 34px 24px;display:flex;flex-direction:column">
       <div style="font-family:'Oswald',sans-serif;font-size:68px;line-height:1;font-weight:500;color:#102a56">${service}</div>
-      ${extra}${blocks}
+      ${blocks}
     </div>`;
 }
 
@@ -63,12 +105,16 @@ function card(service, rows, extra = "") {
  * @param {string} o.photoUrl   file:// or data: URL for the beis medrash photo
  * @param {string} o.logoUrl    file:// or data: URL for logo-vertical-light.png
  * @param {string} o.qrUrl      file:// or data: URL for the QR png
- * @param {string} [o.selichos]  optional Selichos time ("6:20 AM" or "06:20"); omit for none
+ * @param {object} [o.selichos] optional Selichos block, e.g.
+ *   { on: true, offsetMin: 20, erevRHOffsetMin: 40, daySpec: "Sun – Thu" }.
+ *   Times are DERIVED from the Shacharis times by subtracting offsetMin — the
+ *   rav's rule — so nothing is typed by hand. Omit or {on:false} for none.
  */
-export function buildFlierHtml({ weekOf, rows, photoUrl, logoUrl, qrUrl, selichos = "" }) {
-  const cards = SERVICES.map((s) =>
-    card(s, rows.filter((r) => r.service === s), s === "Shacharis" ? selichosLine(selichos) : ""),
-  ).join("");
+export function buildFlierHtml({ weekOf, rows, photoUrl, logoUrl, qrUrl, selichos = null }) {
+  const cards = SERVICES.map((s) => {
+    const mine = rows.filter((r) => r.service === s);
+    return card(s, mine, s === "Shacharis" ? shacharisWithSelichos(mine, selichos) : "");
+  }).join("");
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
