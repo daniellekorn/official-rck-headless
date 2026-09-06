@@ -35,6 +35,12 @@ jobs:
           echo "week=$(node -p "require('./automation/out/meta.json').weekOf")" >> "$GITHUB_OUTPUT"
           echo "base=$(node -p "require('./automation/out/meta.json').base")" >> "$GITHUB_OUTPUT"
 
+       - name: Check the mail secrets are visible to this run
+        run: |
+          echo "MAIL_USERNAME set: ${{ secrets.MAIL_USERNAME != '' }}"
+          echo "MAIL_PASSWORD set: ${{ secrets.MAIL_PASSWORD != '' }}"
+          echo "MAIL_TO set: ${{ secrets.MAIL_TO != '' }}"
+
       - name: Email the flier
         uses: dawidd6/action-send-mail@v3
         with:
@@ -43,7 +49,7 @@ jobs:
           secure: true
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          from: RCK Flier Robot
+          from: RCK Flier Robot <${{ secrets.MAIL_USERNAME }}>
           to: ${{ secrets.MAIL_TO }}
           subject: "Davening flier — week of ${{ steps.meta.outputs.week }}"
           body: |
