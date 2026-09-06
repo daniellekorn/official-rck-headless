@@ -43,6 +43,19 @@ const weekday = weekdayGroups.map((group) => {
 	};
 });
 
+// Fast days (see design-log #068): shown as their own row above Shacharis,
+// same spot Selichos takes when in season. Computed, not CMS — empty on
+// every week without a fast, so nothing renders (no placeholder).
+if (computed.taanis.length > 0) {
+	weekday.unshift({
+		service: "Taanis",
+		timeGroups: computed.taanis.flatMap((f) => [
+			{ daySpec: `${f.name} — Begins`, items: [{ time: f.startTime, notes: f.startDayLabel }] },
+			{ daySpec: `${f.name} — Ends`, items: [{ time: f.endTime, notes: f.endDayLabel }] },
+		]),
+	});
+}
+
 const hasWeekday = weekday.length > 0;
 
 const scheduleFlyers = await getFlyers("schedules", "daily");

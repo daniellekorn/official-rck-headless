@@ -28,13 +28,15 @@ if (arg && !/^\d{4}-\d{2}-\d{2}$/.test(arg)) {
 }
 const probe = arg ? new Date(`${arg}T12:00:00Z`) : new Date();
 
-const { weekOf, weekStartISO, rows } = getComputedWeekdaySchedule(probe);
+const { weekOf, weekStartISO, rows, taanis } = getComputedWeekdaySchedule(probe);
 console.log(`Week of ${weekOf} (${weekStartISO})`);
 for (const r of rows) console.log(`  ${r.service.padEnd(10)} ${r.daySpec.padEnd(24)} ${r.time}`);
+for (const f of taanis) console.log(`  Taanis     ${f.name}: ${f.startTime} (${f.startDayLabel}) - ${f.endTime} (${f.endDayLabel})`);
 
 const html = buildFlierHtml({
   weekOf,
   rows,
+  taanis,
   photoUrl: pathToFileURL(path.join(here, "assets", "beis-medrash.png")).href,
   logoUrl: pathToFileURL(path.join(repo, "public", "logo-vertical-light.png")).href,
   qrUrl: pathToFileURL(path.join(here, "assets", "qr-rckollel.png")).href,

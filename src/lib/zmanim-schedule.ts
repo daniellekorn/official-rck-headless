@@ -1,4 +1,4 @@
-import { GeoLocation, HDate, Locale, Sedra, Zmanim, months } from "@hebcal/core";
+import { GeoLocation, HDate, Locale, Sedra, Zmanim, getHolidaysOnDate, months } from "@hebcal/core";
 
 /**
  * Computed weekday davening schedule (design-log #040).
@@ -32,6 +32,34 @@ const SELICHOS_BEFORE = 20; // minutes before each Shacharis, normally
 const SELICHOS_BEFORE_EREV_ROSH_HASHANA = 40;
 const SELICHOS_BEFORE_EREV_YOM_KIPPUR = 15;
 
+// ── Fast days (confirmed against the printed luach, Sept 2026; see #068). ──
+// Start (Tzom Gedaliah, Asara B'Tevet, Ta'anit Esther, 17 Tammuz): alot
+// hashachar, sun 16.1° below the horizon — @hebcal/core's Zmanim.alotHaShachar()
+// hardcodes this angle. Confirmed against the luach to within 1 minute across
+// all four; a flat 72- or 90-minute offset was off by 4–14 minutes.
+// Start (Tisha B'Av only): plain sunset the evening before, no offset.
+// End (all five, no exceptions): sunset + 19 minutes, confirmed to zero
+// minutes of error. This is its own constant — do not reuse TZEIS_ANGLE
+// (8.5°/~37 min), which is for Shabbos motzash and is measurably different.
+const TAANIS_END_AFTER_SHKIYA = 19;
+
+/** Hebcal's own English event descriptions for the five communal fasts this
+ * page shows (stable across years/locales; see `Event.getDesc()`). Excludes
+ * Yom Kippur (also flagged MAJOR_FAST) and Ta'anit Bechorot (also flagged
+ * MINOR_FAST, firstborns only, not a communal fast on this page). Tisha B'Av
+ * has two descs: plain, and "(observed)" when 9 Av itself is Shabbat and the
+ * fast is deferred to Sunday — verified against 200 years of Hebcal's own
+ * output that it's the only one of the five with a deferred-variant desc
+ * (Tzom Gedaliah/Tammuz keep their plain desc even deferred to Sunday). */
+const TAANIS_DISPLAY_NAME: Record<string, string> = {
+	"Tzom Gedaliah": "Tzom Gedaliah",
+	"Asara B'Tevet": "Asara B'Tevet",
+	"Ta'anit Esther": "Ta'anit Esther",
+	"Tzom Tammuz": "17 Tammuz",
+	"Tish'a B'Av": "Tisha B'Av",
+	"Tish'a B'Av (observed)": "Tisha B'Av",
+};
+
 // ── Shabbos rules (confirmed with the rav, July 2026; see #041). ──
 const CANDLES_BEFORE_SHKIYA = 20; // confirmed against the printed luach (10+ weeks), not hebcal's 18-min default; see #066
 const EREV_MINCHA_VS_CANDLES = 10; // before candles on summer clock, after on winter clock
@@ -51,12 +79,25 @@ export interface ComputedDaveningRow {
 	notes?: string;
 }
 
+export interface ComputedTaanisRow {
+	/** "Tzom Gedaliah", "Asara B'Tevet", "Ta'anit Esther", "17 Tammuz", "Tisha B'Av". */
+	name: string;
+	startTime: string;
+	/** Short weekday the start falls on, e.g. "Mon" — Tisha B'Av's start is the evening before. */
+	startDayLabel: string;
+	endTime: string;
+	/** Short weekday the end falls on, e.g. "Tue". */
+	endDayLabel: string;
+}
+
 export interface ComputedWeekdaySchedule {
 	/** Display label for the Sunday the week starts on, e.g. "July 5". */
 	weekOf: string;
 	/** ISO date (Jerusalem) of that Sunday, e.g. "2026-07-05" — for tooling. */
 	weekStartISO: string;
 	rows: ComputedDaveningRow[];
+	/** Fasts whose start or end falls in this Sun–Sat week; usually empty. */
+	taanis: ComputedTaanisRow[];
 }
 
 /** Civil calendar date in Asia/Jerusalem (month is 1–12). */
@@ -210,6 +251,59 @@ function selichosInfoFor(day: CivilDate, windows: SelichosWindow[]): SelichosDay
 	return null;
 }
 
+/** The one of the five communal fasts (see `TAANIS_DISPLAY_NAME`) landing on
+ * this civil day per Hebcal's own flags/deferral rules, or null. Reads via
+ * this file's TZ-safe `anchor()`, never `Event.getDate().greg()` (unsafe on a
+ * server not necessarily set to Asia/Jerusalem — same caveat as Selichos). */
+function taanisOnDay(day: CivilDate): string | null {
+	const hd = new HDate(anchor(day));
+	for (const ev of getHolidaysOnDate(hd) ?? []) {
+		const desc = ev.getDesc();
+		if (desc in TAANIS_DISPLAY_NAME) return desc;
+	}
+	return null;
+}
+
+/**
+ * Fasts whose start or end time falls within the Sun–Sat week starting
+ * `sunday`. Most fasts start and end the same civil day, so normally match
+ * one week. Tisha B'Av starts at sunset the evening before and ends the
+ * following night at shkiya+19 — if those two evenings land in different
+ * weeks, this returns it for both weeks' calls (never picks just one; see
+ * #068). Scans `sunday` through `sunday + 7` inclusive: enough to catch
+ * every case where a fast's start or end day falls in `[sunday, sunday+6]`.
+ */
+function getComputedTaanisRows(sunday: CivilDate): ComputedTaanisRow[] {
+	const weekEnd = addDays(sunday, 6);
+	const inWeek = (d: CivilDate) => civilTime(d) >= civilTime(sunday) && civilTime(d) <= civilTime(weekEnd);
+
+	const rows: ComputedTaanisRow[] = [];
+	for (let i = 0; i <= 7; i++) {
+		const day = addDays(sunday, i);
+		const desc = taanisOnDay(day);
+		if (!desc) continue;
+
+		const isTishaBav = desc.startsWith("Tish'a B'Av");
+		const startDay = isTishaBav ? addDays(day, -1) : day;
+		const endDay = day;
+		if (!inWeek(startDay) && !inWeek(endDay)) continue;
+
+		const zStart = new Zmanim(LOCATION, anchor(startDay), false);
+		const zEnd = new Zmanim(LOCATION, anchor(endDay), false);
+		const startTime = fmtTime(minutesOf(isTishaBav ? zStart.sunset() : zStart.alotHaShachar()));
+		const endTime = fmtTime(minutesOf(zEnd.sunsetOffset(TAANIS_END_AFTER_SHKIYA, true)));
+
+		rows.push({
+			name: TAANIS_DISPLAY_NAME[desc],
+			startTime,
+			startDayLabel: DAY_NAMES[dayOfWeek(startDay)],
+			endTime,
+			endDayLabel: DAY_NAMES[dayOfWeek(endDay)],
+		});
+	}
+	return rows;
+}
+
 /** Joins day-of-week indices (0=Sun) into "Sun – Wed" style ranges, e.g. [1,2,3,4] → "Mon – Thu". */
 function formatDaySpec(indices: number[]): string {
 	const ranges: number[][] = [];
@@ -301,7 +395,7 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 	const pad = (n: number) => String(n).padStart(2, "0");
 	const weekStartISO = `${sunday.y}-${pad(sunday.m)}-${pad(sunday.d)}`;
 
-	return { weekOf, weekStartISO, rows };
+	return { weekOf, weekStartISO, rows, taanis: getComputedTaanisRows(sunday) };
 }
 
 // ─────────────────────────── Shabbos ───────────────────────────

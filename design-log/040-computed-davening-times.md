@@ -1,9 +1,9 @@
 # 040 — Weekday davening times computed from zmanim
 
-**Status:** implemented; Selichos escape hatch superseded by [#067](067-computed-selichos-times.md)
+**Status:** implemented; Selichos escape hatch superseded by [#067](067-computed-selichos-times.md); fast-day escape hatch superseded by [#068](068-computed-taanis-times.md)
 **Date:** 2026-07-05
 **Author:** claude-session (danielle directing)
-**Related:** [#003](003-davening-schedule-dayspec.md), [#008](008-davening-flat-layout.md), [#020](020-homepage-stale-cache.md), [#067](067-computed-selichos-times.md)
+**Related:** [#003](003-davening-schedule-dayspec.md), [#008](008-davening-flat-layout.md), [#020](020-homepage-stale-cache.md), [#067](067-computed-selichos-times.md), [#068](068-computed-taanis-times.md)
 
 ## Problem
 
@@ -61,10 +61,11 @@ then).
 - `scripts/verify-zmanim.mjs` (Node ≥22.18) prints any week's schedule plus
   the raw daily zmanim for line-by-line comparison with myzmanim — the first
   tool to reach for if a flyer ever disagrees with the site.
-- **v1 limitations:** fast days, erev Yom Tov, chol hamoed, and Chanukah are
-  *not* special-cased — the office covers those via CMS extra rows or the
-  flyer. CMS rows can add lines but cannot remove computed ones. (Selichos
-  is no longer in this list — computed as of #067.)
+- **v1 limitations:** erev Yom Tov, chol hamoed, and Chanukah are *not*
+  special-cased — the office covers those via CMS extra rows or the flyer.
+  CMS rows can add lines but cannot remove computed ones. (Selichos and the
+  five communal fast days are no longer in this list — computed as of #067
+  and #068 respectively.)
 - Rule changes (e.g. the 12:50 floor, the 6:10 cutoff) are one-line constant
   edits at the top of `zmanim-schedule.ts` — a code change, not a CMS edit.
 

@@ -289,11 +289,12 @@ automatically, newest first.
 
 #### `DaveningTimes`
 
-**The regular weekday minyanim, the Shabbos schedule, and Selichos are all
-computed in code, not entered here** (see
+**The regular weekday minyanim, the Shabbos schedule, Selichos, and the five
+communal fast days are all computed in code, not entered here** (see
 [design-log/040](design-log/040-computed-davening-times.md),
-[design-log/041](design-log/041-computed-shabbos-times.md), and
-[design-log/067](design-log/067-computed-selichos-times.md)). The site
+[design-log/041](design-log/041-computed-shabbos-times.md),
+[design-log/067](design-log/067-computed-selichos-times.md), and
+[design-log/068](design-log/068-computed-taanis-times.md)). The site
 calculates weekday Shacharis / Mincha / Maariv each week from Ra'anana zmanim
 using the rav's rules (mincha gedolah with a 12:50 floor, shkiya − 10, shkiya
 + 18, the seasonal 6:00 pm and 8:00 pm minyanim, Rosh Chodesh 7:00 & 8:05),
@@ -303,7 +304,13 @@ Mincha, Maariv at tzeis) is likewise computed per week and rolls to the next
 Shabbos on Motzei Shabbos. Selichos is computed from the Hebrew calendar each
 Elul/Aseres Yemei Teshuva: 20 minutes before each Shacharis, 40 minutes
 before on erev Rosh Hashana, 15 minutes before on erev Yom Kippur, with no
-row outside that season. **Do not re-add any of those times as rows — they
+row outside that season. Tzom Gedaliah, Asara B'Tevet, Ta'anit Esther, 17
+Tammuz, and Tisha B'Av are detected from Hebcal's own fast-day flags (never
+hardcoded dates) and their start/end times computed from zmanim — 16.1°
+alot hashachar for the first four, plain sunset the evening before for Tisha
+B'Av, and shkiya + 19 minutes to end all five. They show as their own row on
+`/daven` only during a week one actually falls in. **Do not re-add any of
+those times as rows — they
 would show up twice**, including any lingering seasonal Selichos row from a
 prior year — deactivate it once #067 ships. If a computed time ever
 disagrees with the flyer, run `node scripts/verify-zmanim.mjs` and compare

@@ -65,18 +65,12 @@ function selichosBlock(shacharisTimes, selichosRows) {
       </div>${extra}`;
 }
 
-function card(service, rows, override = "") {
-  if (override) {
-    return `
-    <div style="background:#f7f5f0;border-top:6px solid #102a56;box-sizing:border-box;padding:28px 34px 24px;display:flex;flex-direction:column">
-      <div style="font-family:'Oswald',sans-serif;font-size:68px;line-height:1;font-weight:500;color:#102a56">${service}</div>${override}
-    </div>`;
-  }
+function defaultBody(rows) {
   const groups = groupByDaySpec(rows);
   const total = rows.length;
   const size = total <= 2 ? 104 : total === 3 ? 96 : 74;
   const gap = total >= 4 ? 4 : 10;
-  const blocks = groups
+  return groups
     .map(
       (g, i) => `
       <div style="font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;font-size:22px;color:#a47915;margin-top:${i === 0 ? 12 : 20}px">${g.daySpec}</div>
@@ -88,27 +82,63 @@ function card(service, rows, override = "") {
         .join("")}</div>`,
     )
     .join("");
+}
+
+/**
+ * @param {string} service
+ * @param {Array} rows
+ * @param {object} [opts]
+ * @param {string} [opts.prefix] Rendered above the body regardless of override — the
+ *   Taanis banner's spot, always on top of whatever else the card shows that week.
+ * @param {string} [opts.overrideBody] Replaces the default groupByDaySpec rendering
+ *   (the Selichos+Shacharis paired grid) when non-empty.
+ */
+function card(service, rows, { prefix = "", overrideBody = "" } = {}) {
+  const body = overrideBody || defaultBody(rows);
   return `
     <div style="background:#f7f5f0;border-top:6px solid #102a56;box-sizing:border-box;padding:28px 34px 24px;display:flex;flex-direction:column">
       <div style="font-family:'Oswald',sans-serif;font-size:68px;line-height:1;font-weight:500;color:#102a56">${service}</div>
-      ${blocks}
+      ${prefix}${body}
     </div>`;
+}
+
+/**
+ * The fast-day banner: gold-bordered, above everything else in the Shacharis
+ * card (the same spot Selichos takes on /daven — see design-log #068).
+ * Returns "" when there's no fast this week, in which case card() renders
+ * exactly as it always has.
+ */
+function taanisBlock(taanisRows) {
+  if (taanisRows.length === 0) return "";
+  return `
+      <div style="margin-top:12px;padding:14px 18px;border:3px solid #dfb030;border-radius:6px;background:#fbf3e0">${taanisRows
+        .map(
+          (f) => `
+        <div style="${GOLD_CAP}">${f.name}</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:32px;line-height:1.3;font-weight:500;color:#1a1a1a;margin-top:4px">Begins ${f.startTime} <span style="color:#a47915">(${f.startDayLabel})</span> &nbsp;·&nbsp; Ends ${f.endTime} <span style="color:#a47915">(${f.endDayLabel})</span></div>`,
+        )
+        .join("")}
+      </div>`;
 }
 
 /**
  * @param {object} o
  * @param {string} o.weekOf     e.g. "September 13"
  * @param {Array}  o.rows       ComputedDaveningRow[] from getComputedWeekdaySchedule
+ * @param {Array}  [o.taanis]   ComputedTaanisRow[] from the same getComputedWeekdaySchedule call
  * @param {string} o.photoUrl   file:// or data: URL for the beis medrash photo
  * @param {string} o.logoUrl    file:// or data: URL for logo-vertical-light.png
  * @param {string} o.qrUrl      file:// or data: URL for the QR png
  */
-export function buildFlierHtml({ weekOf, rows, photoUrl, logoUrl, qrUrl }) {
+export function buildFlierHtml({ weekOf, rows, taanis = [], photoUrl, logoUrl, qrUrl }) {
   const selichosRows = rows.filter((r) => r.service === "Selichos");
   const cards = SERVICES.map((s) => {
     const mine = rows.filter((r) => r.service === s);
-    const override = s === "Shacharis" ? selichosBlock(mine.map((r) => to24(r.time)), selichosRows) : "";
-    return card(s, mine, override);
+    if (s !== "Shacharis") return card(s, mine);
+    return card(s, mine, {
+      prefix: taanisBlock(taanis),
+      overrideBody: selichosBlock(mine.map((r) => to24(r.time)), selichosRows),
+    });
   }).join("");
   return `<!DOCTYPE html>
 <html lang="en">
