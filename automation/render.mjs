@@ -10,7 +10,7 @@
 // /daven page uses — so the flier can never disagree with the website.
 // Output lands in automation/out/.
 
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { chromium } from "playwright";
@@ -32,20 +32,9 @@ const { weekOf, weekStartISO, rows } = getComputedWeekdaySchedule(probe);
 console.log(`Week of ${weekOf} (${weekStartISO})`);
 for (const r of rows) console.log(`  ${r.service.padEnd(10)} ${r.daySpec.padEnd(24)} ${r.time}`);
 
-// automation/special.json — optional. To switch Selichos on for the season:
-//   { "selichos": { "on": true, "offsetMin": 20, "erevRHOffsetMin": 40 } }
-// Drop erevRHOffsetMin except on the Erev Rosh Hashana week.
-// Delete the file when the season is over, or it keeps printing.
-let special = {};
-try {
-  special = JSON.parse(await readFile(path.join(here, "special.json"), "utf8"));
-  console.log("special.json:", special);
-} catch {}
-
 const html = buildFlierHtml({
   weekOf,
   rows,
-  selichos: special.selichos ?? null,
   photoUrl: pathToFileURL(path.join(here, "assets", "beis-medrash.png")).href,
   logoUrl: pathToFileURL(path.join(repo, "public", "logo-vertical-light.png")).href,
   qrUrl: pathToFileURL(path.join(here, "assets", "qr-rckollel.png")).href,

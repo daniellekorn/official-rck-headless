@@ -5,7 +5,7 @@ description: "Creates the RCK weekly davening flier (weekday minyanim) as a prin
 
 # RCK weekly davening flier
 
-**Version:** 2026-09-06a
+**Version:** 2026-09-06b
 
 Report that version if asked.
 
@@ -56,13 +56,14 @@ Node must be **22.18 or newer** (the script imports the site's TypeScript direct
 
 ## Selichos and other special weeks
 
-`automation/special.json` is optional. When it exists, its values are drawn on the flier:
+Nothing to do. Selichos rows come from `getComputedWeekdaySchedule()` like every
+other row, so the flier draws them whenever the site says they run — 20 minutes
+before each Shacharis, 40 before on Erev Rosh Hashana, 15 before on Erev Yom
+Kippur. A day whose offset differs gets its own captioned line, from its real
+day label.
 
-```json
-{ "selichos": "6:20 AM" }
-```
-
-Selichos is **20 minutes before each Shacharis**, and **40 minutes before on Erev Rosh Hashana**. Those are the rav's rules, not a guess — but the site does not compute Selichos yet, so the value in this file is typed by a person. **Confirm the time with whoever asked before writing the file**, and delete the file when the season is over, or the flier will keep printing it.
+There is no file to edit and no time to type. If Selichos is missing or wrong,
+that is `src/lib/zmanim-schedule.ts` — Danielle's, not this skill's.
 
 ## When it goes wrong
 
