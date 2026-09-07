@@ -5,7 +5,7 @@ description: "Renders the RCK weekday davening flier locally from the repo — a
 
 # RCK weekly davening flier
 
-**Version:** 2026-09-06c
+**Version:** 2026-09-07a
 
 Report that version if asked.
 
@@ -31,14 +31,14 @@ node automation/render.mjs 2026-09-13   # the week containing that date
 It prints the week label and every row, then writes both files to `automation/out/`:
 
 ```
-automation/out/daven-flier-2026-09-13.jpg
-automation/out/daven-flier-2026-09-13.pdf
+automation/out/RCK-DaveningTimes_2026-09-13.jpg
+automation/out/RCK-DaveningTimes_2026-09-13.pdf
 ```
 
 Copy them where the person can find them — `~/Downloads` unless they say otherwise:
 
 ```bash
-cp automation/out/daven-flier-*.jpg automation/out/daven-flier-*.pdf ~/Downloads/
+cp automation/out/RCK-DaveningTimes_*.jpg automation/out/RCK-DaveningTimes_*.pdf ~/Downloads/
 ```
 
 Then report the times you saw, in one block, and the two filenames.
@@ -58,9 +58,9 @@ Node must be **22.18 or newer** (the script imports the site's TypeScript direct
 
 Nothing to do. Selichos rows come from `getComputedWeekdaySchedule()` like every
 other row, so the flier draws them whenever the site says they run — 20 minutes
-before each Shacharis, 40 before on Erev Rosh Hashana, 15 before on Erev Yom
-Kippur. A day whose offset differs gets its own captioned line, from its real
-day label.
+before each Shacharis in Elul, 60 before on Erev Rosh Hashana, 30 before during
+Aseres Yemei Teshuva, 15 before on Erev Yom Kippur. A day whose offset differs
+gets its own captioned line, from its real day label.
 
 There is no file to edit and no time to type. If Selichos is missing or wrong,
 that is `src/lib/zmanim-schedule.ts` — Danielle's, not this skill's.

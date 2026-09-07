@@ -51,7 +51,7 @@ const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, de
 await page.goto(pathToFileURL(htmlPath).href, { waitUntil: "networkidle" });
 await page.evaluate(() => document.fonts.ready);
 
-const base = `daven-flier-${weekStartISO}`;
+const base = `RCK-DaveningTimes_${weekStartISO}`;
 await page.screenshot({
   path: path.join(outDir, `${base}.jpg`),
   type: "jpeg",
