@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Runs the flier every Sunday at 06:30 local time.
+  Runs the flier every Monday at 06:30 local time, for the *following* week
+  (weekly-flier.sh passes render.mjs a date 7 days out so it always resolves
+  to next week's Sunday, no matter which day this actually fires).
   Install:  cp automation/com.rckollel.weeklyflier.plist ~/Library/LaunchAgents/
             launchctl load ~/Library/LaunchAgents/com.rckollel.weeklyflier.plist
   Test now: launchctl start com.rckollel.weeklyflier
@@ -23,7 +25,7 @@
 
   <key>StartCalendarInterval</key>
   <dict>
-    <key>Weekday</key><integer>0</integer>
+    <key>Weekday</key><integer>1</integer>
     <key>Hour</key><integer>6</integer>
     <key>Minute</key><integer>30</integer>
   </dict>

@@ -1,8 +1,10 @@
 # Weekly davening flier
 
 Produces the weekday minyanim flier — a 1920×1080 JPG for the television screen
-and WhatsApp, and a PDF for printing — for the current week, using the same
-computed times `rckollel.com/daven` shows.
+and WhatsApp, and a PDF for printing — using the same computed times
+`rckollel.com/daven` shows. The automated Monday run always renders the
+*following* week (see "The weekly schedule" below); run by hand with a date
+argument to render any other week.
 
 Times come from `getComputedWeekdaySchedule()` in `src/lib/zmanim-schedule.ts`.
 **No zman is ever typed into the flier.** If a time on the flier looks wrong,
@@ -15,8 +17,9 @@ node automation/render.mjs              # current week
 node automation/render.mjs 2026-09-13   # the week containing that date
 ```
 
-Both files land in `automation/out/`. `weekly-flier.sh` does the same and copies
-the newest pair to `~/Downloads/RCK Flier`.
+Both files land in `automation/out/`. `weekly-flier.sh` renders *next* week
+specifically (it passes render.mjs a date 7 days out) and copies the newest
+pair to `~/Downloads/RCK Flier`.
 
 First run on a new machine needs Playwright and Node ≥ 22.18:
 
@@ -27,7 +30,8 @@ npm install --save-dev playwright && npx playwright install chromium
 ## The weekly schedule
 
 `com.rckollel.weeklyflier.plist` is a macOS LaunchAgent that runs
-`weekly-flier.sh` every Sunday at 06:30 local time.
+`weekly-flier.sh` every Monday at 06:30 local time, rendering the *following*
+week's flier — so it lands well ahead of the week it covers.
 
 ```bash
 cp automation/com.rckollel.weeklyflier.plist ~/Library/LaunchAgents/
@@ -40,9 +44,9 @@ Logs: `/tmp/rck-flier.log`, `/tmp/rck-flier.err`. If the Mac is asleep at 06:30
 the job runs on the next wake.
 
 `.github/workflows/weekly-flier.yml` renders the same files on GitHub every
-Sunday and attaches them to the run — the backup for when the Mac is away, and
-the route for anyone without the repo checked out. It must never publish the
-flier as a site page.
+Monday (same "following week" date math) and attaches them to the run — the
+backup for when the Mac is away, and the route for anyone without the repo
+checked out. It must never publish the flier as a site page.
 
 ## Files
 
@@ -50,8 +54,8 @@ flier as a site page.
 | --- | --- |
 | `render.mjs` | Reads the schedule, builds the HTML, drives Playwright, writes JPG + PDF + `meta.json` |
 | `flier-html.mjs` | The design: one function returning the 1920×1080 HTML, inline-styled |
-| `weekly-flier.sh` | Renders and copies the newest pair to `~/Downloads/RCK Flier` |
-| `com.rckollel.weeklyflier.plist` | The Sunday 06:30 LaunchAgent |
+| `weekly-flier.sh` | Renders *next* week and copies the newest pair to `~/Downloads/RCK Flier` |
+| `com.rckollel.weeklyflier.plist` | The Monday 06:30 LaunchAgent |
 | `assets/` | Beis medrash photograph, QR code, logo |
 | `out/` | Generated output — gitignored, safe to delete |
 
@@ -70,6 +74,11 @@ posted time is valid every day:
 A missing 18:00 or 20:00 row is correct, not a bug: the rules drop those
 minyanim in some weeks. Selichos runs 20 minutes before each Shacharis, and 40
 minutes before on Erev Rosh Hashana.
+
+A fast (Taanis) week gets a 4th column — solid gold, to the right of
+Shacharis/Mincha/Maariv — naming the fast, its own day and date (e.g.
+"Monday, September 14"), and Start/End of Fast, so the flier never leaves it
+ambiguous which calendar day the time belongs to.
 
 ## Changing how it looks
 

@@ -1,6 +1,7 @@
 #!/bin/bash
-# Renders the weekly davening flier and drops both files in a folder.
-# Run by launchd every Sunday morning (see com.rckollel.weeklyflier.plist),
+# Renders the *following* week's davening flier and drops both files in a
+# folder. Run by launchd every Monday morning (see
+# com.rckollel.weeklyflier.plist) so it lands well before that week starts,
 # or by hand any time:  ./automation/weekly-flier.sh
 #
 # Edit these two lines if your paths differ.
@@ -14,7 +15,11 @@ mkdir -p "$DEST"
 cd "$REPO"
 
 echo "=== $(date) ==="
-node automation/render.mjs
+# +7 days always lands inside next week's Sun–Fri span (even if launchd runs
+# this a day or two late), so render.mjs resolves it to *next* week's Sunday
+# regardless of which day this actually fires — see automation/README.md.
+NEXT_WEEK_DATE="$(date -v+7d +%Y-%m-%d)"
+node automation/render.mjs "$NEXT_WEEK_DATE"
 
 # Newest pair only, so the folder doesn't fill up with old weeks.
 for ext in jpg pdf; do

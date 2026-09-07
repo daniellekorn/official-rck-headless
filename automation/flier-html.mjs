@@ -26,17 +26,61 @@ function groupByDaySpec(rows) {
 const GOLD_CAP =
   "font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;font-size:17px;color:#a47915;line-height:1.3";
 
+// Same caption look as GOLD_CAP but sized to match the day-of-week text
+// (e.g. Mincha/Maariv's "SUN – THU") — used for the day-range caption itself
+// and anywhere else a caption needs to read at that size, not GOLD_CAP's.
+const DAYSPEC_CAP =
+  "font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;font-size:22px;color:#a47915";
+
+/** The day-range caption every card uses directly under its title (e.g.
+ * Mincha/Maariv's "SUN – THU"), with the top-of-card margin only on the
+ * first one. */
+function daySpecCaption(daySpec, { first, compact }) {
+  const top = first ? (compact ? 8 : 12) : compact ? 12 : 20;
+  return `<div style="${DAYSPEC_CAP};margin-top:${top}px">${daySpec}</div>`;
+}
+
 /**
- * The Shacharis card's Selichos treatment: a gold column of Selichos times
- * (from the site's own Selichos rows — never computed here) paired
- * positionally with each Shacharis time, under a gold caption naming the
- * Selichos row's own daySpec. A second daySpec group among the Selichos rows
- * — Erev Rosh Hashana, Erev Yom Kippur — gets its own captioned line below a
- * gold rule, using its real daySpec text, never hardcoded.
- * Returns "" when there are no Selichos rows, in which case card() renders
- * the Shacharis card normally.
+ * @param {Array} rows
+ * @param {boolean} [compact] Tighter margins/gaps — used on fast weeks, where
+ *   a 4th column (the gold Taanis box) narrows the other three and the extra
+ *   room has to come from trimming this whitespace, not the time text itself.
  */
-function selichosBlock(shacharisTimes, selichosRows) {
+function defaultBody(rows, compact = false) {
+  const groups = groupByDaySpec(rows);
+  const total = rows.length;
+  const size = total <= 2 ? 104 : total === 3 ? 96 : 74;
+  const gap = (total >= 4 ? 4 : 10) - (compact ? 2 : 0);
+  const bodyTop = (total >= 4 ? 12 : 24) - (compact ? 6 : 0);
+  return groups
+    .map(
+      (g, i) => `
+      ${daySpecCaption(g.daySpec, { first: i === 0, compact })}
+      <div style="display:flex;flex-direction:column;gap:${gap}px;margin-top:${bodyTop}px">${g.times
+        .map(
+          (t) =>
+            `<div style="font-family:'Oswald',sans-serif;font-size:${size}px;line-height:1.06;font-weight:500;color:#1a1a1a">${t}</div>`,
+        )
+        .join("")}</div>`,
+    )
+    .join("");
+}
+
+/**
+ * The Shacharis card's Selichos treatment (see #067; days moved to match
+ * Mincha/Maariv's caption position, see #069): the day-range caption sits
+ * directly under the card header, in the same spot and style Mincha/Maariv
+ * use for theirs — naming the days that apply to *both* Shacharis and
+ * Selichos that week — followed by a "Selichos" label over a gold column of
+ * Selichos times (from the site's own Selichos rows — never computed here)
+ * paired positionally with each Shacharis time. A second daySpec group among
+ * the Selichos rows — Erev Rosh Hashana, Erev Yom Kippur — gets its own
+ * "Selichos · " captioned line below a gold rule, using its real daySpec
+ * text, never hardcoded.
+ * Returns "" when there are no Selichos rows, in which case card() renders
+ * the Shacharis card normally (defaultBody, unchanged).
+ */
+function selichosBlock(shacharisTimes, selichosRows, compact) {
   if (selichosRows.length === 0) return "";
   const [main, ...rest] = groupByDaySpec(selichosRows);
 
@@ -59,72 +103,89 @@ function selichosBlock(shacharisTimes, selichosRows) {
     .join("");
 
   return `
-      <div style="display:grid;grid-template-columns:auto 1fr;column-gap:26px;row-gap:8px;align-items:baseline;margin-top:12px">
-        <div style="${GOLD_CAP};grid-column:1">Selichos<br />${main.daySpec}</div>
+      ${daySpecCaption(main.daySpec, { first: true, compact })}
+      <div style="display:grid;grid-template-columns:auto 1fr;column-gap:26px;row-gap:8px;align-items:baseline;margin-top:${compact ? 8 : 12}px">
+        <div style="${DAYSPEC_CAP};grid-column:1">Selichos</div>
         <div style="grid-column:2"></div>${pairs}
       </div>${extra}`;
-}
-
-function defaultBody(rows) {
-  const groups = groupByDaySpec(rows);
-  const total = rows.length;
-  const size = total <= 2 ? 104 : total === 3 ? 96 : 74;
-  const gap = total >= 4 ? 4 : 10;
-  return groups
-    .map(
-      (g, i) => `
-      <div style="font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;font-size:22px;color:#a47915;margin-top:${i === 0 ? 12 : 20}px">${g.daySpec}</div>
-      <div style="display:flex;flex-direction:column;gap:${gap}px;margin-top:${total >= 4 ? 12 : 24}px">${g.times
-        .map(
-          (t) =>
-            `<div style="font-family:'Oswald',sans-serif;font-size:${size}px;line-height:1.06;font-weight:500;color:#1a1a1a">${t}</div>`,
-        )
-        .join("")}</div>`,
-    )
-    .join("");
 }
 
 /**
  * @param {string} service
  * @param {Array} rows
  * @param {object} [opts]
- * @param {string} [opts.prefix] Rendered above the body regardless of override — the
- *   Taanis banner's spot, always on top of whatever else the card shows that week.
  * @param {string} [opts.overrideBody] Replaces the default groupByDaySpec rendering
  *   (the Selichos+Shacharis paired grid) when non-empty.
+ * @param {boolean} [opts.compact] See defaultBody — also tightens the card's own padding.
  */
-function card(service, rows, { prefix = "", overrideBody = "" } = {}) {
-  const body = overrideBody || defaultBody(rows);
+function card(service, rows, { overrideBody = "", compact = false } = {}) {
+  const body = overrideBody || defaultBody(rows, compact);
+  const padding = compact ? "22px 26px 18px" : "28px 34px 24px";
   return `
-    <div style="background:#f7f5f0;border-top:6px solid #102a56;box-sizing:border-box;padding:28px 34px 24px;display:flex;flex-direction:column">
+    <div style="background:#f7f5f0;border-top:6px solid #102a56;box-sizing:border-box;padding:${padding};display:flex;flex-direction:column">
       <div style="font-family:'Oswald',sans-serif;font-size:68px;line-height:1;font-weight:500;color:#102a56">${service}</div>
-      ${prefix}${body}
+      ${body}
     </div>`;
 }
 
+// A pale tint of the flier's gold (#dfb030), light enough that the dark
+// time text stays legible and the box doesn't fight the cream cards for
+// attention — just a soft wash marking it "special", not a bold fill.
+const TAANIS_TINT = "#faf1d9";
+// Time text uses the exact same style as every other time on the flier
+// (defaultBody's dark #1a1a1a Oswald) so the fast column doesn't read as a
+// different design language — only the background marks it as different.
+const TIME_STYLE = "font-family:'Oswald',sans-serif;font-weight:500;color:#1a1a1a;line-height:1.06";
+
 /**
- * Fast-day banners, in Selichos' own gold — a caption naming the fast plus
- * one line, above everything else in their card: "Start of Fast" atop
- * Shacharis, "End of Fast" atop Maariv (see design-log #068). Only the half
- * whose own day falls in *this* week renders — a split Tisha B'Av shows
- * "Start of Fast" on one week's flyer and "End of Fast" on the other's,
- * never both on the same one. Returns "" with nothing to show, in which case
- * card() renders exactly as it always has.
+ * The fast-day column — a 4th card to the right of Shacharis/Mincha/Maariv,
+ * shown only on weeks touching a fast (see design-log #069 addendum;
+ * supersedes the earlier per-card banner design). A pale gold tint marks it
+ * as a "special day" panel, but its captions reuse `GOLD_CAP` (the same gold
+ * caption style as "SUN – THU" elsewhere) and its times reuse the exact dark
+ * Oswald style every other time on the flier uses — so it reads as part of
+ * the same design, not a different one. Lists the fast's own day+date, its
+ * name, and Start/End of Fast — only the halves whose own day falls in
+ * *this* week (a split Tisha B'Av shows just "Start" on one week's flyer,
+ * just "End" on the other's; see #068). Returns "" with nothing to show, in
+ * which case buildFlierHtml renders the ordinary 3-column grid.
  */
-function taanisEdgeBlock(taanisRows, edge) {
-  const rows = taanisRows.filter((f) => (edge === "start" ? f.startInWeek : f.endInWeek));
-  if (rows.length === 0) return "";
-  return rows
-    .map(
-      (f) => `
-      <div style="margin-top:12px;padding-bottom:12px;border-bottom:3px solid #dfb030">
-        <div style="${GOLD_CAP}">${f.name}</div>
-        <div style="font-family:'Oswald',sans-serif;font-size:38px;line-height:1.3;font-weight:500;color:#a47915;margin-top:4px">${
-          edge === "start" ? `Start of Fast: ${f.startTime}` : `End of Fast: ${f.endTime}`
-        }</div>
-      </div>`,
-    )
-    .join("");
+function taanisColumn(taanisRows) {
+  if (taanisRows.length === 0) return "";
+  const entries = taanisRows
+    .map((f) => {
+      const edges = [
+        f.startInWeek && { label: "Start of Fast", time: to24(f.startTime), day: f.startDateLabel },
+        f.endInWeek && { label: "End of Fast", time: to24(f.endTime), day: f.endDateLabel },
+      ].filter(Boolean);
+      const sameDay = edges.length === 2 && edges[0].day === edges[1].day;
+      return `
+      <div>
+        ${sameDay ? `<div style="${DAYSPEC_CAP}">${edges[0].day}</div>` : ""}
+        <div style="font-family:'Oswald',sans-serif;font-size:44px;line-height:1.05;font-weight:500;color:#102a56;margin-top:${sameDay ? 4 : 0}px">${f.name}</div>
+        ${edges
+          .map(
+            (e) => `
+          <div style="margin-top:16px;padding-top:14px;border-top:3px solid #dfb030">
+            ${sameDay ? "" : `<div style="${DAYSPEC_CAP}">${e.day}</div>`}
+            <div style="${GOLD_CAP};margin-top:${sameDay ? 0 : 4}px">${e.label}</div>
+            <div style="${TIME_STYLE};font-size:64px;margin-top:4px">${e.time}</div>
+          </div>`,
+          )
+          .join("")}
+      </div>`;
+    })
+    .join('<div style="height:3px;background:#dfb030;margin:22px 0"></div>');
+  return `
+    <div style="background:${TAANIS_TINT};border-top:6px solid #102a56;box-sizing:border-box;padding:22px 26px 18px;display:flex;flex-direction:column">
+      <!-- This column has no "Shacharis"-style header, but its date line
+           must still land level with the day-range caption in the other
+           three cards. 76px = card()'s 68px header line (line-height:1) +
+           daySpecCaption()'s 8px compact top margin — keep in sync by hand
+           if either of those changes. -->
+      <div style="height:76px"></div>
+      ${entries}
+    </div>`;
 }
 
 /**
@@ -138,17 +199,26 @@ function taanisEdgeBlock(taanisRows, edge) {
  */
 export function buildFlierHtml({ weekOf, rows, taanis = [], photoUrl, logoUrl, qrUrl }) {
   const selichosRows = rows.filter((r) => r.service === "Selichos");
+  const hasTaanis = taanis.length > 0;
+  // Selichos' paired gold/dark grid makes the Shacharis card the tightest of
+  // the three on a fast week — give it more of the row and take it from
+  // Mincha/Maariv (their own content doesn't need the extra room) rather
+  // than the Taanis column.
+  const hasSelichosAndTaanis = hasTaanis && selichosRows.length > 0;
   const cards = SERVICES.map((s) => {
     const mine = rows.filter((r) => r.service === s);
     if (s === "Shacharis") {
       return card(s, mine, {
-        prefix: taanisEdgeBlock(taanis, "start"),
-        overrideBody: selichosBlock(mine.map((r) => to24(r.time)), selichosRows),
+        overrideBody: selichosBlock(mine.map((r) => to24(r.time)), selichosRows, hasTaanis),
+        compact: hasTaanis,
       });
     }
-    if (s === "Maariv") return card(s, mine, { prefix: taanisEdgeBlock(taanis, "end") });
-    return card(s, mine);
-  }).join("");
+    return card(s, mine, { compact: hasTaanis });
+  }).join("") + taanisColumn(taanis);
+  const gridTemplateColumns = hasSelichosAndTaanis
+    ? "1.3fr 0.85fr 0.85fr 1fr"
+    : `repeat(${hasTaanis ? 4 : 3},minmax(0,1fr))`;
+  const gridGap = hasTaanis ? 24 : 32;
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -174,7 +244,7 @@ export function buildFlierHtml({ weekOf, rows, taanis = [], photoUrl, logoUrl, q
     </div>
   </header>
 
-  <div style="flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;min-height:0">${cards}</div>
+  <div style="flex:1;display:grid;grid-template-columns:${gridTemplateColumns};gap:${gridGap}px;min-height:0">${cards}</div>
 
   <footer style="flex:none;border-top:3px solid #102a56;padding-top:20px;display:flex;align-items:center;justify-content:space-between;gap:40px">
     <div style="display:flex;flex-direction:column;gap:8px">

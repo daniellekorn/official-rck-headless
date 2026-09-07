@@ -1,4 +1,4 @@
-import { GeoLocation, HDate, Locale, Sedra, Zmanim, getHolidaysOnDate, months } from "@hebcal/core";
+import { GeoLocation, HDate, Locale, Sedra, Zmanim, flags, getHolidaysOnDate, months } from "@hebcal/core";
 
 /**
  * Computed weekday davening schedule (design-log #040).
@@ -27,9 +27,10 @@ const LATE_MINCHA_BEFORE_SHKIYA = 10; // minutes before shkiya
 const MAARIV_AFTER_SHKIYA = 18; // minutes after shkiya
 const FIXED_MAARIV = 20 * 60; // the 8:00 pm minyan, dropped once shkiya+18 reaches it
 
-// ── Selichos (confirmed with Yosef, Sept 2026; see #067). ──
-const SELICHOS_BEFORE = 20; // minutes before each Shacharis, normally
-const SELICHOS_BEFORE_EREV_ROSH_HASHANA = 40;
+// ── Selichos (confirmed with Yosef, Sept 2026; see #067, amended #071). ──
+const SELICHOS_BEFORE_ELUL = 20; // minutes before each Shacharis, season start through erev Rosh Hashana
+const SELICHOS_BEFORE_ASERES_YEMEI_TESHUVA = 30; // minutes before, the weekdays after Rosh Hashana through the day before erev Yom Kippur
+const SELICHOS_BEFORE_EREV_ROSH_HASHANA = 60;
 const SELICHOS_BEFORE_EREV_YOM_KIPPUR = 15;
 
 // ── Fast days (confirmed against the printed luach, Sept 2026; see #068). ──
@@ -85,12 +86,16 @@ export interface ComputedTaanisRow {
 	startTime: string;
 	/** Short weekday the start falls on, e.g. "Mon" — Tisha B'Av's start is the evening before. */
 	startDayLabel: string;
+	/** Full weekday + month/day the start falls on, e.g. "Monday, September 14". */
+	startDateLabel: string;
 	/** Whether the start day itself falls in this Sun–Sat week (vs. this row
 	 * being included only because the *end* falls here — a split Tisha B'Av). */
 	startInWeek: boolean;
 	endTime: string;
 	/** Short weekday the end falls on, e.g. "Tue". */
 	endDayLabel: string;
+	/** Full weekday + month/day the end falls on, e.g. "Tuesday, September 15". */
+	endDateLabel: string;
 	/** Whether the end day itself falls in this Sun–Sat week. */
 	endInWeek: boolean;
 }
@@ -119,6 +124,15 @@ const civilFmt = new Intl.DateTimeFormat("en-CA", {
 	year: "numeric",
 	month: "2-digit",
 	day: "2-digit",
+});
+
+/** "Monday, September 14" — used for the fast-day banners so a reader never
+ * has to work out which calendar day "Start of Fast" refers to. */
+const weekdayDateFmt = new Intl.DateTimeFormat("en-US", {
+	timeZone: TZ,
+	weekday: "long",
+	month: "long",
+	day: "numeric",
 });
 
 const clockFmt = new Intl.DateTimeFormat("en-GB", {
@@ -186,7 +200,31 @@ function isRoshChodesh(c: CivilDate): boolean {
 }
 
 /**
- * Selichos season (Ashkenazi minhag, see #067):
+ * Whether this civil day is a Yom Tov as observed in Ra'anana (Israel) — the
+ * shul's fixed weekday Shacharis/Mincha/Maariv minyanim don't run on these
+ * days (Yom Tov davening replaces them, not modeled here). Rosh Hashana I &
+ * II, Yom Kippur, Sukkot I, Shmini Atzeret/Simchat Torah (combined in
+ * Israel), Pesach I & VII, Shavuot — one day each except Rosh Hashana.
+ * Chol HaMoed is deliberately *not* included here: those weekdays still run
+ * the regular schedule.
+ *
+ * Filters `getHolidaysOnDate()`'s events to `CHAG` flag set and `CHUL_ONLY`
+ * (diaspora-only second day) *not* set — verified against 2026–2027 that
+ * this yields exactly the one-day-per-holiday Israel list above (confirmed
+ * Shmini Atzeret/Simchat Torah collapse to the single combined Israel day,
+ * and Sukkot/Pesach's Chol HaMoed days carry no CHAG flag at all).
+ */
+function isChag(c: CivilDate): boolean {
+	const hd = new HDate(anchor(c));
+	for (const ev of getHolidaysOnDate(hd) ?? []) {
+		const f = ev.getFlags();
+		if (f & flags.CHAG && !(f & flags.CHUL_ONLY)) return true;
+	}
+	return false;
+}
+
+/**
+ * Selichos season (Ashkenazi minhag, see #067, amended #071):
  *
  *  - Leil Selichos is the Motzei Shabbos on/before (1 Tishrei − 4 days) — the
  *    same rule @hebcal/core uses internally for its "Leil Selichot" event
@@ -199,7 +237,12 @@ function isRoshChodesh(c: CivilDate): boolean {
  *    the Sunday's is a special late-night one, not tied to the regular
  *    before-Shacharis time (confirmed with Yosef, Sept 2026).
  *  - It continues every weekday morning through Erev Yom Kippur, skipping
- *    Rosh Hashana itself (no Selichos on Yom Tov).
+ *    Rosh Hashana itself (no Selichos on Yom Tov). The before-Shacharis
+ *    offset itself isn't uniform across the season, though (see #071):
+ *    `SELICHOS_BEFORE_ELUL` from season start through erev Rosh Hashana,
+ *    `SELICHOS_BEFORE_ASERES_YEMEI_TESHUVA` from the day after Rosh Hashana
+ *    through the day before erev Yom Kippur — a longer Selichos once the
+ *    Aseres Yemei Teshuva additions are said.
  */
 interface SelichosWindow {
 	erevRoshHashana: CivilDate;
@@ -250,8 +293,10 @@ function selichosInfoFor(day: CivilDate, windows: SelichosWindow[]): SelichosDay
 		if (civilTime(day) === civilTime(w.erevYomKippur))
 			return { offset: SELICHOS_BEFORE_EREV_YOM_KIPPUR, label: "Erev Yom Kippur" };
 		if (civilTime(day) === civilTime(w.roshHashana1) || civilTime(day) === civilTime(w.roshHashana2)) return null; // no Selichos on Yom Tov
-		if (civilTime(day) >= civilTime(w.seasonStart) && civilTime(day) <= civilTime(w.erevYomKippur))
-			return { offset: SELICHOS_BEFORE };
+		if (civilTime(day) >= civilTime(w.seasonStart) && civilTime(day) <= civilTime(w.erevRoshHashana))
+			return { offset: SELICHOS_BEFORE_ELUL };
+		if (civilTime(day) >= civilTime(w.roshHashana2) && civilTime(day) <= civilTime(w.erevYomKippur))
+			return { offset: SELICHOS_BEFORE_ASERES_YEMEI_TESHUVA };
 	}
 	return null;
 }
@@ -304,9 +349,11 @@ function getComputedTaanisRows(sunday: CivilDate): ComputedTaanisRow[] {
 			name: TAANIS_DISPLAY_NAME[desc],
 			startTime,
 			startDayLabel: DAY_NAMES[dayOfWeek(startDay)],
+			startDateLabel: weekdayDateFmt.format(anchor(startDay)),
 			startInWeek,
 			endTime,
 			endDayLabel: DAY_NAMES[dayOfWeek(endDay)],
+			endDateLabel: weekdayDateFmt.format(anchor(endDay)),
 			endInWeek,
 		});
 	}
@@ -333,13 +380,22 @@ function formatDaySpec(indices: number[]): string {
 export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeekdaySchedule {
 	const sunday = scheduleSunday(civilDateOf(now));
 
-	// Mincha/Maariv run Sun–Thu; aggregate the most restrictive day so one
-	// posted time is valid all week (early minyanim can't precede their zman
-	// on any day, shkiya-anchored ones can't run late on any day).
+	// A Yom Tov day has no fixed weekday Shacharis/Mincha/Maariv at all (see
+	// isChag) — drop it from every regular-day list below, the same way a
+	// week's Taanis or Selichos rows already only cover their own days.
+	// Shacharis also runs Friday; Mincha/Maariv only Sun–Thu (Friday's covered
+	// by the separate Erev Shabbos schedule).
+	const shacharisDays = [0, 1, 2, 3, 4, 5].filter((i) => !isChag(addDays(sunday, i)));
+	const minchaMaarivDays = [0, 1, 2, 3, 4].filter((i) => !isChag(addDays(sunday, i)));
+
+	// Mincha/Maariv aggregate the most restrictive *actually-in-session* day
+	// so one posted time is valid every day it runs (early minyanim can't
+	// precede their zman on any of those days, shkiya-anchored ones can't run
+	// late on any of them).
 	let latestMinchaGedola = 0;
 	let earliestShkiya = Infinity;
 	let latestShkiya = 0;
-	for (let i = 0; i < 5; i++) {
+	for (const i of minchaMaarivDays) {
 		const z = new Zmanim(LOCATION, anchor(addDays(sunday, i)), false);
 		latestMinchaGedola = Math.max(latestMinchaGedola, secondsOfDay(z.minchaGedola()));
 		earliestShkiya = Math.min(earliestShkiya, secondsOfDay(z.sunset()));
@@ -353,9 +409,12 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 
 	const rows: ComputedDaveningRow[] = [];
 
-	for (const t of SHACHARIS) rows.push({ service: "Shacharis", daySpec: "Sun – Fri", time: fmtTime(t) });
-	// Shacharis also runs Friday, so scan Sun–Fri for Rosh Chodesh.
-	const roshChodeshDays = [0, 1, 2, 3, 4, 5]
+	const shacharisDaySpec = formatDaySpec(shacharisDays);
+	for (const t of SHACHARIS) rows.push({ service: "Shacharis", daySpec: shacharisDaySpec, time: fmtTime(t) });
+	// Scan the same in-session days for Rosh Chodesh (never coincides with a
+	// Yom Tov day itself — Rosh Chodesh Tishrei is Rosh Hashana, already
+	// excluded by isRoshChodesh's month check).
+	const roshChodeshDays = shacharisDays
 		.map((i) => addDays(sunday, i))
 		.filter(isRoshChodesh)
 		.map((c) => DAY_NAMES[dayOfWeek(c)]);
@@ -364,16 +423,19 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 		for (const t of SHACHARIS_ROSH_CHODESH) rows.push({ service: "Shacharis", daySpec: spec, time: fmtTime(t) });
 	}
 
-	// Selichos (see #067): a regular bucket at Shacharis − 20 for whichever
-	// Sun–Fri days of this week fall in season, plus one-off rows for erev
-	// Rosh Hashana / erev Yom Kippur if either lands in this week. Assumes no
-	// in-season day is also Rosh Chodesh (only Rosh Chodesh Tishrei — Rosh
-	// Hashana itself — falls anywhere near the season, and it's excluded).
+	// Selichos (see #067, amended #071): a regular bucket per offset (Elul vs
+	// Aseres Yemei Teshuva — almost always just one, but a week straddling
+	// Rosh Hashana mid-week can have in-season days on both sides, each at
+	// its own offset) for whichever Sun–Fri days of this week fall in season,
+	// plus one-off rows for erev Rosh Hashana / erev Yom Kippur if either
+	// lands in this week. Assumes no in-season day is also Rosh Chodesh (only
+	// Rosh Chodesh Tishrei — Rosh Hashana itself — falls anywhere near the
+	// season, and it's excluded).
 	// Rows are collected keyed by their earliest day-of-week, then pushed in
 	// that order — a later-in-the-week special day (e.g. Fri) must render
 	// after an earlier regular bucket (e.g. Mon–Thu), not before it.
 	const selichosWindowsThisWeek = selichosWindows(sunday);
-	const selichosRegularDays: number[] = [];
+	const selichosRegularDaysByOffset = new Map<number, number[]>();
 	const selichosBuckets: { sortKey: number; daySpec: string; offset: number }[] = [];
 	for (let i = 0; i <= 5; i++) {
 		const day = addDays(sunday, i);
@@ -382,23 +444,26 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 		if (info.label) {
 			selichosBuckets.push({ sortKey: i, daySpec: `${info.label} (${DAY_NAMES[i]})`, offset: info.offset });
 		} else {
-			selichosRegularDays.push(i);
+			const days = selichosRegularDaysByOffset.get(info.offset) ?? [];
+			days.push(i);
+			selichosRegularDaysByOffset.set(info.offset, days);
 		}
 	}
-	if (selichosRegularDays.length > 0) {
-		selichosBuckets.push({ sortKey: selichosRegularDays[0], daySpec: formatDaySpec(selichosRegularDays), offset: SELICHOS_BEFORE });
+	for (const [offset, days] of selichosRegularDaysByOffset) {
+		selichosBuckets.push({ sortKey: days[0], daySpec: formatDaySpec(days), offset });
 	}
 	selichosBuckets.sort((a, b) => a.sortKey - b.sortKey);
 	for (const bucket of selichosBuckets) {
 		for (const t of SHACHARIS) rows.push({ service: "Selichos", daySpec: bucket.daySpec, time: fmtTime(t - bucket.offset) });
 	}
 
-	rows.push({ service: "Mincha", daySpec: "Sun – Thu", time: fmtTime(earlyMincha) });
-	if (lateMincha > FIXED_MINCHA_CUTOFF) rows.push({ service: "Mincha", daySpec: "Sun – Thu", time: fmtTime(FIXED_MINCHA) });
-	rows.push({ service: "Mincha", daySpec: "Sun – Thu", time: fmtTime(lateMincha) });
+	const minchaMaarivDaySpec = formatDaySpec(minchaMaarivDays);
+	rows.push({ service: "Mincha", daySpec: minchaMaarivDaySpec, time: fmtTime(earlyMincha) });
+	if (lateMincha > FIXED_MINCHA_CUTOFF) rows.push({ service: "Mincha", daySpec: minchaMaarivDaySpec, time: fmtTime(FIXED_MINCHA) });
+	rows.push({ service: "Mincha", daySpec: minchaMaarivDaySpec, time: fmtTime(lateMincha) });
 
-	rows.push({ service: "Maariv", daySpec: "Sun – Thu", time: fmtTime(shkiyaMaariv) });
-	if (shkiyaMaariv < FIXED_MAARIV) rows.push({ service: "Maariv", daySpec: "Sun – Thu", time: fmtTime(FIXED_MAARIV) });
+	rows.push({ service: "Maariv", daySpec: minchaMaarivDaySpec, time: fmtTime(shkiyaMaariv) });
+	if (shkiyaMaariv < FIXED_MAARIV) rows.push({ service: "Maariv", daySpec: minchaMaarivDaySpec, time: fmtTime(FIXED_MAARIV) });
 
 	const weekOf = new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "long", day: "numeric" }).format(anchor(sunday));
 	const pad = (n: number) => String(n).padStart(2, "0");

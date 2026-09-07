@@ -18,3 +18,7 @@
 # Addendum 2 documents its own removal: "removed the `>= XL_BREAKPOINT`
 # early-return entirely (and the now-unused XL_BREAKPOINT constant)."
 048 XL_BREAKPOINT
+
+# Rename record: "SELICHOS_BEFORE split into SELICHOS_BEFORE_ELUL and
+# SELICHOS_BEFORE_ASERES_YEMEI_TESHUVA." Naming the old constant is the point.
+071 SELICHOS_BEFORE

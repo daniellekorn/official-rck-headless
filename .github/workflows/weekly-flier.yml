@@ -1,10 +1,11 @@
 name: Weekly davening flier
 
-# Runs every Sunday 03:05 UTC — 06:05 in Israel on summer clock, 05:05 on
-# winter clock. Change the times below if you want it earlier or later.
+# Runs every Monday 03:05 UTC — 06:05 in Israel on summer clock, 05:05 on
+# winter clock — for the *following* week (see "Render the flier" below).
+# Change the times below if you want it earlier or later.
 on:
   schedule:
-    - cron: "5 3 * * 0"
+    - cron: "5 3 * * 1"
   workflow_dispatch: {}
 
 jobs:
@@ -27,7 +28,11 @@ jobs:
           npx playwright install --with-deps chromium
 
       - name: Render the flier
-        run: node automation/render.mjs
+        # +7 days always lands inside next week's Sun–Fri span, so render.mjs
+        # resolves it to *next* week's Sunday — same trick as weekly-flier.sh.
+        run: |
+          NEXT_WEEK_DATE="$(date -u -d '+7 days' +%Y-%m-%d)"
+          node automation/render.mjs "$NEXT_WEEK_DATE"
 
       # Keeps a copy in the Actions run for 90 days — the backup path when
       # nobody's Mac ran the local launchd schedule that week.

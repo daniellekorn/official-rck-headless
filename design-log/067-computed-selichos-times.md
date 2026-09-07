@@ -1,9 +1,9 @@
 # 067 — Selichos times computed from Shacharis, not hand-entered
 
-**Status:** implemented
+**Status:** superseded in part by [#071](071-selichos-offset-by-period.md) — the flat 20-minute offset (and erev Rosh Hashana's 40 minutes) were wrong; see that entry for the corrected 20/30/60/15 rule. Everything else here (season window, Leil Selichos calculation, erev Yom Kippur's 15 minutes) still stands.
 **Date:** 2026-09-06
 **Author:** claude-session (Yosef directing)
-**Related:** [#040](040-computed-davening-times.md)
+**Related:** [#040](040-computed-davening-times.md), [#071](071-selichos-offset-by-period.md)
 
 ## Background
 
