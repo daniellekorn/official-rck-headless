@@ -53,3 +53,7 @@ Fallback mode (the live mode until ApiValid arrives) verified against the dev se
 ## Implementation Results
 
 - (append commit SHA on ship)
+
+### Addendum: Teudat Zehut field was missing (2026-09-09)
+
+The `FinishTransaction2` payload always sent `Zeout: ""` (Nedarim Plus's donor ID-number field, from Hebrew זהות) — stubbed but never wired to an input. Section 46 receipts need a valid donor ID, so this was a compliance gap, not a deliberate omission. Added a required "Teudat Zehut / ID number" field to the donor-details grid in `src/pages/donate.astro`, validated client-side with the standard Israeli ID checksum, and wired it into `Zeout`. No CMS change — this is per-donor input, not office-editable content.
