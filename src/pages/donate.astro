@@ -202,6 +202,11 @@ const freqBtn =
 											<p class="mt-1 hidden text-sm text-red-600" data-error-for="donorPhone"></p>
 										</div>
 										<div class="sm:col-span-2">
+											<label class={label} for="donorTeudatZehut">Teudat Zehut / ID number (for your receipt) *</label>
+											<input class={field} id="donorTeudatZehut" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="9" autocomplete="off" required />
+											<p class="mt-1 hidden text-sm text-red-600" data-error-for="donorTeudatZehut"></p>
+										</div>
+										<div class="sm:col-span-2">
 											<label class={label} for="dedication">Dedication / in honor of</label>
 											<input class={field} id="dedication" type="text" maxlength="300" placeholder="e.g. Refuah shelaimah for..." autocomplete="off" />
 										</div>
@@ -422,6 +427,13 @@ const freqBtn =
 			updatePayLabel();
 		});
 
+		// --- teudat zehut (digits only as typed) ---
+		const teudatZehutInput = input("donorTeudatZehut");
+		teudatZehutInput.addEventListener("input", () => {
+			const cleaned = teudatZehutInput.value.replace(/\D/g, "");
+			if (cleaned !== teudatZehutInput.value) teudatZehutInput.value = cleaned;
+		});
+
 		const selectedAmount = (): number => {
 			if (presetAmount) return presetAmount;
 			const n = Number.parseInt(customAmount.value, 10);
@@ -479,10 +491,22 @@ const freqBtn =
 			const phone = rawPhone.replace(/\D/g, "");
 			const dedication = input("dedication").value.trim();
 
+			const teudatZehut = input("donorTeudatZehut").value.trim();
+
 			const nameValid = (s: string) => s.length >= 2 && !/\d/.test(s);
 			const emailValid = (s: string) => /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(s);
 			const phoneValid = (raw: string, digits: string) =>
 				raw === "" || (digits.length >= 7 && /^[+\d][\d\s\-(). +]*$/.test(raw));
+			// Standard Israeli teudat zehut checksum (Luhn-style, weights 1/2 alternating).
+			const teudatZehutValid = (s: string) => {
+				if (!/^\d{5,9}$/.test(s)) return false;
+				const digits = s.padStart(9, "0").split("").map(Number);
+				const sum = digits.reduce((acc, d, i) => {
+					const weighted = d * ((i % 2) + 1);
+					return acc + (weighted > 9 ? weighted - 9 : weighted);
+				}, 0);
+				return sum % 10 === 0;
+			};
 
 			let bad = false;
 			if (amount <= 0) {
@@ -511,6 +535,13 @@ const freqBtn =
 				setError("donorPhone", "Please enter a valid phone number.");
 				bad = true;
 			}
+			if (!teudatZehut) {
+				setError("donorTeudatZehut", "Required for your tax receipt.");
+				bad = true;
+			} else if (!teudatZehutValid(teudatZehut)) {
+				setError("donorTeudatZehut", "Please enter a valid Teudat Zehut (ID) number.");
+				bad = true;
+			}
 			if (bad) return;
 			if (!frameReady) {
 				setStatus("Still connecting to the payment server — try again in a moment.", false);
@@ -528,7 +559,7 @@ const freqBtn =
 					ApiValid: root.dataset.apivalid,
 					PaymentType: frequency === "monthly" ? "HK" : "Ragil",
 					Currency: "1", // ILS
-					Zeout: "",
+					Zeout: teudatZehut,
 					FirstName: firstName,
 					LastName: lastName,
 					Street: "",
