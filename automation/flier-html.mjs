@@ -24,13 +24,15 @@ function groupByDaySpec(rows) {
 }
 
 const GOLD_CAP =
-  "font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;font-size:17px;color:#a47915;line-height:1.3";
+  "font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;font-size:22px;color:#a47915;line-height:1.3";
 
-// Same caption look as GOLD_CAP but sized to match the day-of-week text
-// (e.g. Mincha/Maariv's "SUN – THU") — used for the day-range caption itself
-// and anywhere else a caption needs to read at that size, not GOLD_CAP's.
+// Same caption look as GOLD_CAP but a size up — the day-range caption every
+// card leads with (e.g. Mincha/Maariv's "SUN – THU") is the flier's most
+// important legibility cue at a glance (which days does this card apply to),
+// so it stays the larger of the two (see #073). Used for that caption and
+// anywhere else a caption needs to read at that size, not GOLD_CAP's.
 const DAYSPEC_CAP =
-  "font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;font-size:22px;color:#a47915";
+  "font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;font-size:28px;color:#a47915";
 
 /** The day-range caption every card uses directly under its title (e.g.
  * Mincha/Maariv's "SUN – THU"), with the top-of-card margin only on the

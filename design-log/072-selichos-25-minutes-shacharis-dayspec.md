@@ -68,22 +68,36 @@ bare `SELICHOS` — saying "MON – FRI" twice on one card is noise.
 
 Two details worth keeping:
 
-- The qualified label spans both grid columns and uses `GOLD_CAP` (17px)
-  rather than `DAYSPEC_CAP` (22px). The grid is `auto 1fr`, so a long daySpec
-  left in column 1 would widen the gold time column and squeeze the 92px
-  Shacharis times beside it. Spanning keeps it left-aligned at the same x as
-  the bare `SELICHOS` while costing the layout nothing.
+- The qualified label spans both grid columns and uses `GOLD_CAP` rather than
+  `DAYSPEC_CAP`. The grid is `auto 1fr`, so a long daySpec left in column 1
+  would widen the gold time column and squeeze the 92px Shacharis times
+  beside it. Spanning keeps it left-aligned at the same x as the bare
+  `SELICHOS` while costing the layout nothing.
 - It reuses the exact `Selichos · {daySpec}` wording the *extra*-bucket rows
   below the gold rule already use (#067), so a card showing both reads as one
   convention, not two.
 
+Same day, after seeing the rendered flier: Yosef asked for the day-range
+caption every card leads with, and this qualified Selichos line, to be
+bigger — both were easy to miss at the sizes #067/#069 originally set for a
+plain "SUN – THU". `DAYSPEC_CAP` 22px → 28px, `GOLD_CAP` 17px → 22px (letter-
+spacing trimmed slightly on both, 0.2em→0.18em and 0.16em→0.14em, so the
+wider glyphs don't overspread at the new size). Bumping the shared constants
+means every caption that uses them moved together — Mincha/Maariv's day
+range, the bare `SELICHOS` label, the extra-bucket `Selichos · {daySpec}`
+rows, and the Taanis column's date/Start-of-Fast/End-of-Fast labels — which
+is what keeps the flier reading as one caption convention rather than two
+sizes for the same kind of text. Re-rendered all three weeks below again;
+nothing overflows or collides at the new sizes, though the Taanis column's
+"Monday, September 14" now wraps to two lines (room enough, no overlap).
+
 ## Verification
 
 Re-rendered three weeks through `node automation/render.mjs <date>` and read
-the JPGs. Week of Sep 13 (post-Rosh-Hashana, plus the Tzom Gedaliah column):
-Selichos now 06:35 / 07:50, caption `MON – FRI`, bare `SELICHOS` label —
-i.e. the coinciding-days case renders pixel-identically to before except for
-the corrected times. Week of Sep 20 (Yom Kippur Monday): caption now
+the JPGs (twice — once for the offset/caption-source fix, again after the
+caption-size bump above). Week of Sep 13 (post-Rosh-Hashana, plus the Tzom
+Gedaliah column): Selichos now 06:35 / 07:50, caption `MON – FRI`, bare
+`SELICHOS` label, all at the larger sizes. Week of Sep 20 (Yom Kippur Monday): caption now
 `SUN, TUE – FRI`, matching Mincha's and Maariv's `SUN, TUE – THU`, with
 `SELICHOS · EREV YOM KIPPUR (SUN)` over 06:45 / 08:00. Week of Sep 6 (erev
 Rosh Hashana Friday, the two-bucket case): caption now `SUN – FRI` (was the
