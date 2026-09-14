@@ -29,7 +29,7 @@ const FIXED_MAARIV = 20 * 60; // the 8:00 pm minyan, dropped once shkiya+18 reac
 
 // ── Selichos (confirmed with Yosef, Sept 2026; see #067, amended #071). ──
 const SELICHOS_BEFORE_ELUL = 20; // minutes before each Shacharis, season start through erev Rosh Hashana
-const SELICHOS_BEFORE_ASERES_YEMEI_TESHUVA = 30; // minutes before, the weekdays after Rosh Hashana through the day before erev Yom Kippur
+const SELICHOS_BEFORE_ASERES_YEMEI_TESHUVA = 25; // minutes before, the weekdays after Rosh Hashana through the day before erev Yom Kippur
 const SELICHOS_BEFORE_EREV_ROSH_HASHANA = 60;
 const SELICHOS_BEFORE_EREV_YOM_KIPPUR = 15;
 
@@ -242,7 +242,9 @@ function isChag(c: CivilDate): boolean {
  *    `SELICHOS_BEFORE_ELUL` from season start through erev Rosh Hashana,
  *    `SELICHOS_BEFORE_ASERES_YEMEI_TESHUVA` from the day after Rosh Hashana
  *    through the day before erev Yom Kippur — a longer Selichos once the
- *    Aseres Yemei Teshuva additions are said.
+ *    Aseres Yemei Teshuva additions are said. That Aseres Yemei Teshuva
+ *    offset is 25 minutes, corrected from 30 against what the shul actually
+ *    davened the week of September 13, 2026 (see #072).
  */
 interface SelichosWindow {
 	erevRoshHashana: CivilDate;

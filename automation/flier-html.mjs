@@ -70,19 +70,27 @@ function defaultBody(rows, compact = false) {
  * The Shacharis card's Selichos treatment (see #067; days moved to match
  * Mincha/Maariv's caption position, see #069): the day-range caption sits
  * directly under the card header, in the same spot and style Mincha/Maariv
- * use for theirs — naming the days that apply to *both* Shacharis and
- * Selichos that week — followed by a "Selichos" label over a gold column of
- * Selichos times (from the site's own Selichos rows — never computed here)
- * paired positionally with each Shacharis time. A second daySpec group among
- * the Selichos rows — Erev Rosh Hashana, Erev Yom Kippur — gets its own
- * "Selichos · " captioned line below a gold rule, using its real daySpec
- * text, never hardcoded.
+ * use for theirs — and it names *Shacharis'* own days, never the Selichos
+ * rows' (see #072: they diverge whenever a Yom Tov drops a weekday Shacharis
+ * or Selichos runs on only some of the week's mornings, and the card used to
+ * caption itself with the Selichos days, hiding when Shacharis actually
+ * meets). Under it, a "Selichos" label sits over a gold column of Selichos
+ * times (from the site's own Selichos rows — never computed here) paired
+ * positionally with each Shacharis time; when the Selichos days differ from
+ * Shacharis', that label carries its own days too ("Selichos · Erev Yom
+ * Kippur (Sun)") so the pairing can't be read as "every Shacharis day".
+ * A second daySpec group among the Selichos rows — Erev Rosh Hashana, Erev
+ * Yom Kippur — gets its own "Selichos · " captioned line below a gold rule,
+ * using its real daySpec text, never hardcoded.
  * Returns "" when there are no Selichos rows, in which case card() renders
  * the Shacharis card normally (defaultBody, unchanged).
  */
-function selichosBlock(shacharisTimes, selichosRows, compact) {
+function selichosBlock(shacharisTimes, shacharisDaySpec, selichosRows, compact) {
   if (selichosRows.length === 0) return "";
   const [main, ...rest] = groupByDaySpec(selichosRows);
+  // Only say the days twice when they actually differ — on an ordinary
+  // in-season week ("Mon – Fri" both) the plain "Selichos" label is enough.
+  const sameDays = main.daySpec === shacharisDaySpec;
 
   const pairs = main.times
     .map(
@@ -102,11 +110,18 @@ function selichosBlock(shacharisTimes, selichosRows, compact) {
     )
     .join("");
 
+  // The qualified label spans both columns (and drops to GOLD_CAP's smaller
+  // size) so a long daySpec can't widen the gold time column and squeeze the
+  // Shacharis times beside it; it still starts at the same x as "Selichos".
+  const label = sameDays
+    ? `<div style="${DAYSPEC_CAP};grid-column:1">Selichos</div>
+        <div style="grid-column:2"></div>`
+    : `<div style="${GOLD_CAP};grid-column:1 / -1">Selichos · ${main.daySpec}</div>`;
+
   return `
-      ${daySpecCaption(main.daySpec, { first: true, compact })}
+      ${daySpecCaption(shacharisDaySpec, { first: true, compact })}
       <div style="display:grid;grid-template-columns:auto 1fr;column-gap:26px;row-gap:8px;align-items:baseline;margin-top:${compact ? 8 : 12}px">
-        <div style="${DAYSPEC_CAP};grid-column:1">Selichos</div>
-        <div style="grid-column:2"></div>${pairs}
+        ${label}${pairs}
       </div>${extra}`;
 }
 
@@ -209,7 +224,12 @@ export function buildFlierHtml({ weekOf, rows, taanis = [], photoUrl, logoUrl, q
     const mine = rows.filter((r) => r.service === s);
     if (s === "Shacharis") {
       return card(s, mine, {
-        overrideBody: selichosBlock(mine.map((r) => to24(r.time)), selichosRows, hasTaanis),
+        overrideBody: selichosBlock(
+          mine.map((r) => to24(r.time)),
+          mine[0]?.daySpec ?? "",
+          selichosRows,
+          hasTaanis,
+        ),
         compact: hasTaanis,
       });
     }

@@ -1,6 +1,6 @@
 # 071 — Selichos offset varies by period (20 / 30 / 60 / 15 min)
 
-**Status:** implemented
+**Status:** implemented; the Aseres Yemei Teshuva offset superseded by [#072](072-selichos-25-minutes-shacharis-dayspec.md) (30 → 25 min). The Elul / erev Rosh Hashana / erev Yom Kippur offsets and the per-offset bucketing below are unchanged.
 **Date:** 2026-09-07
 **Author:** claude-session (Yosef directing)
 **Related:** [#067](067-computed-selichos-times.md), [#069](069-flier-monday-next-week-taanis-date.md)
@@ -66,3 +66,12 @@ into Elul/erev-RH/post-RH buckets at 20/60/30, chronologically ordered).
 Rendered and visually confirmed the flier for the straddle week's simpler
 sibling cases and the ordinary weeks above; the triple-bucket-plus-fast
 overflow is the one exception, noted above.
+
+## Addendum (2026-09-14) — Aseres Yemei Teshuva is 25 minutes, not 30
+
+Yosef checked the flier against what the shul actually davened the week of
+September 13, 2026 (the first post-Rosh-Hashana week this rule shipped for):
+Selichos ran 6:35 / 7:50, not the 6:30 / 7:45 this entry's 30-minute offset
+produced. `SELICHOS_BEFORE_ASERES_YEMEI_TESHUVA` is 25. See
+[#072](072-selichos-25-minutes-shacharis-dayspec.md); nothing else in this
+entry changes.

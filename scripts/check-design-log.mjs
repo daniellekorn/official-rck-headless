@@ -65,10 +65,17 @@ function loadAllowlist() {
 	return map;
 }
 
-/** One grep over src/ per identifier, via git so ignored files don't count. */
+/** Directories a design log entry may legitimately cite code in. `automation/`
+ * is here because the weekly flier's renderer lives outside src/ but is
+ * designed in the log the same way the site is (#069, #071, #072) — without
+ * it, live constants like the flier's GOLD_CAP read as stale references. */
+const SOURCE_DIRS = ["src/", "automation/"];
+
+/** One grep per identifier, via git so ignored files don't count. */
 function existsInSource(token) {
+	const dirs = SOURCE_DIRS.join(" ");
 	try {
-		execSync(`git grep -q -w -F -- ${JSON.stringify(token)} src/`, { cwd: root, stdio: "ignore" });
+		execSync(`git grep -q -w -F -- ${JSON.stringify(token)} -- ${dirs}`, { cwd: root, stdio: "ignore" });
 		return true;
 	} catch {
 		return false;
@@ -126,7 +133,7 @@ console.log(`design log: ${findings.length} of ${entries.length} entries cite co
 for (const { file, paths, idents, refs } of findings) {
 	console.log(file);
 	for (const p of paths) console.log(`  missing file    ${p}`);
-	for (const i of idents) console.log(`  not in src/     ${i}`);
+	for (const i of idents) console.log(`  not in source   ${i}`);
 	for (const r of refs) console.log(`  no such entry   ${r}`);
 	console.log();
 }
