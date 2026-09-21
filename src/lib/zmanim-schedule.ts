@@ -380,7 +380,8 @@ function formatDaySpec(indices: number[]): string {
  * (Friday/Shabbos roll to the coming week). Pure and deterministic.
  */
 export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeekdaySchedule {
-	const sunday = scheduleSunday(civilDateOf(now));
+	const today = civilDateOf(now);
+	const sunday = scheduleSunday(today);
 
 	// A Yom Tov day has no fixed weekday Shacharis/Mincha/Maariv at all (see
 	// isChag) — drop it from every regular-day list below, the same way a
@@ -444,6 +445,12 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 		const info = selichosInfoFor(day, selichosWindowsThisWeek);
 		if (!info) continue;
 		if (info.label) {
+			// A one-off (Erev Rosh Hashana / Erev Yom Kippur) already happened once
+			// its day is behind us — unlike the regular in-season buckets below, it
+			// never recurs later in the same week, so once it's past it's just
+			// stale info (confirmed with Yosef, Sept 2026, the Monday right after
+			// Erev Yom Kippur/Yom Kippur itself).
+			if (civilTime(day) < civilTime(today)) continue;
 			selichosBuckets.push({ sortKey: i, daySpec: `${info.label} (${DAY_NAMES[i]})`, offset: info.offset });
 		} else {
 			const days = selichosRegularDaysByOffset.get(info.offset) ?? [];
