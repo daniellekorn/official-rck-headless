@@ -51,9 +51,16 @@ function daySpecCaption(daySpec, { first, compact }) {
 function defaultBody(rows, compact = false) {
   const groups = groupByDaySpec(rows);
   const total = rows.length;
-  const size = total <= 2 ? 104 : total === 3 ? 96 : 74;
-  const gap = (total >= 4 ? 4 : 10) - (compact ? 2 : 0);
-  const bodyTop = (total >= 4 ? 12 : 24) - (compact ? 6 : 0);
+  // A week with no Taanis column (compact=false) *and* only 2 time rows (no
+  // 6pm Mincha, or Shacharis/Maariv's usual 2) has real headroom to spare —
+  // sized up from the Taanis-week numbers rather than as a delta off them, so
+  // that case is untouched. The 3-row case stays at its original size: it
+  // already fills the card at the old sizing (verified against the week of
+  // Sept 27, back to the normal 3-Mincha cadence) and bumping it overflows
+  // into the footer.
+  const size = compact ? (total <= 2 ? 104 : total === 3 ? 96 : 74) : total <= 2 ? 124 : total === 3 ? 96 : 74;
+  const gap = compact ? (total >= 4 ? 4 : 10) - 2 : total <= 2 ? 16 : total >= 4 ? 4 : 10;
+  const bodyTop = compact ? (total >= 4 ? 12 : 24) - 6 : total <= 2 ? 30 : total >= 4 ? 12 : 24;
   return groups
     .map(
       (g, i) => `
@@ -138,9 +145,12 @@ function selichosBlock(shacharisTimes, shacharisDaySpec, selichosRows, compact) 
 function card(service, rows, { overrideBody = "", compact = false } = {}) {
   const body = overrideBody || defaultBody(rows, compact);
   const padding = compact ? "22px 26px 18px" : "28px 34px 24px";
+  // Bigger header on a no-Taanis week, to match defaultBody's bigger times
+  // for the same reason — the card has the headroom to spare.
+  const headerSize = compact ? 68 : 80;
   return `
     <div style="background:#f7f5f0;border-top:6px solid #102a56;box-sizing:border-box;padding:${padding};display:flex;flex-direction:column">
-      <div style="font-family:'Oswald',sans-serif;font-size:68px;line-height:1;font-weight:500;color:#102a56">${service}</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:${headerSize}px;line-height:1;font-weight:500;color:#102a56">${service}</div>
       ${body}
     </div>`;
 }
