@@ -40,6 +40,12 @@ const html = buildFlierHtml({
   photoUrl: pathToFileURL(path.join(here, "assets", "beis-medrash.png")).href,
   logoUrl: pathToFileURL(path.join(repo, "public", "logo-vertical-light.png")).href,
   qrUrl: pathToFileURL(path.join(here, "assets", "qr-rckollel.png")).href,
+  // Self-hosted (not Google Fonts over the network) so the Monday-morning
+  // launchd run still gets the right fonts even if it fires right as the
+  // Mac wakes from sleep, before Wi-Fi has reconnected.
+  oswald500Url: pathToFileURL(path.join(here, "assets", "fonts", "Oswald-500.woff2")).href,
+  onest400Url: pathToFileURL(path.join(here, "assets", "fonts", "Onest-400.woff2")).href,
+  onest600Url: pathToFileURL(path.join(here, "assets", "fonts", "Onest-600.woff2")).href,
 });
 
 await mkdir(outDir, { recursive: true });

@@ -213,8 +213,21 @@ function taanisColumn(taanisRows) {
  * @param {string} o.photoUrl   file:// or data: URL for the beis medrash photo
  * @param {string} o.logoUrl    file:// or data: URL for logo-vertical-light.png
  * @param {string} o.qrUrl      file:// or data: URL for the QR png
+ * @param {string} o.oswald500Url  file:// or data: URL for Oswald-500.woff2
+ * @param {string} o.onest400Url   file:// or data: URL for Onest-400.woff2
+ * @param {string} o.onest600Url   file:// or data: URL for Onest-600.woff2
  */
-export function buildFlierHtml({ weekOf, rows, taanis = [], photoUrl, logoUrl, qrUrl }) {
+export function buildFlierHtml({
+  weekOf,
+  rows,
+  taanis = [],
+  photoUrl,
+  logoUrl,
+  qrUrl,
+  oswald500Url,
+  onest400Url,
+  onest600Url,
+}) {
   const selichosRows = rows.filter((r) => r.service === "Selichos");
   const hasTaanis = taanis.length > 0;
   // Selichos' paired gold/dark grid makes the Shacharis card the tightest of
@@ -245,10 +258,12 @@ export function buildFlierHtml({ weekOf, rows, taanis = [], photoUrl, logoUrl, q
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<style>html,body{margin:0;padding:0}</style>
+<style>
+html,body{margin:0;padding:0}
+@font-face{font-family:'Oswald';font-style:normal;font-weight:500;src:url('${oswald500Url}') format('woff2')}
+@font-face{font-family:'Onest';font-style:normal;font-weight:400;src:url('${onest400Url}') format('woff2')}
+@font-face{font-family:'Onest';font-style:normal;font-weight:600;src:url('${onest600Url}') format('woff2')}
+</style>
 </head>
 <body>
 <div style="width:1920px;height:1080px;box-sizing:border-box;padding:60px 64px;background:#ffffff;font-family:'Onest',system-ui,sans-serif;color:#1a1a1a;display:flex;flex-direction:column;gap:32px;overflow:hidden">
