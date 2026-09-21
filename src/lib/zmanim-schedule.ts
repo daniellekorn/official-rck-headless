@@ -252,6 +252,10 @@ interface SelichosWindow {
 	roshHashana2: CivilDate;
 	erevYomKippur: CivilDate;
 	seasonStart: CivilDate;
+	/** 10 Tishrei — also anchors the Yom-Kippur-to-Sukkos Mincha gap below. */
+	yomKippur: CivilDate;
+	/** 15 Tishrei. */
+	sukkos1: CivilDate;
 }
 
 /** Milliseconds timestamp for a CivilDate — safe for equality/ordering (see `anchor`). */
@@ -270,7 +274,20 @@ function selichosWindowForYear(ref: CivilDate, refAbs: number, hebrewYear: numbe
 		roshHashana2: addDays(tishrei1, 1),
 		erevYomKippur: addDays(tishrei1, 8),
 		seasonStart: addDays(leilSelichos, 2), // the Monday after Leil Selichos, not the Sunday
+		yomKippur: addDays(tishrei1, 9),
+		sukkos1: addDays(tishrei1, 14),
 	};
+}
+
+/**
+ * The shul doesn't run the fixed 6:00pm Mincha between Yom Kippur and Sukkos
+ * (confirmed with Yosef, Sept 2026) — the few weekdays of 11–14 Tishrei that
+ * fall outside both the Aseres Yemei Teshuva schedule and Sukkos itself.
+ * Exclusive of Yom Kippur and Sukkos themselves (both Chag, no weekday Mincha
+ * at all — see `isChag`).
+ */
+function isBetweenYomKippurAndSukkos(day: CivilDate, windows: SelichosWindow[]): boolean {
+	return windows.some((w) => civilTime(day) > civilTime(w.yomKippur) && civilTime(day) < civilTime(w.sukkos1));
 }
 
 /** Both candidate Rosh Hashanas (the one that started this Hebrew year, and next year's) — at
@@ -391,6 +408,21 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 	const shacharisDays = [0, 1, 2, 3, 4, 5].filter((i) => !isChag(addDays(sunday, i)));
 	const minchaMaarivDays = [0, 1, 2, 3, 4].filter((i) => !isChag(addDays(sunday, i)));
 
+	const selichosWindowsThisWeek = selichosWindows(sunday);
+
+	// A day's schedule is still shown once it's over (the flier/page cover the
+	// whole week), but its own *label* shouldn't keep advertising a day that's
+	// already behind us — only the display days drop it, never the underlying
+	// day list the times themselves are computed from below (confirmed with
+	// Yosef, Sept 2026: don't retroactively change an already-posted time).
+	// Falls back to the full list if that would empty it out (e.g. Friday
+	// afternoon, once every Sun–Thu Mincha/Maariv day this week is past).
+	const isPastDay = (i: number) => civilTime(addDays(sunday, i)) < civilTime(today);
+	const labelDays = (days: number[]) => {
+		const remaining = days.filter((i) => !isPastDay(i));
+		return remaining.length > 0 ? remaining : days;
+	};
+
 	// Mincha/Maariv aggregate the most restrictive *actually-in-session* day
 	// so one posted time is valid every day it runs (early minyanim can't
 	// precede their zman on any of those days, shkiya-anchored ones can't run
@@ -412,7 +444,7 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 
 	const rows: ComputedDaveningRow[] = [];
 
-	const shacharisDaySpec = formatDaySpec(shacharisDays);
+	const shacharisDaySpec = formatDaySpec(labelDays(shacharisDays));
 	for (const t of SHACHARIS) rows.push({ service: "Shacharis", daySpec: shacharisDaySpec, time: fmtTime(t) });
 	// Scan the same in-session days for Rosh Chodesh (never coincides with a
 	// Yom Tov day itself — Rosh Chodesh Tishrei is Rosh Hashana, already
@@ -437,7 +469,6 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 	// Rows are collected keyed by their earliest day-of-week, then pushed in
 	// that order — a later-in-the-week special day (e.g. Fri) must render
 	// after an earlier regular bucket (e.g. Mon–Thu), not before it.
-	const selichosWindowsThisWeek = selichosWindows(sunday);
 	const selichosRegularDaysByOffset = new Map<number, number[]>();
 	const selichosBuckets: { sortKey: number; daySpec: string; offset: number }[] = [];
 	for (let i = 0; i <= 5; i++) {
@@ -466,9 +497,14 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 		for (const t of SHACHARIS) rows.push({ service: "Selichos", daySpec: bucket.daySpec, time: fmtTime(t - bucket.offset) });
 	}
 
-	const minchaMaarivDaySpec = formatDaySpec(minchaMaarivDays);
+	const minchaMaarivDaySpec = formatDaySpec(labelDays(minchaMaarivDays));
+	// The fixed 6:00pm Mincha doesn't run between Yom Kippur and Sukkos at all
+	// (confirmed with Yosef, Sept 2026) — overrides the usual sunset-based
+	// FIXED_MINCHA_CUTOFF check for whichever of this week's in-session days
+	// fall in that gap.
+	const skipFixedMincha = minchaMaarivDays.some((i) => isBetweenYomKippurAndSukkos(addDays(sunday, i), selichosWindowsThisWeek));
 	rows.push({ service: "Mincha", daySpec: minchaMaarivDaySpec, time: fmtTime(earlyMincha) });
-	if (lateMincha > FIXED_MINCHA_CUTOFF) rows.push({ service: "Mincha", daySpec: minchaMaarivDaySpec, time: fmtTime(FIXED_MINCHA) });
+	if (lateMincha > FIXED_MINCHA_CUTOFF && !skipFixedMincha) rows.push({ service: "Mincha", daySpec: minchaMaarivDaySpec, time: fmtTime(FIXED_MINCHA) });
 	rows.push({ service: "Mincha", daySpec: minchaMaarivDaySpec, time: fmtTime(lateMincha) });
 
 	rows.push({ service: "Maariv", daySpec: minchaMaarivDaySpec, time: fmtTime(shkiyaMaariv) });
