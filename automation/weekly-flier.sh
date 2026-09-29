@@ -15,10 +15,18 @@ mkdir -p "$DEST"
 cd "$REPO"
 
 echo "=== $(date) ==="
-# +7 days always lands inside next week's Sun–Fri span (even if launchd runs
-# this a day or two late), so render.mjs resolves it to *next* week's Sunday
-# regardless of which day this actually fires — see automation/README.md.
-NEXT_WEEK_DATE="$(date -v+7d +%Y-%m-%d)"
+# The exact Sunday that starts next week (never a mid-week day — see
+# automation/README.md). getComputedWeekdaySchedule() also uses this probe
+# date as "today" to decide whether a day in the displayed week is already
+# past (see zmanim-schedule.ts); a mid-week probe like a flat "+7 days" makes
+# Sunday look past and drops it from the Shacharis/Mincha/Maariv day-range
+# labels ("Mon – Fri" instead of "Sun – Fri"). Landing exactly on next week's
+# Sunday keeps every day of that week in the future, so nothing gets dropped —
+# still robust to launchd firing a day or two late.
+DOW="$(date +%w)"  # 0=Sun .. 6=Sat
+DAYS_AHEAD=$(( (7 - DOW) % 7 ))
+if [ "$DAYS_AHEAD" -eq 0 ]; then DAYS_AHEAD=7; fi
+NEXT_WEEK_DATE="$(date -v+"${DAYS_AHEAD}"d +%Y-%m-%d)"
 node automation/render.mjs "$NEXT_WEEK_DATE"
 
 # Newest pair only, so the folder doesn't fill up with old weeks.
