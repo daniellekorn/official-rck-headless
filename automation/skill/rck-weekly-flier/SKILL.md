@@ -9,7 +9,7 @@ description: "Renders the RCK weekday davening flier locally from the repo — a
 
 Report that version if asked.
 
-Produces two files for the coming week: a **JPG** (television screen, WhatsApp) and a **PDF** (printing). Both are drawn from `getComputedWeekdaySchedule()` in `src/lib/zmanim-schedule.ts` — the same function `rckollel.com/daven` calls. **Never type a zman in by hand and never compute one yourself.** If a time looks wrong, the website is the authority and the fix belongs in that module.
+Produces four files for the coming week: a **JPG** (television screen, WhatsApp), a **PDF** of the same 16:9 design, and an **A4 portrait JPG and PDF** (printing). Both are drawn from `getComputedWeekdaySchedule()` in `src/lib/zmanim-schedule.ts` — the same function `rckollel.com/daven` calls. **Never type a zman in by hand and never compute one yourself.** If a time looks wrong, the website is the authority and the fix belongs in that module.
 
 ## Rules
 
@@ -28,20 +28,22 @@ node automation/render.mjs              # the current week
 node automation/render.mjs 2026-09-13   # the week containing that date
 ```
 
-It prints the week label and every row, then writes both files to `automation/out/`:
+It prints the week label and every row, then writes the files to `automation/out/`:
 
 ```
 automation/out/RCK-DaveningTimes_2026-09-13.jpg
 automation/out/RCK-DaveningTimes_2026-09-13.pdf
+automation/out/RCK-DaveningTimes_A4_2026-09-13.jpg
+automation/out/RCK-DaveningTimes_A4_2026-09-13.pdf
 ```
 
 Copy them where the person can find them — `~/Downloads` unless they say otherwise:
 
 ```bash
-cp automation/out/RCK-DaveningTimes_*.jpg automation/out/RCK-DaveningTimes_*.pdf ~/Downloads/
+cp automation/out/RCK-DaveningTimes_*.jpg automation/out/RCK-DaveningTimes_*.pdf ~/Downloads/   # includes the A4 JPG + PDF
 ```
 
-Then report the times you saw, in one block, and the two filenames.
+Then report the times you saw, in one block, and the four filenames.
 
 ## First run on a new machine
 

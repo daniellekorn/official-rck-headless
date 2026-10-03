@@ -1,7 +1,7 @@
 # Weekly davening flier
 
 Produces the weekday minyanim flier — a 1920×1080 JPG for the television screen
-and WhatsApp, and a PDF for printing — using the same computed times
+and WhatsApp, a 1920×1080 PDF, and an A4 portrait JPG and PDF for printing — using the same computed times
 `rckollel.com/daven` shows. The automated Monday run always renders the
 *following* week (see "The weekly schedule" below); run by hand with a date
 argument to render any other week.
@@ -17,9 +17,10 @@ node automation/render.mjs              # current week
 node automation/render.mjs 2026-09-13   # the week containing that date
 ```
 
-Both files land in `automation/out/`. `weekly-flier.sh` renders *next* week
-specifically (it passes render.mjs a date 7 days out) and copies the newest
-pair to `~/Downloads/RCK Flier`.
+Four files land in `automation/out/`: `RCK-DaveningTimes_<sunday>.jpg` and `.pdf`,
+and `RCK-DaveningTimes_A4_<sunday>.jpg` and `.pdf`. `weekly-flier.sh` renders *next* week
+specifically (it passes render.mjs a date 7 days out) and copies that week's
+four files to `~/Downloads/RCK Flier`.
 
 First run on a new machine needs Playwright and Node ≥ 22.18:
 
@@ -52,9 +53,10 @@ checked out. It must never publish the flier as a site page.
 
 | File | What it is |
 | --- | --- |
-| `render.mjs` | Reads the schedule, builds the HTML, drives Playwright, writes JPG + PDF + `meta.json` |
+| `render.mjs` | Reads the schedule, builds the HTML, drives Playwright, writes JPG + PDF + A4 JPG + A4 PDF + `meta.json` |
 | `flier-html.mjs` | The design: one function returning the 1920×1080 HTML, inline-styled |
-| `weekly-flier.sh` | Renders *next* week and copies the newest pair to `~/Downloads/RCK Flier` |
+| `a4-html.mjs` | The A4 portrait design (794×1123 px) — same palette and fonts, its own layout. Render fails loudly if a busy week overflows the page |
+| `weekly-flier.sh` | Renders *next* week and copies its JPG, PDF, A4 JPG and A4 PDF to `~/Downloads/RCK Flier` |
 | `com.rckollel.weeklyflier.plist` | The Monday 06:30 LaunchAgent |
 | `assets/` | Beis medrash photograph, QR code, logo |
 | `out/` | Generated output — gitignored, safe to delete |
@@ -85,5 +87,6 @@ ambiguous which calendar day the time belongs to.
 The design lives in `flier-html.mjs` as plain inline-styled HTML — navy #102a56,
 gold #dfb030 / #a47915, warm stone #f7f5f0, Oswald for numerals and headings,
 Onest for labels. There is a matching design file (`Davening Times - Screen
-16x9.dc.html`) kept alongside the A4 print version; change both together or they
-drift.
+16x9.dc.html`) kept alongside the screen version; change both together or they drift.
+`a4-html.mjs` is the A4 portrait print version — a change to the palette or
+fonts needs to go there too.

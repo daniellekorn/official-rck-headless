@@ -1,5 +1,5 @@
 #!/bin/bash
-# Renders the *following* week's davening flier and drops both files in a
+# Renders the *following* week's davening flier and drops the files in a
 # folder. Run by launchd every Monday morning (see
 # com.rckollel.weeklyflier.plist) so it lands well before that week starts,
 # or by hand any time:  ./automation/weekly-flier.sh
@@ -29,9 +29,13 @@ if [ "$DAYS_AHEAD" -eq 0 ]; then DAYS_AHEAD=7; fi
 NEXT_WEEK_DATE="$(date -v+"${DAYS_AHEAD}"d +%Y-%m-%d)"
 node automation/render.mjs "$NEXT_WEEK_DATE"
 
-# Newest pair only, so the folder doesn't fill up with old weeks.
-for ext in jpg pdf; do
-  latest=$(ls -t automation/out/*."$ext" | head -1)
-  cp "$latest" "$DEST/"
-  echo "Copied $(basename "$latest") -> $DEST"
+# This week's files only (screen JPG + PDF, A4 JPG + PDF), so the folder
+# doesn't fill up with old weeks. NEXT_WEEK_DATE is the week's Sunday, which is
+# exactly what render.mjs puts in the filenames.
+for f in automation/out/RCK-DaveningTimes_"$NEXT_WEEK_DATE".jpg \
+         automation/out/RCK-DaveningTimes_"$NEXT_WEEK_DATE".pdf \
+         automation/out/RCK-DaveningTimes_A4_"$NEXT_WEEK_DATE".jpg \
+         automation/out/RCK-DaveningTimes_A4_"$NEXT_WEEK_DATE".pdf; do
+  cp "$f" "$DEST/"
+  echo "Copied $(basename "$f") -> $DEST"
 done
