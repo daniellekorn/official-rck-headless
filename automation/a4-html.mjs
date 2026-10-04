@@ -45,16 +45,19 @@ export function buildA4Html({ weekOf, rows, taanis = [], photoUrl, logoUrl, qrUr
   // fill the page and times go big. Busy weeks use compact cards instead.
   const big = selichos.length === 0 && taanis.length === 0;
 
-  const card = (title, inner) => `
+  const card = (title, inner, caption = "") => `
     <div style="background:#f7f5f0;border-top:5px solid #102a56;padding:${big ? "18px 26px 20px" : "12px 26px 14px"};display:grid;grid-template-columns:205px 1fr;column-gap:20px;align-items:center;${big ? "flex:1;" : ""}">
-      <div style="font-family:'Oswald',sans-serif;font-weight:500;font-size:50px;line-height:1;color:#102a56">${title}</div>
+      <div>
+        <div style="font-family:'Oswald',sans-serif;font-weight:500;font-size:50px;line-height:1;color:#102a56">${title}</div>
+        ${caption ? `<div style="${CAP};margin-top:10px">${caption}</div>` : ""}
+      </div>
       <div>${inner}</div>
     </div>`;
 
   const service = (name) => {
     const groups = groupByDaySpec(rows.filter((r) => r.service === name));
     let html = groups
-      .map((g) => `<div style="${CAP}">${g.daySpec}</div>${timesRow(g.times, big ? (g.times.length <= 2 ? 80 : 58) : 54)}`)
+      .map((g, i) => `${i === 0 ? "" : `<div style="${CAP}">${g.daySpec}</div>`}${timesRow(g.times, big ? (g.times.length <= 2 ? 80 : 58) : 54)}`)
       .join('<div style="height:12px"></div>');
     if (name === "Shacharis" && selichos.length) {
       const [main, ...rest] = groupByDaySpec(selichos);
@@ -69,7 +72,7 @@ export function buildA4Html({ weekOf, rows, taanis = [], photoUrl, logoUrl, qrUr
           .join("")}
       </div>`;
     }
-    return card(name, html);
+    return card(name, html, groups[0]?.daySpec ?? "");
   };
 
   const taanisCards = taanis
@@ -105,7 +108,7 @@ html,body{margin:0;padding:0}
       <div>
         <div style="font-family:'Oswald',sans-serif;font-weight:500;font-size:76px;line-height:1;color:#fff">Daven with Us</div>
         <div style="height:4px;width:76px;background:#dfb030;margin:12px 0 10px"></div>
-        <div style="font-weight:600;letter-spacing:.16em;text-transform:uppercase;font-size:20px;line-height:1.35;color:#f6d66b">Weekday Minyanim<br>Week of ${weekOf}</div>
+        <div style="font-weight:600;letter-spacing:.16em;text-transform:uppercase;font-size:24px;line-height:1.35;color:#f6d66b">Week of ${weekOf}</div>
       </div>
       <img src="${logoUrl}" alt="RCK — Ra'anana Community Kollel" style="height:112px;width:auto;display:block" />
     </div>
