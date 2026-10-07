@@ -560,9 +560,11 @@ export function getComputedShabbosSchedule(now: Date = new Date()): ComputedShab
 
 	// Hadlakas neiros: sea-level shkiya − 20, rounded to the nearest minute.
 	// Not hebcal's 18-min default — 20 is what the printed luach uses,
-	// confirmed across 10+ weeks of dates (#066).
+	// confirmed across 10+ weeks of dates (#066). roundMinute must stay false:
+	// hebcal's `true` truncates seconds for negative offsets, which posted
+	// candles a minute early in ~29 of 52 weeks vs the luach (#078).
 	const zFri = new Zmanim(LOCATION, anchor(friday), false);
-	const candles = minutesOf(zFri.sunsetOffset(-CANDLES_BEFORE_SHKIYA, true));
+	const candles = minutesOf(zFri.sunsetOffset(-CANDLES_BEFORE_SHKIYA, false));
 	// Mincha & Kabbalos Shabbos flips with the clock change: 10 min before
 	// hadlakas neiros on the summer clock, 10 after on the winter clock.
 	const erevMincha = candles + (isSummerClock(friday) ? -EREV_MINCHA_VS_CANDLES : EREV_MINCHA_VS_CANDLES);

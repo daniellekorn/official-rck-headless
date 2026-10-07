@@ -70,6 +70,6 @@ for (const input of dates) {
 	const zFri = new Zmanim(LOCATION, new Date(Date.UTC(fy, fm - 1, fd, 12)), false);
 	const zSat = new Zmanim(LOCATION, new Date(Date.UTC(fy, fm - 1, fd + 1, 12)), false);
 	console.log(
-		`     raw: erev shkiya ${clock.format(zFri.sunset())}   candles(−20) ${clock.format(zFri.sunsetOffset(-20, true))}   tzeis 8.5° ${clock.format(zSat.tzeit(8.5))}`,
+		`     raw: erev shkiya ${clock.format(zFri.sunset())}   candles(−20) ${clock.format(zFri.sunsetOffset(-20, false))}   tzeis 8.5° ${clock.format(zSat.tzeit(8.5))}`,
 	);
 }

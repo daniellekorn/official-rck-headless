@@ -1,6 +1,6 @@
 # 066 — Candle-lighting offset: 18 min → 20 min
 
-**Status:** implemented
+**Status:** implemented — rounding amended by [#078](078-candle-lighting-rounding.md)
 **Date:** 2026-09-06
 **Author:** claude-session (Yosef directing)
 **Related:** [#041](041-computed-shabbos-times.md), [#040](040-computed-davening-times.md)
@@ -50,3 +50,10 @@ few Fridays against the printed luach.
 (comments updated); `scripts/verify-zmanim.mjs` raw-diagnostic comments
 updated from −18 to −20; [#041](041-computed-shabbos-times.md) amended with
 a status line + addendum.
+
+## Addendum (2026-10-07)
+
+The 20-minute rule stands. Re-verified against all 52 rows of the printed
+luach ("Shabbos Times Magnet 5787"). But the implementation truncated seconds
+instead of rounding to the nearest minute, so candles posted a minute early
+in 29 of 52 weeks. Fixed in [#078](078-candle-lighting-rounding.md).
