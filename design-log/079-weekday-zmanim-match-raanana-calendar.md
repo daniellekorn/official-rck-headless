@@ -78,3 +78,5 @@ is a few seconds' difference in solar calculation, the same pattern seen in
 `src/lib/zmanim-schedule.ts`: new `minchaGedolaSeconds()`; nearest-minute
 rounding in `getComputedWeekdaySchedule`. `scripts/verify-zmanim.mjs`: daily
 line shows both mincha gedolah candidates. #040 amended.
+
+Commit: `7436c45`.
