@@ -63,7 +63,11 @@ const TAANIS_DISPLAY_NAME: Record<string, string> = {
 
 // ── Shabbos rules (confirmed with the rav, July 2026; see #041). ──
 const CANDLES_BEFORE_SHKIYA = 20; // confirmed against the printed luach (10+ weeks), not hebcal's 18-min default; see #066
-const EREV_MINCHA_VS_CANDLES = 10; // before candles on summer clock, after on winter clock
+// Mincha & Kabbalos Shabbos vs hadlakas neiros, by candle time (Yosef, Oct 2026; see #080):
+// after 6:45 pm → 10 min before; 6:05–6:45 pm (inclusive) → same time; before 6:05 pm → 10 min after.
+const EREV_MINCHA_VS_CANDLES = 10;
+const EREV_MINCHA_SAME_FROM = 18 * 60 + 5; // 6:05 pm
+const EREV_MINCHA_SAME_TO = 18 * 60 + 45; // 6:45 pm
 const SHABBOS_MORNING = [
 	{ label: "Midrash Shiur", minutes: 8 * 60 },
 	{ label: "Shacharis", minutes: 8 * 60 + 45 },
@@ -546,14 +550,6 @@ export interface ComputedShabbosSchedule {
 	dayRows: ComputedShabbosRow[];
 }
 
-const offsetFmt = new Intl.DateTimeFormat("en-US", { timeZone: TZ, timeZoneName: "shortOffset" });
-
-/** Israel summer clock (IDT, GMT+3) in effect on this civil day's afternoon. */
-function isSummerClock(c: CivilDate): boolean {
-	const zone = offsetFmt.formatToParts(anchor(c)).find((p) => p.type === "timeZoneName")?.value;
-	return zone === "GMT+3";
-}
-
 /** Minutes since local midnight of an instant, nearest minute (hebcal-style rounding). */
 function minutesOf(instant: Date): number {
 	return Math.round(secondsOfDay(instant) / 60);
@@ -575,11 +571,17 @@ export function getComputedShabbosSchedule(now: Date = new Date()): ComputedShab
 	// candles a minute early in ~29 of 52 weeks vs the luach (#078).
 	const zFri = new Zmanim(LOCATION, anchor(friday), false);
 	const candles = minutesOf(zFri.sunsetOffset(-CANDLES_BEFORE_SHKIYA, false));
-	// Mincha & Kabbalos Shabbos flips with the clock change: 10 min before
-	// hadlakas neiros on the summer clock, 10 after on the winter clock.
-	const erevMincha = candles + (isSummerClock(friday) ? -EREV_MINCHA_VS_CANDLES : EREV_MINCHA_VS_CANDLES);
+	// Mincha & Kabbalos Shabbos by candle time (#080): 10 min before late
+	// candles, the same time in the 6:05–6:45 band, 10 min after early ones.
+	const erevMincha =
+		candles > EREV_MINCHA_SAME_TO
+			? candles - EREV_MINCHA_VS_CANDLES
+			: candles >= EREV_MINCHA_SAME_FROM
+				? candles
+				: candles + EREV_MINCHA_VS_CANDLES;
 
-	// Chronological: mincha precedes candles in summer, follows them in winter.
+	// Chronological: mincha precedes late candles and follows early ones
+	// (stable sort keeps mincha first when they coincide).
 	const fridayRows: ComputedShabbosRow[] = [
 		{ minutes: erevMincha, label: "Mincha & Kabbalos Shabbos" },
 		{ minutes: candles, label: "Hadlakas Neiros" },

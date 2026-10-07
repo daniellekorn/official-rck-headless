@@ -1,6 +1,6 @@
 # 041 — Shabbos davening times computed from zmanim
 
-**Status:** implemented; Hadlakas Neiros offset superseded by [#066](066-candle-lighting-20-minutes.md) (18 min → 20 min)
+**Status:** implemented; Hadlakas Neiros offset superseded by [#066](066-candle-lighting-20-minutes.md) (18 min → 20 min); Mincha & Kabbalos Shabbos rule superseded by [#080](080-erev-shabbos-mincha-by-candle-time.md)
 **Date:** 2026-07-05
 **Author:** claude-session (danielle directing)
 **Related:** [#040](040-computed-davening-times.md), [#003](003-davening-schedule-restructure.md)
@@ -81,3 +81,11 @@ is no longer current. Yosef confirmed 20 minutes against the printed luach
 across 10+ weeks of dates and asked for the change; hebcal's 18-min default
 was never actually verified against the luach itself, only against
 hebcal.com's own output. See [#066](066-candle-lighting-20-minutes.md).
+
+## Addendum (2026-10-07)
+
+The "Mincha & Kabbalos Shabbos" row (± 10 by summer/winter clock) is no longer
+current. It is now set by the candle-lighting time: after 6:45 pm → 10 min
+before; 6:05–6:45 pm → same time; before 6:05 pm → 10 min after. See
+[#080](080-erev-shabbos-mincha-by-candle-time.md). Shabbos-day Mincha
+(candles − 10) is unchanged.
