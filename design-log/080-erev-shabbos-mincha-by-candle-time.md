@@ -52,3 +52,5 @@ summer clock with early candle times:
 ## Implementation Results
 
 `src/lib/zmanim-schedule.ts` (`getComputedShabbosSchedule`); #041 amended.
+
+Commit: `99d00ef`.
