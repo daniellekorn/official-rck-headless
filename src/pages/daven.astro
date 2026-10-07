@@ -6,6 +6,7 @@ import PageHeader from "../components/PageHeader.astro";
 import { getDaveningGrouped, groupByService } from "../lib/davening";
 import { getComputedShabbosSchedule, getComputedWeekdaySchedule } from "../lib/zmanim-schedule";
 import { getFlyers } from "../lib/flyers";
+import { googleMapsUrl } from "../lib/maps";
 import { scaleFlyerImage, flyerSrcset, flyerLightboxSrc } from "../lib/wix-media";
 
 const grouped = await getDaveningGrouped();
@@ -133,7 +134,11 @@ const scheduleFlyer = scheduleFlyers[0] ?? null;
 							/>
 							<div>
 								<p class="font-sans text-xs font-bold uppercase tracking-[0.2em] text-gold-500">Shabbos Location</p>
-								<p class="mt-0.5 font-sans text-base font-semibold text-navy-700">Tel Khai 8, Ra'anana</p>
+								<p class="mt-0.5 font-sans text-base font-semibold text-navy-700">
+									<a href={googleMapsUrl("Tel Khai 8, Ra'anana")} target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-gold-600 active:text-gold-600">
+										Tel Khai 8, Ra'anana
+									</a>
+								</p>
 							</div>
 						</div>
 
