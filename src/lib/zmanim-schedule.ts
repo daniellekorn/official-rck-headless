@@ -423,19 +423,6 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 
 	const selichosWindowsThisWeek = selichosWindows(sunday);
 
-	// A day's schedule is still shown once it's over (the flier/page cover the
-	// whole week), but its own *label* shouldn't keep advertising a day that's
-	// already behind us — only the display days drop it, never the underlying
-	// day list the times themselves are computed from below (confirmed with
-	// Yosef, Sept 2026: don't retroactively change an already-posted time).
-	// Falls back to the full list if that would empty it out (e.g. Friday
-	// afternoon, once every Sun–Thu Mincha/Maariv day this week is past).
-	const isPastDay = (i: number) => civilTime(addDays(sunday, i)) < civilTime(today);
-	const labelDays = (days: number[]) => {
-		const remaining = days.filter((i) => !isPastDay(i));
-		return remaining.length > 0 ? remaining : days;
-	};
-
 	// Mincha/Maariv aggregate the most restrictive *actually-in-session* day
 	// so one posted time is valid every day it runs (early minyanim can't
 	// precede their zman on any of those days, shkiya-anchored ones can't run
@@ -458,7 +445,7 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 
 	const rows: ComputedDaveningRow[] = [];
 
-	const shacharisDaySpec = formatDaySpec(labelDays(shacharisDays));
+	const shacharisDaySpec = formatDaySpec(shacharisDays);
 	for (const t of SHACHARIS) rows.push({ service: "Shacharis", daySpec: shacharisDaySpec, time: fmtTime(t) });
 	// Scan the same in-session days for Rosh Chodesh (never coincides with a
 	// Yom Tov day itself — Rosh Chodesh Tishrei is Rosh Hashana, already
@@ -511,7 +498,7 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 		for (const t of SHACHARIS) rows.push({ service: "Selichos", daySpec: bucket.daySpec, time: fmtTime(t - bucket.offset) });
 	}
 
-	const minchaMaarivDaySpec = formatDaySpec(labelDays(minchaMaarivDays));
+	const minchaMaarivDaySpec = formatDaySpec(minchaMaarivDays);
 	// The fixed 6:00pm Mincha doesn't run between Yom Kippur and Sukkos at all
 	// (confirmed with Yosef, Sept 2026) — overrides the usual sunset-based
 	// FIXED_MINCHA_CUTOFF check for whichever of this week's in-session days
