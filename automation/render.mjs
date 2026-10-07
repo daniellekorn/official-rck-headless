@@ -16,7 +16,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { chromium } from "playwright";
 import { getComputedWeekdaySchedule } from "../src/lib/zmanim-schedule.ts";
 import { buildFlierHtml } from "./flier-html.mjs";
-import { buildA4Html } from "./a4-html.mjs";
+import { buildA4Html, alignRowWidths } from "./a4-html.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, "..");
@@ -80,6 +80,7 @@ await writeFile(a4Path, buildA4Html(shared), "utf8");
 const a4Page = await browser.newPage({ viewport: { width: 794, height: 1123 }, deviceScaleFactor: 2 });
 await a4Page.goto(pathToFileURL(a4Path).href, { waitUntil: "networkidle" });
 await a4Page.evaluate(() => document.fonts.ready);
+await a4Page.evaluate(alignRowWidths);
 const a4Overflows = await a4Page.evaluate(() => {
   const b = document.getElementById("body");
   return b.scrollHeight > b.clientHeight + 1;

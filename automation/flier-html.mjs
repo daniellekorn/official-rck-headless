@@ -31,8 +31,12 @@ const GOLD_CAP =
 // important legibility cue at a glance (which days does this card apply to),
 // so it stays the larger of the two (see #073). Used for that caption and
 // anywhere else a caption needs to read at that size, not GOLD_CAP's.
-const DAYSPEC_CAP =
-  "font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;font-size:28px;color:#a47915";
+const DAYSPEC_CAP_BUSY =
+  "font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;font-size:28px;color:#a47915;text-wrap:balance";
+// Plain weeks have room for bigger day labels; weeks with Selichos or a fast are already full, so they keep the original size.
+const DAYSPEC_CAP_ROOMY =
+  "font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;font-size:34px;color:#a47915;text-wrap:balance";
+let DAYSPEC_CAP = DAYSPEC_CAP_ROOMY;
 
 /** The day-range caption every card uses directly under its title (e.g.
  * Mincha/Maariv's "SUN – THU"), with the top-of-card margin only on the
@@ -134,6 +138,52 @@ function selichosBlock(shacharisTimes, shacharisDaySpec, selichosRows, compact) 
       </div>${extra}`;
 }
 
+
+const WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
+/** "Rosh Chodesh (Sun & Mon)" → "Sun & Mon"; null for any other spec. */
+const rcDaysOf = (spec) => /^Rosh Chodesh \((.+)\)$/.exec(spec)?.[1] ?? null;
+/** The Sun–Fri days left once Rosh Chodesh's days are taken out, as a label. */
+function otherDays(rc) {
+  const gone = rc.split(" & ");
+  const rest = WEEK.filter((d) => !gone.includes(d));
+  if (rest.length <= 1) return rest[0] ?? "";
+  // Runs of 3+ consecutive days collapse to a range; shorter runs list their days. Keeps the label to two lines at most.
+  const parts = [];
+  for (let i = 0; i < rest.length; ) {
+    let j = i;
+    while (j + 1 < rest.length && WEEK.indexOf(rest[j + 1]) === WEEK.indexOf(rest[j]) + 1) j++;
+    if (j - i >= 2) parts.push(`${rest[i]}\u00A0–\u00A0${rest[j]}`);
+    else for (let k = i; k <= j; k++) parts.push(rest[k]);
+    i = j + 1;
+  }
+  return parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(", ")} &\u00A0${parts[parts.length - 1]}`;
+}
+
+/**
+ * The Shacharis card on a week with Rosh Chodesh. Rosh Chodesh changes only the
+ * later minyan, on its own days, so it gets its own labelled row instead of a
+ * second "Sun – Fri" row that overlaps the first. It leads when it opens the
+ * week (Sun/Mon) and follows the regular days otherwise. Returns "" when the
+ * week has no Rosh Chodesh row.
+ */
+function rcBlock(shacharisRows, compact) {
+  const groups = groupByDaySpec(shacharisRows);
+  const rcg = groups.find((g) => rcDaysOf(g.daySpec));
+  if (!rcg) return "";
+  const reg = groups.find((g) => g !== rcg);
+  const rc = rcDaysOf(rcg.daySpec);
+  const regLabel = otherDays(rc);
+  const size = compact ? 80 : 104;
+  const times = (ts) =>
+    `<div style="display:flex;gap:28px;margin-top:6px">${ts
+      .map((t) => `<div style="font-family:'Oswald',sans-serif;font-size:${size}px;line-height:1.06;font-weight:500;color:#1a1a1a">${t}</div>`)
+      .join("")}</div>`;
+  const rcRow = `<div style="${DAYSPEC_CAP}">${rc}</div><div style="${DAYSPEC_CAP};color:#102a56;letter-spacing:0.06em;margin-top:2px">Rosh Chodesh</div>${times(rcg.times)}`;
+  const regRow = regLabel && reg ? `<div style="${DAYSPEC_CAP}">${regLabel}</div>${times(reg.times)}` : "";
+  const first = ["Sun", "Mon"].includes(rc.split(" & ")[0]);
+  return `<div style="margin-top:${compact ? 10 : 16}px">${first ? rcRow : regRow}</div><div style="margin-top:${compact ? 14 : 22}px">${first ? regRow : rcRow}</div>`;
+}
+
 /**
  * @param {string} service
  * @param {Array} rows
@@ -188,13 +238,13 @@ function taanisColumn(taanisRows) {
       const sameDay = edges.length === 2 && edges[0].day === edges[1].day;
       return `
       <div>
-        ${sameDay ? `<div style="${DAYSPEC_CAP}">${edges[0].day}</div>` : ""}
+        ${sameDay ? `<div style="${DAYSPEC_CAP};font-size:25px;letter-spacing:0.1em;white-space:nowrap">${edges[0].day}</div>` : ""}
         <div style="font-family:'Oswald',sans-serif;font-size:44px;line-height:1.05;font-weight:500;color:#102a56;margin-top:${sameDay ? 4 : 0}px">${f.name}</div>
         ${edges
           .map(
             (e) => `
           <div style="margin-top:16px;padding-top:14px;border-top:3px solid #dfb030">
-            ${sameDay ? "" : `<div style="${DAYSPEC_CAP}">${e.day}</div>`}
+            ${sameDay ? "" : `<div style="${DAYSPEC_CAP};font-size:25px;letter-spacing:0.1em;white-space:nowrap">${e.day}</div>`}
             <div style="${GOLD_CAP};margin-top:${sameDay ? 0 : 4}px">${e.label}</div>
             <div style="${TIME_STYLE};font-size:64px;margin-top:4px">${e.time}</div>
           </div>`,
@@ -245,16 +295,18 @@ export function buildFlierHtml({
   // Mincha/Maariv (their own content doesn't need the extra room) rather
   // than the Taanis column.
   const hasSelichosAndTaanis = hasTaanis && selichosRows.length > 0;
+  DAYSPEC_CAP = selichosRows.length === 0 && !hasTaanis ? DAYSPEC_CAP_ROOMY : DAYSPEC_CAP_BUSY;
   const cards = SERVICES.map((s) => {
     const mine = rows.filter((r) => r.service === s);
     if (s === "Shacharis") {
       return card(s, mine, {
-        overrideBody: selichosBlock(
-          mine.map((r) => to24(r.time)),
-          mine[0]?.daySpec ?? "",
-          selichosRows,
-          hasTaanis,
-        ),
+        overrideBody:
+          selichosBlock(
+            mine.map((r) => to24(r.time)),
+            mine[0]?.daySpec ?? "",
+            selichosRows,
+            hasTaanis,
+          ) || rcBlock(mine, hasTaanis),
         compact: hasTaanis,
       });
     }
@@ -276,7 +328,7 @@ html,body{margin:0;padding:0}
 </style>
 </head>
 <body>
-<div style="width:1920px;height:1080px;box-sizing:border-box;padding:60px 64px;background:#ffffff;font-family:'Onest',system-ui,sans-serif;color:#1a1a1a;display:flex;flex-direction:column;gap:32px;overflow:hidden">
+<div style="width:1920px;height:1080px;box-sizing:border-box;padding:36px 40px;background:#ffffff;font-family:'Onest',system-ui,sans-serif;color:#1a1a1a;display:flex;flex-direction:column;gap:28px;overflow:hidden">
 
   <header style="position:relative;height:200px;overflow:hidden;background:#091c41;flex:none">
     <img src="${photoUrl}" alt="" style="position:absolute;top:-228px;left:100px;width:1938px;height:auto;display:block" />
@@ -285,7 +337,7 @@ html,body{margin:0;padding:0}
       <div>
         <div style="font-family:'Oswald',sans-serif;font-size:92px;line-height:0.98;font-weight:500;color:#ffffff;letter-spacing:0.01em">Daven with Us</div>
         <div style="display:block;height:4px;width:88px;background:#dfb030;margin:18px 0 15px"></div>
-        <div style="font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;font-size:20px;color:#f6d66b">Weekday Minyanim | Week of ${weekOf}</div>
+        <div style="font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;font-size:28px;color:#f6d66b">Week of ${weekOf}</div>
       </div>
       <img src="${logoUrl}" alt="RCK — Ra'anana Community Kollel" style="height:156px;width:auto;display:block;flex:none" />
     </div>

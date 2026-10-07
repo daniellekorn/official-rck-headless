@@ -42,6 +42,32 @@ The office also wanted the A4 sheet as a JPG (for sharing as an image), so
 `render.mjs` writes `RCK-DaveningTimes_A4_<sunday>.jpg` (1588×2246) from the
 same page, and `weekly-flier.sh` copies it too.
 
+## Addendum — Rosh Chodesh, labels, margins (2026-10-07)
+
+Both fliers (screen and A4) were reworked after the first A4 version:
+
+- **Rosh Chodesh gets its own labelled row inside the Shacharis card.** The old
+  wide flier stacked a second Shacharis block under "Rosh Chodesh (Sun & Mon)"
+  and overflowed into the footer on every Rosh Chodesh week (12 of the next 60).
+  Now the Rosh Chodesh days (navy "Rosh Chodesh" under the gold days) lead when
+  they open the week (Sun/Mon) and follow the regular days otherwise. The
+  regular row's label drops the Rosh Chodesh days instead of overlapping them.
+- **Day labels never take more than two lines.** Runs of 3+ consecutive days
+  collapse to a range ("Sun – Wed & Fri"); the "&" is glued to the last day so
+  it never ends a line.
+- **A4 only: the two Shacharis rows on a Rosh Chodesh week are width-matched.**
+  `alignRowWidths()` (run in the page by `render.mjs`) spreads a sub-pixel
+  letter-spacing so 07:00 08:05 and 07:00 08:15 share left and right edges.
+- **Header reads "Week of …"** on both fliers ("Weekday Minyanim" dropped), at a
+  larger size; page margins were cut (wide 60/64 → 36/40 px, A4 32/40 → 22/24 px)
+  so times and day labels could grow.
+- **A4 time sizing:** 80 px on plain weeks; a third Mincha time drops to its own
+  line rather than shrinking the row. Selichos/fast weeks use compact cards.
+
+Checked against the 60 weeks from 2026-10-04 (every Rosh Chodesh, Selichos and
+fast week in that span): all fit one A4 page and the wide flier clears the
+footer. `render.mjs` still refuses to write the A4 PDF if a week overflows.
+
 ## Implementation Results
 
 Verified against weeks of Sept 6, 13, 20, 27 and Oct 4 2026 (plain, Selichos,
