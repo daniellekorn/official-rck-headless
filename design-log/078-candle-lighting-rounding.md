@@ -71,3 +71,5 @@ Remaining 7:
 
 `src/lib/zmanim-schedule.ts` (`getComputedShabbosSchedule`) and
 `scripts/verify-zmanim.mjs`: `sunsetOffset(-20, true)` → `false`.
+
+Commit: `9bd60c0`.
