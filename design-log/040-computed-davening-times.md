@@ -1,6 +1,6 @@
 # 040 — Weekday davening times computed from zmanim
 
-**Status:** implemented; Selichos escape hatch superseded by [#067](067-computed-selichos-times.md); fast-day escape hatch superseded by [#068](068-computed-taanis-times.md)
+**Status:** implemented; Selichos escape hatch superseded by [#067](067-computed-selichos-times.md); fast-day escape hatch superseded by [#068](068-computed-taanis-times.md); mincha gedolah definition and rounding amended by [#079](079-weekday-zmanim-match-raanana-calendar.md)
 **Date:** 2026-07-05
 **Author:** claude-session (danielle directing)
 **Related:** [#003](003-davening-schedule-dayspec.md), [#008](008-davening-flat-layout.md), [#020](020-homepage-stale-cache.md), [#067](067-computed-selichos-times.md), [#068](068-computed-taanis-times.md)
@@ -77,3 +77,16 @@ maarivs), spring (6 pm mincha live), a two-day Rosh Chodesh (Thu & Fri, Dec
 2026), and the Israel DST-change week (Oct 2026). Today's live myzmanim page
 matched to seconds. `npx astro check` clean; `/daven` on the dev server
 renders computed rows followed by the legacy CMS rows.
+
+## Addendum (2026-10-07)
+
+Two parts of "The rules" above are no longer current (see
+[#079](079-weekday-zmanim-match-raanana-calendar.md)). Both changes match the
+Ra'anana religious council's calendar, which the office used before the site
+computed these times:
+
+- **Mincha gedolah** is now the *later of* 6.5 sha'os zmaniyos and chatzos +
+  30 min, not 6.5 sha'os zmaniyos alone.
+- Aggregated times are **rounded to the nearest minute**, not rounded down.
+
+The 12:50 floor and every other rule in the table are unchanged.

@@ -20,7 +20,7 @@ const TZ = "Asia/Jerusalem";
 // ── Rules (minutes since local midnight). Confirmed with the rav; see #040. ──
 const SHACHARIS = [7 * 60, 8 * 60 + 15]; // 7:00 & 8:15, never change
 const SHACHARIS_ROSH_CHODESH = [7 * 60, 8 * 60 + 5]; // 7:00 & 8:05
-const EARLY_MINCHA_FLOOR = 12 * 60 + 50; // mincha gedolah, but never before 12:50
+const EARLY_MINCHA_FLOOR = 12 * 60 + 50; // mincha gedolah (later of 6.5 hrs / chatzos+30, #079), but never before 12:50
 const FIXED_MINCHA = 18 * 60; // the 6:00 pm minyan...
 const FIXED_MINCHA_CUTOFF = 18 * 60 + 10; // ...runs only while late mincha is after 6:10
 const LATE_MINCHA_BEFORE_SHKIYA = 10; // minutes before shkiya
@@ -173,6 +173,15 @@ function secondsOfDay(instant: Date): number {
 	const parts = clockFmt.formatToParts(instant);
 	const get = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? 0);
 	return get("hour") * 3600 + get("minute") * 60 + get("second");
+}
+
+/**
+ * Mincha gedolah as the Ra'anana calendar and Itim LeBinah define it: the
+ * later of 6.5 sha'os zmaniyos (GRA) and chatzos + 30 minutes. In winter
+ * chatzos + 30 is later; in summer the two coincide with 6.5 hours (#079).
+ */
+function minchaGedolaSeconds(z: Zmanim): number {
+	return Math.max(secondsOfDay(z.minchaGedola()), secondsOfDay(z.chatzot()) + 30 * 60);
 }
 
 /** "1:20 PM" from minutes since midnight. */
@@ -432,15 +441,16 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 	let latestShkiya = 0;
 	for (const i of minchaMaarivDays) {
 		const z = new Zmanim(LOCATION, anchor(addDays(sunday, i)), false);
-		latestMinchaGedola = Math.max(latestMinchaGedola, secondsOfDay(z.minchaGedola()));
+		latestMinchaGedola = Math.max(latestMinchaGedola, minchaGedolaSeconds(z));
 		earliestShkiya = Math.min(earliestShkiya, secondsOfDay(z.sunset()));
 		latestShkiya = Math.max(latestShkiya, secondsOfDay(z.sunset()));
 	}
 
-	// Round down to the minute only after aggregating exact times.
-	const earlyMincha = Math.max(Math.floor(latestMinchaGedola / 60), EARLY_MINCHA_FLOOR);
-	const lateMincha = Math.floor(earliestShkiya / 60) - LATE_MINCHA_BEFORE_SHKIYA;
-	const shkiyaMaariv = Math.floor(latestShkiya / 60) + MAARIV_AFTER_SHKIYA;
+	// Round to the nearest minute only after aggregating exact times — what the
+	// Ra'anana religious council's calendar prints (#079).
+	const earlyMincha = Math.max(Math.round(latestMinchaGedola / 60), EARLY_MINCHA_FLOOR);
+	const lateMincha = Math.round(earliestShkiya / 60) - LATE_MINCHA_BEFORE_SHKIYA;
+	const shkiyaMaariv = Math.round(latestShkiya / 60) + MAARIV_AFTER_SHKIYA;
 
 	const rows: ComputedDaveningRow[] = [];
 

@@ -54,7 +54,7 @@ for (const input of dates) {
 		const d = new Date(Date.UTC(y, m - 1, d0 + i, 12));
 		const z = new Zmanim(LOCATION, d, false);
 		console.log(
-			`     ${dayLabel.format(d).padEnd(12)} mincha gedolah ${clock.format(z.minchaGedola())}   shkiya ${clock.format(z.sunset())}`,
+			`     ${dayLabel.format(d).padEnd(12)} mincha gedolah 6.5h ${clock.format(z.minchaGedola())} / chatzos+30 ${clock.format(new Date(z.chatzot().getTime() + 30 * 60 * 1000))} (later wins, #079)   shkiya ${clock.format(z.sunset())}`,
 		);
 	}
 
