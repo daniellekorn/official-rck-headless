@@ -24,7 +24,7 @@ function groupByDaySpec(rows) {
 }
 
 const GOLD_CAP =
-  "font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;font-size:22px;color:#a47915;line-height:1.3";
+  "font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;font-size:25px;color:#a47915;line-height:1.3";
 
 // Same caption look as GOLD_CAP but a size up — the day-range caption every
 // card leads with (e.g. Mincha/Maariv's "SUN – THU") is the flier's most
@@ -32,10 +32,10 @@ const GOLD_CAP =
 // so it stays the larger of the two (see #073). Used for that caption and
 // anywhere else a caption needs to read at that size, not GOLD_CAP's.
 const DAYSPEC_CAP_BUSY =
-  "font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;font-size:28px;color:#a47915;text-wrap:balance";
+  "font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;font-size:31px;color:#a47915;text-wrap:balance";
 // Plain weeks have room for bigger day labels; weeks with Selichos or a fast are already full, so they keep the original size.
 const DAYSPEC_CAP_ROOMY =
-  "font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;font-size:34px;color:#a47915;text-wrap:balance";
+  "font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;font-size:40px;color:#a47915;text-wrap:balance";
 let DAYSPEC_CAP = DAYSPEC_CAP_ROOMY;
 
 /** The day-range caption every card uses directly under its title (e.g.
@@ -52,7 +52,11 @@ function daySpecCaption(daySpec, { first, compact }) {
  *   a 4th column (the gold Taanis box) narrows the other three and the extra
  *   room has to come from trimming this whitespace, not the time text itself.
  */
-function defaultBody(rows, compact = false) {
+/** Stairs-and-arrow marker for a downstairs minyan. */
+const STAIRS_ICON = (px, arrow = true) =>
+  `<svg width="${Math.round((px * (arrow ? 76 : 50)) / 64)}" height="${px}" viewBox="${arrow ? "0 0 76 64" : "26 0 50 64"}" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Downstairs" style="flex:none;display:block">${arrow ? `<path d="M12 6v42M2 38l10 11 10-11" stroke="#102a56"/>` : ""}<path d="M32 10h14v14h14v14h14v14" stroke="#a47915" stroke-linecap="square" stroke-linejoin="miter"/></svg>`;
+
+function defaultBody(rows, compact = false, service = "") {
   const groups = groupByDaySpec(rows);
   const total = rows.length;
   // A week with no Taanis column (compact=false) *and* only 2 time rows (no
@@ -62,7 +66,7 @@ function defaultBody(rows, compact = false) {
   // already fills the card at the old sizing (verified against the week of
   // Sept 27, back to the normal 3-Mincha cadence) and bumping it overflows
   // into the footer.
-  const size = compact ? (total <= 2 ? 104 : total === 3 ? 96 : 74) : total <= 2 ? 124 : total === 3 ? 96 : 74;
+  const size = compact ? (total <= 2 ? 118 : total === 3 ? 106 : 82) : total <= 2 ? 150 : total === 3 ? 120 : 88;
   const gap = compact ? (total >= 4 ? 4 : 10) - 2 : total <= 2 ? 16 : total >= 4 ? 4 : 10;
   const bodyTop = compact ? (total >= 4 ? 12 : 24) - 6 : total <= 2 ? 30 : total >= 4 ? 12 : 24;
   return groups
@@ -70,10 +74,13 @@ function defaultBody(rows, compact = false) {
       (g, i) => `
       ${daySpecCaption(g.daySpec, { first: i === 0, compact })}
       <div style="display:flex;flex-direction:column;gap:${gap}px;margin-top:${bodyTop}px">${g.times
-        .map(
-          (t) =>
-            `<div style="font-family:'Oswald',sans-serif;font-size:${size}px;line-height:1.06;font-weight:500;color:#1a1a1a">${t}</div>`,
-        )
+        .map((t, ti) => {
+          const big = `<div style="font-family:'Oswald',sans-serif;font-size:${size}px;line-height:1.06;font-weight:500;color:#1a1a1a">${t}</div>`;
+          // The second Mincha is downstairs when it starts before 6:00 pm.
+          const isDown = (service === "Mincha" && g.times.length === 2 && ti === 1 && t < "18:00") || (service === "Maariv" && ti === 0 && t < "18:00");
+          if (!isDown) return big;
+          return `<div style="display:flex;align-items:center;gap:12px">${big}${STAIRS_ICON(Math.round(size * 0.44))}</div>`;
+        })
         .join("")}</div>`,
     )
     .join("");
@@ -108,8 +115,8 @@ function selichosBlock(shacharisTimes, shacharisDaySpec, selichosRows, compact) 
   const pairs = main.times
     .map(
       (t, i) => `
-          <div style="font-family:'Oswald',sans-serif;font-size:60px;line-height:1.06;font-weight:500;color:#a47915;border-right:3px solid #dfb030;padding-right:26px">${t}</div>
-          <div style="font-family:'Oswald',sans-serif;font-size:92px;line-height:1.06;font-weight:500;color:#1a1a1a">${shacharisTimes[i] ?? ""}</div>`,
+          <div style="font-family:'Oswald',sans-serif;font-size:66px;line-height:1.06;font-weight:500;color:#a47915;border-right:3px solid #dfb030;padding-right:26px">${t}</div>
+          <div style="font-family:'Oswald',sans-serif;font-size:100px;line-height:1.06;font-weight:500;color:#1a1a1a">${shacharisTimes[i] ?? ""}</div>`,
     )
     .join("");
 
@@ -118,7 +125,7 @@ function selichosBlock(shacharisTimes, shacharisDaySpec, selichosRows, compact) 
       (g) => `
         <div style="margin-top:18px;padding-top:14px;border-top:3px solid #dfb030">
           <div style="${GOLD_CAP}">Selichos · ${g.daySpec}</div>
-          <div style="font-family:'Oswald',sans-serif;font-size:52px;line-height:1.06;font-weight:500;color:#a47915;margin-top:8px">${g.times.join(" | ")}</div>
+          <div style="font-family:'Oswald',sans-serif;font-size:58px;line-height:1.06;font-weight:500;color:#a47915;margin-top:8px">${g.times.join(" | ")}</div>
         </div>`,
     )
     .join("");
@@ -193,11 +200,11 @@ function rcBlock(shacharisRows, compact) {
  * @param {boolean} [opts.compact] See defaultBody — also tightens the card's own padding.
  */
 function card(service, rows, { overrideBody = "", compact = false } = {}) {
-  const body = overrideBody || defaultBody(rows, compact);
-  const padding = compact ? "22px 26px 18px" : "28px 34px 24px";
+  const body = overrideBody || defaultBody(rows, compact, service);
+  const padding = compact ? "22px 26px 18px" : "26px 34px 22px";
   // Bigger header on a no-Taanis week, to match defaultBody's bigger times
   // for the same reason — the card has the headroom to spare.
-  const headerSize = compact ? 68 : 80;
+  const headerSize = compact ? 76 : 90;
   return `
     <div style="background:#f7f5f0;border-top:6px solid #102a56;box-sizing:border-box;padding:${padding};display:flex;flex-direction:column">
       <div style="font-family:'Oswald',sans-serif;font-size:${headerSize}px;line-height:1;font-weight:500;color:#102a56">${service}</div>
@@ -238,15 +245,15 @@ function taanisColumn(taanisRows) {
       const sameDay = edges.length === 2 && edges[0].day === edges[1].day;
       return `
       <div>
-        ${sameDay ? `<div style="${DAYSPEC_CAP};font-size:25px;letter-spacing:0.1em;white-space:nowrap">${edges[0].day}</div>` : ""}
-        <div style="font-family:'Oswald',sans-serif;font-size:44px;line-height:1.05;font-weight:500;color:#102a56;margin-top:${sameDay ? 4 : 0}px">${f.name}</div>
+        ${sameDay ? `<div style="${DAYSPEC_CAP};font-size:27px;letter-spacing:0.1em;white-space:nowrap">${edges[0].day}</div>` : ""}
+        <div style="font-family:'Oswald',sans-serif;font-size:50px;line-height:1.05;font-weight:500;color:#102a56;margin-top:${sameDay ? 4 : 0}px">${f.name}</div>
         ${edges
           .map(
             (e) => `
           <div style="margin-top:16px;padding-top:14px;border-top:3px solid #dfb030">
-            ${sameDay ? "" : `<div style="${DAYSPEC_CAP};font-size:25px;letter-spacing:0.1em;white-space:nowrap">${e.day}</div>`}
+            ${sameDay ? "" : `<div style="${DAYSPEC_CAP};font-size:27px;letter-spacing:0.1em;white-space:nowrap">${e.day}</div>`}
             <div style="${GOLD_CAP};margin-top:${sameDay ? 0 : 4}px">${e.label}</div>
-            <div style="${TIME_STYLE};font-size:64px;margin-top:4px">${e.time}</div>
+            <div style="${TIME_STYLE};font-size:72px;margin-top:4px">${e.time}</div>
           </div>`,
           )
           .join("")}
@@ -257,10 +264,10 @@ function taanisColumn(taanisRows) {
     <div style="background:${TAANIS_TINT};border-top:6px solid #102a56;box-sizing:border-box;padding:22px 26px 18px;display:flex;flex-direction:column">
       <!-- This column has no "Shacharis"-style header, but its date line
            must still land level with the day-range caption in the other
-           three cards. 76px = card()'s 68px header line (line-height:1) +
+           three cards. 84px = card()'s 76px header line (line-height:1) +
            daySpecCaption()'s 8px compact top margin — keep in sync by hand
            if either of those changes. -->
-      <div style="height:76px"></div>
+      <div style="height:84px"></div>
       ${entries}
     </div>`;
 }
@@ -328,16 +335,16 @@ html,body{margin:0;padding:0}
 </style>
 </head>
 <body>
-<div style="width:1920px;height:1080px;box-sizing:border-box;padding:36px 40px;background:#ffffff;font-family:'Onest',system-ui,sans-serif;color:#1a1a1a;display:flex;flex-direction:column;gap:28px;overflow:hidden">
+<div style="width:1920px;height:1080px;box-sizing:border-box;padding:18px 20px;background:#ffffff;font-family:'Onest',system-ui,sans-serif;color:#1a1a1a;display:flex;flex-direction:column;gap:20px;overflow:hidden">
 
-  <header style="position:relative;height:200px;overflow:hidden;background:#091c41;flex:none">
+  <header style="position:relative;height:210px;overflow:hidden;background:#091c41;flex:none">
     <img src="${photoUrl}" alt="" style="position:absolute;top:-228px;left:100px;width:1938px;height:auto;display:block" />
     <div style="position:absolute;inset:0;background:linear-gradient(100deg,rgba(9,28,65,0.95) 0%,rgba(9,28,65,0.9) 30%,rgba(9,28,65,0.6) 45%,rgba(9,28,65,0.18) 58%,rgba(9,28,65,0.42) 70%,rgba(9,28,65,0.82) 82%,rgba(9,28,65,0.94) 100%)"></div>
     <div style="position:relative;height:100%;box-sizing:border-box;padding:22px 44px;display:flex;align-items:center;justify-content:space-between;gap:40px">
       <div>
-        <div style="font-family:'Oswald',sans-serif;font-size:92px;line-height:0.98;font-weight:500;color:#ffffff;letter-spacing:0.01em">Daven with Us</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:100px;line-height:0.98;font-weight:500;color:#ffffff;letter-spacing:0.01em">Daven with Us</div>
         <div style="display:block;height:4px;width:88px;background:#dfb030;margin:18px 0 15px"></div>
-        <div style="font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;font-size:28px;color:#f6d66b">Week of ${weekOf}</div>
+        <div style="font-family:'Onest',sans-serif;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;font-size:31px;color:#f6d66b">Week of ${weekOf}</div>
       </div>
       <img src="${logoUrl}" alt="RCK — Ra'anana Community Kollel" style="height:156px;width:auto;display:block;flex:none" />
     </div>
@@ -345,14 +352,14 @@ html,body{margin:0;padding:0}
 
   <div style="flex:1;display:grid;grid-template-columns:${gridTemplateColumns};gap:${gridGap}px;min-height:0">${cards}</div>
 
-  <footer style="flex:none;border-top:3px solid #102a56;padding-top:20px;display:flex;align-items:center;justify-content:space-between;gap:40px">
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <div style="font-family:'Oswald',sans-serif;font-size:38px;font-weight:500;color:#102a56;line-height:1.1">Times update weekly at rckollel.com/daven</div>
-      <div style="font-size:22px;color:#3e4d6b">Ahuza St 198, Ra'anana | 058-794-5168 | rckollel@gmail.com</div>
+  <footer style="flex:none;border-top:3px solid #102a56;padding-top:10px;display:flex;align-items:center;justify-content:space-between;gap:40px">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-family:'Oswald',sans-serif;font-size:32px;font-weight:500;color:#102a56;line-height:1.1">Times update weekly at rckollel.com/daven</div>
+      <div style="font-size:19px;color:#3e4d6b">Ahuza St 198, Ra'anana | 058-794-5168 | rckollel@gmail.com</div>
     </div>
     <div style="display:flex;align-items:center;gap:22px;flex:none">
-      <div style="text-align:right;font-family:'Oswald',sans-serif;font-size:38px;line-height:1.15;font-weight:500;color:#102a56">Visit our Website:</div>
-      <img src="${qrUrl}" alt="QR code to rckollel.com" style="width:128px;height:128px;display:block" />
+      <div style="text-align:right;font-family:'Oswald',sans-serif;font-size:32px;line-height:1.15;font-weight:500;color:#102a56">Visit our Website:</div>
+      <img src="${qrUrl}" alt="QR code to rckollel.com" style="width:96px;height:96px;display:block" />
     </div>
   </footer>
 

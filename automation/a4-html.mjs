@@ -24,13 +24,17 @@ const capStyle = (px) =>
   `font-family:'Onest',sans-serif;font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:${px}px;color:#a47915`;
 let CAP = capStyle(28);
 const time = (t, size, color = "#1a1a1a") =>
-  `<div style="font-family:'Oswald',sans-serif;font-weight:500;font-size:${size}px;line-height:1;color:${color};font-variant-numeric:tabular-nums">${t}</div>`;
+  `<div style="font-family:'Oswald',sans-serif;font-weight:500;font-size:${typeof size === "number" ? size + "px" : size};line-height:1;color:${color};font-variant-numeric:tabular-nums">${t}</div>`;
 const timesStack = (times, size) => {
   const row = (ts) => `<div style="display:flex;justify-content:flex-end;gap:30px">${ts.map((t) => time(t, size)).join("")}</div>`;
   return `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;margin-top:8px">${row(times.slice(0, -1))}${row(times.slice(-1))}</div>`;
 };
 const timesRow = (times, size, attr = "") =>
   `<div ${attr} style="display:flex;justify-content:flex-end;gap:30px;margin-top:8px;flex-wrap:nowrap">${times.map((t) => time(t, size)).join("")}</div>`;
+
+/** Stairs marker for a downstairs minyan; the arrow is optional (the A4 sheet prints "Down Stairs" beside it instead). */
+const STAIRS_ICON = (px, arrow = true) =>
+  `<svg width="${Math.round((px * (arrow ? 76 : 50)) / 64)}" height="${px}" viewBox="${arrow ? "0 0 76 64" : "26 0 50 64"}" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Downstairs" style="flex:none;display:block">${arrow ? `<path d="M12 6v42M2 38l10 11 10-11" stroke="#102a56"/>` : ""}<path d="M32 10h14v14h14v14h14v14" stroke="#a47915" stroke-linecap="square" stroke-linejoin="miter"/></svg>`;
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
 /** "Rosh Chodesh (Sun & Mon)" → "Sun & Mon"; null for any other spec. */
@@ -69,13 +73,39 @@ export function buildA4Html({ weekOf, rows, taanis = [], photoUrl, logoUrl, qrUr
   // A plain week (no Selichos, no fast) has room to spare, so cards stretch to
   // fill the page and times go big. Busy weeks use compact cards instead.
   const big = selichos.length === 0 && taanis.length === 0;
+  const rcWeek = rows.some((r) => /^Rosh Chodesh/.test(r.daySpec));
   // Day labels are as large as the page allows; crowded weeks (Selichos, a fast) need them a little smaller.
   CAP = capStyle(big ? 28 : 24);
   // Two-time cards share the large size; a three-time Mincha is allowed to be
   // smaller so it still fits the card, without shrinking the other minyanim.
-  const sizeFor = () => (big ? 80 : 50);
+  // Crowded weeks size their times from --ts, which fitTimes() raises until the page is full.
+  const TS = (k) => `calc(var(--ts, 50) * ${k}px)`;
+  const sizeFor = () => (big ? 80 : TS(1));
   // With room to spare, a third time drops to its own line instead of shrinking the row.
-  const timesFor = (times) => (big && times.length >= 3 ? timesStack(times, sizeFor()) : timesRow(times, sizeFor()));
+  // The second Mincha is downstairs when it starts before 6:00 pm.
+  const timesDS = (times, size, dsIdx) => {
+    const label = (px) => `<div style="${CAP};font-size:${px}px;line-height:1.1;letter-spacing:.14em;text-align:right">Down<br>Stairs</div>`;
+    const cell = (t, i) => {
+      if (i !== dsIdx) return time(t, size);
+      const tight = rcWeek;
+      const iconPx = big && !tight ? 58 : 44;
+      const under = `<div style="display:flex;align-items:center;justify-content:flex-end;gap:14px">${label(big && !tight ? 24 : 20)}${STAIRS_ICON(iconPx, false)}</div>`;
+      // Plain weeks hang the marker below the time (absolute, so it doesn't push the times row off the title's centre line);
+      // crowded weeks have no spare height, so there it stays in the flow.
+      return big
+        ? `<div style="padding-bottom:${tight ? 56 : 30}px"><div style="position:relative">${time(t, size)}<div style="position:absolute;right:0;top:100%;margin-top:${tight ? 10 : 22}px">${under}</div></div></div>`
+        : `<div style="display:flex;flex-direction:column;align-items:flex-end">${time(t, size)}<div style="margin-top:8px">${under}</div></div>`;
+    };
+    return `<div style="display:flex;justify-content:flex-end;align-items:flex-start;gap:30px;margin-top:8px;flex-wrap:nowrap">${times.map(cell).join("")}</div>`;
+  };
+  // Downstairs: the second Mincha, and the early Maariv, whenever they start before 6:00 pm.
+  const dsIndex = (name, times) =>
+    name === "Mincha" && times.length === 2 && times[1] < "18:00" ? 1 : name === "Maariv" && times.length >= 1 && times[0] < "18:00" ? 0 : -1;
+  const timesFor = (times, name) => {
+    const i = dsIndex(name, times);
+    return i >= 0 ? timesDS(times, sizeFor(), i) : timesFor0(times);
+  };
+  const timesFor0 = (times) => (big && times.length >= 3 ? timesStack(times, sizeFor()) : timesRow(times, sizeFor()));
 
   const card = (title, inner, caption = "") => `
     <div style="background:#f7f5f0;border-top:5px solid #102a56;padding:${big ? "18px 26px 20px" : "12px 26px 14px"};display:grid;grid-template-columns:250px 1fr;column-gap:20px;align-items:center;${big ? "flex:1;" : ""}">
@@ -109,17 +139,17 @@ export function buildA4Html({ weekOf, rows, taanis = [], photoUrl, logoUrl, qrUr
     </div>`;
     }
     let html = groups
-      .map((g, i) => `${i === 0 ? "" : `<div style="${CAP}">${g.daySpec}</div>`}${timesFor(g.times)}`)
+      .map((g, i) => `${i === 0 ? "" : `<div style="${CAP}">${g.daySpec}</div>`}${timesFor(g.times, name)}`)
       .join('<div style="height:12px"></div>');
     if (name === "Shacharis" && selichos.length) {
       const [main, ...rest] = groupByDaySpec(selichos);
       html += `
       <div style="margin-top:16px;padding-top:12px;border-top:2px solid #dfb030">
         <div style="${CAP}">Selichos · ${main.daySpec}</div>
-        <div style="display:flex;justify-content:flex-end;gap:30px;margin-top:8px">${main.times.map((t) => time(t, 44, "#a47915")).join("")}</div>
+        <div style="display:flex;justify-content:flex-end;gap:30px;margin-top:8px">${main.times.map((t) => time(t, big ? 44 : TS(0.88), "#a47915")).join("")}</div>
         ${rest
           .map(
-            (g) => `<div style="margin-top:12px"><div style="${CAP}">Selichos · ${g.daySpec}</div><div style="display:flex;justify-content:flex-end;gap:30px;margin-top:6px">${g.times.map((t) => time(t, 36, "#a47915")).join("")}</div></div>`,
+            (g) => `<div style="margin-top:12px"><div style="${CAP}">Selichos · ${g.daySpec}</div><div style="display:flex;justify-content:flex-end;gap:30px;margin-top:6px">${g.times.map((t) => time(t, big ? 36 : TS(0.72), "#a47915")).join("")}</div></div>`,
           )
           .join("")}
       </div>`;
@@ -134,7 +164,7 @@ export function buildA4Html({ weekOf, rows, taanis = [], photoUrl, logoUrl, qrUr
       <div style="background:#faf1d9;border-top:5px solid #102a56;padding:12px 26px 14px">
         <div style="${CAP}">${f.startDateLabel}</div>
         <div style="font-family:'Oswald',sans-serif;font-weight:500;font-size:40px;color:#102a56;margin-top:2px">${f.name}</div>
-        <div style="display:flex;gap:60px;margin-top:6px">${edges.map(([l, t]) => `<div><div style="${CAP}">${l}</div>${time(to24(t), 46)}</div>`).join("")}</div>
+        <div style="display:flex;gap:60px;margin-top:6px">${edges.map(([l, t]) => `<div><div style="${CAP}">${l}</div>${time(to24(t), TS(0.92))}</div>`).join("")}</div>
       </div>`;
     })
     .join("");
@@ -152,7 +182,7 @@ html,body{margin:0;padding:0}
 </style>
 </head>
 <body>
-<div id="page" style="width:794px;height:1123px;box-sizing:border-box;padding:22px 24px;display:flex;flex-direction:column;gap:16px;font-family:'Onest',system-ui,sans-serif;color:#1a1a1a;overflow:hidden;background:#fff">
+<div id="page" data-fit="${big ? 0 : 1}" style="width:794px;height:1123px;box-sizing:border-box;padding:22px 24px;display:flex;flex-direction:column;gap:16px;font-family:'Onest',system-ui,sans-serif;color:#1a1a1a;overflow:hidden;background:#fff">
   <header style="position:relative;height:200px;overflow:hidden;background:#091c41;flex:none">
     <img src="${photoUrl}" alt="" style="position:absolute;top:-40px;left:-60px;width:1000px;height:auto" />
     <div style="position:absolute;inset:0;background:linear-gradient(100deg,rgba(9,28,65,.95) 0%,rgba(9,28,65,.88) 40%,rgba(9,28,65,.5) 70%,rgba(9,28,65,.85) 100%)"></div>
@@ -211,3 +241,49 @@ export function alignRowWidths() {
   });
   return rows.map((r) => glyphSpan(r)).map((g) => ({ left: +g.left.toFixed(2), right: +g.right.toFixed(2) }));
 }
+
+/**
+ * Runs inside the page. True when anything doesn't fit: the body is taller than
+ * its box, a child pokes out of the bottom of its card (e.g. a Down Stairs
+ * marker), content runs past a card's side padding, or a row of times is
+ * wider than its column.
+ */
+export function a4Overflows() {
+  const body = document.getElementById("body");
+  if (body.scrollHeight > body.clientHeight + 1) return true;
+  for (const card of body.children) {
+    const cr = card.getBoundingClientRect();
+    for (const el of card.querySelectorAll("*")) {
+      const r = el.getBoundingClientRect();
+      if (r.height > 0 && r.bottom > cr.bottom - 6) return true;
+      // 26 px is the card's side padding; content must stay inside it.
+      if (r.width > 0 && r.right > cr.right - 24) return true;
+    }
+  }
+  return [...body.querySelectorAll("div")].some((d) => d.scrollWidth > d.clientWidth + 1);
+}
+
+/**
+ * Runs inside the page, before alignRowWidths(). On crowded weeks (Selichos, a
+ * fast, Rosh Chodesh) the times start at 50 px and leave a gap above the
+ * footer; this raises --ts one pixel at a time until the page is full, stopping
+ * before anything overflows its card or the page, or a row of times runs past
+ * its column. Returns the size chosen (null on plain weeks, which are fixed).
+ */
+export function fitTimes() {
+  const page = document.getElementById("page");
+  const body = document.getElementById("body");
+  if (!page || !body || page.dataset.fit !== "1") return null;
+  const root = document.documentElement;
+  let best = 50;
+  for (let ts = 50; ts <= 100; ts++) {
+    root.style.setProperty("--ts", String(ts));
+    if (a4Overflows()) break;
+    best = ts;
+  }
+  root.style.setProperty("--ts", String(best));
+  return best;
+}
+
+/** The three in-page helpers as one script, so they can call each other once injected (Playwright serialises functions one by one). */
+export const A4_PAGE_SCRIPT = [a4Overflows, fitTimes, alignRowWidths].map(String).join("\n\n");

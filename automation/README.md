@@ -73,6 +73,10 @@ posted time is valid every day:
 - Maariv — the latest sunset across the week, plus 18 minutes
 - The fixed 20:00 minyan — shown only while that earlier Maariv is before 20:00
 
+**Downstairs:** a Mincha or Maariv that starts before 18:00 is held downstairs,
+so the fliers mark it (design-log #077). That is the second Mincha when there
+are two, and the early Maariv.
+
 A missing 18:00 or 20:00 row is correct, not a bug: the rules drop those
 minyanim in some weeks. Selichos runs 20 minutes before each Shacharis, and 40
 minutes before on Erev Rosh Hashana.
