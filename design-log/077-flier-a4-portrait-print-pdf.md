@@ -104,7 +104,7 @@ footer. `render.mjs` still refuses to write the A4 PDF if a week overflows.
   (`A4_PAGE_SCRIPT`), because Playwright serialises each function separately and
   they call each other.
 
-Verified by rendering 64 weeks (2026-09-06 through 2027-10-10, every Rosh
+Verified by rendering 64 weeks (2026-09-06 through 2027-11-21, every Rosh
 Chodesh, Selichos, fast and downstairs week) through `render.mjs`: no failures,
 all four files written each week.
 
