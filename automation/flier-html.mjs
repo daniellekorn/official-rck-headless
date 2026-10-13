@@ -52,9 +52,6 @@ function daySpecCaption(daySpec, { first, compact }) {
  *   a 4th column (the gold Taanis box) narrows the other three and the extra
  *   room has to come from trimming this whitespace, not the time text itself.
  */
-/** Stairs-and-arrow marker for a downstairs minyan. */
-const STAIRS_ICON = (px, arrow = true) =>
-  `<svg width="${Math.round((px * (arrow ? 76 : 50)) / 64)}" height="${px}" viewBox="${arrow ? "0 0 76 64" : "26 0 50 64"}" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Downstairs" style="flex:none;display:block">${arrow ? `<path d="M12 6v42M2 38l10 11 10-11" stroke="#102a56"/>` : ""}<path d="M32 10h14v14h14v14h14v14" stroke="#a47915" stroke-linecap="square" stroke-linejoin="miter"/></svg>`;
 
 function defaultBody(rows, compact = false, service = "") {
   const groups = groupByDaySpec(rows);
@@ -79,7 +76,8 @@ function defaultBody(rows, compact = false, service = "") {
           // The second Mincha is downstairs when it starts before 6:00 pm.
           const isDown = (service === "Mincha" && g.times.length === 2 && ti === 1 && t < "18:00") || (service === "Maariv" && ti === 0 && t < "18:00");
           if (!isDown) return big;
-          return `<div style="display:flex;align-items:center;gap:18px">${big}${STAIRS_ICON(Math.round(size * 0.92))}</div>`;
+          // Words instead of the icon: "DOWN / STAIRS" on two lines, cap height about the icon's old height.
+          return `<div style="display:flex;align-items:center;gap:18px">${big}<div style="${DAYSPEC_CAP};font-size:${Math.round(size * 0.255)}px;line-height:1.05;letter-spacing:.08em;text-wrap:nowrap">Down<br>Stairs</div></div>`;
         })
         .join("")}</div>`,
     )
@@ -240,16 +238,32 @@ function taanisColumn(taanisRows) {
     .map((f) => {
       const edges = [
         f.startInWeek && { label: "Start of Fast", time: to24(f.startTime), day: f.startDateLabel },
+        // Fast-day Mincha and Maariv (#082) sit between start and end; same day as the end.
+        f.endInWeek && f.minchaTime && { davening: true, mincha: to24(f.minchaTime), maariv: to24(f.maarivTime), day: f.endDateLabel },
         f.endInWeek && { label: "End of Fast", time: to24(f.endTime), day: f.endDateLabel },
       ].filter(Boolean);
-      const sameDay = edges.length === 2 && edges[0].day === edges[1].day;
+      const sameDay = edges.length >= 2 && edges.every((e) => e.day === edges[0].day);
       return `
       <div>
         ${sameDay ? `<div style="${DAYSPEC_CAP};font-size:27px;letter-spacing:0.1em;white-space:nowrap">${edges[0].day}</div>` : ""}
         <div style="font-family:'Oswald',sans-serif;font-size:50px;line-height:1.05;font-weight:500;color:#102a56;margin-top:${sameDay ? 4 : 0}px">${f.name}</div>
         ${edges
-          .map(
-            (e) => `
+          .map((e) =>
+            e.davening
+              ? `
+          <div style="margin-top:16px;padding-top:14px;border-top:3px solid #dfb030;display:flex;gap:28px">
+            ${[["Mincha", e.mincha], ["Maariv", e.maariv]]
+              .map(
+                ([lab, t]) => `
+            <div>
+              <div style="${GOLD_CAP}">${lab}</div>
+              <div style="${TIME_STYLE};font-size:58px;margin-top:4px">${t}</div>
+              ${t < "18:00" ? `<div style="${GOLD_CAP};font-size:19px;letter-spacing:0.08em;margin-top:2px">Down Stairs</div>` : ""}
+            </div>`,
+              )
+              .join("")}
+          </div>`
+              : `
           <div style="margin-top:16px;padding-top:14px;border-top:3px solid #dfb030">
             ${sameDay ? "" : `<div style="${DAYSPEC_CAP};font-size:27px;letter-spacing:0.1em;white-space:nowrap">${e.day}</div>`}
             <div style="${GOLD_CAP};margin-top:${sameDay ? 0 : 4}px">${e.label}</div>

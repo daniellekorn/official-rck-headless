@@ -111,6 +111,16 @@ Verified by rendering 64 weeks (2026-09-06 through 2027-11-21, every Rosh
 Chodesh, Selichos, fast and downstairs week) through `render.mjs`: no failures,
 all four files written each week.
 
+## Addendum — final marker designs and fast-day times (2026-10-13)
+
+- The wide flier's marker is the words "Down / Stairs" (two lines, gold) beside
+  the time, at 0.255 × the time's font size; the arrow-and-stairs icon was
+  dropped. The A4 flier's marker is the same words under the time, with no
+  icon. This supersedes the icon descriptions above; the unused icon code was
+  removed.
+- Fast weeks show the fast-day Mincha and Maariv ([#082](082-fast-day-mincha-maariv.md)):
+  in the wide fast column and as two extra cells in the A4 fast card.
+
 ## Implementation Results
 
 Verified against weeks of Sept 6, 13, 20, 27 and Oct 4 2026 (plain, Selichos,

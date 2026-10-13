@@ -136,3 +136,10 @@ Shabbat): the Saturday-ending week's flyer shows only "Start of Fast" (no
 end block on Maariv), the following week's shows only "End of Fast" (no
 start block on Shacharis) — confirmed the same on `/daven`'s Begins/Ends
 rows. `npx tsc --noEmit` and `npm run check:design-log` both clean.
+
+## Addendum — fast-day Mincha and Maariv (2026-10-13)
+
+[#082](082-fast-day-mincha-maariv.md) adds a Mincha (20–25 min before shkiya, on a
+multiple of 5) and a Maariv (2 min before the end) to the four fasts other than
+Tisha B'Av. `ComputedTaanisRow` gained optional `minchaTime` / `maarivTime`;
+start and end times above are unchanged.

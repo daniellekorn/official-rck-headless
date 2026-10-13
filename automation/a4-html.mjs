@@ -32,9 +32,6 @@ const timesStack = (times, size) => {
 const timesRow = (times, size, attr = "") =>
   `<div ${attr} style="display:flex;justify-content:flex-end;gap:30px;margin-top:8px;flex-wrap:nowrap">${times.map((t) => time(t, size)).join("")}</div>`;
 
-/** Stairs marker for a downstairs minyan; the arrow is optional (the A4 sheet prints "Down Stairs" beside it instead). */
-const STAIRS_ICON = (px, arrow = true) =>
-  `<svg width="${Math.round((px * (arrow ? 76 : 50)) / 64)}" height="${px}" viewBox="${arrow ? "0 0 76 64" : "26 0 50 64"}" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Downstairs" style="flex:none;display:block">${arrow ? `<path d="M12 6v42M2 38l10 11 10-11" stroke="#102a56"/>` : ""}<path d="M32 10h14v14h14v14h14v14" stroke="#a47915" stroke-linecap="square" stroke-linejoin="miter"/></svg>`;
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
 /** "Rosh Chodesh (Sun & Mon)" → "Sun & Mon"; null for any other spec. */
@@ -88,8 +85,7 @@ export function buildA4Html({ weekOf, rows, taanis = [], photoUrl, logoUrl, qrUr
     const cell = (t, i) => {
       if (i !== dsIdx) return time(t, size);
       const tight = rcWeek;
-      const iconPx = big && !tight ? 58 : 44;
-      const under = `<div style="display:flex;align-items:center;justify-content:flex-end;gap:14px">${label(big && !tight ? 24 : 20)}${STAIRS_ICON(iconPx, false)}</div>`;
+      const under = label(big && !tight ? 24 : 20);
       // Plain weeks hang the marker below the time (absolute, so it doesn't push the times row off the title's centre line);
       // crowded weeks have no spare height, so there it stays in the flow.
       return big
@@ -159,12 +155,24 @@ export function buildA4Html({ weekOf, rows, taanis = [], photoUrl, logoUrl, qrUr
 
   const taanisCards = taanis
     .map((f) => {
-      const edges = [f.startInWeek && ["Start of Fast", f.startTime], f.endInWeek && ["End of Fast", f.endTime]].filter(Boolean);
+      // Start, then the fast-day Mincha and Maariv (#082, same day as the end), then end.
+      const cells = [
+        f.startInWeek && ["Start of<br>Fast", f.startTime, false],
+        f.endInWeek && f.minchaTime && ["Mincha", f.minchaTime, true],
+        f.endInWeek && f.maarivTime && ["Maariv", f.maarivTime, true],
+        f.endInWeek && ["End of<br>Fast", f.endTime, false],
+      ].filter(Boolean);
       return `
       <div style="background:#faf1d9;border-top:5px solid #102a56;padding:12px 26px 14px">
         <div style="${CAP}">${f.startDateLabel}</div>
         <div style="font-family:'Oswald',sans-serif;font-weight:500;font-size:40px;color:#102a56;margin-top:2px">${f.name}</div>
-        <div style="display:flex;gap:60px;margin-top:6px">${edges.map(([l, t]) => `<div><div style="${CAP}">${l}</div>${time(to24(t), TS(0.92))}</div>`).join("")}</div>
+        <div style="display:flex;justify-content:space-between;gap:24px;margin-top:6px">${cells
+          .map(([l, t, davening]) => {
+            const t24 = to24(t);
+            const down = davening && t24 < "18:00";
+            return `<div><div style="${CAP};line-height:1.15;min-height:2.3em">${l}</div>${time(t24, TS(0.92))}${down ? `<div style="${CAP};font-size:16px;letter-spacing:.08em;margin-top:6px">Down Stairs</div>` : ""}</div>`;
+          })
+          .join("")}</div>
       </div>`;
     })
     .join("");

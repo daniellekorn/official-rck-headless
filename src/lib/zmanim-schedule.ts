@@ -44,6 +44,17 @@ const SELICHOS_BEFORE_EREV_YOM_KIPPUR = 15;
 // (8.5°/~37 min), which is for Shabbos motzash and is measurably different.
 const TAANIS_END_AFTER_SHKIYA = 19;
 
+// Fast-day davening (#082), the four fasts other than Tisha B'Av. These are
+// posted in addition to the week's regular Mincha/Maariv, for the fast day only.
+// Mincha: a minute that is a multiple of 5, between 20 and 25 minutes before
+// shkiya (the window is exactly 5 minutes wide, so one always exists; on an
+// exact tie at both ends the earlier one is taken).
+const FAST_MINCHA_MIN_BEFORE_SHKIYA = 20;
+const FAST_MINCHA_MAX_BEFORE_SHKIYA = 25;
+const FAST_MINCHA_STEP_MINUTES = 5;
+// Maariv: this many minutes before the posted end of the fast.
+const FAST_MAARIV_BEFORE_FAST_END = 2;
+
 /** Hebcal's own English event descriptions for the five communal fasts this
  * page shows (stable across years/locales; see `Event.getDesc()`). Excludes
  * Yom Kippur (also flagged MAJOR_FAST) and Ta'anit Bechorot (also flagged
@@ -102,6 +113,10 @@ export interface ComputedTaanisRow {
 	endDateLabel: string;
 	/** Whether the end day itself falls in this Sun–Sat week. */
 	endInWeek: boolean;
+	/** Fast-day Mincha (e.g. "6:25 PM"), on the day the fast ends. Absent for Tisha B'Av (#082). */
+	minchaTime?: string;
+	/** Fast-day Maariv, 2 minutes before `endTime`. Absent for Tisha B'Av (#082). */
+	maarivTime?: string;
 }
 
 export interface ComputedWeekdaySchedule {
@@ -346,6 +361,13 @@ function taanisOnDay(day: CivilDate): string | null {
 	return null;
 }
 
+/** The fast-day Mincha, in minutes since midnight, for a shkiya at `sunsetSeconds`. */
+function fastMinchaMinutes(sunsetSeconds: number): number {
+	const step = FAST_MINCHA_STEP_MINUTES * 60;
+	const earliest = sunsetSeconds - FAST_MINCHA_MAX_BEFORE_SHKIYA * 60;
+	return (Math.ceil(earliest / step) * step) / 60;
+}
+
 /**
  * Fasts whose start or end time falls within the Sun–Sat week starting
  * `sunday`. Most fasts start and end the same civil day, so normally match
@@ -375,7 +397,14 @@ function getComputedTaanisRows(sunday: CivilDate): ComputedTaanisRow[] {
 		const zStart = new Zmanim(LOCATION, anchor(startDay), false);
 		const zEnd = new Zmanim(LOCATION, anchor(endDay), false);
 		const startTime = fmtTime(minutesOf(isTishaBav ? zStart.sunset() : zStart.alotHaShachar()));
-		const endTime = fmtTime(minutesOf(zEnd.sunsetOffset(TAANIS_END_AFTER_SHKIYA, true)));
+		const endMinutes = minutesOf(zEnd.sunsetOffset(TAANIS_END_AFTER_SHKIYA, true));
+		const endTime = fmtTime(endMinutes);
+		const fastDavening = isTishaBav
+			? {}
+			: {
+					minchaTime: fmtTime(fastMinchaMinutes(secondsOfDay(zEnd.sunset()))),
+					maarivTime: fmtTime(endMinutes - FAST_MAARIV_BEFORE_FAST_END),
+				};
 
 		rows.push({
 			name: TAANIS_DISPLAY_NAME[desc],
@@ -387,6 +416,7 @@ function getComputedTaanisRows(sunday: CivilDate): ComputedTaanisRow[] {
 			endDayLabel: DAY_NAMES[dayOfWeek(endDay)],
 			endDateLabel: weekdayDateFmt.format(anchor(endDay)),
 			endInWeek,
+			...fastDavening,
 		});
 	}
 	return rows;

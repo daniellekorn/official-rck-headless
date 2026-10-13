@@ -52,6 +52,10 @@ const weekday = weekdayGroups.map((group) => {
 // other's, never both on the same week.
 const taanisTimeGroups = computed.taanis.flatMap((f) => [
 	...(f.startInWeek ? [{ daySpec: `${f.name} — Begins`, items: [{ time: f.startTime, notes: f.startDayLabel }] }] : []),
+	// Fast-day Mincha and Maariv (#082), in addition to the week's regular ones.
+	// They sit on the day the fast ends, so they follow the same endInWeek gate.
+	...(f.endInWeek && f.minchaTime ? [{ daySpec: `${f.name} — Mincha`, items: [{ time: f.minchaTime, notes: f.endDayLabel }] }] : []),
+	...(f.endInWeek && f.maarivTime ? [{ daySpec: `${f.name} — Maariv`, items: [{ time: f.maarivTime, notes: f.endDayLabel }] }] : []),
 	...(f.endInWeek ? [{ daySpec: `${f.name} — Ends`, items: [{ time: f.endTime, notes: f.endDayLabel }] }] : []),
 ]);
 if (taanisTimeGroups.length > 0) {
