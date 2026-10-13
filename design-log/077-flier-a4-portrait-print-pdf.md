@@ -81,6 +81,9 @@ footer. `render.mjs` still refuses to write the A4 PDF if a week overflows.
   `flier-html.mjs`.
 - **Wide flier:** a navy down-arrow and gold staircase beside the time, no words
   (the screen is read from a distance and the words did not fit beside the time).
+  The icon is sized at 0.92 × the time's font size (it was 0.44 and read too small
+  on a TV); Dec 20 (fast day, four columns) is the tightest fit, about 24 px from
+  the card edge.
 - **A4 flier:** the words "Down Stairs" and a gold staircase (no arrow) hang
   under the time, right-aligned, so every time keeps the same right edge. The
   marker is positioned under the time rather than in the flow so the pair of

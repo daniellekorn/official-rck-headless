@@ -79,7 +79,7 @@ function defaultBody(rows, compact = false, service = "") {
           // The second Mincha is downstairs when it starts before 6:00 pm.
           const isDown = (service === "Mincha" && g.times.length === 2 && ti === 1 && t < "18:00") || (service === "Maariv" && ti === 0 && t < "18:00");
           if (!isDown) return big;
-          return `<div style="display:flex;align-items:center;gap:12px">${big}${STAIRS_ICON(Math.round(size * 0.44))}</div>`;
+          return `<div style="display:flex;align-items:center;gap:18px">${big}${STAIRS_ICON(Math.round(size * 0.92))}</div>`;
         })
         .join("")}</div>`,
     )
