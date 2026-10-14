@@ -304,27 +304,48 @@ const isContactActive = pathname === "/contact";
 	});
 
 	// Desktop-only: hovering the hamburger opens the menu immediately, and
-	// moving the mouse off both the button and the panel closes it, mirroring
-	// the hover-open submenus in the desktop nav list. The short close delay
-	// lets the pointer cross the gap between the button and the panel (and
-	// forgives a brief overshoot) without the menu snapping shut. Gated to real
-	// hover+fine-pointer devices so a touch tap's synthetic mouseenter-before-
-	// click doesn't fire this and then have the click handler immediately
-	// toggle it back closed.
-	if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+	// moving the mouse off it closes it, mirroring the hover-open submenus in
+	// the desktop nav list. "On it" means over the button, over the panel, or
+	// in the gap between them — measured live on each mouse move rather than
+	// with a fixed-size CSS bridge, since that gap changes with screen width
+	// and logo height. The short close delay forgives a brief overshoot. Gated
+	// to real hover+fine-pointer devices so a touch tap's synthetic
+	// mouseenter-before-click doesn't fire this and then have the click
+	// handler immediately toggle it back closed.
+	if (toggle && menu && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
 		let closeTimer: number | undefined;
-		const cancelClose = () => window.clearTimeout(closeTimer);
-		const scheduleClose = () => {
-			cancelClose();
-			closeTimer = window.setTimeout(() => setOpen(false), 250);
+		const inside = (r: DOMRect, x: number, y: number) =>
+			x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+		const isOverMenu = (x: number, y: number) => {
+			const t = toggle.getBoundingClientRect();
+			const m = menu.getBoundingClientRect();
+			const gap = new DOMRect(
+				Math.min(t.left, m.left),
+				t.bottom,
+				Math.max(t.right, m.right) - Math.min(t.left, m.left),
+				Math.max(0, m.top - t.bottom),
+			);
+			return inside(t, x, y) || inside(m, x, y) || inside(gap, x, y);
 		};
-		toggle?.addEventListener("mouseenter", () => {
-			cancelClose();
+		toggle.addEventListener("mouseenter", () => {
 			if (toggle.getAttribute("aria-expanded") !== "true") setOpen(true);
 		});
-		menu?.addEventListener("mouseenter", cancelClose);
-		toggle?.addEventListener("mouseleave", scheduleClose);
-		menu?.addEventListener("mouseleave", scheduleClose);
+		document.addEventListener("mousemove", (e) => {
+			if (toggle.getAttribute("aria-expanded") !== "true") return;
+			if (isOverMenu(e.clientX, e.clientY)) {
+				window.clearTimeout(closeTimer);
+				closeTimer = undefined;
+			} else if (closeTimer === undefined) {
+				closeTimer = window.setTimeout(() => {
+					closeTimer = undefined;
+					setOpen(false);
+				}, 250);
+			}
+		});
+		// Mouse leaving the browser window entirely fires no further mousemove.
+		document.documentElement.addEventListener("mouseleave", () => {
+			if (toggle.getAttribute("aria-expanded") === "true") setOpen(false);
+		});
 	}
 
 	menu?.querySelectorAll("a").forEach((a) => {
