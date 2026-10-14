@@ -303,16 +303,28 @@ const isContactActive = pathname === "/contact";
 		setOpen(!isOpen);
 	});
 
-	// Desktop-only: hovering the hamburger opens the menu immediately, mirroring
-	// the hover-open submenus in the desktop nav list. It never auto-closes on
-	// mouseleave though (unlike those submenus) — once open, only clicking the
-	// button (now showing the X) closes it. Gated to real hover+fine-pointer
-	// devices so a touch tap's synthetic mouseenter-before-click doesn't fire
-	// this and then have the click handler immediately toggle it back closed.
+	// Desktop-only: hovering the hamburger opens the menu immediately, and
+	// moving the mouse off both the button and the panel closes it, mirroring
+	// the hover-open submenus in the desktop nav list. The short close delay
+	// lets the pointer cross the gap between the button and the panel (and
+	// forgives a brief overshoot) without the menu snapping shut. Gated to real
+	// hover+fine-pointer devices so a touch tap's synthetic mouseenter-before-
+	// click doesn't fire this and then have the click handler immediately
+	// toggle it back closed.
 	if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+		let closeTimer: number | undefined;
+		const cancelClose = () => window.clearTimeout(closeTimer);
+		const scheduleClose = () => {
+			cancelClose();
+			closeTimer = window.setTimeout(() => setOpen(false), 250);
+		};
 		toggle?.addEventListener("mouseenter", () => {
+			cancelClose();
 			if (toggle.getAttribute("aria-expanded") !== "true") setOpen(true);
 		});
+		menu?.addEventListener("mouseenter", cancelClose);
+		toggle?.addEventListener("mouseleave", scheduleClose);
+		menu?.addEventListener("mouseleave", scheduleClose);
 	}
 
 	menu?.querySelectorAll("a").forEach((a) => {
