@@ -6,11 +6,17 @@ import PageHeader from "../components/PageHeader.astro";
 import CoverflowCarousel from "../components/CoverflowCarousel.astro";
 import Highlight from "../components/Highlight.astro";
 import Flyer from "../components/Flyer.astro";
-import { getFlyers, uniqueSubCategories } from "../lib/flyers";
+import { getFlyers, pickFeaturedFlyer, uniqueSubCategories } from "../lib/flyers";
 import { groupTags } from "../lib/tag-groups";
 
 const allLearning = await getFlyers("learning");
 const tagGroups = groupTags(uniqueSubCategories(allLearning));
+// This week's featured flyer (the site-wide pop-up's "Learn more!" lands here)
+// leads the carousel; the rest keep their displayOrder. See design-log #083.
+const featured = pickFeaturedFlyer(allLearning);
+const carouselItems = featured
+	? [featured, ...allLearning.filter((f) => f._id !== featured._id)]
+	: allLearning;
 ---
 
 <Layout>
@@ -22,7 +28,7 @@ const tagGroups = groupTags(uniqueSubCategories(allLearning));
 	/>
 
 	{allLearning.length > 0 && (
-		<CoverflowCarousel items={allLearning}>
+		<CoverflowCarousel items={carouselItems}>
 			<Fragment slot="aside">
 				<h2
 					class="text-center lg:text-left font-display text-[2rem] sm:text-[2.5rem] leading-[1.05] font-medium uppercase text-navy-600"

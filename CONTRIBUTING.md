@@ -40,6 +40,8 @@ All of these live in the Wix CMS. Edit them in the dashboard and they go live au
 | Footer address, phone, email | `ContactInfo` | Edit the single row. Leave a field empty to hide it from the footer. |
 | Footer social links | `ContactInfo` | Fill in any of `facebookUrl`, `instagramUrl`, `youtubeUrl`, `whatsappUrl`, `twitterUrl`, `linkedinUrl`. Empty = icon hidden. (`whatsappUrl` should be the main community invite — same link as `HomePage.whatsappJoinHref`.) |
 | Donate page (intro text, suggested amounts, donation designations) | `DonatePage` | Edit the single row. See schema below — the `apiValid` field is what switches the page from a "Donate Securely" link into the full on-site card form. |
+| The weekly featured shiur pop-up ("Learn with us!") | `Flyers` | On the `learning` flyer you want featured, set `featuredWeekOf` to the **Sunday** its week starts. You can fill in several weeks ahead — it switches by itself each Sunday. No flyer dated for this week = no pop-up. See [#083](design-log/083-site-promo-popup.md). |
+| A fundraising campaign pop-up | `PopupCampaigns` | Add a row with start/end dates, a flyer image or YouTube link, and the campaign link. While it's running it replaces the weekly shiur pop-up. See the schema below. |
 | Brand colors (the gold, the navy, the bright accent) | `ThemeSettings` | Edit the single row. Put a hex code (e.g. `#d6a21e`) in `primaryGold` / `primaryNavy` / `accent`. The whole matching scale across the site recolors. Leave a field empty to keep the built-in color. See [#028](design-log/028-cms-editable-theme-colors.md). |
 
 ### Two ways to edit content
@@ -439,6 +441,7 @@ One row per flyer. Set **`imageUrl`** (preferred) or **`pdfUrl`** — a row with
 | displayOrder | Number | Sort order within the category. Lower = first. |
 | subCategory | Tags | Optional. Filter tags — add as many per flyer as apply (e.g. `Halacha`, `Men`, `Sunday`, `Night`). The site groups them automatically into **Topic / Audience / Day / Time** rows in the filter panel: weekdays + `Daily`/`Shabbos`/`Motzei-Shabbos` land under Day, `Morning`/`Afternoon`/`Evening`/`Night` under Time, `Men`/`Women`/`Boys`/`Girls`/`Kids`/`Teens`/`Youth`/`Family`/`Community` under Audience, and anything else under Topic. A flyer must match **every** currently-selected filter to show (picking "Men" and "Monday" hides anything that isn't tagged both). Capitalization doesn't matter (`daily` and `Daily` are the same tag), but tags must not contain the `\|` character. Leave empty if no sub-filtering needed. **Exception:** the `learning` row titled exactly "Community Schedule" always shows, first, under every filter combination, regardless of its own tags — see the callout below. |
 | removeAfter | Date | Optional. The last day the flyer should appear. It stays up through that whole day (Israel time) and drops off the site by itself the next morning. **Leave empty for anything evergreen** (a standing schedule, a learning program). Only put a date on things that go stale — mainly event flyers. The row is *not* deleted: to bring a flyer back, just change the date to a future one. |
+| featuredWeekOf | Date | Optional, `learning` rows only. The **Sunday** of the week this flyer is the site-wide featured-shiur pop-up ("Learn with us!") (any day in that Sun–Sat week works). Fill in future weeks ahead of time on other flyers. Leave empty otherwise. The featured flyer also moves to the front of the `/learn` carousel that week. If two flyers share a week, the lower `displayOrder` wins. A flyer that's inactive, expired (`removeAfter`), or has no `imageUrl` won't pop up. See [#083](design-log/083-site-promo-popup.md). |
 | linkedFlyerTitle | Text | Optional. Exact `title` of another `Flyers` row in the `learning` category — when set, **this row's image/PDF is ignored** and it mirrors that learning row's `imageUrl`/`pdfUrl` instead. Use this on a `schedules`/`youth`/`events` row that's really the same flyer as one already posted under Learning, so you only update the image once. Learning rows themselves never follow a link (they're always the source). See design-log #057. |
 
 > **Renaming a `learning` flyer's `title` changes what it's linked to — do it on purpose.** `linkedFlyerTitle` (on this collection and on `YouthPrograms`) matches by exact text, not a stable ID, so retitling a `learning` row silently repoints or breaks every link pointing at it: the linked row just keeps showing whatever image it last had, with no error anywhere. As of design-log #057, the rows currently pointing at a `learning` title are: `YouthPrograms` "Dor L'Dor for Boys" → `Dor L'Dor for Boys`, "Dor L'Dor for Girls" → `Dor L'Dor for Girls`, "Matmidim Chaburos & Program" → `Learn & Grow Chaburos for Kids`; and the `Flyers`/`schedules` "Daily Schedule" row → `Community Schedule`. If you rename any of those four `learning` titles, update the matching `linkedFlyerTitle` value(s) to match, or the link quietly stops working.
@@ -492,6 +495,25 @@ A fair question: why can't the site just *watch* a Canva folder and show whateve
 - **Auto-export needs the Canva Connect API** — an OAuth app with token refresh and async export jobs. That's real plumbing that quietly breaks, for a flyer that changes a few times a year. We looked at it (design log #031) and decided it wasn't worth it yet.
 
 So the deliberate, two-click export stays manual. The `removeAfter` date is the part of "automatic" actually worth having: set a take-down date once and old event flyers disappear on their own — that's the cleanup nobody wants to remember, so we automated *that*.
+
+#### `PopupCampaigns` — one row per campaign
+
+Drives the site-wide pop-up **during a fundraising campaign**. While a row is active and today (Israel time) is between its dates, visitors see the campaign instead of the weekly featured shiur: full pop-up on the first page they open, then a small **Donate** tab in the corner on every page after (and whenever they press ×). When the end date passes or you untick `isActive`, the weekly shiur pop-up comes back by itself. See [#083](design-log/083-site-promo-popup.md).
+
+| Field | Type | Notes |
+|---|---|---|
+| `title` | Text | Internal name — not shown. |
+| `heading` | Text (opt) | Not shown on screen (the pop-up is just the flyer and its button) — it's the label screen readers announce. Empty = "Support RCK". |
+| `isActive` | Boolean | Master on/off switch. |
+| `startDate` | Date (opt) | First day it shows. Empty = starts now. |
+| `endDate` | Date (opt) | Last day it shows (through the whole day). Empty = until you untick `isActive`. |
+| `mediaType` | Text | `flyer` or `video` (lowercase). |
+| `image` | Image | The campaign flyer. Also shown behind the video while it loads. **Required for `flyer`**, recommended for `video`. |
+| `youtubeUrl` | Text (opt) | Any YouTube link. Used when `mediaType` is `video`; plays muted on loop with an Unmute button. A missing/bad link falls back to the `image`. |
+| `buttonLabel` | Text (opt) | Button text. Empty = "Donate now!". |
+| `buttonUrl` | Text | **Required.** The campaign page (e.g. the Charidy link). Opens in a new tab. A row without it is ignored. |
+
+Only one campaign shows at a time; if two overlap, whichever the CMS returns first wins — avoid overlapping dates.
 
 #### `TorahSheets` — one row per sheet
 

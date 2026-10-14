@@ -32,10 +32,16 @@ export interface Flyer {
 	 * design-log #057.
 	 */
 	linkedFlyerTitle?: string;
+	/**
+	 * Sunday (Israel time) of the week this Learning flyer is the site-wide
+	 * featured-shiur pop-up ("Learn with us!"). Any date inside the Sun–Sat week counts,
+	 * so a mistyped Monday still lands in the right week. See design-log #083.
+	 */
+	featuredWeekOf?: Date | string;
 }
 
 /** Today's date as YYYY-MM-DD in Israel time, regardless of where the server runs. */
-function israelDateStr(d: Date): string {
+export function israelDateStr(d: Date): string {
 	return new Intl.DateTimeFormat("en-CA", {
 		timeZone: "Asia/Jerusalem",
 		year: "numeric",
@@ -55,6 +61,54 @@ function isExpired(removeAfter: Flyer["removeAfter"], now: Date): boolean {
 	const date = removeAfter instanceof Date ? removeAfter : new Date(removeAfter);
 	if (Number.isNaN(date.getTime())) return false;
 	return israelDateStr(date) < israelDateStr(now);
+}
+
+/**
+ * A CMS date as YYYY-MM-DD in Israel time. Date-only fields arrive as a plain
+ * "YYYY-MM-DD" string (kept as-is — re-parsing it as UTC midnight could shift
+ * the day); date-time fields arrive as a Date or ISO string. Unparseable →
+ * undefined.
+ */
+export function cmsDateStr(value: Date | string | undefined): string | undefined {
+	if (!value) return undefined;
+	if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+	const date = value instanceof Date ? value : new Date(value);
+	return Number.isNaN(date.getTime()) ? undefined : israelDateStr(date);
+}
+
+/** Add `days` to a YYYY-MM-DD string, calendar-only (no time zone involved). */
+export function addDays(dateStr: string, days: number): string {
+	const d = new Date(`${dateStr}T00:00:00Z`);
+	d.setUTCDate(d.getUTCDate() + days);
+	return d.toISOString().slice(0, 10);
+}
+
+/** The Sunday that starts `now`'s week, as YYYY-MM-DD in Israel time. */
+export function israelWeekStart(now: Date): string {
+	const today = israelDateStr(now);
+	const weekday = new Date(`${today}T00:00:00Z`).getUTCDay(); // 0 = Sunday
+	return addDays(today, -weekday);
+}
+
+/**
+ * This week's featured flyer among already-fetched Learning flyers, or null if
+ * the office hasn't picked one. Ties go to the lowest `displayOrder` —
+ * `getFlyers` already returns them in that order. See design-log #083.
+ */
+export function pickFeaturedFlyer(flyers: Flyer[], now = new Date()): Flyer | null {
+	const start = israelWeekStart(now);
+	const end = addDays(start, 6);
+	return (
+		flyers.find((f) => {
+			const d = cmsDateStr(f.featuredWeekOf);
+			return d !== undefined && d >= start && d <= end;
+		}) ?? null
+	);
+}
+
+/** Fetches the Learning flyers and returns this week's featured one (the pop-up's default mode). */
+export async function getFeaturedFlyer(now = new Date()): Promise<Flyer | null> {
+	return pickFeaturedFlyer(await getFlyers("learning"), now);
 }
 
 async function queryActiveByCategory(category?: FlyerCategory): Promise<Flyer[]> {

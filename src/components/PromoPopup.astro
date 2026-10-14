@@ -1,0 +1,408 @@
+---
+/**
+ * Site-wide promo pop-up, mounted once in Layout. Two modes, chosen per
+ * request by `getActivePopup()` (see design-log #083):
+ *
+ * - **shiur** — this week's featured Learning flyer. Opens on the first page
+ *   of a browsing session only; × closes it for good.
+ * - **campaign** — an in-range `PopupCampaigns` row (flyer or YouTube video).
+ *   Opens on the first page; × (and every later page) collapses it to a small
+ *   "Donate" tab that reopens it.
+ *
+ * Just the flyer: no card or heading around it — a × on its corner and a gold
+ * button bar along its bottom edge. Desktop: bottom-right corner. Phones: full
+ * screen on a navy backdrop with a large ×. Nothing renders when there's no
+ * active pop-up.
+ */
+import { getActivePopup } from "../lib/popup";
+
+interface Props {
+	pathname: string;
+}
+
+const { pathname } = Astro.props;
+const config = await getActivePopup();
+// Someone who lands on /learn is already where the button goes — don't cover
+// the page, but still count it as this session's first page.
+const suppress = config?.kind === "shiur" && /^\/learn\/?$/.test(pathname);
+const storageKey = config ? `rck-popup-${config.kind}-${config.id}` : "";
+const isVideo = config?.media.type === "youtube";
+---
+
+{config && (
+	<div
+		class="promo"
+		data-promo
+		data-kind={config.kind}
+		data-key={storageKey}
+		data-suppress={suppress ? "true" : undefined}
+		data-youtube-id={config.media.type === "youtube" ? config.media.id : undefined}
+	>
+		{!suppress && (
+			<aside
+				class:list={["promo-panel", { "promo-panel--video": isVideo }]}
+				role="dialog"
+				aria-label={config.heading}
+				data-promo-panel
+				hidden
+			>
+				<div class="promo-media">
+					{config.media.type === "image" ? (
+						<img class="promo-img" src={config.media.src} alt={config.media.alt} decoding="async" />
+					) : (
+						<div class="promo-video" style={config.media.poster ? `background-image: url(${config.media.poster})` : undefined}>
+							{/* src is set by the script on open, so YouTube never loads for a closed/minimized pop-up. */}
+							<iframe
+								data-promo-iframe
+								title={config.heading}
+								allow="autoplay; encrypted-media; picture-in-picture"
+								allowfullscreen
+							/>
+							<button type="button" class="promo-unmute" data-promo-unmute aria-pressed="false">
+								Unmute
+							</button>
+						</div>
+					)}
+					<a
+						class="promo-cta"
+						href={config.cta.href}
+						target={config.cta.external ? "_blank" : undefined}
+						rel={config.cta.external ? "noopener" : undefined}
+						data-promo-cta
+					>
+						{config.cta.label}
+					</a>
+					<button
+						type="button"
+						class="promo-close"
+						data-promo-close
+						aria-label={config.dismiss === "minimize" ? "Minimize" : "Close"}
+					>
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" aria-hidden="true">
+							<path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
+						</svg>
+					</button>
+				</div>
+			</aside>
+		)}
+
+		{!suppress && config.dismiss === "minimize" && (
+			<button type="button" class="promo-pill" data-promo-pill hidden aria-label={`Open: ${config.heading}`}>
+				<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+					<path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.5 1.1 5.3 3 1.8-1.9 3.2-3 5.3-3 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z" />
+				</svg>
+				Donate
+			</button>
+		)}
+	</div>
+)}
+
+<style>
+	/* ── Phones (default): full-screen takeover on navy, big × ─────────── */
+	.promo-panel {
+		position: fixed;
+		inset: 0;
+		z-index: 60; /* above the fixed Nav (z-50); the Lightbox <dialog> sits in the top layer above both */
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 4.5rem 1rem 1.5rem;
+		background: rgb(from var(--color-navy-700) r g b / 0.94);
+		opacity: 0;
+		transform: translateY(1rem);
+		transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	.promo-panel[hidden] {
+		display: none;
+	}
+	.promo-panel.is-open {
+		opacity: 1;
+		transform: none;
+	}
+
+	/* Shrink-wraps the flyer so the button bar sits on the image's own bottom
+	   edge and the × on its corner. */
+	.promo-media {
+		position: static; /* phones: × pins to the screen corner, not the flyer */
+		width: fit-content;
+		max-width: 100%;
+	}
+	.promo-img {
+		display: block;
+		width: auto;
+		max-width: 100%;
+		/* screen − panel padding (6rem) − button bar (~3.5rem) */
+		max-height: calc(100dvh - 9.5rem);
+		border-radius: 0.375rem 0.375rem 0 0;
+	}
+	.promo-video {
+		position: relative;
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		overflow: hidden;
+		border-radius: 0.375rem 0.375rem 0 0;
+		background: var(--color-navy-700) center / cover no-repeat;
+	}
+	.promo-panel--video .promo-media {
+		width: 100%;
+	}
+	.promo-video iframe {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		border: 0;
+	}
+	.promo-unmute {
+		position: absolute;
+		top: 0.5rem;
+		inset-inline-start: 0.5rem;
+		padding: 0.3rem 0.65rem;
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--color-navy-700);
+		background: rgb(255 255 255 / 0.92);
+	}
+
+	/* The gold button bar under the flyer — white text ("Learn with us!" /
+	   "Donate now!"). A slightly deeper gold + text shadow keeps the white
+	   readable against the brand gold. */
+	.promo-cta {
+		display: block;
+		/* width 0 + min-width 100%: the bar takes the flyer's width instead of
+		   its own text width widening the shrink-wrapped frame past the image. */
+		width: 0;
+		min-width: 100%;
+		padding: 0.75rem 0.5rem;
+		text-align: center;
+		white-space: nowrap;
+		font-family: var(--font-display);
+		font-size: 1.25rem;
+		font-weight: 500;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: #fff;
+		text-shadow: 0 1px 2px rgb(7 23 58 / 0.45);
+		background: var(--color-gold-500, #c99a1f);
+		border-radius: 0 0 0.375rem 0.375rem;
+		transition: background 0.18s;
+	}
+	.promo-cta:hover {
+		background: var(--color-gold-600, #a87f14);
+	}
+
+	.promo-close {
+		position: absolute;
+		top: 1rem;
+		inset-inline-end: 1rem;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 3rem;
+		height: 3rem;
+		border-radius: 9999px;
+		color: var(--color-navy-700);
+		background: #fff;
+		box-shadow: 0 6px 18px -8px rgb(0 0 0 / 0.6);
+		transition: background 0.18s;
+	}
+	.promo-close:hover {
+		background: var(--color-gold-400);
+	}
+	.promo-close svg {
+		width: 1.6rem;
+		height: 1.6rem;
+	}
+
+	/* Minimized campaign tab — every page after the first, and after ×. */
+	.promo-pill {
+		position: fixed;
+		bottom: 1rem;
+		inset-inline-end: 1rem;
+		z-index: 60;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		padding: 0.7rem 1.1rem;
+		border-radius: 9999px;
+		font-weight: 700;
+		font-size: 0.95rem;
+		color: #fff;
+		text-shadow: 0 1px 2px rgb(7 23 58 / 0.45);
+		background: var(--color-gold-500, #c99a1f);
+		box-shadow: 0 12px 30px -10px rgb(7 23 58 / 0.55);
+		transition: transform 0.18s;
+	}
+	.promo-pill[hidden] {
+		display: none;
+	}
+	.promo-pill:hover {
+		transform: translateY(-2px);
+	}
+	.promo-pill svg {
+		width: 1rem;
+		height: 1rem;
+	}
+
+	/* ── Desktop / tablet: the bare flyer in the bottom-right corner ───── */
+	@media (min-width: 640px) {
+		.promo-panel {
+			inset: auto;
+			bottom: 1.25rem;
+			inset-inline-end: 1.25rem;
+			display: block;
+			width: 17rem;
+			padding: 0;
+			background: none;
+		}
+		.promo-panel--video {
+			width: 24rem;
+		}
+		.promo-media {
+			position: relative;
+			width: 100%;
+			filter: drop-shadow(0 20px 30px rgb(7 23 58 / 0.4));
+		}
+		.promo-img {
+			width: 100%;
+			max-height: 70vh;
+			object-fit: contain;
+		}
+		.promo-cta {
+			font-size: 1.1rem;
+			padding: 0.6rem 0.75rem;
+		}
+		/* × sits on the flyer's top corner, overhanging slightly. */
+		.promo-close {
+			top: -0.6rem;
+			inset-inline-end: -0.6rem;
+			width: 2.1rem;
+			height: 2.1rem;
+		}
+		.promo-close svg {
+			width: 1.1rem;
+			height: 1.1rem;
+		}
+		.promo-pill {
+			bottom: 1.25rem;
+			inset-inline-end: 1.25rem;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.promo-panel,
+		.promo-pill {
+			transition: none;
+		}
+	}
+</style>
+
+<script>
+	// Session rule (design-log #083): the full pop-up opens on the first page of
+	// a browsing session only. Shiur → nothing after that. Campaign → the
+	// "Donate" tab on every later page. The key includes the row id, so a new
+	// week's flyer or a new campaign counts as unseen.
+	const root = document.querySelector<HTMLElement>("[data-promo]");
+
+	const read = (key: string): string | null => {
+		try {
+			return sessionStorage.getItem(key);
+		} catch {
+			return null;
+		}
+	};
+	const write = (key: string, value: string) => {
+		try {
+			sessionStorage.setItem(key, value);
+		} catch {
+			/* storage blocked — the pop-up just can't remember being seen */
+		}
+	};
+
+	if (root) {
+		const key = root.dataset.key ?? "";
+		const kind = root.dataset.kind;
+		const youtubeId = root.dataset.youtubeId;
+		const panel = root.querySelector<HTMLElement>("[data-promo-panel]");
+		const pill = root.querySelector<HTMLButtonElement>("[data-promo-pill]");
+		const closeBtn = root.querySelector<HTMLButtonElement>("[data-promo-close]");
+		const iframe = root.querySelector<HTMLIFrameElement>("[data-promo-iframe]");
+		const unmuteBtn = root.querySelector<HTMLButtonElement>("[data-promo-unmute]");
+		const isPhone = window.matchMedia("(max-width: 639px)");
+		const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+		let muted = true;
+
+		const lockScroll = (lock: boolean) => {
+			document.documentElement.style.overflow = lock && isPhone.matches ? "hidden" : "";
+		};
+
+		const open = () => {
+			if (!panel) return;
+			if (pill) pill.hidden = true;
+			if (iframe && youtubeId) {
+				muted = true;
+				unmuteBtn?.setAttribute("aria-pressed", "false");
+				if (unmuteBtn) unmuteBtn.textContent = "Unmute";
+				iframe.src =
+					`https://www.youtube-nocookie.com/embed/${youtubeId}` +
+					`?autoplay=1&mute=1&loop=1&playlist=${youtubeId}&playsinline=1&controls=0&rel=0&enablejsapi=1`;
+			}
+			panel.hidden = false;
+			lockScroll(true);
+			// Next frame so the transition runs from the hidden state.
+			requestAnimationFrame(() => panel.classList.add("is-open"));
+			// Full-screen on phones, so move focus into it; on desktop it's a
+			// corner card and shouldn't steal focus from the page.
+			if (isPhone.matches) closeBtn?.focus({ preventScroll: true });
+		};
+
+		const dismiss = () => {
+			if (!panel || panel.hidden) return;
+			panel.classList.remove("is-open");
+			lockScroll(false);
+			if (iframe) iframe.removeAttribute("src"); // stops the video
+			const finish = () => {
+				panel.hidden = true;
+				if (pill) pill.hidden = false; // campaign → collapse to the tab
+			};
+			if (reduceMotion) finish();
+			else setTimeout(finish, 250);
+		};
+
+		closeBtn?.addEventListener("click", dismiss);
+		pill?.addEventListener("click", open);
+		// Tapping the dark area around the flyer (phones) dismisses too.
+		panel?.addEventListener("click", (e) => {
+			if (e.target === panel) dismiss();
+		});
+		document.addEventListener("keydown", (e) => {
+			if (e.key === "Escape") dismiss();
+		});
+		unmuteBtn?.addEventListener("click", () => {
+			muted = !muted;
+			iframe?.contentWindow?.postMessage(
+				JSON.stringify({ event: "command", func: muted ? "mute" : "unMute", args: [] }),
+				"*",
+			);
+			unmuteBtn.textContent = muted ? "Unmute" : "Mute";
+			unmuteBtn.setAttribute("aria-pressed", String(!muted));
+		});
+
+		const seen = read(key);
+		if (root.dataset.suppress === "true") {
+			// Landed on /learn — counts as the first page, show nothing.
+			write(key, "shown");
+		} else if (kind === "campaign") {
+			if (seen) {
+				if (pill) pill.hidden = false;
+			} else {
+				write(key, "minimized");
+				setTimeout(open, 800);
+			}
+		} else if (!seen) {
+			write(key, "shown");
+			setTimeout(open, 800);
+		}
+	}
+</script>
