@@ -33,8 +33,8 @@ export interface Flyer {
 	 */
 	linkedFlyerTitle?: string;
 	/**
-	 * Sunday (Israel time) of the week this Learning flyer is the site-wide
-	 * featured-shiur pop-up ("Learn with us!"). Any date inside the Sun–Sat week counts,
+	 * Sunday (Israel time) of the week this `learning` or `events` flyer is the
+	 * site-wide pop-up ("Learn with us!" / "Join us!"). Any date inside the Sun–Sat week counts,
 	 * so a mistyped Monday still lands in the right week. See design-log #083.
 	 */
 	featuredWeekOf?: Date | string;
@@ -91,7 +91,7 @@ export function israelWeekStart(now: Date): string {
 }
 
 /**
- * This week's featured flyer among already-fetched Learning flyers, or null if
+ * This week's featured flyer among already-fetched flyers, or null if
  * the office hasn't picked one. Ties go to the lowest `displayOrder` —
  * `getFlyers` already returns them in that order. See design-log #083.
  */
@@ -106,9 +106,16 @@ export function pickFeaturedFlyer(flyers: Flyer[], now = new Date()): Flyer | nu
 	);
 }
 
-/** Fetches the Learning flyers and returns this week's featured one (the pop-up's default mode). */
+/**
+ * This week's featured flyer for the site-wide pop-up — a `learning` or an
+ * `events` row (one slot per week across both). See design-log #083.
+ */
 export async function getFeaturedFlyer(now = new Date()): Promise<Flyer | null> {
-	return pickFeaturedFlyer(await getFlyers("learning"), now);
+	const [learning, events] = await Promise.all([getFlyers("learning"), getFlyers("events")]);
+	const candidates = [...learning, ...events].sort(
+		(a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0),
+	);
+	return pickFeaturedFlyer(candidates, now);
 }
 
 async function queryActiveByCategory(category?: FlyerCategory): Promise<Flyer[]> {

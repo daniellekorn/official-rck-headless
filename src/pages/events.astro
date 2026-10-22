@@ -5,10 +5,16 @@ import Footer from "../components/Footer.astro";
 import PageHeader from "../components/PageHeader.astro";
 import EventArchive from "../components/EventArchive.astro";
 import Flyer from "../components/Flyer.astro";
-import { getFlyers } from "../lib/flyers";
+import { getFlyers, pickFeaturedFlyer } from "../lib/flyers";
 import { getPastEvents } from "../lib/past-events";
 
-const allEvents = await getFlyers("events");
+const upcoming = await getFlyers("events");
+// This week's featured event flyer (the site-wide pop-up's "Join us!" lands
+// here) leads the carousel; the rest keep their displayOrder. See design-log #083.
+const featured = pickFeaturedFlyer(upcoming);
+const allEvents = featured
+	? [featured, ...upcoming.filter((f) => f._id !== featured._id)]
+	: upcoming;
 
 const pastEvents = await getPastEvents();
 ---

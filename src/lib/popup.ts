@@ -31,14 +31,14 @@ export type PopupMedia =
 
 /** Everything the site-wide pop-up needs to render — one shape for both modes. */
 export interface PopupConfig {
-	kind: "campaign" | "shiur";
+	kind: "campaign" | "shiur" | "event";
 	/** CMS row id — part of the per-session storage key, so a new week/campaign shows again. */
 	id: string;
 	/** Not shown on screen — the dialog's accessible name and the video's title. */
 	heading: string;
 	media: PopupMedia;
 	cta: { label: string; href: string; external: boolean };
-	/** Shiur: × removes it. Campaign: × collapses it into a "Donate" tab. */
+	/** Shiur/event: × removes it. Campaign: × collapses it into a "Donate" tab. */
 	dismiss: "close" | "minimize";
 }
 
@@ -79,23 +79,28 @@ async function getActiveCampaign(now: Date): Promise<PopupConfig | null> {
 	return null;
 }
 
-async function getShiurPopup(now: Date): Promise<PopupConfig | null> {
+async function getFeaturedFlyerPopup(now: Date): Promise<PopupConfig | null> {
 	const flyer = await getFeaturedFlyer(now);
 	const src = scaleFlyerImage(flyer?.imageUrl, 800);
 	if (!flyer || !src) return null;
+	// A featured event flyer sends visitors to /events; a shiur to /learn.
+	const isEvent = flyer.category === "events";
+	const heading = isEvent ? "Featured event" : "Featured shiur";
 	return {
-		kind: "shiur",
+		kind: isEvent ? "event" : "shiur",
 		id: flyer._id,
-		heading: "Featured shiur",
-		media: { type: "image", src, alt: flyerAlt(flyer.title, `${flyer.title ?? "Featured shiur"} flyer`) },
-		cta: { label: "Learn with us!", href: "/learn", external: false },
+		heading,
+		media: { type: "image", src, alt: flyerAlt(flyer.title, `${flyer.title ?? heading} flyer`) },
+		cta: isEvent
+			? { label: "Join us!", href: "/events", external: false }
+			: { label: "Learn with us!", href: "/learn", external: false },
 		dismiss: "close",
 	};
 }
 
 /**
  * The pop-up to show right now: an in-range campaign wins, else this week's
- * featured shiur, else nothing. Never throws — a CMS hiccup (or the
+ * featured flyer (shiur or event), else nothing. Never throws — a CMS hiccup (or the
  * PopupCampaigns collection not existing yet) just means no pop-up / falls
  * through to the shiur.
  */
@@ -107,9 +112,9 @@ export async function getActivePopup(now = new Date()): Promise<PopupConfig | nu
 		console.error("[popup] campaign query failed:", err);
 	}
 	try {
-		return await getShiurPopup(now);
+		return await getFeaturedFlyerPopup(now);
 	} catch (err) {
-		console.error("[popup] featured shiur lookup failed:", err);
+		console.error("[popup] featured flyer lookup failed:", err);
 		return null;
 	}
 }

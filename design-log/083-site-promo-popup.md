@@ -20,29 +20,33 @@ take effect without a redeploy) and returns one `PopupConfig` shape for both:
 
 1. **Campaign** — an `isActive` row in the new `PopupCampaigns` collection whose
    `startDate`–`endDate` contains today (Israel time). Wins over the shiur.
-2. **Weekly featured shiur** — the active, unexpired `learning` row in `Flyers`
-   whose new `featuredWeekOf` date falls in this Sun–Sat week (Israel time).
-   Ties → lowest `displayOrder`. Lookup is `getFeaturedFlyer()` in
-   `src/lib/flyers.ts`.
+2. **Weekly featured flyer** — the active, unexpired `learning` **or `events`**
+   row in `Flyers` whose new `featuredWeekOf` date falls in this Sun–Sat week
+   (Israel time). One slot per week across both categories; ties → lowest
+   `displayOrder`. Lookup is `getFeaturedFlyer()` in `src/lib/flyers.ts`.
 3. Neither → nothing renders.
 
 Schemas are in `CONTRIBUTING.md` (Flyers table + `PopupCampaigns` section).
 
-| | Shiur | Campaign |
-|---|---|---|
-| On-screen text | none on the flyer — only the button | none on the flyer — only the button (`heading` is the screen-reader label, default "Support RCK") |
-| Media | flyer `imageUrl` (CDN-scaled) | `image`, or `youtubeUrl` when `mediaType = video` |
-| Button | "Learn with us!" → `/learn`, whose carousel leads with the featured flyer | `buttonLabel` (default "Donate now!") → `buttonUrl`, new tab |
-| × | closes it | collapses to a "Donate" tab that reopens it |
-| Later pages in the session | nothing | the "Donate" tab |
+| | Shiur (`learning` flyer) | Event (`events` flyer) | Campaign |
+|---|---|---|---|
+| On-screen text | none on the flyer — only the button | same | same (`heading` is the screen-reader label, default "Support RCK") |
+| Media | flyer `imageUrl` (CDN-scaled) | same | `image`, or `youtubeUrl` when `mediaType = video` |
+| Button | "Learn with us!" → `/learn`, whose carousel leads with the featured flyer | "Join us!" → `/events`, whose carousel leads with the featured flyer | `buttonLabel` (default "Donate now!") → `buttonUrl`, new tab |
+| × | closes it | closes it | collapses to a "Donate" tab that reopens it |
+| Later pages in the session | nothing | nothing | the "Donate" tab |
+| Landing directly on the button's page | no pop-up (counts as first page) | same | n/a |
 
-Look (Yosef): just the flyer — no card, frame, or heading around it. A gold
-button bar with **white** text runs along the flyer's bottom edge (a deeper gold,
-`--color-gold-500`, plus a text shadow, since white on the brand gold-400 is hard
-to read), and a round white × sits on the flyer's top corner. Desktop: the bare
-flyer bottom-right (wider for 16:9 video). Under 640px: full screen on a navy
-backdrop with a 3rem × in the screen corner, page scroll locked while open. On a
-video the bar sits *under* the player so it doesn't cover it.
+Look (Yosef): just the flyer — no card, frame, or heading around it. A **white**
+button strip with **black** text runs along the flyer's bottom edge, set in the
+menu bar's font (Onest / `--font-sans`, medium weight, normal case — matching
+the Nav links). It replaced an earlier gold strip with white uppercase Oswald
+text. A round white × sits on the flyer's top corner. Desktop: the bare flyer
+bottom-right (wider for 16:9 video). Under 640px: full screen on a 65% navy
+backdrop (lighter than first shipped, so the page shows through and it reads as
+a pop-up) with a 3rem × in the screen corner, page scroll locked while open. On
+a video the strip sits *under* the player so it doesn't cover it. The minimized
+campaign "Donate" tab stays gold.
 
 ## Questions and Answers
 
@@ -56,6 +60,13 @@ video the bar sits *under* the player so it doesn't cover it.
   **A:** The carousel at the top of `/learn` always leads with this week's featured flyer (`pickFeaturedFlyer` in `learn.astro`; the rest keep `displayOrder`), so it's the first thing on the page for every visitor, pop-up or not. A first build deep-linked to the grid (`/learn#flyer-<_id>`, scrolling ~3000px down and ringing the card) — Yosef preferred the carousel; don't reach for the grid anchor again. If one is ever needed, anchor by `_id`, not `slugify(title)`, which strips Hebrew titles to empty.
 - **Q:** Video hosting and autoplay?
   **A:** YouTube (`extractYouTubeId`, same as Past Events), via `youtube-nocookie.com`, `autoplay=1&mute=1&loop=1`. Browsers only allow *muted* autoplay, so there's an Unmute button driving the player through `postMessage` (`enablejsapi=1`). The iframe `src` is set on open and removed on minimize, so a closed pop-up never loads YouTube and minimizing stops playback.
+
+Event flyers were added after first ship (Yosef): the office wanted to put an
+event (e.g. a trip) in the weekly slot. It reuses `featuredWeekOf` rather than a
+second field, so "one featured flyer per week" stays a single rule — an event
+week simply replaces the shiur that week. Event flyers usually carry a
+`removeAfter`; one that expires mid-week drops out of the pop-up the next
+morning like everywhere else, leaving no pop-up for the rest of that week.
 
 ## Trade-offs
 

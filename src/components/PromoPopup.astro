@@ -3,7 +3,8 @@
  * Site-wide promo pop-up, mounted once in Layout. Two modes, chosen per
  * request by `getActivePopup()` (see design-log #083):
  *
- * - **shiur** — this week's featured Learning flyer. Opens on the first page
+ * - **shiur / event** — this week's featured Learning or Events flyer, with
+ *   "Learn with us!" → /learn or "Join us!" → /events. Opens on the first page
  *   of a browsing session only; × closes it for good.
  * - **campaign** — an in-range `PopupCampaigns` row (flyer or YouTube video).
  *   Opens on the first page; × (and every later page) collapses it to a small
@@ -22,9 +23,11 @@ interface Props {
 
 const { pathname } = Astro.props;
 const config = await getActivePopup();
-// Someone who lands on /learn is already where the button goes — don't cover
-// the page, but still count it as this session's first page.
-const suppress = config?.kind === "shiur" && /^\/learn\/?$/.test(pathname);
+// Someone who lands on the button's own page (/learn for a shiur, /events for
+// an event) is already there — don't cover the page, but still count it as
+// this session's first page.
+const suppress =
+	config?.dismiss === "close" && pathname.replace(/\/$/, "") === config.cta.href;
 const storageKey = config ? `rck-popup-${config.kind}-${config.id}` : "";
 const isVideo = config?.media.type === "youtube";
 ---
@@ -165,9 +168,9 @@ const isVideo = config?.media.type === "youtube";
 		background: rgb(255 255 255 / 0.92);
 	}
 
-	/* The gold button bar under the flyer — white text ("Learn with us!" /
-	   "Donate now!"). A slightly deeper gold + text shadow keeps the white
-	   readable against the brand gold. */
+	/* The button strip under the flyer ("Learn with us!" / "Join us!" /
+	   "Donate now!"): white with black text, in the menu bar's font — Onest
+	   (font-sans), medium weight, normal case, like the Nav links. */
 	.promo-cta {
 		display: block;
 		/* width 0 + min-width 100%: the bar takes the flyer's width instead of
@@ -177,19 +180,18 @@ const isVideo = config?.media.type === "youtube";
 		padding: 0.75rem 0.5rem;
 		text-align: center;
 		white-space: nowrap;
-		font-family: var(--font-display);
+		font-family: var(--font-sans);
 		font-size: 1.25rem;
 		font-weight: 500;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
-		color: #fff;
-		text-shadow: 0 1px 2px rgb(7 23 58 / 0.45);
-		background: var(--color-gold-500, #c99a1f);
+		color: #000;
+		background: #fff;
+		border-top: 1px solid var(--color-navy-100, #e2e8f0);
 		border-radius: 0 0 0.375rem 0.375rem;
-		transition: background 0.18s;
+		transition: background 0.18s, color 0.18s;
 	}
 	.promo-cta:hover {
-		background: var(--color-gold-600, #a87f14);
+		background: var(--color-navy-50, #f1f5f9);
+		color: var(--color-gold-600, #a87f14);
 	}
 
 	.promo-close {
@@ -271,7 +273,7 @@ const isVideo = config?.media.type === "youtube";
 		}
 		.promo-cta {
 			font-size: 1.1rem;
-			padding: 0.6rem 0.75rem;
+			padding: 0.65rem 0.75rem;
 		}
 		/* × sits on the flyer's top corner, overhanging slightly. */
 		.promo-close {
@@ -391,7 +393,7 @@ const isVideo = config?.media.type === "youtube";
 
 		const seen = read(key);
 		if (root.dataset.suppress === "true") {
-			// Landed on /learn — counts as the first page, show nothing.
+			// Landed on the button's own page — counts as the first page, show nothing.
 			write(key, "shown");
 		} else if (kind === "campaign") {
 			if (seen) {
