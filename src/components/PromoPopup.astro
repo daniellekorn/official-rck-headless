@@ -217,7 +217,8 @@ const isVideo = config?.media.type === "youtube";
 		height: 1.6rem;
 	}
 
-	/* Minimized campaign tab — every page after the first, and after ×. */
+	/* Minimized campaign tab — every page after the first, and after ×. Same
+	   look as the button strip: white, black text, the menu bar's font. */
 	.promo-pill {
 		position: fixed;
 		bottom: 1rem;
@@ -227,20 +228,23 @@ const isVideo = config?.media.type === "youtube";
 		align-items: center;
 		gap: 0.45rem;
 		padding: 0.7rem 1.1rem;
-		border-radius: 9999px;
-		font-weight: 700;
-		font-size: 0.95rem;
-		color: #fff;
-		text-shadow: 0 1px 2px rgb(7 23 58 / 0.45);
-		background: var(--color-gold-500, #c99a1f);
+		border-radius: 0.375rem;
+		font-family: var(--font-sans);
+		font-weight: 500;
+		font-size: 1rem;
+		color: #000;
+		background: #fff;
+		border: 1px solid var(--color-navy-100, #e2e8f0);
 		box-shadow: 0 12px 30px -10px rgb(7 23 58 / 0.55);
-		transition: transform 0.18s;
+		transition: transform 0.18s, color 0.18s, background 0.18s;
 	}
 	.promo-pill[hidden] {
 		display: none;
 	}
 	.promo-pill:hover {
 		transform: translateY(-2px);
+		background: var(--color-navy-50, #f1f5f9);
+		color: var(--color-gold-600, #a87f14);
 	}
 	.promo-pill svg {
 		width: 1rem;

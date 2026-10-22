@@ -46,7 +46,7 @@ bottom-right (wider for 16:9 video). Under 640px: full screen on a 65% navy
 backdrop (lighter than first shipped, so the page shows through and it reads as
 a pop-up) with a 3rem × in the screen corner, page scroll locked while open. On
 a video the strip sits *under* the player so it doesn't cover it. The minimized
-campaign "Donate" tab stays gold.
+campaign "Donate" tab matches the strip (white, black Onest text).
 
 ## Questions and Answers
 
