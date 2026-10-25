@@ -22,6 +22,7 @@ const groupByDaySpec = (rows) => {
 
 const capStyle = (px) =>
   `font-family:'Onest',sans-serif;font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:${px}px;color:#a47915`;
+const MARKER_GAP = 10; // px between a time and its Down Stairs marker on plain weeks
 let CAP = capStyle(28);
 const time = (t, size, color = "#1a1a1a") =>
   `<div style="font-family:'Oswald',sans-serif;font-weight:500;font-size:${typeof size === "number" ? size + "px" : size};line-height:1;color:${color};font-variant-numeric:tabular-nums">${t}</div>`;
@@ -80,19 +81,33 @@ export function buildA4Html({ weekOf, rows, taanis = [], photoUrl, logoUrl, qrUr
   const sizeFor = () => (big ? 80 : TS(1));
   // With room to spare, a third time drops to its own line instead of shrinking the row.
   // The second Mincha is downstairs when it starts before 6:00 pm.
-  const timesDS = (times, size, dsIdx) => {
-    const label = (px) => `<div style="${CAP};font-size:${px}px;line-height:1.1;letter-spacing:.14em;text-align:right">Down<br>Stairs</div>`;
+  const timesDS = (times, size0, dsIdx) => {
+    const size = size0;
+    // The marker belongs to one time. When that time is not the last in its row it is left-aligned with the
+    // time (so it reads as under it, not between it and its neighbour); the last time's marker is right-aligned.
+    const leftAlign = dsIdx < times.length - 1;
+    // Stacked (3 times): the last time drops to its own line and the left-aligned marker sits beside it, in that line's height,
+    // so the marker costs no extra vertical room and the times keep their full size.
+    const stacked = big && times.length >= 3;
+    const label = (px) => `<div style="${CAP};font-size:${px}px;line-height:1.1;letter-spacing:.14em;text-align:${leftAlign ? "left" : "right"}">Down<br>Stairs</div>`;
     const cell = (t, i) => {
       if (i !== dsIdx) return time(t, size);
       const tight = rcWeek;
       const under = label(big && !tight ? 24 : 20);
       // Plain weeks hang the marker below the time (absolute, so it doesn't push the times row off the title's centre line);
       // crowded weeks have no spare height, so there it stays in the flow.
+      const gap = tight ? 6 : MARKER_GAP;
       return big
-        ? `<div style="padding-bottom:${tight ? 56 : 30}px"><div style="position:relative">${time(t, size)}<div style="position:absolute;right:0;top:100%;margin-top:${tight ? 10 : 22}px">${under}</div></div></div>`
-        : `<div style="display:flex;flex-direction:column;align-items:flex-end">${time(t, size)}<div style="margin-top:8px">${under}</div></div>`;
+        ? `<div style="padding-bottom:${stacked && leftAlign ? 0 : tight ? 52 : 30}px"><div style="position:relative">${time(t, size)}<div style="position:absolute;${leftAlign ? "left:0" : "right:0"};top:100%;margin-top:${gap}px">${under}</div></div></div>`
+        : `<div style="display:flex;flex-direction:column;align-items:${leftAlign ? "flex-start" : "flex-end"}">${time(t, size)}<div style="margin-top:8px">${under}</div></div>`;
     };
-    return `<div style="display:flex;justify-content:flex-end;align-items:flex-start;gap:30px;margin-top:8px;flex-wrap:nowrap">${times.map(cell).join("")}</div>`;
+    const row = (cells) => `<div style="display:flex;justify-content:flex-end;align-items:flex-start;gap:30px;flex-wrap:nowrap">${cells.join("")}</div>`;
+    // Three times (an 18:00 Maariv added to an early one, #083) on a roomy page: the last drops to its own line, as in timesStack.
+    if (big && times.length >= 3) {
+      const cells = times.map(cell);
+      return `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;margin-top:8px">${row(cells.slice(0, -1))}${row(cells.slice(-1))}</div>`;
+    }
+    return `<div style="margin-top:8px">${row(times.map(cell))}</div>`;
   };
   // Downstairs: the second Mincha, and the early Maariv, whenever they start before 6:00 pm.
   const dsIndex = (name, times) =>

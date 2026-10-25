@@ -71,6 +71,8 @@ posted time is valid every day:
 - The fixed 18:00 minyan — shown only while late Mincha still falls after 18:10
 - Late Mincha — the earliest sunset across the week, minus 10 minutes
 - Maariv — the latest sunset across the week, plus 18 minutes
+- The fixed 18:00 Maariv — added whenever the first Maariv is more than 15 minutes
+  before 6:00 (earlier than 17:45), design-log #083
 - The fixed 20:00 minyan — shown only while that earlier Maariv is before 20:00
 
 **Downstairs:** a Mincha or Maariv that starts before 18:00 is held downstairs,

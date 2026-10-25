@@ -26,6 +26,8 @@ const FIXED_MINCHA_CUTOFF = 18 * 60 + 10; // ...runs only while late mincha is a
 const LATE_MINCHA_BEFORE_SHKIYA = 10; // minutes before shkiya
 const MAARIV_AFTER_SHKIYA = 18; // minutes after shkiya
 const FIXED_MAARIV = 20 * 60; // the 8:00 pm minyan, dropped once shkiya+18 reaches it
+const FIXED_EARLY_MAARIV = 18 * 60; // the 6:00 pm minyan...
+const FIXED_EARLY_MAARIV_GAP = 15; // ...added whenever the first Maariv is MORE than 15 minutes before 6:00 (#083)
 
 // ── Selichos (confirmed with Yosef, Sept 2026; see #067, amended #071). ──
 const SELICHOS_BEFORE_ELUL = 20; // minutes before each Shacharis, season start through erev Rosh Hashana
@@ -539,6 +541,9 @@ export function getComputedWeekdaySchedule(now: Date = new Date()): ComputedWeek
 	rows.push({ service: "Mincha", daySpec: minchaMaarivDaySpec, time: fmtTime(lateMincha) });
 
 	rows.push({ service: "Maariv", daySpec: minchaMaarivDaySpec, time: fmtTime(shkiyaMaariv) });
+	// #083: when the first Maariv is more than 15 minutes before 6:00 (i.e. earlier
+	// than 5:45 — exactly 5:45 does not qualify), a 6:00 pm Maariv runs as well.
+	if (shkiyaMaariv < FIXED_EARLY_MAARIV - FIXED_EARLY_MAARIV_GAP) rows.push({ service: "Maariv", daySpec: minchaMaarivDaySpec, time: fmtTime(FIXED_EARLY_MAARIV) });
 	if (shkiyaMaariv < FIXED_MAARIV) rows.push({ service: "Maariv", daySpec: minchaMaarivDaySpec, time: fmtTime(FIXED_MAARIV) });
 
 	const weekOf = new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "long", day: "numeric" }).format(anchor(sunday));
