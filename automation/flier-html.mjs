@@ -63,7 +63,7 @@ function defaultBody(rows, compact = false, service = "") {
   // already fills the card at the old sizing (verified against the week of
   // Sept 27, back to the normal 3-Mincha cadence) and bumping it overflows
   // into the footer.
-  const size = compact ? (total <= 2 ? 118 : total === 3 ? 106 : 82) : total <= 2 ? 150 : total === 3 ? 120 : 88;
+  const size = compact ? (total <= 2 ? 118 : total === 3 ? 106 : 82) : total <= 2 ? 150 : total === 3 ? 132 : 88;
   const gap = compact ? (total >= 4 ? 4 : 10) - 2 : total <= 2 ? 16 : total >= 4 ? 4 : 10;
   const bodyTop = compact ? (total >= 4 ? 12 : 24) - 6 : total <= 2 ? 30 : total >= 4 ? 12 : 24;
   return groups

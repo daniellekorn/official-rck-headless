@@ -41,3 +41,10 @@ matches the rule, and the rows are always in increasing order. The two weeks
 nearest the boundary (2027-02-14: 5:47, 2028-02-13: 5:46) correctly do not get
 the 6:00. 64 weeks render through `render.mjs` with no failures and the wide
 flier has no overflow.
+
+## Addendum — wide flier three-row size
+
+A card with three times (a Maariv or Mincha with three rows) uses 132 px on the wide
+flier (was 120). 134 is the most that fits all 64 weeks tested; 136 overflows the
+footer on 44 of them, so 132 leaves a small margin. Fast-day (compact) weeks are
+unchanged.
