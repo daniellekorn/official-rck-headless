@@ -79,6 +79,27 @@ async function getActiveCampaign(now: Date): Promise<PopupConfig | null> {
 	return null;
 }
 
+/**
+ * The flyer's `popupLink`, if it's usable: a site path ("/youth#…") stays in
+ * the tab; a full http(s) URL is external unless it's rckollel.com itself.
+ * Anything else (a typo like "youth") is ignored so the default link stands.
+ */
+function popupLinkOverride(raw: string | undefined): { href: string; external: boolean } | null {
+	const link = raw?.trim();
+	if (!link) return null;
+	if (link.startsWith("/") && !link.startsWith("//")) return { href: link, external: false };
+	try {
+		const url = new URL(link);
+		if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+		const ownSite = /(^|\.)rckollel\.com$/i.test(url.hostname);
+		return ownSite
+			? { href: `${url.pathname}${url.search}${url.hash}`, external: false }
+			: { href: url.href, external: true };
+	} catch {
+		return null;
+	}
+}
+
 async function getFeaturedFlyerPopup(now: Date): Promise<PopupConfig | null> {
 	const flyer = await getFeaturedFlyer(now);
 	const src = scaleFlyerImage(flyer?.imageUrl, 800);
@@ -91,9 +112,15 @@ async function getFeaturedFlyerPopup(now: Date): Promise<PopupConfig | null> {
 		id: flyer._id,
 		heading,
 		media: { type: "image", src, alt: flyerAlt(flyer.title, `${flyer.title ?? heading} flyer`) },
-		cta: isEvent
-			? { label: "Join us!", href: "/events", external: false }
-			: { label: "Learn with us!", href: "/learn", external: false },
+		cta: {
+			label: isEvent ? "Join us!" : "Learn with us!",
+			// `popupLink` on the row sends the button elsewhere (e.g. a youth
+			// program's section); otherwise the category's own page.
+			...(popupLinkOverride(flyer.popupLink) ?? {
+				href: isEvent ? "/events" : "/learn",
+				external: false,
+			}),
+		},
 		dismiss: "close",
 	};
 }

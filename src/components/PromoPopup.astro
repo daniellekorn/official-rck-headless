@@ -24,10 +24,12 @@ interface Props {
 const { pathname } = Astro.props;
 const config = await getActivePopup();
 // Someone who lands on the button's own page (/learn for a shiur, /events for
-// an event) is already there — don't cover the page, but still count it as
+// an event, or the flyer's `popupLink` page) is already there — don't cover the page, but still count it as
 // this session's first page.
+// Compared on the path alone, so "/youth#dor-ldor-for-boys" matches /youth.
+const ctaPath = config && !config.cta.external ? config.cta.href.split(/[?#]/)[0].replace(/\/$/, "") : null;
 const suppress =
-	config?.dismiss === "close" && pathname.replace(/\/$/, "") === config.cta.href;
+	config?.dismiss === "close" && ctaPath !== null && pathname.replace(/\/$/, "") === ctaPath;
 const storageKey = config ? `rck-popup-${config.kind}-${config.id}` : "";
 const isVideo = config?.media.type === "youtube";
 ---

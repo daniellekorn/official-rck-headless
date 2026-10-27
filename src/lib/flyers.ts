@@ -38,6 +38,13 @@ export interface Flyer {
 	 * so a mistyped Monday still lands in the right week. See design-log #083.
 	 */
 	featuredWeekOf?: Date | string;
+	/**
+	 * Optional destination for the pop-up's button when this flyer is featured,
+	 * overriding the category default (/learn or /events) — e.g.
+	 * "/youth#dor-ldor-for-boys". A site path, or a full https:// URL (opens in
+	 * a new tab). See design-log #083.
+	 */
+	popupLink?: string;
 }
 
 /** Today's date as YYYY-MM-DD in Israel time, regardless of where the server runs. */

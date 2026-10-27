@@ -68,6 +68,18 @@ week simply replaces the shiur that week. Event flyers usually carry a
 `removeAfter`; one that expires mid-week drops out of the pop-up the next
 morning like everywhere else, leaving no pop-up for the rest of that week.
 
+**Per-flyer button link (`Flyers.popupLink`, Text, optional).** Added when the
+office featured "Dor L'Dor for Boys" (a `learning` row) but wanted the button to
+open its program on `/youth`, not `/learn`. `popupLinkOverride()` in
+`src/lib/popup.ts` accepts a site path (`/youth#dor-ldor-for-boys`, kept in the
+tab) or a full http(s) URL (external → new tab, unless it's rckollel.com). Any
+other value is ignored so a typo falls back to the category page instead of a
+broken link. The label stays "Learn with us!" / "Join us!". The "no pop-up
+when you land on the button's page" rule compares the path only, so landing on
+`/youth` suppresses a `/youth#…` link. The destination page's carousel is not
+reordered for an override — only `/learn` and `/events` lead with the featured
+flyer.
+
 ## Trade-offs
 
 - The office has to remember to date next week's flyer — mitigated by a weekly Sunday reminder (a scheduled Claude task, outside this repo) that asks Yosef for the following Sunday's pick and writes `featuredWeekOf` via the Wix MCP.
