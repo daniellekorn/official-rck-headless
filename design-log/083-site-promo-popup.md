@@ -80,6 +80,19 @@ when you land on the button's page" rule compares the path only, so landing on
 reordered for an override — only `/learn` and `/events` lead with the featured
 flyer.
 
+**Exact-time windows (`Flyers.featuredFrom` / `featuredUntil`, Date & time,
+optional).** Added when the office wanted Penimiyus HaTorah until Wednesday
+20:00 and then Dor L'Dor for Girls until Motzei Shabbos 20:00 — a mid-week
+switch the Sunday-to-Saturday `featuredWeekOf` can't express. In
+`pickFeaturedFlyer`, a row whose window covers `now` wins; otherwise the week
+pick applies. `featuredUntil` is required (a window with no end is ignored, so
+a forgotten field can't pin a flyer forever); an empty `featuredFrom` means
+"already started". Chosen over scheduling CMS edits at the switch times (a
+Claude scheduled task) because the site evaluates the window on every request
+— no dependency on a Mac being awake at 20:00. Caveat: Wix's CDN can hold the
+homepage HTML for ~25 min (#020), so the homepage may switch late; other pages
+switch on time.
+
 ## Trade-offs
 
 - The office has to remember to date next week's flyer — mitigated by a weekly Sunday reminder (a scheduled Claude task, outside this repo) that asks Yosef for the following Sunday's pick and writes `featuredWeekOf` via the Wix MCP.

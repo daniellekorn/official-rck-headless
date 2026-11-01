@@ -45,6 +45,15 @@ export interface Flyer {
 	 * a new tab). See design-log #083.
 	 */
 	popupLink?: string;
+	/**
+	 * Optional exact time window (date-time fields) for featuring this flyer,
+	 * e.g. Wednesday 20:00 → Saturday 20:00. A row whose window covers "now"
+	 * beats any `featuredWeekOf` pick. `featuredUntil` is required for a window
+	 * (so a forgotten end can't feature a flyer forever); an empty
+	 * `featuredFrom` means "from now". See design-log #083.
+	 */
+	featuredFrom?: Date | string;
+	featuredUntil?: Date | string;
 }
 
 /** Today's date as YYYY-MM-DD in Israel time, regardless of where the server runs. */
@@ -97,12 +106,30 @@ export function israelWeekStart(now: Date): string {
 	return addDays(today, -weekday);
 }
 
+/** A CMS date-time as epoch ms, or undefined when empty/unparseable. */
+function cmsInstant(value: Date | string | undefined): number | undefined {
+	if (!value) return undefined;
+	const t = (value instanceof Date ? value : new Date(value)).getTime();
+	return Number.isNaN(t) ? undefined : t;
+}
+
 /**
- * This week's featured flyer among already-fetched flyers, or null if
- * the office hasn't picked one. Ties go to the lowest `displayOrder` —
- * `getFlyers` already returns them in that order. See design-log #083.
+ * The featured flyer right now among already-fetched flyers, or null if the
+ * office hasn't picked one. A flyer whose `featuredFrom`–`featuredUntil`
+ * window covers `now` wins; otherwise this week's `featuredWeekOf` pick. Ties
+ * go to the lowest `displayOrder` — `getFlyers` already returns them in that
+ * order. See design-log #083.
  */
 export function pickFeaturedFlyer(flyers: Flyer[], now = new Date()): Flyer | null {
+	const t = now.getTime();
+	const timed = flyers.find((f) => {
+		const until = cmsInstant(f.featuredUntil);
+		if (until === undefined) return false;
+		const from = cmsInstant(f.featuredFrom);
+		return (from === undefined || from <= t) && t < until;
+	});
+	if (timed) return timed;
+
 	const start = israelWeekStart(now);
 	const end = addDays(start, 6);
 	return (
