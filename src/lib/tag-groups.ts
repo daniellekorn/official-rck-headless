@@ -1,14 +1,14 @@
 /**
  * Groups flyer subCategory tags into labeled rows for the filter UI (design log #038).
  *
- * Day / Time / Audience are closed vocabularies inferred in code — no CMS "tag type"
+ * Day / Time / Audience / Language are closed vocabularies inferred in code — no CMS "tag type"
  * field for the office to maintain or mistype. Anything unrecognized falls back to
  * Topic, which is the open-ended group, so a brand-new tag still shows up somewhere
  * sensible. All matching is against lowercase tags (see normalizeTags in flyers.ts).
  */
 
 export interface TagGroup {
-	key: "topic" | "audience" | "day" | "time";
+	key: "topic" | "audience" | "language" | "day" | "time";
 	label: string;
 	tags: string[];
 }
@@ -40,6 +40,9 @@ const AUDIENCE_TAGS = [
 	"community",
 ] as const;
 
+/** "hebrew" and "english" also pick which side a two-language flyer shows (#084). */
+const LANGUAGE_TAGS = ["english", "hebrew", "spanish"] as const;
+
 function byVocabulary(tags: string[], vocabulary: readonly string[]): string[] {
 	return vocabulary.filter((v) => tags.includes(v));
 }
@@ -53,12 +56,14 @@ export function groupTags(tags: string[]): TagGroup[] {
 	const day = byVocabulary(tags, DAY_TAGS);
 	const time = byVocabulary(tags, TIME_TAGS);
 	const audience = byVocabulary(tags, AUDIENCE_TAGS);
-	const known = new Set<string>([...day, ...time, ...audience]);
+	const language = byVocabulary(tags, LANGUAGE_TAGS);
+	const known = new Set<string>([...day, ...time, ...audience, ...language]);
 	const topic = tags.filter((t) => !known.has(t)).sort();
 
 	const groups: TagGroup[] = [
 		{ key: "topic", label: "Topic", tags: topic },
 		{ key: "audience", label: "Audience", tags: audience },
+		{ key: "language", label: "Language", tags: language },
 		{ key: "day", label: "Day", tags: day },
 		{ key: "time", label: "Time", tags: time },
 	];

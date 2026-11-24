@@ -14,8 +14,9 @@ Two jobs: **a new flyer**, and **replacing the picture on one already up**.
 1. **The Canva link.** Open and read it before asking anything else — it gives you the title, page count, date, and audience.
 2. **Which section**, if the design doesn't settle it — Schedules, Learning, or Events.
 3. **Title** — read it off the design and offer it for confirmation.
-4. **Which page** — only if there's more than one. Count them yourself.
+4. **Which page** — only if there's more than one. Count them yourself. Two pages that are the same flyer in English and Hebrew → *Hebrew + English flyers* below.
 5. **How long it stays up.** If the design carries a date, offer that date. Events need one; standing schedules and ongoing programs don't.
+6. **The link on the flyer**, if it has one — see *The link line*. Put it in the read-back; don't ask separately when you could read it.
 
 ## Fields
 
@@ -29,6 +30,11 @@ Two jobs: **a new flyer**, and **replacing the picture on one already up**.
 | `displayOrder` | Number | Order within its section, lower first. |
 | `subCategory` | Tags | Optional filter tags — see below. |
 | `removeAfter` | Date | The last day it shows. Optional. |
+| `imageUrlHebrew` | Text | The Hebrew flyer, same kind of public URL as `imageUrl`. Optional. |
+| `titleHebrew` | Text | Hebrew title, shown under the Hebrew flyer. Optional. |
+| `linkUrl` | Text | The link that's on the flyer. Optional. |
+| `linkText` | Text | Words for that link, in English. Optional. |
+| `linkTextHebrew` | Text | Words for that link, in Hebrew. Optional. |
 
 ## Sections
 
@@ -61,7 +67,36 @@ Prefer an image over a PDF: it gets hover zoom, click-to-enlarge, and a Download
 
 ## One page per flyer
 
-Export **one page** as PNG, never the whole design. Several pages → count them and ask which one.
+Export **one page** as PNG, never the whole design. Several pages → count them and ask which one. The one exception is below.
+
+## Hebrew + English flyers
+
+When two pages are the same flyer in English and Hebrew, upload both to **one row**: the English page in `imageUrl`, the Hebrew page in `imageUrlHebrew`. The site shows one card that opens in English, with an עברית button that flips it to the Hebrew flyer, title, and link. Never make two rows.
+
+- Read both titles off the design: English in `title`, Hebrew in `titleHebrew`.
+- Both languages share one `linkUrl`; write both `linkText` and `linkTextHebrew`.
+- Works on `events` and `learning` flyers. The pop-up shows the English one only.
+- No language tag needed: it answers to both the Hebrew and English filters by itself.
+
+## The link line
+
+A link on the flyer becomes a line under its title. Look for one on every event and shiur flyer: a web address in the text, a QR code, a Zoom or WhatsApp group link.
+
+A QR code is a picture, so the design's text won't contain its link. Decode it from the exported page if you can; if not, ask for the link it opens. **Never guess a link**, and never use a placeholder. A phone number is not a link: only make one (`https://wa.me/9725…`, no leading 0) if they ask.
+
+Write the full address in `linkUrl`, and pick the words from what the flyer asks people to do:
+
+| The flyer says | `linkText` | `linkTextHebrew` |
+|---|---|---|
+| register, RSVP | Click here to register | לחצו כאן להרשמה |
+| sign up | Click here to sign up | לחצו כאן להרשמה |
+| join (Zoom, WhatsApp group) | Click here to join | לחצו כאן להצטרפות |
+| reserve, buy tickets | Click here to reserve | לחצו כאן להזמנת מקום |
+| sponsor, donate | Click here to sponsor | לחצו כאן לתרומה |
+| watch, listen | Click here to watch | לחצו כאן לצפייה |
+| nothing specific | Click here for more details | לחצו כאן לפרטים נוספים |
+
+Leave the words empty and the site picks some from the kind of link. Show the link and the words in the read-back.
 
 ## Take-down dates
 
@@ -77,6 +112,7 @@ Export **one page** as PNG, never the whole design. Several pages → count them
 - **Day** — weekday names, plus `Daily`, `Shabbos`, `Motzei-Shabbos`
 - **Time** — `Morning`, `Afternoon`, `Evening`, `Night`
 - **Audience** — `Men`, `Women`, `Boys`, `Girls`, `Kids`, `Teens`, `Youth`, `Family`, `Community`
+- **Language** — `Hebrew`, `English`, `Spanish` (the language the shiur is given in)
 - **Topic** — anything else
 
 Capitalisation doesn't matter. No `|` in a tag.

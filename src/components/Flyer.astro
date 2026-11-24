@@ -26,9 +26,16 @@ interface Props {
 	 * landscape image into a tall 3:4 box leaves large empty bars.
 	 */
 	aspectRatio?: string;
+	/**
+	 * Every image of a bilingual pair (raw URLs), plus this one's place in it.
+	 * The lightbox then opens on this flyer and its arrows flip between the
+	 * languages. See design-log #084.
+	 */
+	pair?: string[];
+	pairIndex?: number;
 }
 
-const { imageUrl, pdfUrl, title, eager = false, aspectRatio } = Astro.props;
+const { imageUrl, pdfUrl, title, eager = false, aspectRatio, pair, pairIndex = 0 } = Astro.props;
 const label = title ?? "flyer";
 const imgAlt = flyerAlt(title, `${label} flyer`);
 // The <img> and the lightbox both serve scaled CDN variants; only the
@@ -36,6 +43,7 @@ const imgAlt = flyerAlt(title, `${label} flyer`);
 const thumbSrc = scaleFlyerImage(imageUrl);
 const thumbSrcset = flyerSrcset(imageUrl);
 const lightboxSrc = flyerLightboxSrc(imageUrl);
+const gallery = pair ? JSON.stringify(pair.map((url) => flyerLightboxSrc(url))) : undefined;
 ---
 
 <div
@@ -43,12 +51,14 @@ const lightboxSrc = flyerLightboxSrc(imageUrl);
 	style={aspectRatio ? `aspect-ratio: ${aspectRatio};` : undefined}
 >
 	{imageUrl ? (
-		<div class="flyer group absolute inset-0">
+		<div class:list={["flyer group absolute inset-0", pair && "flyer-paired"]}>
 			<button
 				type="button"
 				class="flyer-open"
 				data-lightbox-open
 				data-lightbox-src={lightboxSrc}
+				data-lightbox-gallery={gallery}
+				data-lightbox-index={gallery ? pairIndex : undefined}
 				data-lightbox-title={title}
 				aria-label={`View ${label} full size`}
 			>
@@ -170,6 +180,12 @@ const lightboxSrc = flyerLightboxSrc(imageUrl);
 	@media (hover: none) {
 		.flyer-expand,
 		.flyer-download { opacity: 1; transform: none; }
+	}
+	/* On a phone the flip button already takes the top edge of a bilingual
+	   flyer. A tap still opens the lightbox, which has Download. */
+	@media (max-width: 639px) {
+		.flyer-paired .flyer-expand,
+		.flyer-paired .flyer-download { display: none; }
 	}
 	.flyer-btn {
 		display: inline-flex;

@@ -1,0 +1,18 @@
+---
+/** The "Click here to …" line under a flyer's title. See design-log #084. */
+import type { FlyerLink } from "../lib/flyer-link";
+
+interface Props {
+	link: FlyerLink;
+	text: string;
+}
+
+const { link, text } = Astro.props;
+---
+
+<a
+	href={link.href}
+	target={link.external ? "_blank" : undefined}
+	rel={link.external ? "noopener noreferrer" : undefined}
+	class="mt-1 inline-block py-1 text-sm font-medium text-navy-600 underline decoration-gold-500 decoration-2 underline-offset-4 transition-colors hover:text-navy-700 hover:decoration-navy-600"
+>{text}</a>

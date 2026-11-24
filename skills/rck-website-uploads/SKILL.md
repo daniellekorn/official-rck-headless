@@ -1,11 +1,11 @@
 ---
-name: rck-website-uploads
-description: Guided, bilingual (Hebrew/English) workflow for putting content on the RCK website (Ra'anana Community Kollel, a Wix headless site) — Torah sheets, event and shiur flyers, the weekly schedule, youth programs, photos from past events, special minyan times — usually from a Canva link. Use whenever someone has something to put on the site, wants to change or replace something already up, or wants something taken down. Triggers on a bare Canva link or an attached design with no other instruction, and on Hebrew phrasing such as "יש לי דף חדש", "להעלות פלייר", "עלון", "לוח זמנים", "מודעה", "תמונות מהאירוע", "פרשת", or "Torah Bytes". Works out which part of the site the thing belongs in before asking anything else.
+name: "rck-website-uploads"
+description: "Guided, bilingual (Hebrew/English) workflow for putting content on the RCK website (Ra'anana Community Kollel, a Wix headless site) - Torah sheets, event and shiur flyers, the weekly schedule, youth programs, photos from past events, special minyan times - usually from a Canva link. Use whenever someone has something to put on the site, wants to change or replace something already up, or wants something taken down. Triggers on a bare Canva link or an attached design with no other instruction, and on Hebrew phrasing such as \"יש לי דף חדש\", \"להעלות פלייר\", \"עלון\", \"לוח זמנים\", \"מודעה\", \"תמונות מהאירוע\", \"פרשת\", or \"Torah Bytes\". Works out which part of the site the thing belongs in before asking anything else."
 ---
 
 # RCK website uploads
 
-**Version:** 2026-07-29d
+**Version:** 2026-11-24b
 
 Report that version if asked — installed copies drift.
 
@@ -13,17 +13,48 @@ Report that version if asked — installed copies drift.
 
 Your users are non-technical. No jargon, no plumbing: "it'll show up under Learning", not "`category` is `learning`".
 
+This entire job — reading a Canva design, exporting it, and writing it to Wix — is doable with API calls alone. The job ends on the website: **never offer to save, download, or print a copy to anyone's computer**, and don't ask for folder access. **Never open a design or a web page in a browser, and never take a screenshot, anywhere in this skill.** Every "open it", "read it", or "look at it" instruction below means calling the Canva MCP tools (`resolve-shortlink`, `read-design`, `get-design-dataset`) or the Wix connector — not viewing the page yourself. Screen automation is slow, and on Yosef's Mac it triggers a fresh OS permission prompt for nearly every click, which is what makes a job stall instead of finishing in a handful of tool calls. If a tool call fails, that's the problem to solve (retry, check sharing permissions, ask Yosef) — never a reason to fall back to doing it by hand in a browser.
+
 ## Rules
 
-1. **One question per message.** Nothing else in it — no second question, no statement stapled on. Never a form.
+1. **One question per message, and it's a click, not typing.** Nothing else in it — no second question, no statement stapled on. Never a form. See *Click-to-answer questions* below.
 2. **Never ask what they already told you.**
 3. **Fewest questions possible.** Turn a question into a default they confirm, or drop it.
-4. **Look before you ask. Don't write until every answer is in.** Open the design, read existing rows, list folders — early and freely.
+4. **Look before you ask. Don't write until every answer is in.** Open the design (via the Canva MCP tools), read existing rows, list folders — early and freely.
 5. **Never invent a parsha, chag, or category name.** Look every one up in `reference/vocabulary.md`. No exact match → stop and ask. A wrong value throws no error: the sheet uploads, then vanishes from the site's filters.
 6. **Read back before writing. Verify after.**
 7. **Say when something is reversible.**
 8. **Touch only the row you're working on.** Never edit another row to make a page look a certain way.
 9. **Answers that don't fit mean the wrong flow, not a narrower question.** Say so, re-confirm the route, and start the right flow. "It's not a chag, it's for the summer kollel" → not a Torah sheet at all; don't ask which series instead.
+
+## Click-to-answer questions
+
+Every question goes out as clickable choices (the AskUserQuestion tool), so they tap an answer instead of typing. The tool always adds its own **Other** box for typing - never add an "Other" option yourself. If the tool isn't available, ask in plain text and say they can just answer yes, or type the correction.
+
+Confirmations - the route, the parsha, the year, the read-back - are a yes with a way out:
+
+| Question | Options to give |
+|---|---|
+| The route (*"This looks like a Torah sheet - it'll go on the Torah Sheets page. Right?"*) | **Yes** · **No** (Other is added automatically) |
+| The parsha or chag (*"Parsha: Vayeira (וירא)?"*) | **Yes** · **Pick from a list** (Other is added automatically) |
+| The year (*"Year: תשפ״ז?"*) | **Yes** · **Pick from a list** (Other is added automatically) |
+| The read-back (*"Go ahead?"*) | **Yes, upload it** · **Change something** (Other is added automatically) |
+
+- **Pick from a list** → next message offers the closest parshios (or years) as choices.
+- **No** on the route → next message offers the route options from *Route* as choices.
+- **Other** with typed text → treat it as their answer (look a parsha up in `reference/vocabulary.md` as usual) and confirm it with another Yes/Other click.
+- Put your best guess in the question itself, read from the design, so a yes is all most people ever need.
+- Ask the parsha as its own click even when the design makes it obvious - one tap to confirm it.
+
+### Which pages
+
+Ask which pages to upload whenever the design has **more than one page**, right after the route is confirmed. Read the page count from the design first; offer one checkbox per page (multi-select), labelled `Page 1`, `Page 2`, ... and nothing else - no thumbnails, no descriptions.
+
+- **2-4 pages:** one question, one checkbox per page.
+- **5+ pages:** the tool allows 4 options per question, so split the pages across up to 4 questions in the *same* card (`Pages 1-4`, `Pages 5-8`, ...), each multi-select. It's still one card, one answer.
+- **1 page:** don't ask.
+
+Export only the pages they ticked (pass them to `export-design`). For a Torah sheet that's the PDF. For a flyer, two ticked pages that are the same flyer in English and Hebrew go up together as a pair (`flows/flyer.md`); any other time they tick more than one page, ask which one is the picture.
 
 ## Language
 
@@ -46,7 +77,7 @@ The noun they use does not determine where it goes:
 | תוכנית · program | an ongoing program, or a one-off event |
 | גיליון · חוברת · booklet | Torah sheet, or a multi-page flyer |
 
-**Open the design and read it before asking anything else.** It decides the route, and it gives you the title, page count, date, and audience.
+**Open the design and read it before asking anything else** — with the Canva MCP tools (`resolve-shortlink` if it's a shortlink, then `read-design` or `get-design-dataset`), never by opening the link yourself. It decides the route, and it gives you the title, page count, date, and audience.
 
 - Built around a piece of Torah → Torah sheet.
 - Lists times, a place, a price, a phone number → flyer.
@@ -131,9 +162,9 @@ If they change anything, show the whole block again.
 
 ## Doing the work
 
-**Canva.** They send a link to the *design*; you do the exporting. Open and read it first, then export — PDF for a Torah sheet, PNG of one chosen page for anything else — and hand the export URL to Wix. If Canva can't reach the design, it's almost always sharing permissions.
+**Canva.** They send a link to the *design*; you do the exporting — with the Canva MCP tools (`get-export-formats` then `export-design`), never by opening Canva in a browser. Open and read it first, then export — PDF for a Torah sheet, PNG of one chosen page for anything else (two, for a Hebrew + English flyer) — and hand the export URL straight to Wix (Wix fetches it from that URL itself via the import-by-URL call or the image-upload tool; you never download the file into the container or onto Yosef's computer for this part — there's nothing to move, so there's nothing that should ever touch a browser, Downloads, or a screenshot). Any JPEG produced anywhere in this workflow uses the highest quality option Canva offers, every time — never ask about this, just use it. If Canva can't reach the design, it's almost always sharing permissions — say so and ask Yosef to check them; never work around it by opening the design in a browser yourself.
 
-**Wix.** Read `reference/wix.md` before your first write.
+**Wix.** Read `reference/wix.md` before your first write — it's all connector calls (query/create/patch/import), never a browser.
 
 **Work quietly.** One line that you're uploading, then the result. No running commentary.
 

@@ -1,6 +1,6 @@
 # 038 — Flyer tags: case-insensitive identity + grouped filter panel
 
-**Status:** implemented
+**Status:** implemented — groups extended by #084 (Language)
 **Date:** 2026-07-05
 **Author:** claude-session (danielle directing)
 **Related:** [#037](037-flyers-subcategory-tags-field.md), [#012](012-learn-page.md)
@@ -67,3 +67,7 @@ and the Daven page still resolves its `schedules` + `daily` flyer.
 ## Implementation Results
 
 Shipped in 8730ce7 (together with #037).
+
+## Addendum (2026-11-24)
+
+[#084](084-bilingual-flyers-and-link-line.md) added a fifth closed group, **Language** (`english`/`hebrew`/`spanish`), between Audience and Day. Those words no longer fall back to Topic.

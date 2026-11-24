@@ -1,11 +1,47 @@
 ---
-import { flyerAlt } from "../lib/flyers";
+import FlipToggle from "./FlipToggle.astro";
+import { flyerAlt, isBilingual } from "../lib/flyers";
+import { flyerLink } from "../lib/flyer-link";
 import { scaleFlyerImage, flyerSrcset, flyerLightboxSrc } from "../lib/wix-media";
 
 interface Item {
+	_id?: string;
 	title?: string;
+	titleHebrew?: string;
 	imageUrl?: string;
+	imageUrlHebrew?: string;
 	pdfUrl?: string;
+	linkUrl?: string;
+	linkText?: string;
+	linkTextHebrew?: string;
+}
+
+// The side(s) of a card. A two-language flyer has both, back to back, with a
+// flip button; everything else has one. See design-log #084.
+function sides(item: Item) {
+	const link = flyerLink(item);
+	const english = {
+		face: "english",
+		lang: undefined as string | undefined,
+		dir: undefined as "rtl" | undefined,
+		imageUrl: item.imageUrl,
+		title: item.title,
+		link,
+		linkText: link?.text,
+	};
+	if (!isBilingual(item)) return [english];
+	return [
+		english,
+		{
+			...english,
+			face: "hebrew",
+			lang: "he",
+			dir: "rtl" as const,
+			imageUrl: item.imageUrlHebrew,
+			title: item.titleHebrew || item.title,
+			linkText: link?.textHebrew,
+		},
+	];
 }
 
 interface Props {
@@ -48,7 +84,10 @@ const hasAside = Astro.slots.has("aside");
 		)}
 		<div class:list={[hasAside && "min-w-0 w-full"]}>
 	<div class="coverflow-stage" data-coverflow data-autoplay-ms={autoplayMs}>
-		{items.map((item, i) => (
+		{items.map((item, i) => {
+			const cardSides = sides(item);
+			const flips = cardSides.length > 1;
+			return (
 			<div
 				class:list={[
 					"coverflow-card",
@@ -61,43 +100,69 @@ const hasAside = Astro.slots.has("aside");
 			>
 				<div class="coverflow-inner">
 					{item.imageUrl ? (
-						<div class="coverflow-media">
-							<img
-								src={scaleFlyerImage(item.imageUrl)}
-								srcset={flyerSrcset(item.imageUrl)}
-								sizes="(min-width: 640px) 300px, 70vw"
-								alt={flyerAlt(item.title, item.title ?? "")}
-								loading={i === 0 ? "eager" : "lazy"}
-								decoding="async"
-								class="coverflow-img"
-							/>
-							<div class="coverflow-actions">
-								<button
-									type="button"
-									class="coverflow-btn"
-									data-lightbox-open
-									data-lightbox-src={flyerLightboxSrc(item.imageUrl)}
-									data-lightbox-title={item.title}
-									aria-label={`View ${item.title ?? "flyer"} full size`}
-								>
-									<svg viewBox="0 0 24 24" class="coverflow-btn-icon" fill="none" stroke="currentColor" stroke-width="2">
-										<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" stroke-linecap="round" stroke-linejoin="round" />
-									</svg>
-								</button>
-								<button
-									type="button"
-									class="coverflow-btn"
-									data-download
-									data-download-src={item.imageUrl}
-									data-download-title={item.title}
-									aria-label={`Download ${item.title ?? "flyer"}`}
-								>
-									<svg viewBox="0 0 24 24" class="coverflow-btn-icon" fill="none" stroke="currentColor" stroke-width="2">
-										<path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke-linecap="round" stroke-linejoin="round" />
-									</svg>
-								</button>
+						<div
+							class:list={["coverflow-media", flips && "coverflow-flips"]}
+							data-bilingual={flips ? "" : undefined}
+							data-flyer-id={flips ? item._id : undefined}
+							data-view={flips ? "english" : undefined}
+						>
+							<div class="coverflow-picture">
+								{cardSides.map((side) => (
+									<img
+										src={scaleFlyerImage(side.imageUrl)}
+										srcset={flyerSrcset(side.imageUrl)}
+										sizes="(min-width: 640px) 300px, 70vw"
+										alt={flyerAlt(side.title, side.title ?? "")}
+										loading={i === 0 ? "eager" : "lazy"}
+										decoding="async"
+										class="coverflow-img"
+										data-face={flips ? side.face : undefined}
+									/>
+								))}
 							</div>
-							{item.title && <p class="coverflow-label">{item.title}</p>}
+							{flips && <FlipToggle />}
+							{cardSides.map((side) => (
+								<div class="coverflow-actions" data-face={flips ? side.face : undefined}>
+									<button
+										type="button"
+										class="coverflow-btn"
+										data-lightbox-open
+										data-lightbox-src={flyerLightboxSrc(side.imageUrl)}
+										data-lightbox-title={side.title}
+										aria-label={`View ${side.title ?? "flyer"} full size`}
+									>
+										<svg viewBox="0 0 24 24" class="coverflow-btn-icon" fill="none" stroke="currentColor" stroke-width="2">
+											<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" stroke-linecap="round" stroke-linejoin="round" />
+										</svg>
+									</button>
+									<button
+										type="button"
+										class="coverflow-btn"
+										data-download
+										data-download-src={side.imageUrl}
+										data-download-title={side.title}
+										aria-label={`Download ${side.title ?? "flyer"}`}
+									>
+										<svg viewBox="0 0 24 24" class="coverflow-btn-icon" fill="none" stroke="currentColor" stroke-width="2">
+											<path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke-linecap="round" stroke-linejoin="round" />
+										</svg>
+									</button>
+								</div>
+							))}
+							<div class="coverflow-labels">
+								{cardSides.map((side) => side.title && (
+									<p class="coverflow-label" lang={side.lang} dir={side.dir} data-face={flips ? side.face : undefined}>{side.title}</p>
+								))}
+							</div>
+							{cardSides.map((side) => side.link && (
+								<p class="coverflow-link" lang={side.lang} dir={side.dir} data-face={flips ? side.face : undefined}>
+									<a
+										href={side.link.href}
+										target={side.link.external ? "_blank" : undefined}
+										rel={side.link.external ? "noopener noreferrer" : undefined}
+									>{side.linkText}</a>
+								</p>
+							))}
 						</div>
 					) : item.pdfUrl ? (
 						<iframe
@@ -121,7 +186,8 @@ const hasAside = Astro.slots.has("aside");
 				    picture; only iframe/placeholder cards use this card-anchored one. */}
 				{!item.imageUrl && item.title && <p class="coverflow-label">{item.title}</p>}
 			</div>
-		))}
+			);
+		})}
 
 		<button
 			type="button"
@@ -212,6 +278,43 @@ const hasAside = Astro.slots.has("aside");
 		box-shadow: 0 25px 60px -18px rgba(7, 23, 58, 0.35);
 	}
 
+	/* Two-language flyer: both pictures back to back in one cell, turned by the
+	   flip button. Labels share a cell so the card never changes height. */
+	.coverflow-flips .coverflow-picture {
+		display: grid;
+		align-items: center;
+		transform-style: preserve-3d;
+		transform: perspective(1200px);
+		transition: transform 0.6s cubic-bezier(0.45, 0.05, 0.25, 1);
+	}
+	.coverflow-flips[data-view="hebrew"] .coverflow-picture {
+		transform: perspective(1200px) rotateY(180deg);
+	}
+	.coverflow-flips .coverflow-img {
+		grid-area: 1 / 1;
+		-webkit-backface-visibility: hidden;
+		backface-visibility: hidden;
+	}
+	.coverflow-flips .coverflow-img[data-face="hebrew"] {
+		transform: rotateY(180deg);
+	}
+	.coverflow-flips .coverflow-labels {
+		display: grid;
+	}
+	.coverflow-flips .coverflow-label {
+		grid-area: 1 / 1;
+	}
+	.coverflow-flips[data-view="english"] [data-face="hebrew"]:not(img),
+	.coverflow-flips[data-view="hebrew"] [data-face="english"]:not(img) {
+		visibility: hidden;
+	}
+	.coverflow-card:not(.pos-active) [data-flip-toggle] {
+		display: none;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.coverflow-flips .coverflow-picture { transition: none; }
+	}
+
 	/* Expand + Download buttons — only on the active card, revealed on hover.
 	   Hidden on side/far cards so they don't clutter the 3D stack. */
 	.coverflow-actions {
@@ -235,6 +338,10 @@ const hasAside = Astro.slots.has("aside");
 	}
 	@media (hover: none) {
 		.coverflow-card.pos-active .coverflow-actions { opacity: 1; transform: none; }
+	}
+	/* The flip button owns the right corner. */
+	.coverflow-flips .coverflow-actions {
+		inset-inline: 0.5rem auto;
 	}
 	.coverflow-btn {
 		display: inline-flex;
@@ -298,6 +405,29 @@ const hasAside = Astro.slots.has("aside");
 	   float far below the picture). */
 	.coverflow-media .coverflow-label {
 		position: static;
+	}
+
+	/* The flyer's own link, under the label — active card only. Absolute, so
+	   cards with and without a link still center their pictures alike. */
+	.coverflow-link {
+		position: absolute;
+		inset-inline: 0;
+		top: 100%;
+		text-align: center;
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: var(--color-navy-600);
+	}
+	.coverflow-link a {
+		display: inline-block;
+		padding: 0.25rem 0.5rem;
+		text-decoration: underline;
+		text-decoration-color: var(--color-gold-500);
+		text-decoration-thickness: 2px;
+		text-underline-offset: 3px;
+	}
+	.coverflow-card:not(.pos-active) .coverflow-link {
+		display: none;
 	}
 
 	.coverflow-card.pos-active {
@@ -440,9 +570,14 @@ const hasAside = Astro.slots.has("aside");
 
 		cards.forEach((card, i) => {
 			card.addEventListener("click", (e) => {
-				// Let the Expand/Download buttons do their own thing (lightbox /
-				// download) without also toggling the coverflow zoom.
-				if ((e.target as HTMLElement).closest("[data-lightbox-open],[data-download]")) return;
+				// Let the Expand/Download buttons and the flyer's link do their own
+				// thing without also toggling the coverflow zoom.
+				if ((e.target as HTMLElement).closest("[data-lightbox-open],[data-download],.coverflow-link a")) return;
+				// Flipping to the other language holds the carousel still to read it.
+				if ((e.target as HTMLElement).closest("[data-flip-toggle]")) {
+					stop();
+					return;
+				}
 				if (card.classList.contains("pos-active")) {
 					const nowZoomed = card.classList.toggle("is-zoomed");
 					if (nowZoomed) {

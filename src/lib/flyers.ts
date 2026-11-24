@@ -21,11 +21,27 @@ export interface Flyer {
 	 * alone renders the "Flyer coming soon" placeholder. See #010's addendum.
 	 */
 	imageUrl?: string;
+	/**
+	 * The Hebrew version of the same flyer, as a public image URL. When set, the
+	 * card opens on `imageUrl` and a button flips it over to this. See
+	 * design-log #084.
+	 */
+	imageUrlHebrew?: string;
+	/** Hebrew title, shown when the card is on its Hebrew side. */
+	titleHebrew?: string;
+	/**
+	 * The link printed on the flyer (usually its QR code) — shown as a line under
+	 * the title. Resolved by `flyerLink()` in ./flyer-link. See design-log #084.
+	 */
+	linkUrl?: string;
+	/** Words for that line; when empty they're chosen from the kind of link. */
+	linkText?: string;
+	linkTextHebrew?: string;
 	isActive?: boolean;
 	displayOrder?: number;
 	removeAfter?: Date | string;
 	/**
-	 * Exact title of a `category = "learning"` row whose `imageUrl`/`pdfUrl` this
+	 * Exact title of a `category = "learning"` row whose images/PDF this
 	 * row should mirror instead of keeping its own — lets the office update one
 	 * flyer (in Learning) and have it reflect here too. Falls back to this row's
 	 * own `imageUrl`/`pdfUrl` when unset or when no learning row matches. See
@@ -54,6 +70,11 @@ export interface Flyer {
 	 */
 	featuredFrom?: Date | string;
 	featuredUntil?: Date | string;
+}
+
+/** Both language versions are uploaded, so the card flips between them. */
+export function isBilingual(flyer: Pick<Flyer, "imageUrl" | "imageUrlHebrew">): boolean {
+	return Boolean(flyer.imageUrl && flyer.imageUrlHebrew);
 }
 
 /** Today's date as YYYY-MM-DD in Israel time, regardless of where the server runs. */
@@ -181,7 +202,14 @@ export async function getFlyers(category?: FlyerCategory, subCategory?: string):
 			flyers = flyers.map((f) => {
 				if (!f.linkedFlyerTitle) return f;
 				const source = byTitle.get(f.linkedFlyerTitle.trim().toLowerCase());
-				return source ? { ...f, imageUrl: source.imageUrl, pdfUrl: source.pdfUrl } : f;
+				return source
+					? {
+							...f,
+							imageUrl: source.imageUrl,
+							imageUrlHebrew: source.imageUrlHebrew,
+							pdfUrl: source.pdfUrl,
+						}
+					: f;
 			});
 		}
 

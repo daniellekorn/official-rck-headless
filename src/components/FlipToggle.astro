@@ -1,0 +1,56 @@
+---
+/**
+ * The button that flips a Hebrew + English flyer, named for the other language.
+ * Place inside a `data-bilingual` card, over the picture. See design-log #084.
+ */
+---
+
+<button type="button" class="flip-toggle" data-flip-toggle>
+	<svg viewBox="0 0 24 24" class="flip-toggle-icon" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+		<path d="M4 9h14l-4-4M20 15H6l4 4" stroke-linecap="round" stroke-linejoin="round" />
+	</svg>
+	<span class="flip-to-hebrew" lang="he" dir="rtl">עברית</span>
+	<span class="flip-to-english" lang="en">English</span>
+</button>
+
+<style>
+	.flip-toggle {
+		position: absolute;
+		top: 0.5rem;
+		right: 0.5rem;
+		z-index: 3;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		height: 2rem;
+		padding: 0 0.625rem;
+		border-radius: 0.25rem;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--color-navy-700);
+		background: #fff;
+		box-shadow: 0 6px 18px -6px rgb(7 23 58 / 0.55);
+		transition: background 0.18s;
+	}
+	/* Looks small so it covers little of the flyer; taps like a full-size one. */
+	.flip-toggle::before {
+		content: "";
+		position: absolute;
+		inset: -0.5rem;
+	}
+	.flip-toggle:hover {
+		background: var(--color-gold-400);
+	}
+	.flip-toggle-icon {
+		width: 1rem;
+		height: 1rem;
+	}
+	:global([data-bilingual][data-view="english"]) .flip-to-english,
+	:global([data-bilingual][data-view="hebrew"]) .flip-to-hebrew {
+		display: none;
+	}
+</style>
+
+<script>
+	import "../lib/flyer-flip";
+</script>
