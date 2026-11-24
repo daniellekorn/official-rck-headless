@@ -13,6 +13,7 @@
 
 - The picture area is A4 (`794 / 1123`, the shape of nearly every flyer) inside 0.75rem of padding, so the space is identical on all four sides. A landscape flyer still letterboxes inside it.
 - `FlyerBackdrop.astro` fills the frame with a 48px-wide CDN copy of the same flyer (~2 KB), blurred and faded over white. It also stands in while the flyer loads.
+- Hovering grows the flyer slightly inside its frame and shows its buttons. The old dark shade over the bottom third is gone: it covered the QR code and stopped short of the enlarged flyer's edge.
 - Lives in `Flyer.astro`, so `/events`, `/learn`, `/youth` and past events all match. The placeholder and PDF viewer keep no padding. The `/learn` carousel has no frame and is unchanged.
 
 ## Questions and Answers
