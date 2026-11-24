@@ -5,7 +5,7 @@ description: "Guided, bilingual (Hebrew/English) workflow for putting content on
 
 # RCK website uploads
 
-**Version:** 2026-11-24b
+**Version:** 2026-11-24c
 
 Report that version if asked — installed copies drift.
 
@@ -162,7 +162,7 @@ If they change anything, show the whole block again.
 
 ## Doing the work
 
-**Canva.** They send a link to the *design*; you do the exporting — with the Canva MCP tools (`get-export-formats` then `export-design`), never by opening Canva in a browser. Open and read it first, then export — PDF for a Torah sheet, PNG of one chosen page for anything else (two, for a Hebrew + English flyer) — and hand the export URL straight to Wix (Wix fetches it from that URL itself via the import-by-URL call or the image-upload tool; you never download the file into the container or onto Yosef's computer for this part — there's nothing to move, so there's nothing that should ever touch a browser, Downloads, or a screenshot). Any JPEG produced anywhere in this workflow uses the highest quality option Canva offers, every time — never ask about this, just use it. If Canva can't reach the design, it's almost always sharing permissions — say so and ask Yosef to check them; never work around it by opening the design in a browser yourself.
+**Canva.** They send a link to the *design*; you do the exporting — with the Canva MCP tools (`get-export-formats` then `export-design`), never by opening Canva in a browser. Open and read it first, then export — PDF for a Torah sheet, JPG of one chosen page for anything else (two, for a Hebrew + English flyer) with `quality: 100`, `export_quality: regular` and `width: 1588` — never `pro`, which can drop parts of a design — and hand the export URL straight to Wix (Wix fetches it from that URL itself via the import-by-URL call or the image-upload tool; you never download the file into the container or onto Yosef's computer for this part — there's nothing to move, so there's nothing that should ever touch a browser, Downloads, or a screenshot). Never ask about export quality, just use these. If Canva can't reach the design, it's almost always sharing permissions — say so and ask Yosef to check them; never work around it by opening the design in a browser yourself.
 
 **Wix.** Read `reference/wix.md` before your first write — it's all connector calls (query/create/patch/import), never a browser.
 

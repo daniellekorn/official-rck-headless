@@ -57,7 +57,7 @@ No fifth section exists. If they want one, that's Danielle's.
 
 Like `https://static.wixstatic.com/media/f477b1_abc123….png`. A `wix:image://v1/…` value renders a broken image on a live page with no error anywhere.
 
-Upload the PNG to the **Flyers** folder and use the URL the upload hands back — don't construct one. Read an existing flyer row and mirror it.
+Upload the JPG to the **Flyers** folder and use the URL the upload hands back — don't construct one. Read an existing flyer row and mirror it.
 
 **The collection also has an `image` field and nothing reads it.** Most rows carry the same URL in both, but only `imageUrl` reaches the page — fill `image` alone and the flyer shows the "coming soon" placeholder. Always write `imageUrl`.
 
@@ -67,7 +67,7 @@ Prefer an image over a PDF: it gets hover zoom, click-to-enlarge, and a Download
 
 ## One page per flyer
 
-Export **one page** as PNG, never the whole design. Several pages → count them and ask which one. The one exception is below.
+Export **one page** as JPG, never the whole design, then compare the exported picture with the page's thumbnail from `read-design` before writing the row. Gray blocks or a missing banner → export again with different settings. Can't see the picture → ask them to check it on the site. Several pages → count them and ask which one. The one exception is below.
 
 ## Hebrew + English flyers
 

@@ -1,8 +1,9 @@
 ---
 /**
- * Flyer media block — the framed `aspect-[3/4]` area only. Callers keep their
- * own outer frame (bg/ring/shadow) and caption, so each context's layout is
- * untouched; this just swaps what goes *inside* the frame.
+ * Flyer media block — the framed picture only: the flyer at its own A4 shape
+ * with even space on all four sides, filled by its own colors blurred and
+ * faded (design-log #085). Callers keep their own outer frame (ring/shadow)
+ * and caption.
  *
  * Image path: a click-to-zoom trigger (opens the shared <Lightbox/>) with a
  * within-frame hover zoom and hover-revealed Expand + Download buttons. A PDF
@@ -10,6 +11,7 @@
  * branded "coming soon" placeholder keeps the layout intact until the office
  * uploads an image. See design log #031.
  */
+import FlyerBackdrop from "./FlyerBackdrop.astro";
 import { flyerAlt } from "../lib/flyers";
 import { scaleFlyerImage, flyerSrcset, flyerLightboxSrc } from "../lib/wix-media";
 
@@ -20,10 +22,10 @@ interface Props {
 	/** Eager-load the image (above-the-fold flyers). Defaults to lazy. */
 	eager?: boolean;
 	/**
-	 * CSS aspect-ratio value (e.g. "2040 / 1148") to size the frame to a
-	 * specific image instead of the default portrait 3:4. Use when the source
+	 * CSS aspect-ratio value (e.g. "2040 / 1148") to size the picture area to a
+	 * specific image instead of the default portrait A4. Use when the source
 	 * is an actual photo rather than a portrait print flyer — letterboxing a
-	 * landscape image into a tall 3:4 box leaves large empty bars.
+	 * landscape image into a tall box leaves large empty bars.
 	 */
 	aspectRatio?: string;
 	/**
@@ -47,9 +49,10 @@ const gallery = pair ? JSON.stringify(pair.map((url) => flyerLightboxSrc(url))) 
 ---
 
 <div
-	class="flyer-frame relative aspect-[3/4] overflow-hidden"
-	style={aspectRatio ? `aspect-ratio: ${aspectRatio};` : undefined}
+	class:list={["flyer-frame relative overflow-hidden", imageUrl && "flyer-frame-matted"]}
 >
+	{imageUrl && <FlyerBackdrop imageUrl={imageUrl} />}
+	<div class="flyer-area" style={aspectRatio ? `aspect-ratio: ${aspectRatio};` : undefined}>
 	{imageUrl ? (
 		<div class:list={["flyer group absolute inset-0", pair && "flyer-paired"]}>
 			<button
@@ -109,14 +112,23 @@ const gallery = pair ? JSON.stringify(pair.map((url) => flyerLightboxSrc(url))) 
 			<span class="flyer-placeholder-text">Flyer coming soon</span>
 		</div>
 	)}
+	</div>
 </div>
 
 <style>
-	/* The frame paints its own light backdrop so flyers of any aspect ratio
-	   letterbox onto the site's cream (design log #039 — the navy backdrop
-	   read as a mistake) instead of whatever the caller's card color is. */
+	/* White under the faded backdrop, so its colors come out light whatever the
+	   caller's card color is. */
 	.flyer-frame {
-		background: var(--color-mist);
+		background: #fff;
+	}
+	/* Even space on all four sides of the flyer. */
+	.flyer-frame-matted {
+		padding: 0.75rem;
+	}
+	.flyer-area {
+		position: relative;
+		/* A4, like the print flyers — they fill it exactly. */
+		aspect-ratio: 794 / 1123;
 	}
 
 	.flyer-open {
@@ -133,11 +145,13 @@ const gallery = pair ? JSON.stringify(pair.map((url) => flyerLightboxSrc(url))) 
 		width: 100%;
 		height: 100%;
 		object-fit: contain;
+		/* Not box-shadow: this follows the picture when it's letterboxed. */
+		filter: drop-shadow(0 4px 10px rgb(7 23 58 / 0.22));
 		transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 	}
 	.flyer:hover .flyer-img,
 	.flyer:focus-within .flyer-img {
-		transform: scale(1.06);
+		transform: scale(1.03);
 	}
 	.flyer-veil {
 		position: absolute;

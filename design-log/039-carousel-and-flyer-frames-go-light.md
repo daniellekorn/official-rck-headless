@@ -1,6 +1,6 @@
 # 039 — Carousel band and flyer letterboxes go light (white / cream)
 
-**Status:** implemented
+**Status:** implemented — the cream letterbox in `Flyer.astro` is superseded by #085; the white carousel band stands
 **Date:** 2026-07-05
 **Author:** claude-session (danielle directing)
 **Related:** [#021](021-cream-bands-bright-yellow-low-radius.md), [#034](034-design-review-cleanup.md)
@@ -44,3 +44,7 @@ in the grids. Lightbox and youth/archive frames unchanged.
 ## Implementation Results
 
 Shipped in 1d3b161.
+
+## Addendum (2026-11-24)
+
+[#085](085-flyer-frame-backdrop.md) replaced `Flyer.astro`'s cream letterbox with an even frame in the flyer's own faded colors. The placeholder panel and the carousel band are unchanged.

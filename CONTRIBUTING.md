@@ -455,7 +455,7 @@ One row per flyer. Set **`imageUrl`** (preferred) or **`pdfUrl`** — a row with
 >
 > **The `/learn` page's "always show first" behavior also depends on that exact title.** `src/pages/learn.astro` checks `flyer.title === "Community Schedule"` to decide which `learning` card bypasses every filter and pins to the front of the grid (design-log #059). Renaming that row breaks this the same silent way — the card just becomes a normal, filterable flyer again, no error anywhere.
 
-**Exporting a flyer image from Canva:** open the design → **Share → Download → PNG**, and select **page 1 only**. Upload that PNG into the row's image field (or paste a public image URL). That's the whole step. For a Hebrew + English flyer, download both pages as two separate PNGs: English goes in `imageUrl`, Hebrew in `imageUrlHebrew`.
+**Exporting a flyer image from Canva:** open the design → **Share → Download → PNG**, and select **page 1 only**. Upload that PNG into the row's image field (or paste a public image URL). That's the whole step. JPG works just as well — check the picture before uploading, since a Canva export occasionally drops part of a design. For a Hebrew + English flyer, download both pages as two separate files: English goes in `imageUrl`, Hebrew in `imageUrlHebrew`.
 
 **`category` slugs — three that render, one that doesn't:**
 

@@ -5,6 +5,7 @@
  * on the picture flips it over, and the title and link follow. See design-log #084.
  */
 import FlipToggle from "./FlipToggle.astro";
+import FlyerBackdrop from "./FlyerBackdrop.astro";
 import Flyer from "./Flyer.astro";
 import FlyerLinkLine from "./FlyerLinkLine.astro";
 import { isBilingual, type Flyer as FlyerRow } from "../lib/flyers";
@@ -29,6 +30,8 @@ const pair = bilingual ? [flyer.imageUrl!, flyer.imageUrlHebrew!] : undefined;
 			data-view="english"
 		>
 			<div class="bi-stage">
+				{/* Seen only mid-flip, while the cards are edge-on. */}
+				<FlyerBackdrop imageUrl={flyer.imageUrl!} />
 				<div class="bi-inner">
 					<div class="bi-face" data-face="english">
 						<Flyer imageUrl={flyer.imageUrl} title={flyer.title} pair={pair} pairIndex={0} />
@@ -77,8 +80,11 @@ const pair = bilingual ? [flyer.imageUrl!, flyer.imageUrlHebrew!] : undefined;
 	/* Both faces share one cell, back to back. */
 	.bi-stage {
 		position: relative;
+		overflow: hidden;
 		perspective: 1200px;
-		background: var(--color-mist);
+		background: #fff;
+		/* Inside the flyer's corner: the frame's 0.75rem + 0.5rem. */
+		--flip-inset: 1.25rem;
 	}
 	.bi-inner {
 		display: grid;
