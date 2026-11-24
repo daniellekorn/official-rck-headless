@@ -82,7 +82,7 @@ When two pages are the same flyer in English and Hebrew, upload both to **one ro
 
 A link on the flyer becomes a line under its title. Look for one on every event and shiur flyer: a web address in the text, a QR code, a Zoom or WhatsApp group link.
 
-A QR code is a picture, so the design's text won't contain its link. Decode it from the exported page if you can; if not, ask for the link it opens. **Never guess a link**, and never use a placeholder. A phone number is not a link: only make one (`https://wa.me/9725…`, no leading 0) if they ask.
+A QR code is a picture, so the design's text won't contain its link. Decode it from the exported page if you can; if not, ask for the link it opens. **Never guess a link**, and never use a placeholder. **Never make a link from a phone number**, WhatsApp numbers included. The Community Schedule gets no link line, whatever QR codes are on it.
 
 Write the full address in `linkUrl`, and pick the words from what the flyer asks people to do:
 

@@ -5,7 +5,7 @@ description: "Guided, bilingual (Hebrew/English) workflow for putting content on
 
 # RCK website uploads
 
-**Version:** 2026-11-24c
+**Version:** 2026-11-24d
 
 Report that version if asked — installed copies drift.
 
