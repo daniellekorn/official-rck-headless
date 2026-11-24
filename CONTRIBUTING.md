@@ -279,6 +279,7 @@ Same field shape as `YouthPrograms`. See design log #027, [#050](design-log/050-
 | `gallery` | Media Gallery (opt) | Event photos — add as many as you like. **One** shows as a single image; **more** become a swipeable slideshow (thumbnails on desktop, dots on mobile). |
 | `videoUrls` | Text (opt) | Video links, **one per line** — any YouTube URL form (`watch?v=`, `youtu.be/`, `/shorts/`, or a bare video ID) works. Shown as extra thumbnails (with a play-button overlay) after the photos; clicking one opens it right in the same full-size viewer the photos use. Same field convention as `WhatsappGroups.videoUrls`. |
 | `flyerImage` | Image (opt) | **Preferred.** A static flyer image (export page 1 of the Canva design as PNG). Gets a click-to-enlarge viewer + Download button. |
+| `flyerImageHebrew` | Image (opt) | The **Hebrew version** of the same flyer. With `flyerImage` also filled, the flyer gets a button that flips between English and Hebrew. See [#084](design-log/084-bilingual-flyers-and-link-line.md). |
 | `flyerPdfUrl` | Text (opt) | Direct public PDF URL — fallback for multi-page documents. Checked after the image. |
 | `blurb` | Rich Text (opt) | A short description shown above the photos. Paragraphs preserved. |
 | `sortOrder` | Number (opt) | Tiebreaker only — orders events that share the same `eventDate` (lower first). |

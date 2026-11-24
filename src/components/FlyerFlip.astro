@@ -1,0 +1,76 @@
+---
+/**
+ * A two-language flyer: both pictures back to back with the button that flips
+ * them. Goes inside an element carrying `data-bilingual`, `data-flyer-id` and
+ * `data-view="english"` (see ../lib/flyer-flip), which may also hold captions
+ * for each side. See design-log #084.
+ */
+import FlipToggle from "./FlipToggle.astro";
+import Flyer from "./Flyer.astro";
+import FlyerBackdrop from "./FlyerBackdrop.astro";
+
+interface Props {
+	imageUrl: string;
+	imageUrlHebrew: string;
+	title?: string;
+	titleHebrew?: string;
+}
+
+const { imageUrl, imageUrlHebrew, title, titleHebrew } = Astro.props;
+const pair = [imageUrl, imageUrlHebrew];
+---
+
+<div class="flip-stage">
+	{/* Seen only mid-flip, while the cards are edge-on. */}
+	<FlyerBackdrop imageUrl={imageUrl} />
+	<div class="flip-inner">
+		<div class="flip-face" data-face="english">
+			<Flyer imageUrl={imageUrl} title={title} pair={pair} pairIndex={0} />
+		</div>
+		<div class="flip-face" data-face="hebrew">
+			<Flyer imageUrl={imageUrlHebrew} title={titleHebrew || title} pair={pair} pairIndex={1} />
+		</div>
+	</div>
+	<FlipToggle />
+</div>
+
+<style>
+	/* Both faces share one cell, back to back. */
+	.flip-stage {
+		position: relative;
+		overflow: hidden;
+		perspective: 1200px;
+		background: #fff;
+		/* Inside the flyer's corner: the frame's 0.75rem + 0.5rem. */
+		--flip-inset: 1.25rem;
+	}
+	.flip-inner {
+		display: grid;
+		transform-style: preserve-3d;
+		transition: transform 0.6s cubic-bezier(0.45, 0.05, 0.25, 1);
+	}
+	.flip-face {
+		grid-area: 1 / 1;
+		min-width: 0;
+		-webkit-backface-visibility: hidden;
+		backface-visibility: hidden;
+	}
+	.flip-face[data-face="hebrew"],
+	:global([data-bilingual][data-view="hebrew"]) .flip-inner {
+		transform: rotateY(180deg);
+	}
+
+	/* The flip button owns the right corner. */
+	.flip-face :global(.flyer-expand) {
+		inset-inline-end: auto;
+		inset-inline-start: 0.5rem;
+	}
+	.flip-face :global(.flyer-download) {
+		inset-inline-end: auto;
+		inset-inline-start: 2.875rem;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.flip-inner { transition: none; }
+	}
+</style>

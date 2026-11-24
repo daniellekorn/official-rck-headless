@@ -37,12 +37,13 @@ A title and a date alone is a valid entry. Don't hold the upload for photos that
 | `gallery` | Media Gallery | The photos. One is a single image; more become a slideshow. |
 | `videoUrls` | Text | Video links, **one per line**. Any YouTube URL form. They appear after the photos in the same viewer. |
 | `flyerImage` | Image | The event's flyer. Preferred over the PDF. |
+| `flyerImageHebrew` | Image | The same flyer in Hebrew. With `flyerImage` filled too, the site adds a button that flips between them. Moving over a two-language flyer → carry both pictures. |
 | `flyerPdfUrl` | Text | A public PDF URL. Multi-page fallback. |
 | `blurb` | Rich Text | Short description above the photos. Paragraphs kept. |
 | `sortOrder` | Number | Tiebreaker for two events on the same date, lower first. |
 | `active` | Boolean | Show/hide without deleting. Default true. |
 
-`flyerImage` and `gallery` are media fields — **read an existing row and mirror its format** (`reference/wix.md`). Don't carry the plain-URL rule over from `Flyers.imageUrl`; this collection holds both shapes and both render.
+`flyerImage`, `flyerImageHebrew` and `gallery` are media fields — **read an existing row and mirror its format** (`reference/wix.md`). Don't carry the plain-URL rule over from `Flyers.imageUrl`; this collection holds both shapes and both render.
 
 ## Order
 

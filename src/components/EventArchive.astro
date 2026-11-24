@@ -12,6 +12,7 @@
  */
 import PhotoGalleryGrid from "./PhotoGalleryGrid.astro";
 import Flyer from "./Flyer.astro";
+import FlyerFlip from "./FlyerFlip.astro";
 import { ricosToPlainText } from "../lib/ricos";
 import { hasFlyer, type PastEvent } from "../lib/past-events";
 import type { GalleryMediaItem } from "../lib/wix-media";
@@ -137,11 +138,21 @@ function mediaItems(e: PastEvent): GalleryMediaItem[] {
 											]}
 										>
 											<div class="w-full max-w-sm overflow-hidden rounded-md bg-navy-800 ring-1 ring-navy-100 shadow-[0_30px_64px_-34px_rgba(7,23,58,0.55)]">
-												<Flyer
-													imageUrl={e.flyerImageUrl}
-													pdfUrl={e.flyerPdfUrl}
-													title={e.title}
-												/>
+												{e.flyerImageUrl && e.flyerImageHebrewUrl ? (
+													<div data-bilingual data-flyer-id={e._id} data-view="english">
+														<FlyerFlip
+															imageUrl={e.flyerImageUrl}
+															imageUrlHebrew={e.flyerImageHebrewUrl}
+															title={e.title}
+														/>
+													</div>
+												) : (
+													<Flyer
+														imageUrl={e.flyerImageUrl}
+														pdfUrl={e.flyerPdfUrl}
+														title={e.title}
+													/>
+												)}
 											</div>
 										</div>
 									)}

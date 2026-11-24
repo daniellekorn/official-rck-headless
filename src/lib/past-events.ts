@@ -34,13 +34,15 @@ export interface PastEvent {
 	videos: VideoItem[]; // parsed from videoUrls
 	flyerPdfUrl?: string; // direct PDF URL
 	flyerImageUrl?: string; // resolved static flyer image (preferred)
+	flyerImageHebrewUrl?: string; // the Hebrew flyer; with flyerImageUrl, the two flip (#084)
 	sortOrder?: number; // manual tiebreaker when two events share a date
 	active?: boolean;
 }
 
-interface PastEventRow extends Omit<PastEvent, "galleryUrls" | "galleryFullUrls" | "videos" | "flyerImageUrl" | "slug"> {
+interface PastEventRow extends Omit<PastEvent, "galleryUrls" | "galleryFullUrls" | "videos" | "flyerImageUrl" | "flyerImageHebrewUrl" | "slug"> {
 	gallery?: GalleryItem[];
 	flyerImage?: string;
+	flyerImageHebrew?: string;
 }
 
 function dateValue(d: PastEvent["eventDate"]): number {
@@ -67,6 +69,7 @@ export async function getPastEvents(): Promise<PastEvent[]> {
 					galleryFullUrls: resolveGalleryFullUrls(row.gallery),
 					videos: parseVideos(row.videoUrls),
 					flyerImageUrl: resolveImage(row.flyerImage, 900, 1200),
+					flyerImageHebrewUrl: resolveImage(row.flyerImageHebrew, 900, 1200),
 				}) as PastEvent,
 		);
 
